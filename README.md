@@ -1,2 +1,2 @@
 # TombRaiderLinuxSteamManager
-a tool for Tomb Raider classics 2,3,4,5 with steam to select a map from trle.net
+a tool for Tomb Raider classics 2,3,4,5 with steam to select a map from trle.net I play some of Tomb Raider classic, Its almost the only game I still play. I use a ps4 controller and want to make a tool or a script so that I dont have to manually move all game files when I want to play a mod. and preserve game savefiles and configurations for all maps and moods. and autostart the game. chech if I forgott to connect ps4 and so on... On linux
