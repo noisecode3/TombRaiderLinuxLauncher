@@ -13,7 +13,9 @@ there is a workaround for input bug that happens if the player uses Ctrl and Alt
 The next problem is that sometimes steam input will crash the game after the core design intro video. If this happens shutting down steam and open it again should work. I have played this game over 50 hours on steam and its working.
 
 I recommend these patches
+
 https://tombraiders.net/stella/downloads/widescreen.html
+
 https://core-design.com/community_tr3withoutcrystals.html
 
 I recommend Proton 5.0-10 or Proton 6.8-GE-2
