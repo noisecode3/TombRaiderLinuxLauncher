@@ -10,7 +10,7 @@ I have this workaround for input bug that happens if the player uses Ctrl and Al
 
 ![screenshot](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxSteamManager/main/controller.png "controller")
 
-The next problem is that sometimes steam input will crash the game after the core design intro video. If this happens shutting down steam and open it again work. I have played this game over 80 hours on steam and its working and never crash in the game if I dont use Ctrl and Alt.
+The next problem is that sometimes steam input will crash the game after the core design intro video. If this happens shutting down steam and open it again work. I have played this game over 80 hours on steam and its working and never crash in the game if I dont use Ctrl and Alt.(and dont change any graphics settings in the game) I manage to change gamma settings in the game dont recommend it, i will usually lead to crashes.
 
 The game is old an broken even on windows...
 I recommend these patches
