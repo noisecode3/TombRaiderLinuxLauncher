@@ -21,4 +21,8 @@ https://core-design.com/community_tr3withoutcrystals.html
 
 https://github.com/legluondunet/mlls-tools/raw/master/dgVoodoo2/dgVoodoo2_61.zip
 
+vooodo may benefit from https://github.com/Matoking/protontricks
+
+look at https://lutris.net/games/install/13348/view
+
 I recommend Proton 5.0-10 or Proton 6.8-GE-2
