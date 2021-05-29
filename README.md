@@ -19,6 +19,6 @@ https://tombraiders.net/stella/downloads/widescreen.html
 
 https://core-design.com/community_tr3withoutcrystals.html
 
-https://www.tombraiderchronicles.com/tr3/fixes.html
+https://github.com/legluondunet/mlls-tools/raw/master/dgVoodoo2/dgVoodoo2_61.zip
 
 I recommend Proton 5.0-10 or Proton 6.8-GE-2
