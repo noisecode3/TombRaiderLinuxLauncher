@@ -31,5 +31,11 @@ https://github.com/legluondunet/mlls-tools/blob/master/dgVoodoo2/dgVoodoo2_61.zi
 
 https://github.com/Matoking/protontricks
 
+# Help
+## Recommended compatibility layer
+- Proton 5.0-10
+- Wine-tkg
 
-I recommend Proton 5.0-10 or Wine-tkg
+## Recommended compatibility layer configuration
+- Overide ddraw to native,builtin
+
