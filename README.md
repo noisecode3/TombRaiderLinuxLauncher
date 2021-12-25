@@ -37,5 +37,5 @@ https://github.com/Matoking/protontricks
 - Wine-tkg
 
 ## Recommended compatibility layer configuration
-- Overide ddraw to native,builtin
+- Overide ddraw to native,builtin (TR3) and especially with dgVoodoo2 using D3D11 not Glide
 
