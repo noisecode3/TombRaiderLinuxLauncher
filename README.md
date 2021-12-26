@@ -20,17 +20,34 @@ How to play Tomb Raider 3 steam input working example.
 
 ![screenshot](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxSteamManager/main/controller.png "controller")
 
+# Patches
 The game is old and broken even on windows...
 I recommend these patches
 
-https://tombraiders.net/stella/downloads/widescreen.html
+- https://tombraiders.net/stella/downloads/widescreen.html
 
-https://core-design.com/community_tr3withoutcrystals.html
+- https://core-design.com/community_tr3withoutcrystals.html
 
-https://github.com/legluondunet/mlls-tools/blob/master/dgVoodoo2/dgVoodoo2_61.zip
+- https://github.com/legluondunet/mlls-tools/blob/master/dgVoodoo2/dgVoodoo2_61.zip
 
-https://github.com/Matoking/protontricks
-
+# dgVoodoo2 info
+## TR3
+Files used:<br />
+MS/x86/DDraw.dll<br />
+MS/x86/D3DImm.dll<br />
+dgVoodoo.conf --> change
+```
+      DirectX:
+        ForceVerticalSync: true
+        Resolution: max_qhd_isf
+        VRAM: 256
+        dgVoodooWatermark: false
+      General:
+        CaptureMouse: false
+        FullScreenMode: false
+        ScalingMode: stretched_ar
+```
+Put these in game directory
 # Help
 ## Recommended compatibility layer
 - Proton 5.0-10 (for TR3)
