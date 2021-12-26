@@ -33,9 +33,12 @@ https://github.com/Matoking/protontricks
 
 # Help
 ## Recommended compatibility layer
-- Proton 5.0-10
-- Wine-tkg
+- Proton 5.0-10 (for TR3)
+- Wine-tkg (in general works good)
 
 ## Recommended compatibility layer configuration
-- Overide ddraw to native,builtin (TR3) and especially with dgVoodoo2 using D3D11 not Glide
+### TR3
+- Overide ddraw to native,builtin (especially with dgVoodoo2 using D3D11 not Glide)
+- CSMT should probably be disabled in winecfg (It may not matter nowadays)
+- Use fsync or esync
 
