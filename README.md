@@ -41,4 +41,6 @@ https://github.com/Matoking/protontricks
 - Overide ddraw to native,builtin (especially with dgVoodoo2 using D3D11 not Glide)
 - CSMT should probably be disabled in winecfg (It may not matter nowadays)
 - Use fsync or esync
+- If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under.
+- installing d3dcompiler_47 with winetricks can help D3D compatibility (It may not matter nowadays)
 
