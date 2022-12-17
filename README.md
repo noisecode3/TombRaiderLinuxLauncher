@@ -29,7 +29,8 @@ I recommend these patches, on the steam version
 
 ## TR3
 If you have good vulkan drivers GloriousEggroll 6.21-GE-2 will work perfectly on steam, no bugs at all
-I tested with Intel, Nvidia and AMD a lot. I play this game a lot. Here is a wine-tkg example:
+I tested with Intel, Nvidia and AMD a lot. I play this game a lot. Here is some wine-tkg example:
+- With -setup
 ```
 cd ~/games/TombRaider\ \(III\) # must be in the current working directory
 WINEPREFIX=~/games/TombRaider\ \(III\)_WINEPREFIX \
@@ -39,6 +40,20 @@ STAGING_RT_PRIORITY_BASE=95 \
 WINEFSYNC=1 \
 DRI_PRIME=1 \
 /opt/wine-tkg-staging-fsync-git-6.17.r0.g5f19a815/bin/wine tomb3.exe -setup
+```
+- With Gallium Hud, you should not see a single frame drop but its only 30 fps game lol, 1 cpu could be saturated for short time, on 20 years almost potato laptop
+```
+cd ~/games/TombRaider\ \(III\)
+MONITORGPU=".w550.h280.c70fps:70,.w550.h280GPU-load:100,.w550.h280.c80temperature:80"
+MONITORCPU=".w550.h280cpu0+cpu1+cpu2+cpu3+cpu4+cpu5+cpu6+cpu7+cpu8+cpu9+cpu10+cpu11:100"
+GALLIUM_HUD=${MONITORGPU},${MONITORCPU} \
+WINEPREFIX=~/games/TombRaider\ \(III\)_WINEPREFIX \
+STAGING_SHARED_MEMORY=1 \
+STAGING_RT_PRIORITY_SERVER=95 \
+STAGING_RT_PRIORITY_BASE=95 \
+WINEFSYNC=1 \
+DRI_PRIME=1 \
+/opt/wine-tkg-staging-fsync-git-6.17.r0.g5f19a815/bin/wine tomb3.exe
 ```
 # Help
 ## Recommended compatibility layer
@@ -51,6 +66,8 @@ DRI_PRIME=1 \
 ### TR3
 - Make sure mesa is compiled with gallium (this is better on some old computers, i915,i965,r100,r200,nouveau), or use dxvk with wine-tkg will run the best way
 - Use fsync or esync
+- Use winetricks latest gallium
 - If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under.
 - Use a gaming kernel, for example https://xanmod.org/
-- sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar could help you see the window
+- Sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar could help you see the window
+- The game will recognize you're controller, left stick and all the other, except D-pad was missing for me, see https://github.com/AntiMicroX/antimicrox
