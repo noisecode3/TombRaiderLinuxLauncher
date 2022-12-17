@@ -16,48 +16,41 @@ This application will be written in c++ for the GUI and for modding and manipula
 
 # Guide
 
-How to play Tomb Raider 3 steam input working example.
-
-![screenshot](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxSteamManager/main/controller.png "controller")
+How to play Tomb Raider 3
 
 # Patches
-The game is old and broken even on windows...
-I recommend these patches
+The game is old and broken even on windows... We can make it work perfectly, and lag
+I recommend these patches, on the steam version
 
 - https://tombraiders.net/stella/downloads/widescreen.html
 
 - https://core-design.com/community_tr3withoutcrystals.html
 
-- https://github.com/legluondunet/mlls-tools/blob/master/dgVoodoo2/dgVoodoo2_61.zip
 
-# dgVoodoo2 info
 ## TR3
-Files used:<br />
-MS/x86/DDraw.dll<br />
-MS/x86/D3DImm.dll<br />
-dgVoodoo.conf --> change
+If you have good vulkan drivers GloriousEggroll 6.21-GE-2 will work perfectly on steam, no bugs at all
+I tested with Intel, Nvidia and AMD a lot. I play this game a lot. Here is a wine-tkg example:
 ```
-      DirectX:
-        ForceVerticalSync: true
-        Resolution: max_qhd_isf
-        VRAM: 256
-        dgVoodooWatermark: false
-      General:
-        CaptureMouse: false
-        FullScreenMode: false
-        ScalingMode: stretched_ar
+cd ~/games/TombRaider\ \(III\) # must be in the current working directory
+WINEPREFIX=~/games/TombRaider\ \(III\)_WINEPREFIX \
+STAGING_SHARED_MEMORY=1 \
+STAGING_RT_PRIORITY_SERVER=95 \
+STAGING_RT_PRIORITY_BASE=95 \
+WINEFSYNC=1 \
+DRI_PRIME=1 \
+/opt/wine-tkg-staging-fsync-git-6.17.r0.g5f19a815/bin/wine tomb3.exe -setup
 ```
-Put these in game directory
 # Help
 ## Recommended compatibility layer
-- Proton 5.0-10 (for TR3)
-- Wine-tkg (in general works good)
+- Proton 5.0-10 (for TR3) - Small input bug and if you have nvidia the cutscene after the firt map would be a black screen
+- GloriousEggroll (https://github.com/GloriousEggroll/proton-ge-custom/releases/tag/6.21-GE-2)
+- Wine-tkg (https://github.com/Frogging-Family/wine-tkg-git/releases/tag/6.17.r0.g5f19a815) tick "emulate a virtual desktop"
+- Wine-tkg works good in general
 
-## Recommended compatibility layer configuration
+## Recommended compatibility layer configuration and other tips
 ### TR3
-- Overide ddraw to native,builtin (especially with dgVoodoo2 using D3D11 not Glide)
-- CSMT should probably be disabled in winecfg (It may not matter nowadays)
+- Make sure mesa is compiled with gallium (this is better on some old computers, i915,i965,r100,r200,nouveau), or use dxvk with wine-tkg will run the best way
 - Use fsync or esync
 - If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under.
-- installing d3dcompiler_47 with winetricks can help D3D compatibility (It may not matter nowadays)
-
+- Use a gaming kernel, for example https://xanmod.org/
+- sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar could help you see the window
