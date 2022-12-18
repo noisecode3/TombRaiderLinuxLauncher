@@ -14,6 +14,12 @@ This application will be written in c++ for the GUI and for modding and manipula
 - implement patching of files and backup.
 - checksums
 
+# trle.net mods the launcher will download and play with wine-tkg that I tested
+
+- [Calypsis Jungle - Part One](https://www.trle.net/sc/levelfeatures.php?lid=3500)
+- [Feder - Templars Secret](https://www.trle.net/sc/levelfeatures.php?lid=3082)
+- [Delca - Kitten Adventure](https://www.trle.net/sc/levelfeatures.php?lid=3379)
+
 # Guide
 
 How to play Tomb Raider 3
@@ -36,38 +42,22 @@ cd ~/games/TombRaider\ \(III\) # must be in the current working directory
 WINEPREFIX=~/games/TombRaider\ \(III\)_WINEPREFIX \
 STAGING_SHARED_MEMORY=1 \
 STAGING_RT_PRIORITY_SERVER=95 \
-STAGING_RT_PRIORITY_BASE=95 \
 WINEFSYNC=1 \
 DRI_PRIME=1 \
 /opt/wine-tkg-staging-fsync-git-6.17.r0.g5f19a815/bin/wine tomb3.exe -setup
 ```
-- With Gallium Hud, you should not see a single frame drop but its only 30 fps game lol, 1 cpu could be saturated for short time, on 20 years almost potato laptop
-```
-cd ~/games/TombRaider\ \(III\)
-MONITORGPU=".w550.h280.c70fps:70,.w550.h280GPU-load:100,.w550.h280.c80temperature:80"
-MONITORCPU=".w550.h280cpu0+cpu1+cpu2+cpu3+cpu4+cpu5+cpu6+cpu7+cpu8+cpu9+cpu10+cpu11:100"
-GALLIUM_HUD=${MONITORGPU},${MONITORCPU} \
-WINEPREFIX=~/games/TombRaider\ \(III\)_WINEPREFIX \
-STAGING_SHARED_MEMORY=1 \
-STAGING_RT_PRIORITY_SERVER=95 \
-STAGING_RT_PRIORITY_BASE=95 \
-WINEFSYNC=1 \
-DRI_PRIME=1 \
-/opt/wine-tkg-staging-fsync-git-6.17.r0.g5f19a815/bin/wine tomb3.exe
-```
-# Help
+# Tips
 ## Recommended compatibility layer
-- Proton 5.0-10 (for TR3) - Small input bug and if you have nvidia the cutscene after the firt map would be a black screen
-- GloriousEggroll (https://github.com/GloriousEggroll/proton-ge-custom/releases/tag/6.21-GE-2)
-- Wine-tkg (https://github.com/Frogging-Family/wine-tkg-git/releases/tag/6.17.r0.g5f19a815) tick "emulate a virtual desktop"
-- Wine-tkg works good in general
+- Proton 5.0-10 for TR3 - Small input bug and if you have nvidia the cutscene after the firt map would be a black screen
+- [GloriousEggroll](https://github.com/GloriousEggroll/proton-ge-custom/releases/tag/6.21-GE-2)
+- [Wine-tkg](https://github.com/Frogging-Family/wine-tkg-git/releases/tag/7.6.r12.g51472395) tick "emulate a virtual desktop"
 
 ## Recommended compatibility layer configuration and other tips
 ### TR3
 - Make sure mesa is compiled with gallium (this is better on some old computers, i915,i965,r100,r200,nouveau), or use dxvk with wine-tkg will run the best way
 - Use fsync or esync
-- Use winetricks latest gallium
+- Use winetricks for dxvk or gallium
 - If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under.
 - Use a gaming kernel, for example https://xanmod.org/
-- Sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar could help you see the window
+- Sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar like alt+tab could help you see the window
 - The game will recognize you're controller, left stick and all the other, except D-pad was missing for me, see https://github.com/AntiMicroX/antimicrox
