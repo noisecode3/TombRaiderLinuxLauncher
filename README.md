@@ -25,13 +25,17 @@ This application will be written in c++ for the GUI and for modding and manipula
 How to play Tomb Raider 3
 
 # Patches
-The game is old and broken even on windows... We can make it work perfectly, and lag
-I recommend these patches, on the steam version
+The game uses old API and old optimizations..
+with wine you need a minimum
+4 x DDR3-1600mhz and 3.0 GHz CPU
+It's a bit demanding on the memory, try use gallium nine
+No special graphics card, but if you gonna play mods you could need
+One of those cards that has 1-4 Gb
+recommend patches, on the steam version
 
 - https://tombraiders.net/stella/downloads/widescreen.html
 
 - https://core-design.com/community_tr3withoutcrystals.html
-
 
 ## TR3
 If you have good vulkan drivers GloriousEggroll 6.21-GE-2 will work perfectly on steam, no bugs at all
