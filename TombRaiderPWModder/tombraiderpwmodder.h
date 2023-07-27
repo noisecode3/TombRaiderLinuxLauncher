@@ -10,10 +10,12 @@ QT_END_NAMESPACE
 class TombRaiderPWModder : public QMainWindow
 {
     Q_OBJECT
-
 public:
     TombRaiderPWModder(QWidget *parent = nullptr);
     ~TombRaiderPWModder();
+
+public slots:
+    void linkClicked();
 
 private:
     Ui::TombRaiderPWModder *ui;

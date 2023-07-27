@@ -13,6 +13,7 @@ This application will be written in c++ for the GUI and for modding and manipula
 - check if I forgot to connect controller and so on... On Linux. I like my Steam controller configurations also.
 - implement patching of files and backup.
 - checksums
+- download maps/mods, and install them
 
 # trle.net mods the launcher will download and play with wine-tkg that I tested
 
@@ -26,42 +27,37 @@ How to play Tomb Raider 3
 
 # Patches
 The game uses old API and old optimizations..
-with wine you need a minimum
+With wine you need a minimum
 4 x DDR3-1600mhz and 3.0 GHz CPU
-It's a bit demanding on the memory, try use gallium nine
+It's a bit demanding on the memory, try use gallium nine if you have nouveau
 No special graphics card, but if you gonna play mods you could need
-One of those cards that has 1-4 Gb
-recommend patches, on the steam version
+One 2010+ card that has about 2-4 Gb for some Tomb Raider 4 mods with enhanced graphics
+recommend patches, on steam proton 7
+
+- https://github.com/Trxyebeep/tomb3
+
+- https://github.com/dege-diosg/dgVoodoo2
 
 - https://tombraiders.net/stella/downloads/widescreen.html
 
 - https://core-design.com/community_tr3withoutcrystals.html
 
 ## TR3
-If you have good vulkan drivers GloriousEggroll 6.21-GE-2 will work perfectly on steam, no bugs at all
-I tested with Intel, Nvidia and AMD a lot. I play this game a lot. Here is some wine-tkg example:
-- With -setup
-```
-cd ~/games/TombRaider\ \(III\) # must be in the current working directory
-WINEPREFIX=~/games/TombRaider\ \(III\)_WINEPREFIX \
-STAGING_SHARED_MEMORY=1 \
-STAGING_RT_PRIORITY_SERVER=95 \
-WINEFSYNC=1 \
-DRI_PRIME=1 \
-/opt/wine-tkg-staging-fsync-git-6.17.r0.g5f19a815/bin/wine tomb3.exe -setup
-```
+
+Most, if not all trle.net tr3 mods will work with proton 7, if unpacked and configured with dgVoodoo2
+some new tr3 mods already comes with the tomb3 patch. A combination of tomb3 and dgVoodoo2 is recommended for the original game.
+
 # Tips
 ## Recommended compatibility layer
-- Proton 5.0-10 for TR3 - Small input bug and if you have nvidia the cutscene after the firt map would be a black screen
+- Proton 7.0 for TR3 - with dgVoodoo2
+- Proton 5.0-10 for TR3
+- Sometimes avoiding Ctrl and Alt will make wine/proton
 - [GloriousEggroll](https://github.com/GloriousEggroll/proton-ge-custom/releases/tag/6.21-GE-2)
 - [Wine-tkg](https://github.com/Frogging-Family/wine-tkg-git/releases/tag/7.6.r12.g51472395) tick "emulate a virtual desktop"
 
 ## Recommended compatibility layer configuration and other tips
 ### TR3
-- Make sure mesa is compiled with gallium (this is better on some old computers, i915,i965,r100,r200,nouveau), or use dxvk with wine-tkg will run the best way
 - Use fsync or esync
-- Use winetricks for dxvk or gallium
-- If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under.
-- Use a gaming kernel, for example https://xanmod.org/
+- If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under. Or use dgVoodoo2
 - Sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar like alt+tab could help you see the window
-- The game will recognize you're controller, left stick and all the other, except D-pad was missing for me, see https://github.com/AntiMicroX/antimicrox
+- The game will recognize you're controller, left stick only, see https://github.com/AntiMicroX/antimicrox
