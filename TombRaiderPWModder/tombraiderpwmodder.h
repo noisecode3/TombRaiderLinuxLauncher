@@ -2,6 +2,8 @@
 #define TOMBRAIDERPWMODDER_H
 
 #include <QMainWindow>
+#include <unistd.h>
+#include <string>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderPWModder; }
@@ -18,6 +20,7 @@ public slots:
     void linkClicked();
 
 private:
+    void readNextCstring(int &index, char* cString, char* path);
     Ui::TombRaiderPWModder *ui;
 };
 #endif // TOMBRAIDERPWMODDER_H
