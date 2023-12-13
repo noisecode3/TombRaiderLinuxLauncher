@@ -60,4 +60,4 @@ some new tr3 mods already comes with the tomb3 patch. A combination of tomb3 and
 - Use fsync or esync
 - If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under. Or use dgVoodoo2
 - Sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar like alt+tab could help you see the window
-- The game will recognize you're controller, left stick only, see https://github.com/AntiMicroX/antimicrox
+- The game will recognize your controller, left stick only, see [https://github.com/AntiMicroX/antimicrox](https://github.com/AntiMicroX/antimicrox)
