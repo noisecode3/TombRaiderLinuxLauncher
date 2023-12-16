@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <unistd.h>
-#include <string>
+#include "leveldata.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderPWModder; }

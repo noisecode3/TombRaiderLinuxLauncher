@@ -21,62 +21,63 @@
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
-  return written;
+    size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+    return written;
 }
 
-size_t downloadFile(const char* url, const char* filename) {
-  CURL *curl_handle;
-  static const char *pagefilename = filename;
-  FILE *pagefile;
+size_t downloadFile(const char* url, const char* filename)
+{
+    CURL *curl_handle;
+    static const char *pagefilename = filename;
+    FILE *pagefile;
+    if (filename[0] == '/')
+    {
+        curl_global_init(CURL_GLOBAL_ALL);
  
+        /* init the curl session */
+        curl_handle = curl_easy_init();
  
-  curl_global_init(CURL_GLOBAL_ALL);
+        /* set URL to get here */
+        curl_easy_setopt(curl_handle, CURLOPT_URL, url);
  
-  /* init the curl session */
-  curl_handle = curl_easy_init();
+        /* Switch on full protocol/debug output while testing */
+        curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
  
-  /* set URL to get here */
-  curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+        /* disable progress meter, set to 0L to enable it */
+        curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
  
-  /* Switch on full protocol/debug output while testing */
-  curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
+        /* send all data to this function  */
+        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
  
-  /* disable progress meter, set to 0L to enable it */
-  curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
+        /* open the file */
+        pagefile = fopen(pagefilename, "wb");
+        if(pagefile) {
  
-  /* send all data to this function  */
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
+            /* write the page body to this file handle */
+            curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
  
-  /* open the file */
-  pagefile = fopen(pagefilename, "wb");
-  if(pagefile) {
+            /* get it! */
+            curl_easy_perform(curl_handle);
  
-    /* write the page body to this file handle */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
- 
-    /* get it! */
-    curl_easy_perform(curl_handle);
- 
-    /* close the header file */
-    fclose(pagefile);
-  }
- 
-  /* cleanup curl stuff */
-  curl_easy_cleanup(curl_handle);
-  curl_global_cleanup();
- 
-  return 0;
+            /* close the header file */
+            fclose(pagefile);
+        }
+        /* cleanup curl stuff */
+        curl_easy_cleanup(curl_handle);
+        curl_global_cleanup();
+    }
+    return 0;
 }
     
 // Function to calculate MD5 checksum of a file
-std::string calculateMD5(const char* filename) {
+std::string calculateMD5(const char* filename)
+{
     FILE* file = fopen(filename, "rb");
-    if (!file) {
+    if (!file)
+    {
         std::cerr << "Error opening file for reading." << std::endl;
         return "";
     }
-
     fseek(file, 0, SEEK_END);
     rewind(file);
 
@@ -90,7 +91,8 @@ std::string calculateMD5(const char* filename) {
     char buffer[1024];
     size_t bytesRead;
 
-    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0)
+    {
         EVP_DigestUpdate(md5Context, buffer, bytesRead);
     }
 
@@ -99,17 +101,20 @@ std::string calculateMD5(const char* filename) {
     fclose(file);
 
     std::stringstream md5string;
-    for (int i = 0; i < EVP_MD_size(md5Type); ++i) {
+    for (int i = 0; i < EVP_MD_size(md5Type); ++i)
+    {
         md5string << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md5sum[i]);
     }
 
     return md5string.str();
 }
 
-void extractZip(const char* zipFilename, const char* extractPath) {
+void extractZip(const char* zipFilename, const char* extractPath)
+{
     zip_t* archive = zip_open(zipFilename, 0, NULL);
 
-    if (!archive) {
+    if (!archive)
+    {
         std::cerr << "Error opening ZIP file" << std::endl;
         return;
     }
@@ -121,21 +126,25 @@ void extractZip(const char* zipFilename, const char* extractPath) {
     int numEntries = zip_get_num_entries(archive, 0);
 
     // Extract each entry in the ZIP file
-    for (int i = 0; i < numEntries; ++i) {
-        if (zip_stat_index(archive, i, 0, &zipStat) == 0) {
+    for (int i = 0; i < numEntries; ++i)
+    {
+        if (zip_stat_index(archive, i, 0, &zipStat) == 0)
+        {
             // Allocate memory for the data
             char* data = new char[zipStat.size];
             // Create directories if they don't exist
             std::string filePath = extractPath + std::string("/") + zipStat.name;
             std::string directory = filePath.substr(0, filePath.find_last_of("/\\"));
-            if (!std::filesystem::exists(directory)) {
+            if (!std::filesystem::exists(directory))
+            {
                 std::filesystem::create_directories(directory);
             }
 
             // Open the file in the ZIP archive
             zip_file_t* zipFile = zip_fopen_index(archive, i, 0);
 
-            if (zipFile) {
+            if (zipFile)
+            {
                 // Read the data from the file in the ZIP archive
                 zip_fread(zipFile, data, zipStat.size);
 
@@ -149,10 +158,14 @@ void extractZip(const char* zipFilename, const char* extractPath) {
                 outFile.close();
 
                 delete[] data;// leak
-            } else {
+            }
+            else
+            {
                 std::cerr << "Error opening file in ZIP archive" << std::endl;
             }
-        } else {
+        }
+        else
+        {
             std::cerr << "Error getting information for entry " << i << std::endl;
         }
     }
@@ -160,7 +173,7 @@ void extractZip(const char* zipFilename, const char* extractPath) {
     zip_close(archive);
 }
 
-int main() {
+int test() {
     // We need a class for hanling map download link or local file.
     // Checking files checksum and or remove them
     // Change to the game's directory
@@ -302,10 +315,12 @@ int main() {
     };
 
     // Remove files and directories
-    for (const char* item : filesToRemove) {
+    for (const char* item : filesToRemove)
+    {
         remove(item);
     }
-    for (const char* item : directoriesToRemove) {
+    for (const char* item : directoriesToRemove)
+    {
         rmdir(item);
     }
 
@@ -313,24 +328,28 @@ int main() {
     const char* url = "https://www.trle.net/levels/levels/2023/1123/Jonson-TheInfadaCult.zip";
     const char* filename = "Jonson-TheInfadaCult.zip";
 
-    if (!downloadFile(url, filename)) {
+    if (!downloadFile(url, filename))
+    {
         // Check MD5sum
         const char* expectedMD5 = "152d33e5c28d7db6458975a5e53a3122";
         std::string md5sum = calculateMD5(filename);
         std::cout << md5sum << std::endl;
 
-        if (md5sum == expectedMD5) {
+        if (md5sum == expectedMD5)
+        {
             // Extract the ZIP file
             const char* extractPath = "./";
             extractZip(filename, extractPath);
 
         }
-        else {
+        else
+        {
             std::cerr << "Download problem" << std::endl;
             return 1;
         }
     }
-    else {
+    else
+    {
         std::cerr << "Download problem" << std::endl;
         return 1;
     }

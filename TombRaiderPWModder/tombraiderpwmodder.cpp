@@ -4,7 +4,11 @@
 #include <filesystem>
 #include <dirent.h>
 #include <unistd.h>
-#include <string>
+
+/*    int currentIndex = stackedWidget->currentIndex();
+ *    int nextPage = (currentIndex + 1) % stackedWidget->count();
+ *    stackedWidget->setCurrentIndex(nextPage);
+ */
 
 TombRaiderPWModder::TombRaiderPWModder(QWidget *parent)
     : QMainWindow(parent)
@@ -44,6 +48,11 @@ TombRaiderPWModder::TombRaiderPWModder(QWidget *parent)
     std::cout << " does not exist\n";
 
     //dpdf = opendir(ui->tableWidgetSetup->item(1, 0)->text().toStdString().data());
+    ui->listWidgetModds->setIconSize(QSize(320, 240));
+    QFont defaultFont = QApplication::font();
+    int newSize = 22;
+    defaultFont.setPointSize(newSize);
+    ui->listWidgetModds->setFont(defaultFont);
     dpdf = opendir(path);
     if (dpdf != NULL)
     {
@@ -60,11 +69,24 @@ TombRaiderPWModder::TombRaiderPWModder(QWidget *parent)
                 }
             }
             if(keep)
-               ui->listWidgetModds->insertItem(0, QString(epdf->d_name));
+            {
+                QString s(epdf->d_name + 17);
+                if(s == "Jonson-TheInfadaCult")//this is just a test to add picture
+                {
+                    QIcon i("3573.jpg");
+                    QListWidgetItem *wi = new QListWidgetItem(i, s);
+                    wi->setIcon(i);
+                    ui->listWidgetModds->addItem(wi);
+                }
+                else
+                {
+                    QListWidgetItem *wi = new QListWidgetItem(s);
+                    ui->listWidgetModds->addItem(wi);
+                }
+            }
         }
         closedir(dpdf);
     }
-
 }
 
 void TombRaiderPWModder::readNextCstring(int &index, char* cString, char* path)

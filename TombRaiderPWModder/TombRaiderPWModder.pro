@@ -1,8 +1,9 @@
-QT       += core gui
+QT       += core gui widgets webenginewidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
+LIBS += -lcurl -lzip -lssl -lcrypto
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -10,10 +11,12 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    tombraiderpwmodder.cpp
+    tombraiderpwmodder.cpp \
+    networkTR3.cpp
 
 HEADERS += \
-    tombraiderpwmodder.h
+    tombraiderpwmodder.h \
+    leveldata.h
 
 FORMS += \
     tombraiderpwmodder.ui

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>641</width>
-    <height>513</height>
+    <width>730</width>
+    <height>391</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,19 +20,191 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="Modds">
+      <widget class="QWidget" name="Levels">
        <attribute name="title">
-        <string>Modds</string>
+        <string>Levels</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayoutModdsGrid">
-        <item row="0" column="1" colspan="2">
-         <widget class="QListWidget" name="listWidgetModds"/>
-        </item>
-        <item row="1" column="1" colspan="2">
-         <widget class="QPushButton" name="pushButtonLink">
-          <property name="text">
-           <string>Link</string>
+        <item row="2" column="0" rowspan="2" colspan="2">
+         <widget class="QStackedWidget" name="stackedWidget">
+          <property name="enabled">
+           <bool>true</bool>
           </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="select">
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QListWidget" name="listWidgetModds">
+              <property name="lineWidth">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QWidget" name="widget" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>42</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QPushButton" name="pushButtonLink">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Link</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Info</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButtonDownload">
+                 <property name="minimumSize">
+                  <size>
+                   <width>127</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Download and install</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="Info">
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QWebEngineView" name="webEngineView">
+              <property name="url">
+               <url>
+                <string>about:blank</string>
+               </url>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QWidget" name="widget_2" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>42</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QPushButton" name="pushButton_3">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Back</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_2">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Walkthrough</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="walkthrough">
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QWebEngineView" name="webEngineView_2">
+              <property name="url">
+               <url>
+                <string>about:blank</string>
+               </url>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QWidget" name="widget_3" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>42</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QPushButton" name="pushButton_4">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Back</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -43,7 +215,19 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayoutModdingGrid">
         <item row="0" column="0">
-         <widget class="QTableView" name="tableViewModding"/>
+         <widget class="QStackedWidget" name="stackedWidget_2">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="page">
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QTableView" name="tableViewModding"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_2"/>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -51,34 +235,46 @@
        <attribute name="title">
         <string>Setup</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayoutSetupGrid">
-        <item row="0" column="0">
-         <widget class="QTableWidget" name="tableWidgetSetup">
-          <row>
-           <property name="text">
-            <string>GAMEDIR</string>
-           </property>
-          </row>
-          <row>
-           <property name="text">
-            <string>RESOURCEDIR</string>
-           </property>
-          </row>
-          <column>
-           <property name="text">
-            <string>Paths</string>
-           </property>
-          </column>
-          <item row="0" column="0">
-           <property name="text">
-            <string>~/.steam/root/steamapps/common/TombRaider (III)</string>
-           </property>
-          </item>
-          <item row="1" column="0">
-           <property name="text">
-            <string>~/.local/share/TombRaider3ModderGames</string>
-           </property>
-          </item>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QStackedWidget" name="stackedWidget_3">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="page_3">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QTableWidget" name="tableWidgetSetup">
+              <row>
+               <property name="text">
+                <string>GAMEDIR</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>RESOURCEDIR</string>
+               </property>
+              </row>
+              <column>
+               <property name="text">
+                <string>Paths</string>
+               </property>
+              </column>
+              <item row="0" column="0">
+               <property name="text">
+                <string>~/.steam/root/steamapps/common/TombRaider (III)</string>
+               </property>
+              </item>
+              <item row="1" column="0">
+               <property name="text">
+                <string>~/.local/share/TombRaider3ModderGames</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_4"/>
          </widget>
         </item>
        </layout>
@@ -89,18 +285,30 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayoutAboutGrid">
         <item row="0" column="0">
-         <widget class="QTextBrowser" name="textBrowserAbout">
-          <property name="html">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QTextBrowser" name="textBrowserAbout">
+             <property name="html">
+              <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell';&quot;&gt;Hi this is my first official Qt program for fun&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cantarell';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell';&quot;&gt;This program takes a Tomb Raider installation with cresponding Wine or Proton prefix and and modifies it. It will launch diffrent wine exe for modding and manage all you're Tomb Rader mods and maps from trle.net&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cantarell';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell';&quot;&gt;It will move you're steam proton Tomb Raider (for now 3 and 4) installation and prefix and link to it with hard links. So you can easaly relink and launch you mod with steam without needing to move you directory into the game launch path. I will later try to move away from dependent wine modding aplications and implament the moding direktly into the program. For fun.I play tomb raider 3 and 4 mostly and with both  lutris and steam proton and this will work for both lutris and steam proton. But no linking for lutris should be needed&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell'; font-size:10pt;&quot;&gt;Hi this is my first official Qt program for fun&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cantarell'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell'; font-size:10pt;&quot;&gt;This program takes a Tomb Raider installation with cresponding Wine or Proton prefix and and modifies it. It will launch diffrent wine exe for modding and manage all you're Tomb Rader mods and maps from trle.net&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cantarell'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell'; font-size:10pt;&quot;&gt;It will move you're steam proton Tomb Raider (for now 3 and 4) installation and prefix and link to it with hard links. So you can easaly relink and launch you mod with steam without needing to move you directory into the game launch path. I will later try to move away from dependent wine modding aplications and implament the moding direktly into the program. For fun.I play tomb raider 3 and 4 mostly and with both  lutris and steam proton and this will work for both lutris and steam proton. But no linking for lutris should be needed&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -110,6 +318,13 @@ p, li { white-space: pre-wrap; }
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QWebEngineView</class>
+   <extends>QWidget</extends>
+   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
