@@ -34,6 +34,7 @@ Thumbs.db
 *.rc
 /.qmake.cache
 /.qmake.stash
+/.qtc_clangd
 moc_predefs.h
 
 # qtcreator generated files
@@ -71,4 +72,4 @@ moc_predefs.h
 # --------
 *.dll
 *.exe
-
+TombRaiderLinuxLauncher

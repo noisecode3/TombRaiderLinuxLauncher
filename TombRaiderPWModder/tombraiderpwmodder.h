@@ -20,6 +20,7 @@ public slots:
     void linkClicked();
 
 private:
+    void setup();
     void readNextCstring(int &index, char* cString, char* path);
     Ui::TombRaiderPWModder *ui;
 };

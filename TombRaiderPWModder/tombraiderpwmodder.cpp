@@ -1,10 +1,12 @@
+#include <QSettings>
+#include <QDebug>
 #include "tombraiderpwmodder.h"
 #include "ui_tombraiderpwmodder.h"
+#include "originalFileList.h"
 #include <iostream>
 #include <filesystem>
 #include <dirent.h>
 #include <unistd.h>
-
 /*    int currentIndex = stackedWidget->currentIndex();
  *    int nextPage = (currentIndex + 1) % stackedWidget->count();
  *    stackedWidget->setCurrentIndex(nextPage);
@@ -16,6 +18,10 @@ TombRaiderPWModder::TombRaiderPWModder(QWidget *parent)
 {
     ui->setupUi(this);
     connect(ui->pushButtonLink, SIGNAL (clicked()), this, SLOT (linkClicked()));
+
+    // Construct the QSettings object
+    QSettings settings;
+
     DIR *dpdf;
     struct dirent *epdf;
     const int  prefixSize = 18;
@@ -43,7 +49,7 @@ TombRaiderPWModder::TombRaiderPWModder(QWidget *parent)
     std::filesystem::path p(path2);
     std::filesystem::exists(p) ?
         std::filesystem::is_symlink(p) ?
-            std::cout << std::filesystem::read_symlink(p) << '\n' :
+            std::cout << std::filesystem::read_symlink(p) << '\n' : //TODO SET SECLECTED
         std::cout << " exists but it is not a symlink\n" :
     std::cout << " does not exist\n";
 
@@ -73,7 +79,7 @@ TombRaiderPWModder::TombRaiderPWModder(QWidget *parent)
                 QString s(epdf->d_name + 17);
                 if(s == "Jonson-TheInfadaCult")//this is just a test to add picture
                 {
-                    QIcon i("3573.jpg");
+                    QIcon i("./3573.jpg");
                     QListWidgetItem *wi = new QListWidgetItem(i, s);
                     wi->setIcon(i);
                     ui->listWidgetModds->addItem(wi);
@@ -87,6 +93,20 @@ TombRaiderPWModder::TombRaiderPWModder(QWidget *parent)
         }
         closedir(dpdf);
     }
+}
+void readSavedSettings()
+{
+
+    // Save a setting
+    //settings.setValue("exampleKey", "exampleValue");
+
+    // Read a setting
+    //QString value = settings.value("exampleKey").toString();
+    //qDebug() << "Read value:" << value;
+}
+void setup()
+{
+    //make qt save changes
 }
 
 void TombRaiderPWModder::readNextCstring(int &index, char* cString, char* path)

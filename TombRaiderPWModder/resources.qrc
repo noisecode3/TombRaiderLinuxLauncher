@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/pictures">
+        <file>pictures/Lara.jpg</file>
+        <file>pictures/Tomb_Raider_I.jpg</file>
+        <file>pictures/Tomb_Raider_II.jpg</file>
+        <file>pictures/Tomb_Raider_III.jpg</file>
+        <file>pictures/Tomb_Raider_IIII.jpg</file>
+        <file>pictures/Tomb_Raider_IIIII.jpg</file>
+    </qresource>
+</RCC>
