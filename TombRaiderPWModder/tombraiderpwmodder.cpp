@@ -370,36 +370,44 @@ const QString TombRaiderLinuxLauncher::calculateMD5(const QString& filename)
 
 void TombRaiderLinuxLauncher::linkClicked()
 {
-    /*
+    struct folderNames folder;
+    const QString gamePath = settings.value("gamePath").toString() + folder.TR3;
+    qDebug() << "Read game path value:" << gamePath;
+    const QString levelPath = settings.value("levelPath").toString();
+    qDebug() << "Read level path value:" << levelPath;
     QList<QListWidgetItem *> list = ui->listWidgetModds->selectedItems();
-    //std::cout << list.at(0)->text().toStdString() << "\n";
-
-    char path1[256] = "/home/";
-    char gamedir[256] = "/.local/share/TombRaider3ModderGames/";
-    char* readnext = getlogin();
-    int i=6;
-    readNextCstring(i, readnext,path1);
-    readnext = gamedir;
-    readNextCstring(i, readnext,path1);
-
-    char game[256] ="TombRaider (III)";
-    char path2[256] = "/home/";
-    char steamdir[256] = "/.steam/root/steamapps/common/";
-    readnext = getlogin();
-    i=6;
-
-    readNextCstring(i, readnext,path2);
-    readnext = steamdir;
-    readNextCstring(i, readnext,path2);
-    readnext = game;
-    readNextCstring(i, readnext,path2);
-
-    //the symlink
-    std::filesystem::remove(path2);
-
-    std::filesystem::create_symlink(path1 + list.at(0)->text().toStdString(), path2);
+    if (!list.isEmpty())
+    {
+        // Create a symbolic link
+        QString s = list.first()->text();
+        if (s == "Tomb Raider III Original")
+            s = "Original.TR3";
+        const QString p = levelPath + "/" + s;
+        if (QFile::link(p, gamePath))
+        {
+            qDebug() << "Symbolic link created successfully.";
+        }
+        else
+        {
+            if (QFile::exists(gamePath))
+            {
+                QFileInfo i(gamePath);
+                if (i.isSymLink())
+                {
+                    QFile::remove(gamePath);
+                    if (QFile::link(p, gamePath))
+                        qDebug() << "Symbolic link created successfully.";
+                    else
+                        qDebug() << "Failed to create symbolic link.";
+                }
+                else
+                    qDebug() << "Failed to create symbolic link.";
+            }
+            else
+                qDebug() << "Failed to create symbolic link.";
+        }
     QApplication::quit();
-    */
+    }
 }
 
 
