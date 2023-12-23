@@ -1,23 +1,24 @@
 #pragma once
-#include <string>
+#include <QString>
 #include <vector>
 #include <algorithm>
 class file
 {
 public:
-    file(const std::string path, const std::string md5sum)
-        : path(path), md5sum(md5sum)  {}
-    const std::string& getPath() const { return path; }
-    const std::string& getMd5sum() const { return md5sum; }
+    file(const QString md5sum, const QString path)
+        :  md5sum(md5sum), path(path) {}
+    const QString& getPath() const { return path; }
+    const QString& getMd5sum() const { return md5sum; }
 private:
-    const std::string path; //path + name
-    const std::string md5sum;
+    const QString md5sum;
+    const QString path; //path + name
 };
+
 class gameFileList
 {
 public:
-    gameFileList(const std::string name) : name(name) {}
-    const std::string getMd5sum(std::string& path)
+    gameFileList(const QString name) : name(name) {}
+    const QString getMd5sum(QString& path)
     {
         auto it = std::find_if(list.begin(), list.end(),
             [&path](const file& obj) { return obj.getPath() == path; });
@@ -25,7 +26,7 @@ public:
             return it->getMd5sum();
         return "";
     }
-    size_t getIndex(std::string path)
+    size_t getIndex(QString path)
     {
         auto it = std::find_if(list.begin(), list.end(),
             [&path](const file& obj) { return obj.getPath() == path; });
@@ -38,7 +39,7 @@ public:
     {
         return list.size();
     }
-    void addFile(const std::string path, const std::string md5sum)
+    void addFile(const QString path, const QString md5sum)
     {
         list.push_back(file(path,md5sum));
     }
@@ -47,6 +48,6 @@ public:
         return list.at(index);
     }
 private:
-    const std::string name;
+    const QString name;
     std::vector<file> list;
 };

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName("TombRaiderLinuxLauncher");
 
     // Construct the QSettings object
-    TombRaiderPWModder w;
+    TombRaiderLinuxLauncher w;
     w.show();
     return a.exec();
 }

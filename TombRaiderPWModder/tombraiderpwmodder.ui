@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TombRaiderPWModder</class>
- <widget class="QMainWindow" name="TombRaiderPWModder">
+ <class>TombRaiderLinuxLauncher</class>
+ <widget class="QMainWindow" name="TombRaiderLinuxLauncher">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -237,7 +237,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QStackedWidget" name="stackedWidget_3">
+         <widget class="QStackedWidget" name="setupStackedWidget">
           <property name="currentIndex">
            <number>0</number>
           </property>
@@ -245,6 +245,12 @@
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <widget class="QTableWidget" name="tableWidgetSetup">
+              <attribute name="horizontalHeaderVisible">
+               <bool>true</bool>
+              </attribute>
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>500</number>
+              </attribute>
               <row>
                <property name="text">
                 <string>GAMEDIR</string>
@@ -274,7 +280,7 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="setup">
+          <widget class="QWidget" name="firstTime">
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
              <widget class="QLabel" name="lara">
@@ -350,6 +356,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial'; color:#000000;&quot;&gt;In this directory custom maps and backups of game files will be saved.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial'; color:#000000;&quot;&gt;trle.net’s custom maps each have there own game directory&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial'; color:#000000;&quot;&gt;with custom files and most likely a different build/modification for every map.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="setOptions">
+                 <property name="text">
+                  <string>set options</string>
                  </property>
                 </widget>
                </item>

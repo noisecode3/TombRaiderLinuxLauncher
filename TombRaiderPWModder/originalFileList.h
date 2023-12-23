@@ -5,7 +5,6 @@
 gameFileList TR3FileList ("TR3.Original");
 void work()
 {
-    TR3FileList.addFile("acc750411877527f118028aee957a854", "installscript.vdf");
     TR3FileList.addFile("61f1377c2123f1c971cbfbf9c7ce8faf", "DATA.TAG");
     TR3FileList.addFile("d09677d10864caa509ab2ffbd7ad37e7", "DEC130.DLL");
     TR3FileList.addFile("4ee5d4026f15c967ed3ae599885018b0", "WINPLAY.DLL");
