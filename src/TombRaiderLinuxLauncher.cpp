@@ -396,6 +396,8 @@ void TombRaiderLinuxLauncher::linkClicked()
         QString s = list.first()->text();
         if (s == "Tomb Raider III Original")
             s = "Original.TR3";
+        else if (s == "The Infada Cult\nby Jonson")
+            s = "Jonson-TheInfadaCult.TR3";
         const QString p = levelPath + "/" + s;
         if (QFile::link(p, gamePath))
         {
