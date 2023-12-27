@@ -8,31 +8,8 @@
 #include <QStringList>
 #include <QDebug>
 #include "TombRaiderLinuxLauncher.h"
+#include "worker.h"
 #include "ui_TombRaiderLinuxLauncher.h"
-#include "originalFileList.h"
-
-#include <QDir>
-#include "quazip/quazip.h"
-#include "quazip/quazipfile.h"
-#include <iostream>
-
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <cstdio>
-#include <filesystem>
-#include <cstring>
-#include <openssl/md5.h>
-#include <openssl/evp.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <curl/curl.h> //depend
-#include <zip.h> //depend
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <curl/curl.h>
 
 /*
  *
@@ -46,16 +23,17 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 {
     ui->setupUi(this);
     connect(ui->pushButtonLink, SIGNAL (clicked()), this, SLOT (linkClicked()));
+    connect(ui->pushButtonDownload, SIGNAL (clicked()), this, SLOT (downloadClicked()));
     connect(ui->setOptions, SIGNAL (clicked()), this, SLOT (setOptionsClicked()));
 
-    pool games;
-    games.setName("Jonson-TheInfadaCult.TR3");
-    games.setFileList(TRLE3573FileList);
-    games.setData(TRLE3573);
+    //pool games;
+    //games.setName("Jonson-TheInfadaCult.TR3");
+    //games.setFileList(TRLE3573FileList);
+    //games.setData(TRLE3573);
 
     // Read settings
     QString value = settings.value("setup").toString();
-    //settings.setValue("setup" , "no");
+    settings.setValue("setup" , "yes");
     if (value != "yes")
         setup();
     else
@@ -120,99 +98,13 @@ int TombRaiderLinuxLauncher::checkGameDirectory(int game)
 /*
  *
  *
- *
+ * this should be in the worker class 
  *
  */
-void TombRaiderLinuxLauncher::packOriginalGame(int game)
-{
-    TR3FileListWork();
-    struct folderNames folder;
-    const QString folderPath = settings.value("gamePath").toString() + folder.TR3;
-    const size_t s = TR3FileList.getSize();
-
-    QString directoryPath = settings.value("levelPath").toString() + "/Original.TR3";
-
-    // Create the directory if it doesn't exist
-    if (!QDir(directoryPath).exists()) {
-        if (QDir().mkpath(directoryPath)) {
-            qDebug() << "Directory created successfully.";
-        } else {
-            qDebug() << "Error creating directory.";
-            return;
-        }
-    } else {
-        qDebug() << "Directory already exists.";
-    }
-
-    for (size_t i = 0; i < s; i++)
-    {
-        file f(TR3FileList.getFile(i));
-        const QString sourcePath = folderPath + "/" + f.getPath();
-        const QString destinationPath = directoryPath + "/" + f.getPath();
-
-        if(f.getMd5sum() == calculateMD5(sourcePath))
-        {
-            // Ensure the destination directory exists
-            const QFileInfo destinationFileInfo(destinationPath);
-            QDir destinationDir(destinationFileInfo.absolutePath());
-            if (!destinationDir.exists()) {
-                if (!QDir().mkpath(destinationDir.absolutePath())) {
-                    qDebug() << "Error creating destination directory.";
-                    return;
-                }
-            }
-
-            // Copy the file
-            if (QFile::copy(sourcePath, destinationPath))
-            {
-                qDebug() << "File copy successfully.";
-            }
-            else
-            {
-                if(QFile::exists(destinationPath))
-                {
-                    if(f.getMd5sum() == calculateMD5(destinationPath))
-                        qDebug() << "File exist";
-                }
-                else
-                {
-                    qDebug() << "Failed to copy file " << f.getPath() << Qt::endl;
-                    return;
-                }
-            }
-        }
-        else {
-            qDebug() << "Original file was modified" << Qt::endl;
-            return;
-        }
-    }
-    QDir directory(folderPath);
-
-    if (directory.exists()) {
-        // Remove the directory and its contents recursively
-        if (directory.removeRecursively()) {
-            qDebug() << "Directory removed successfully.";
-        } else {
-            qDebug() << "Error removing directory.";
-        }
-    } else {
-        qDebug() << "Directory does not exist.";
-    }
-
-    // Create a symbolic link
-    if (QFile::link(directoryPath, folderPath))
-    {
-        qDebug() << "Symbolic link created successfully.";
-    }
-    else
-    {
-        qDebug() << "Failed to create symbolic link.";
-    }
-
-}
 void TombRaiderLinuxLauncher::checkCommonFiles()
 {
     int dirStaus = checkGameDirectory(TR3); // we only setup tr3 for now
+    folderNames folder;
     if (dirStaus)
     {
         if(dirStaus == 1)// The path is a symbolic link.
@@ -231,7 +123,9 @@ void TombRaiderLinuxLauncher::checkCommonFiles()
             int result = msgBox.exec();
             if (result == QMessageBox::Yes) {
                 qDebug() << "User clicked Yes.";
-                packOriginalGame(3);
+                WorkerThread packOriginalGame(3, true, settings.value("gamePath").toString() + folder.TR3, settings.value("levelPath").toString() + "/Original.TR3");
+
+
             } else {
                 qDebug() << "User clicked No or closed the dialog.";
             }
@@ -358,29 +252,6 @@ void TombRaiderLinuxLauncher::setOptionsClicked()
  *
  *
  */
-const QString TombRaiderLinuxLauncher::calculateMD5(const QString& filename)
-{
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        qDebug() << "Error opening file for reading: " << file.errorString();
-        return "";
-    }
-
-    QCryptographicHash md5(QCryptographicHash::Md5);
-
-    char buffer[1024];
-    qint64 bytesRead;
-
-    while ((bytesRead = file.read(buffer, sizeof(buffer))) > 0)
-    {
-        md5.addData(buffer, static_cast<int>(bytesRead));
-    }
-
-    file.close();
-
-    return QString(md5.result().toHex());
-}
 
 void TombRaiderLinuxLauncher::linkClicked()
 {
@@ -426,105 +297,9 @@ void TombRaiderLinuxLauncher::linkClicked()
     }
 }
 
-
-size_t TombRaiderLinuxLauncher::write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+void TombRaiderLinuxLauncher::downloadClicked()
 {
-    size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
-    return written;
 }
-
-size_t TombRaiderLinuxLauncher::downloadFile(const char* url, const char* filename)
-{
-    CURL *curl_handle;
-    static const char *pagefilename = filename;
-    FILE *pagefile;
-    if (filename[0] == '/')
-    {
-        curl_global_init(CURL_GLOBAL_ALL);
-
-        /* init the curl session */
-        curl_handle = curl_easy_init();
-
-        /* set URL to get here */
-        curl_easy_setopt(curl_handle, CURLOPT_URL, url);
-
-        /* Switch on full protocol/debug output while testing */
-        curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
-
-        /* disable progress meter, set to 0L to enable it */
-        curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
-
-        /* send all data to this function  */
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
-
-        /* open the file */
-        pagefile = fopen(pagefilename, "wb");
-        if(pagefile) {
-
-            /* write the page body to this file handle */
-            curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
-
-            /* get it! */
-            curl_easy_perform(curl_handle);
-
-            /* close the header file */
-            fclose(pagefile);
-        }
-        /* cleanup curl stuff */
-        curl_easy_cleanup(curl_handle);
-        curl_global_cleanup();
-    }
-    return 0;
-}
-
-
-void TombRaiderLinuxLauncher::extractZip(const QString& zipFilename, const QString& extractPath)
-{
-    QuaZip zip(zipFilename);
-    if (!zip.open(QuaZip::mdUnzip))
-    {
-        std::cerr << "Error opening ZIP file" << std::endl;
-        return;
-    }
-
-    QuaZipFileInfo info;
-    QuaZipFile file(&zip);
-
-    for (bool more = zip.goToFirstFile(); more; more = zip.goToNextFile())
-    {
-        if (zip.getCurrentFileInfo(&info) && file.open(QIODevice::ReadOnly))
-        {
-            QByteArray data = file.readAll();
-            file.close();
-
-            // Create directories if they don't exist
-            QString filePath = extractPath + QDir::separator() + info.name;
-            QString directory = filePath.left(filePath.lastIndexOf(QDir::separator()));
-
-            QDir().mkpath(directory);
-
-            // Create a new file on disk and write the data
-            QFile outFile(filePath);
-            if (outFile.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
-            {
-                outFile.write(data);
-                outFile.close();
-            }
-            else
-            {
-                std::cerr << "Error opening file for writing: " << filePath.toStdString() << std::endl;
-            }
-        }
-        else
-        {
-            std::cerr << "Error reading file info from ZIP archive" << std::endl;
-        }
-    }
-
-    zip.close();
-}
-
-
 
 TombRaiderLinuxLauncher::~TombRaiderLinuxLauncher()
 {

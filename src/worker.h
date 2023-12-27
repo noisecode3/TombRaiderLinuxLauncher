@@ -1,11 +1,254 @@
-#pragma once
-#include "files.h"
-#include "leveldata.h"
-//it should be put in a database, it's terrible to have this here, test data
+#ifndef FILES_H
+#define FILES_H
+#include "network.h"
+#include "quazip/quazip.h"
+#include "quazip/quazipfile.h"
 
-gameFileList TR3FileList ("TR3.Original");
-void TR3FileListWork()
+
+
+#include <QCoreApplication>
+#include <QThread>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QDebug>
+#include <QStandardPaths>
+#include <QDirIterator>
+#include <QDir>
+#include <QFileInfo>
+#include <QFile>
+#include <QCryptographicHash>
+#include <QStringList>
+#include <QDebug>
+#include <QString>
+#include <vector>
+#include <algorithm>
+class file
 {
+public:
+    file(const QString md5sum, const QString path)
+        :  md5sum(md5sum), path(path) {}
+    const QString& getPath() const { return path; }
+    const QString& getMd5sum() const { return md5sum; }
+private:
+    const QString md5sum;
+    const QString path; //path + name
+};
+
+class gameFileList
+{
+public:
+    gameFileList() {}
+    gameFileList(const QString name) : name(name) {}
+    const QString getMd5sum(QString& path)
+    {
+        auto it = std::find_if(list.begin(), list.end(),
+            [&path](const file& obj) { return obj.getPath() == path; });
+        if (it != list.end())
+            return it->getMd5sum();
+        return "";
+    }
+    size_t getIndex(QString path)
+    {
+        auto it = std::find_if(list.begin(), list.end(),
+            [&path](const file& obj) { return obj.getPath() == path; });
+        if (it != list.end())
+            return std::distance(list.begin(), it);
+        else
+            return 0;
+    }
+    size_t getSize()
+    {
+        return list.size();
+    }
+    void addFile(const QString path, const QString md5sum)
+    {
+        list.push_back(file(path,md5sum));
+    }
+    file getFile(size_t index)
+    {
+        return list.at(index);
+    }
+private:
+    const QString name;
+    std::vector<file> list;
+};
+
+
+
+#include <QFile>
+#include <string>
+
+/* 
+ * trle.net level info data
+ * The data needed for the offline part of the client
+ * I don't think we should bother the server and its faster
+ * It there will be to many pictures or over 10 games I can
+ * move the pictures to some other download, but they are for
+ * testing now. The id number will be used at end of every URL
+ *
+ */
+struct folderNames
+{
+    const QString TR1 = "/Tomb Raider (I)";
+    const QString TR2 = "/Tomb Raider (II)";
+    const QString TR3 = "/TombRaider (III)";
+    const QString TR4 = "/Tomb Raider (IV) The Last Revelation";
+    const QString TR5 = "/Tomb Raider (V) Chronicles";
+};
+class leveldata
+{
+private:
+    const int id;
+    const std::string zipMd5sum;
+public:
+    leveldata(const int id, const std::string md5sum)
+    : id(id), zipMd5sum(md5sum)  {}
+    const std::string& getZipMd5sum() const { return zipMd5sum; }
+    const int& getId() const { return id; }
+    
+    const std::string& getTitle() const { return title; }
+    void setTitle(const std::string& s) { title = s; }
+
+    const std::string& getAuthor() const { return author; }
+    void setAuthor(const std::string& s) { author = s; }
+
+    const std::string& getType() const { return type; }
+    void setType(const std::string& s) { type = s; }
+
+    const std::string& getLevelclass() const { return levelclass; }
+    void setLevelclass(const std::string& s) { levelclass = s; }
+
+    const std::string& getReleasedate() const { return releasedate; }
+    void setReleasedate(const std::string& s) { releasedate = s; }
+
+    const std::string& getDifficulty() const { return difficulty; }
+    void setDifficulty(const std::string& s) { difficulty = s; }
+
+    const std::string& getDuration() const { return duration; }
+    void setDuration(const std::string& s) { duration = s; }
+
+    const std::string& getScreensLarge() const { return screensLarge; }
+    void setScreensLarge(const std::string& s) { screensLarge = s; }
+
+    const std::string& getScreen() const { return screen; }
+    void setScreen(const std::string& s) { screen = s; }
+
+    const std::string& getBody() const { return body; }
+    void setBody(const std::string& s) { body = s; }
+
+    const std::string& getWalkthrough() const { return walkthrough; }
+    void setWalkthrough(const std::string& s) { walkthrough = s; }
+
+    const float& getZipSize() const { return zipSize; }
+    void setZipSize(const float& s) { zipSize = s; }
+
+    const std::string& getZipName() const { return zipName; }
+    void setZipName(const std::string& s) { zipName = s; }
+
+private:
+    std::string title;
+    std::string author;
+    std::string type; // like TR4
+    std::string levelclass;
+    std::string releasedate;
+    std::string difficulty;
+    std::string duration;
+    std::string screen;
+    std::string screensLarge; // separated by ,
+    std::string body; //html
+    std::string walkthrough; //html
+    float zipSize;
+    std::string zipName;
+};
+/*
+ *
+ *
+ */
+class pool
+{
+public:
+    const std::string levelUrl = "https://www.trle.net/sc/levelfeatures.php?lid={id}";
+    const std::string walkthroughUrl = "https://www.trle.net/sc/Levelwalk.php?lid={id}";
+    const std::string screensUrl = "https://www.trle.net/screens/{id}.jpg";
+    const std::string screensLargeUrl = "https://www.trle.net/screens/large/{id}[a-z].jpg";
+    const std::string downloadUrl = "https://www.trle.net/levels/levels/{year}/{id}/{zipName}";
+
+    void setName(const QString newName) { name.push_back(newName); }
+    void setFileList(const gameFileList& newFileList) { fileList.push_back(newFileList); }
+    void setData(const leveldata& newData) { data.push_back(newData); }
+    int getSize() const { return name.size(); }
+    const gameFileList& getFileList(int index) const { return fileList[index]; }
+    const gameFileList& getFileList(const QString& gameName) const
+    {
+        int index = name.indexOf(gameName);
+        return fileList[index];
+    }
+    const leveldata& getLevelData(int index) const { return data[index]; }
+    const leveldata& getLevelData(const QString& gameName) const
+    {
+        int index = name.indexOf(gameName);
+        return data[index];
+    }
+
+private:
+    QStringList name;
+    std::vector<gameFileList> fileList;
+    std::vector<leveldata> data;
+
+
+};
+
+   /* 
+    QCoreApplication a(argc, argv);
+
+    // Add SQLite database driver
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+
+    // Set the database name and file mode (ReadOnly)
+    db.setDatabaseName("your_database_file.sqlite3");
+    db.setConnectOptions("QSQLITE_OPEN_READONLY");
+
+    // Open the database
+    if (db.open()) {
+        qDebug() << "Database opened in read-only mode.";
+
+        // Perform read-only operations here
+
+        // Close the database when done
+        db.close();
+        qDebug() << "Database closed.";
+    } else {
+        // Handle the case when the database cannot be opened
+        qDebug() << "Failed to open the database.";
+    }
+    */
+// WorkerThread class for hard drive and database operations
+    // Create an instance of the worker thread
+    // WorkerThread workerThread;
+
+    // Start the worker thread
+    // workerThread.start();
+
+    // Wait for the worker thread to finish
+    // workerThread.wait();
+
+
+
+class WorkerThread : public QThread
+{
+    Q_OBJECT
+    uint id;
+    bool original;
+    QString folderPath;
+    QString directoryPath;
+    gameFileList TR3FileList;
+    gameFileList TRLE3573FileList;
+    leveldata TRLE3573;
+public:
+    WorkerThread(uint id, bool original, QString folderPath="", QString directoryPath="")
+    : id(id), original(original), folderPath(folderPath), directoryPath(directoryPath),
+      TR3FileList("TR3.Original"), TRLE3573(3573, "152d33e5c28d7db6458975a5e53a3122")
+    {
     TR3FileList.addFile("61f1377c2123f1c971cbfbf9c7ce8faf", "DATA.TAG");
     TR3FileList.addFile("d09677d10864caa509ab2ffbd7ad37e7", "DEC130.DLL");
     TR3FileList.addFile("4ee5d4026f15c967ed3ae599885018b0", "WINPLAY.DLL");
@@ -87,12 +330,8 @@ void TR3FileListWork()
     TR3FileList.addFile("cfaa679cd484b0709c36c8324dbf0960", "support/info/Ninja.jpg");
     TR3FileList.addFile("a78b2f1ec41c1443d04592714b9ab36c", "support/info/core.jpg");
     TR3FileList.addFile("a1030488e87c0edbdfc5b8ebeba53235", "support/info/tr3logo.jpg");
-}
 
 
-gameFileList TRLE3573FileList("TR3.3573");
-void TRLE3573FileListWork()
-{
     TRLE3573FileList.addFile("f220b7353e550c8e017ab2d90fd83ae3", "/WINSDEC.DLL");
     TRLE3573FileList.addFile("8b1ad46066f4db6a035b70845671e518", "/tomb3.exe");
     TRLE3573FileList.addFile("8cae30f072ddb6abe23d4b349145428f", "/ReadmeHost.txt");
@@ -204,11 +443,7 @@ void TRLE3573FileListWork()
     TRLE3573FileList.addFile("9daadb00c31009b332195f513e04c555", "/data/Level2.tr2");
     TRLE3573FileList.addFile("54476f906908bf70d73f9ec6d00b8cf4", "/data/Level4.tr2");
     TRLE3573FileList.addFile("90e439c3da36ff390c7aa51eea01a83a", "/data/Test.tr2");
-}
 
-leveldata TRLE3573(3573, "152d33e5c28d7db6458975a5e53a3122");
-void TRLE3573work()
-{
     TRLE3573.setTitle("The Infada Cult");
     TRLE3573.setAuthor("Jonson");
     TRLE3573.setDifficulty("medium");
@@ -222,4 +457,202 @@ void TRLE3573work()
     TRLE3573.setWalkthrough("some other day...");
     TRLE3573.setZipName("Jonson-TheInfadaCult.zip");
     TRLE3573.setZipSize(255.0);
+
+    }
+    void run() override {
+        // Perform hard drive operations
+
+        if (original == true && id == 3)
+        {
+            packOriginalGame(3, folderPath, directoryPath);
+        }
+        else if (original == false && id == 3573)
+        {
+            FileDownloader downloader;
+            QUrl url("https://www.trle.net/levels/levels/2023/3573/Jonson-TheInfadaCult.zip");
+            QString localFilePath = "Jonson-TheInfadaCult.zip";
+            downloader.downloadFile(url, localFilePath);
+            //TRLE3573FileList
+            //TRLE3573
+        }
+
+
+        qDebug() << "Hard drive operation in progress...";
+
+        // Simulate hard drive operation
+        sleep(2);
+
+        // Perform database operations
+        qDebug() << "Database operation in progress...";
+
+        // Connect to the database
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName("mydatabase.db");
+
+        if (db.open()) {
+            // Simulate database operation
+            QSqlQuery query;
+            query.exec("CREATE TABLE IF NOT EXISTS mytable (id INTEGER PRIMARY KEY, name TEXT)");
+            query.exec("INSERT INTO mytable (name) VALUES ('John')");
+            qDebug() << "Database operation completed.";
+        } else {
+            qDebug() << "Failed to open the database.";
+        }
+    }
+private:
+void extractZip(const QString& zipFilename, const QString& extractPath)
+{
+    QuaZip zip(zipFilename);
+    if (!zip.open(QuaZip::mdUnzip))
+    {
+        qDebug() << "Error opening ZIP file" << Qt::endl;
+        return;
+    }
+
+    QuaZipFileInfo info;
+    QuaZipFile file(&zip);
+
+    for (bool more = zip.goToFirstFile(); more; more = zip.goToNextFile())
+    {
+        if (zip.getCurrentFileInfo(&info) && file.open(QIODevice::ReadOnly))
+        {
+            QByteArray data = file.readAll();
+            file.close();
+
+            // Create directories if they don't exist
+            QString filePath = extractPath + QDir::separator() + info.name;
+            QString directory = filePath.left(filePath.lastIndexOf(QDir::separator()));
+
+            QDir().mkpath(directory);
+
+            // Create a new file on disk and write the data
+            QFile outFile(filePath);
+            if (outFile.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
+            {
+                outFile.write(data);
+                outFile.close();
+            }
+            else
+            {
+                qDebug() << "Error opening file for writing: " << filePath << Qt::endl;
+            }
+        }
+        else
+        {
+            qDebug() << "Error reading file info from ZIP archive" << Qt::endl;
+        }
+    }
+
+        zip.close();
+    }
+
+const QString calculateMD5(const QString& filename)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Error opening file for reading: " << file.errorString();
+        return "";
+    }
+
+    QCryptographicHash md5(QCryptographicHash::Md5);
+
+    char buffer[1024];
+    qint64 bytesRead;
+
+    while ((bytesRead = file.read(buffer, sizeof(buffer))) > 0)
+    {
+        md5.addData(buffer, static_cast<int>(bytesRead));
+    }
+
+    file.close();
+
+        return QString(md5.result().toHex());
 }
+
+void packOriginalGame(int game , const QString folderPath, const QString directoryPath )
+{
+    struct folderNames folder;
+    const size_t s = TR3FileList.getSize();
+    
+
+    // Create the directory if it doesn't exist
+    if (!QDir(directoryPath).exists()) {
+        if (QDir().mkpath(directoryPath)) {
+            qDebug() << "Directory created successfully.";
+        } else {
+            qDebug() << "Error creating directory.";
+            return;
+        }
+    } else {
+        qDebug() << "Directory already exists.";
+    }
+
+    for (size_t i = 0; i < s; i++)
+    {
+        file f(TR3FileList.getFile(i));
+        const QString sourcePath = folderPath + "/" + f.getPath();
+        const QString destinationPath = directoryPath + "/" + f.getPath();
+
+        if(f.getMd5sum() == calculateMD5(sourcePath))
+        {
+            // Ensure the destination directory exists
+            const QFileInfo destinationFileInfo(destinationPath);
+            QDir destinationDir(destinationFileInfo.absolutePath());
+            if (!destinationDir.exists()) {
+                if (!QDir().mkpath(destinationDir.absolutePath())) {
+                    qDebug() << "Error creating destination directory.";
+                    return;
+                }
+            }
+
+            // Copy the file
+            if (QFile::copy(sourcePath, destinationPath))
+            {
+                qDebug() << "File copy successfully.";
+            }
+            else
+            {
+                if(QFile::exists(destinationPath))
+                {
+                    if(f.getMd5sum() == calculateMD5(destinationPath))
+                        qDebug() << "File exist";
+                }
+                else
+                {
+                    qDebug() << "Failed to copy file " << f.getPath() << Qt::endl;
+                    return;
+                }
+            }
+        }
+        else {
+            qDebug() << "Original file was modified" << Qt::endl;
+            return;
+        }
+    }
+    QDir directory(folderPath);
+
+    if (directory.exists()) {
+        // Remove the directory and its contents recursively
+        if (directory.removeRecursively()) {
+            qDebug() << "Directory removed successfully.";
+        } else {
+            qDebug() << "Error removing directory.";
+        }
+    } else {
+        qDebug() << "Directory does not exist.";
+    }
+
+    // Create a symbolic link
+    if (QFile::link(directoryPath, folderPath))
+    {
+        qDebug() << "Symbolic link created successfully.";
+    }
+    else
+    {
+        qDebug() << "Failed to create symbolic link.";
+    }
+
+}
+};
+#endif

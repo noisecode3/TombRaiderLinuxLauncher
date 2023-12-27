@@ -3,28 +3,23 @@ My mamma bakes em potatis
 """
 import os
 import hashlib
+import json
+DIRECTORY = os.path.expanduser("~") + "/.local/share/TombRaiderLinuxLauncher/Original.TR3"
+file_info = {}
 
-#DIRECTORY = os.path.expanduser("~") + "/.steam/steam/steamapps/common/TombRaider (III)/"
-DIRECTORY = os.path.expanduser("~") + "/test-TR3"
-OUTPUT = "output.h"
+for root, dirs, files in os.walk(DIRECTORY):
+    for file in files:
+        file_path = os.path.join(root, file)
 
-with open(OUTPUT, "w") as f:
-    f.write('#pragma once\n')
-    f.write('#include "files.h"\n\n')
-    f.write('gameFileList TRLE3573FileList("TR3.3573");\n')
-    f.write('void work()\n{\n')
+        if file_path.startswith(DIRECTORY):
+            relative_path = file_path[len(DIRECTORY):]
 
-    for root, dirs, files in os.walk(DIRECTORY):
-        for file in files:
-            file_path = os.path.join(root, file)
+        with open(file_path, "rb") as current_file:
+            file_content = current_file.read()
+            md5sum = hashlib.md5(file_content).hexdigest()
 
-            if file_path.startswith(DIRECTORY):
-                relative_path = file_path[len(DIRECTORY):]
+        file_info[relative_path] = md5sum
 
-            with open(file_path, "rb") as current_file:
-                file_content = current_file.read()
-                md5sum = hashlib.md5(file_content).hexdigest()
-
-            f.write(f'   TRLE3573FileList.addFile("{md5sum}", "{relative_path}");\n')
-
-    f.write('}')
+# Write the dictionary to a JSON file
+with open('file_info.json', 'w') as json_file:
+    json.dump(file_info, json_file, indent=4)

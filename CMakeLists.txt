@@ -6,16 +6,14 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets WebEngineWidgets REQUIRED)
-
-find_package(CURL REQUIRED)
-
-include_directories(include)
+find_package(Qt5 COMPONENTS Core Gui Widgets WebEngineWidgets Network Sql REQUIRED)
 
 add_subdirectory(libs/quazip)
 
 set(SOURCES
     src/main.cpp
+    src/network.h
+    src/worker.h
     src/TombRaiderLinuxLauncher.cpp
     src/TombRaiderLinuxLauncher.ui
     src/resources.qrc
@@ -28,8 +26,9 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::Gui
     Qt5::Widgets
     Qt5::WebEngineWidgets
+    Qt5::Network
+    Qt5::Sql
     QuaZip
-    ${CURL_LIBRARIES}
 )
 
 
