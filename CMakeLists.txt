@@ -14,6 +14,8 @@ set(SOURCES
     src/main.cpp
     src/network.h
     src/worker.h
+    src/controller.cpp
+    src/controller.h
     src/TombRaiderLinuxLauncher.cpp
     src/TombRaiderLinuxLauncher.ui
     src/resources.qrc

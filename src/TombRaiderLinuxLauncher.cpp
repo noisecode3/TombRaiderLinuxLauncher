@@ -124,6 +124,7 @@ void TombRaiderLinuxLauncher::checkCommonFiles()
             if (result == QMessageBox::Yes) {
                 qDebug() << "User clicked Yes.";
                 WorkerThread packOriginalGame(3, true, settings.value("gamePath").toString() + folder.TR3, settings.value("levelPath").toString() + "/Original.TR3");
+                packOriginalGame.run();
 
 
             } else {

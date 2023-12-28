@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSettings>
+//#include "controller.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
