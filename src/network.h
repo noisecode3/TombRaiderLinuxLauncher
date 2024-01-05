@@ -6,11 +6,24 @@
 #include <QFile>
 #include <QDebug>
 
+/**
+ * //Example usage
+ * FileDownloader downloader;
+ * QUrl url("https://example.com/sample.txt");
+ * QString localFilePath = "downloaded_file.txt";
+ * downloader.downloadFile(url, localFilePath);
+ */
 class FileDownloader : public QObject
 {
     Q_OBJECT
 public:
+    /**
+     * 
+     */
     explicit FileDownloader(QObject *parent = nullptr) : QObject(parent) {}
+    /**
+     * 
+     */
     void downloadFile(const QUrl &url, const QString &localFilePath)
     {
         // Create a QNetworkAccessManager
@@ -39,6 +52,9 @@ public:
         });
     }
 private:
+    /**
+     * 
+     */
     void saveToFile(QIODevice *data, const QString &filePath)
     {
         // Open the local file for writing
@@ -50,15 +66,3 @@ private:
         }
     }
 };
-
-
-
-
-/**Example usage**********************************
- *
- * FileDownloader downloader;
- * QUrl url("https://example.com/sample.txt");
- * QString localFilePath = "downloaded_file.txt";
- * downloader.downloadFile(url, localFilePath);
- *************************************************/
-

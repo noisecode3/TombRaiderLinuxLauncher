@@ -11,12 +11,6 @@
 #include "worker.h"
 #include "ui_TombRaiderLinuxLauncher.h"
 
-/*
- *
- *
- *
- *
- */
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::TombRaiderLinuxLauncher)
@@ -41,14 +35,10 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
 }
 /*
- * 0 Game dose not exist.
- * 1 The path is a symbolic link.
- * 2 The path is not a symbolic link.
- * 3 value 3:The path is not a directory.
  */
 int TombRaiderLinuxLauncher::checkGameDirectory(int game)
 {
-    struct folderNames folder;
+    struct FolderNames folder;
     QString name;
     switch (game)
     {
@@ -104,7 +94,7 @@ int TombRaiderLinuxLauncher::checkGameDirectory(int game)
 void TombRaiderLinuxLauncher::checkCommonFiles()
 {
     int dirStaus = checkGameDirectory(TR3); // we only setup tr3 for now
-    folderNames folder;
+    FolderNames folder;
     if (dirStaus)
     {
         if(dirStaus == 1)// The path is a symbolic link.
@@ -256,7 +246,7 @@ void TombRaiderLinuxLauncher::setOptionsClicked()
 
 void TombRaiderLinuxLauncher::linkClicked()
 {
-    struct folderNames folder;
+    struct FolderNames folder;
     const QString gamePath = settings.value("gamePath").toString() + folder.TR3;
     qDebug() << "Read game path value:" << gamePath;
     const QString levelPath = settings.value("levelPath").toString();

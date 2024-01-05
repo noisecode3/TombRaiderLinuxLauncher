@@ -3,9 +3,6 @@
 #include "network.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
-
-
-
 #include <QCoreApplication>
 #include <QThread>
 #include <QSqlDatabase>
@@ -20,74 +17,96 @@
 #include <QStringList>
 #include <QDebug>
 #include <QString>
-#include <vector>
-#include <algorithm>
-class file
+class GameFileList
 {
 public:
-    file(const QString md5sum, const QString path)
-        :  md5sum(md5sum), path(path) {}
-    const QString& getPath() const { return path; }
-    const QString& getMd5sum() const { return md5sum; }
-private:
-    const QString md5sum;
-    const QString path; //path + name
-};
-
-class gameFileList
-{
-public:
-    gameFileList() {}
-    gameFileList(const QString name) : name(name) {}
+    /**
+     * @class GameFileList
+     * @brief Game List of file names and md5sum
+     * @param name Name of game release or game level
+     * @details 2 Qt lists of file names and md5sum, that share index number. \name
+     * When a file is added to the collection of lists. It makes sure the attributes share the index.
+     */
+    GameFileList() {}
+    GameFileList(const QString name) : name(name) {}
+    
+    /**
+     * @brief get md5sum based on path
+     * @param path File name relative to game directory
+     */
     const QString getMd5sum(QString& path)
     {
-        auto it = std::find_if(list.begin(), list.end(),
-            [&path](const file& obj) { return obj.getPath() == path; });
-        if (it != list.end())
-            return it->getMd5sum();
+        int index = fileList.indexOf(path);
+        if (index != -1)
+            return md5List.at(index);
         return "";
     }
-    size_t getIndex(QString path)
+    /**
+     * @brief get index form path 
+     * @param path File name relative to game directory
+     */
+    size_t getIndex(QString& path)
     {
-        auto it = std::find_if(list.begin(), list.end(),
-            [&path](const file& obj) { return obj.getPath() == path; });
-        if (it != list.end())
-            return std::distance(list.begin(), it);
-        else
-            return 0;
+        return fileList.indexOf(path);
     }
+    /**
+     * @brief get size of the index
+     */
     size_t getSize()
     {
-        return list.size();
+        return fileList.size();
     }
-    void addFile(const QString path, const QString md5sum)
+    /**
+     * @brief Adds file attributes to the list
+     * @param md5sum Recorded md5sum from the file
+     * @param path File name relative to game directory
+     * @details Adds file name and md5sum to 2 QList only return true if both gets added
+     */
+    bool addFile(const QString md5sum, const QString path)
     {
-        list.push_back(file(path,md5sum));
+        int pathSize = fileList.size();
+        fileList.append(path);
+        int md5sumSize  = md5List.size(); 
+        md5List.append(md5sum);
+        if(pathSize+1 == path.size())
+            if(md5sumSize+1 == path.size())
+                return true;
+        return false;
     }
-    file getFile(size_t index)
+    /**
+     * @brief Get filename
+     * @param index a number from 0 to size
+     * @details The filename and path from the current game directory. \n
+     * For example /tomb.exe or /pix/screen1.jpg without the dot prefix
+     */
+    const QString& getPath(int index) const
     {
-        return list.at(index);
+        if (index != -1)
+            return fileList.at(index);
+        return emptySpace;
+    }
+    /**
+     * @brief Get md5sum
+     * @details The md5sum is used for file integrity monitoring
+     */
+    const QString& getMd5sum(int index) const
+    {
+        if (index != -1)
+            return md5List.at(index);
+        return emptySpace;
     }
 private:
     const QString name;
-    std::vector<file> list;
+    QList<QString> fileList;
+    QList<QString> md5List;
+    const QString emptySpace = "";
 };
-
-
-
-#include <QFile>
-#include <string>
-
-/* 
- * trle.net level info data
- * The data needed for the offline part of the client
- * I don't think we should bother the server and its faster
- * It there will be to many pictures or over 10 games I can
- * move the pictures to some other download, but they are for
- * testing now. The id number will be used at end of every URL
- *
+/**
+ * @struct FolderNames
+ * @brief Folder names game used on windows
+ * @details These names are used by steam and installed in the common folder on linux.
  */
-struct folderNames
+struct FolderNames
 {
     const QString TR1 = "/Tomb Raider (I)";
     const QString TR2 = "/Tomb Raider (II)";
@@ -95,95 +114,214 @@ struct folderNames
     const QString TR4 = "/Tomb Raider (IV) The Last Revelation";
     const QString TR5 = "/Tomb Raider (V) Chronicles";
 };
-class leveldata
+struct LevelData
 {
-private:
-    const int id;
-    const std::string zipMd5sum;
 public:
-    leveldata(const int id, const std::string md5sum)
+    /**
+     * @struct GameFileList
+     * @brief Game List of file names and md5sum
+     * @param name Name of game release or game level
+     * @details 2 Qt lists of file names and md5sum, that share index number. \name
+     * When a file is added to the collection of lists. It makes sure the attributes share the index.
+     */
+    LevelData(int id, const QString md5sum)
     : id(id), zipMd5sum(md5sum)  {}
-    const std::string& getZipMd5sum() const { return zipMd5sum; }
+    const int id;
+    const QString zipMd5sum;
+    /**
+     * 
+     */
+    const QString& getZipMd5sum() const { return zipMd5sum; }
+    /**
+     * 
+     */
     const int& getId() const { return id; }
     
-    const std::string& getTitle() const { return title; }
-    void setTitle(const std::string& s) { title = s; }
+    /**
+     * 
+     */
+    const QString& getTitle() const { return title; }
+    /**
+     * 
+     */
+    void setTitle(const QString& s) { title = s; }
 
-    const std::string& getAuthor() const { return author; }
-    void setAuthor(const std::string& s) { author = s; }
+    /**
+     * 
+     */
+    const QString& getAuthor() const { return author; }
+    /**
+     * 
+     */
+    void setAuthor(const QString& s) { author = s; }
 
-    const std::string& getType() const { return type; }
-    void setType(const std::string& s) { type = s; }
+    /**
+     * 
+     */
+    const QString& getType() const { return type; }
+    /**
+     * 
+     */
+    void setType(const QString& s) { type = s; }
 
-    const std::string& getLevelclass() const { return levelclass; }
-    void setLevelclass(const std::string& s) { levelclass = s; }
+    /**
+     * 
+     */
+    const QString& getLevelclass() const { return levelclass; }
+    /**
+     * 
+     */
+    void setLevelclass(const QString& s) { levelclass = s; }
 
-    const std::string& getReleasedate() const { return releasedate; }
-    void setReleasedate(const std::string& s) { releasedate = s; }
+    /**
+     * 
+     */
+    const QString& getReleasedate() const { return releasedate; }
+    /**
+     * 
+     */
+    void setReleasedate(const QString& s) { releasedate = s; }
 
-    const std::string& getDifficulty() const { return difficulty; }
-    void setDifficulty(const std::string& s) { difficulty = s; }
+    /**
+     * 
+     */
+    const QString& getDifficulty() const { return difficulty; }
+    /**
+     * 
+     */
+    void setDifficulty(const QString& s) { difficulty = s; }
 
-    const std::string& getDuration() const { return duration; }
-    void setDuration(const std::string& s) { duration = s; }
+    /**
+     * 
+     */
+    const QString& getDuration() const { return duration; }
+    /**
+     * 
+     */
+    void setDuration(const QString& s) { duration = s; }
 
-    const std::string& getScreensLarge() const { return screensLarge; }
-    void setScreensLarge(const std::string& s) { screensLarge = s; }
+    /**
+     * 
+     */
+    const QString& getScreensLarge() const { return screensLarge; }
+    /**
+     * 
+     */
+    void setScreensLarge(const QString& s) { screensLarge = s; }
 
-    const std::string& getScreen() const { return screen; }
-    void setScreen(const std::string& s) { screen = s; }
+    /**
+     * 
+     */
+    const QString& getScreen() const { return screen; }
+    /**
+     * 
+     */
+    void setScreen(const QString& s) { screen = s; }
 
-    const std::string& getBody() const { return body; }
-    void setBody(const std::string& s) { body = s; }
+    /**
+     * 
+     */
+    const QString& getBody() const { return body; }
+    /**
+     * 
+     */
+    void setBody(const QString& s) { body = s; }
 
-    const std::string& getWalkthrough() const { return walkthrough; }
-    void setWalkthrough(const std::string& s) { walkthrough = s; }
+    /**
+     * 
+     */
+    const QString& getWalkthrough() const { return walkthrough; }
+    /**
+     * 
+     */
+    void setWalkthrough(const QString& s) { walkthrough = s; }
 
+    /**
+     * 
+     */
     const float& getZipSize() const { return zipSize; }
+    /**
+     * 
+     */
     void setZipSize(const float& s) { zipSize = s; }
 
-    const std::string& getZipName() const { return zipName; }
-    void setZipName(const std::string& s) { zipName = s; }
+    /**
+     * 
+     */
+    const QString& getZipName() const { return zipName; }
+    /**
+     * 
+     */
+    void setZipName(const QString& s) { zipName = s; }
 
 private:
-    std::string title;
-    std::string author;
-    std::string type; // like TR4
-    std::string levelclass;
-    std::string releasedate;
-    std::string difficulty;
-    std::string duration;
-    std::string screen;
-    std::string screensLarge; // separated by ,
-    std::string body; //html
-    std::string walkthrough; //html
+    QString title;
+    QString author;
+    QString type; // like TR4
+    QString levelclass;
+    QString releasedate;
+    QString difficulty;
+    QString duration;
+    QString screen;
+    QString screensLarge; // separated by ,
+    QString body; //html
+    QString walkthrough; //html
     float zipSize;
-    std::string zipName;
+    QString zipName;
 };
-/*
+
+/**
  *
  *
  */
+/*
 class pool
 {
 public:
-    const std::string levelUrl = "https://www.trle.net/sc/levelfeatures.php?lid={id}";
-    const std::string walkthroughUrl = "https://www.trle.net/sc/Levelwalk.php?lid={id}";
-    const std::string screensUrl = "https://www.trle.net/screens/{id}.jpg";
-    const std::string screensLargeUrl = "https://www.trle.net/screens/large/{id}[a-z].jpg";
-    const std::string downloadUrl = "https://www.trle.net/levels/levels/{year}/{id}/{zipName}";
+    const QString levelUrl = "https://www.trle.net/sc/levelfeatures.php?lid={id}";
+    const QString walkthroughUrl = "https://www.trle.net/sc/Levelwalk.php?lid={id}";
+    const QString screensUrl = "https://www.trle.net/screens/{id}.jpg";
+    const QString screensLargeUrl = "https://www.trle.net/screens/large/{id}[a-z].jpg";
+    const QString downloadUrl = "https://www.trle.net/levels/levels/{year}/{id}/{zipName}";
 
-    void setName(const QString newName) { name.push_back(newName); }
-    void setFileList(const gameFileList& newFileList) { fileList.push_back(newFileList); }
-    void setData(const leveldata& newData) { data.push_back(newData); }
-    int getSize() const { return name.size(); }
-    const gameFileList& getFileList(int index) const { return fileList[index]; }
-    const gameFileList& getFileList(const QString& gameName) const
+    /**
+     * 
+     */
+    //void setName(const QString newName) { name.push_back(newName); }
+    /**
+     * 
+     */
+    //void setFileList(const gameFileList& newFileList) { fileList.push_back(newFileList); }
+    /**
+     * 
+     */
+    //void setData(const leveldata& newData) { data.push_back(newData); }
+    /**
+     * 
+     */
+    //int getSize() const { return name.size(); }
+    /**
+     * 
+     */
+    //const gameFileList& getFileList(int index) const { return fileList[index]; }
+    /**
+     * 
+     */
+    //const gameFileList& getFileList(const QString& gameName) const
+    /*
     {
         int index = name.indexOf(gameName);
         return fileList[index];
     }
-    const leveldata& getLevelData(int index) const { return data[index]; }
+    */
+    /**
+     * 
+     */
+    //const leveldata& getLevelData(int index) const { return data[index]; }
+    /**
+     * 
+     */
+    /*
     const leveldata& getLevelData(const QString& gameName) const
     {
         int index = name.indexOf(gameName);
@@ -192,11 +330,13 @@ public:
 
 private:
     QStringList name;
-    std::vector<gameFileList> fileList;
-    std::vector<leveldata> data;
+    QList<gameFileList> fileList;
+    QList<leveldata> data;
 
 
 };
+
+*/
 
    /* 
     QCoreApplication a(argc, argv);
@@ -232,8 +372,8 @@ private:
     // Wait for the worker thread to finish
     // workerThread.wait();
 
-
-
+/**
+ */
 class WorkerThread : public QThread
 {
     Q_OBJECT
@@ -241,10 +381,13 @@ class WorkerThread : public QThread
     bool original;
     QString folderPath;
     QString directoryPath;
-    gameFileList TR3FileList;
-    gameFileList TRLE3573FileList;
-    leveldata TRLE3573;
+    GameFileList TR3FileList;
+    GameFileList TRLE3573FileList;
+    LevelData TRLE3573;
 public:
+    /**
+     * 
+     */
     WorkerThread(uint id, bool original, QString folderPath="", QString directoryPath="")
     : id(id), original(original), folderPath(folderPath), directoryPath(directoryPath),
       TR3FileList("TR3.Original"), TRLE3573(3573, "152d33e5c28d7db6458975a5e53a3122")
@@ -457,6 +600,9 @@ public:
         TRLE3573.setZipName("Jonson-TheInfadaCult.zip");
         TRLE3573.setZipSize(255.0);
     }
+    /**
+     * 
+     */
     void run() override {
         // Perform hard drive operations
 
@@ -499,6 +645,9 @@ public:
         */
     }
 private:
+    /**
+     * 
+     */
     void extractZip(const QString& zipFilename, const QString& extractPath)
     {
         QuaZip zip(zipFilename);
@@ -543,7 +692,9 @@ private:
         }
         zip.close();
     }
-
+    /**
+     * 
+     */
     const QString calculateMD5(const QString& filename)
     {
         QFile file(filename);
@@ -566,10 +717,11 @@ private:
         file.close();
         return QString(md5.result().toHex());
     }
-
+    /**
+     * 
+     */
     void packOriginalGame(int game , const QString folderPath, const QString directoryPath )
     {
-        struct folderNames folder;
         const size_t s = TR3FileList.getSize();
     
 
@@ -593,12 +745,13 @@ private:
 
         for (size_t i = 0; i < s; i++)
         {
-            file f(TR3FileList.getFile(i));
-            const QString sourcePath = folderPath + "/" + f.getPath();
-            const QString destinationPath = directoryPath + "/" + f.getPath();
+            const QString fMd5sum = TR3FileList.getMd5sum(i);
+            const QString fPath = TR3FileList.getPath(i);
+            const QString sourcePath = folderPath + "/" + fPath;
+            const QString destinationPath = directoryPath + "/" + fPath;
 
             const QString  calculated = calculateMD5(sourcePath);
-            if(f.getMd5sum() == calculated)
+            if(fMd5sum == calculated)
             {
                 // Ensure the destination directory exists
                 const QFileInfo destinationFileInfo(destinationPath);
@@ -621,20 +774,20 @@ private:
                 {
                     if(QFile::exists(destinationPath))
                     {
-                        if(f.getMd5sum() == calculateMD5(destinationPath))
+                        if(fMd5sum == calculateMD5(destinationPath))
                             qDebug() << "File exist";
                     }
                     else
                     {
-                        qDebug() << "Failed to copy file " << f.getPath() << Qt::endl;
+                        qDebug() << "Failed to copy file " << fPath << Qt::endl;
                         return;
                     }
                 }
             }
             else
             {
-                qDebug() << "Original file was modified, had" << f.getMd5sum()
-                    << " got " << calculated << " for file " << f.getPath() << Qt::endl;
+                qDebug() << "Original file was modified, had" << fMd5sum
+                    << " got " << calculated << " for file " << fPath << Qt::endl;
                 QDir directory(directoryPath);
                 if (directory.exists())
                 {
