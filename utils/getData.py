@@ -1,5 +1,5 @@
 """
-X-files
+Grab raw data from trle.net and put it in a data.json file
 """
 import os
 import sys
@@ -40,9 +40,9 @@ if response.status_code == 200:
         or "missing"
     type = soup.find('td', string='file type:').find_next('td').get_text(strip=True) \
         or "missing"
-    levelclass = soup.find('td', string='class:').find_next('td').get_text(strip=True) \
+    class_ = soup.find('td', string='class:').find_next('td').get_text(strip=True) \
         or "missing"
-    releasedate = soup.find('td', string='release date:').find_next('td').get_text(strip=True) \
+    releaseDate = soup.find('td', string='release date:').find_next('td').get_text(strip=True) \
         or "missing"
     difficulty = soup.find('td', string='difficulty:').find_next('td').get_text(strip=True) \
         or "missing"
@@ -53,8 +53,13 @@ if response.status_code == 200:
         body = specific_tags[1]
     else:
         body = "missing"
-    zipFileSize = float(soup.find('td', string='file size:').find_next('td').get_text(strip=True).replace('MB', '')) \
-        or 0.0
+
+    zipFileSize = float(
+        soup.find('td', string='file size:')
+        .find_next('td')
+        .get_text(strip=True)
+        .replace('MB', '')
+    ) or 0.0
     download_link = soup.find('a', string='Download')
     if download_link:
         url = download_link['href']
@@ -62,6 +67,7 @@ if response.status_code == 200:
         response2 = requests.head(url, allow_redirects=True)
 
         if response2.status_code == 200:
+            download_url = response2.url
             # Extract the file name from the URL
             file_name = response2.url.split('/')[-1]
             zipFileName = file_name
@@ -79,9 +85,9 @@ if response.status_code == 200:
 
         if response3.status_code == 200:
             soup2 = BeautifulSoup(response3.text, 'html.parser')
-            ifram_tag = soup2.find('iframe')
-            ifram_src = ifram_tag['src']
-            url = "https://www.trle.net" + ifram_src
+            iframe_tag = soup2.find('iframe')
+            iframe_src = iframe_tag['src']
+            url = "https://www.trle.net" + iframe_src
             response4 = requests.get(url)
             if response4.status_code == 200:
                 walkthrough = response4.text
@@ -101,30 +107,13 @@ if response.status_code == 200:
 
     screen = 'https://www.trle.net' + image_tag['src']
 
-    # Print the results
-    """
-    print(f'Title: {title}')
-    print(f'Author: {author}')
-    print(f'Type: {type}')
-    print(f'Level Class: {levelclass}')
-    print(f'Release Date: {releasedate}')
-    print(f'Difficulty: {difficulty}')
-    print(f'Duration: {duration}')
-    print(f'Screen: {screen}')
-    print(f'Screens Large: {screensLarge}')
-    print(f'Zip File Size: {zipFileSize} MB')
-    print(f'Body: {body}')
-    print(f'Walkthrough: {walkthrough}')
-    print(f'Zip File Name: {zipFileName}')
-    print(f'Zip File Name: {zipFileMd5}')
-    """
     # Create a dictionary with your variables
     data = {
         "title": title,
         "author": author,
         "type": type,
-        "levelclass": levelclass,
-        "releasedate": releasedate,
+        "class_": class_,
+        "releaseDate": releaseDate,
         "difficulty": difficulty,
         "duration": duration,
         "screen": screen,
@@ -133,7 +122,8 @@ if response.status_code == 200:
         "zipFileName": zipFileName,
         "zipFileMd5": zipFileMd5,
         "body": body,
-        "walkthrough": walkthrough
+        "walkthrough": walkthrough,
+        "download_url": download_url,
     }
     if body:
         data["body"] = str(body)

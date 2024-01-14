@@ -1,6 +1,8 @@
 #ifndef FILES_H
 #define FILES_H
 #include "network.h"
+#include "qicon.h"
+#include "qpixmap.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 #include <QCoreApplication>
@@ -17,6 +19,7 @@
 #include <QStringList>
 #include <QDebug>
 #include <QString>
+#include <QSqlError>
 class GameFileList
 {
 public:
@@ -64,12 +67,12 @@ public:
      */
     bool addFile(const QString md5sum, const QString path)
     {
-        int pathSize = fileList.size();
+        int fileListSize = fileList.size();
         fileList.append(path);
         int md5sumSize  = md5List.size(); 
         md5List.append(md5sum);
-        if(pathSize+1 == path.size())
-            if(md5sumSize+1 == path.size())
+        if(fileListSize+1 == fileListSize)
+            if(md5sumSize+1 == md5sumSize)
                 return true;
         return false;
     }
@@ -114,167 +117,105 @@ struct FolderNames
     const QString TR4 = "/Tomb Raider (IV) The Last Revelation";
     const QString TR5 = "/Tomb Raider (V) Chronicles";
 };
-struct LevelData
+
+struct PictureData
 {
-public:
     /**
-     * @struct GameFileList
-     * @brief Game List of file names and md5sum
-     * @param name Name of game release or game level
-     * @details 2 Qt lists of file names and md5sum, that share index number. \name
-     * When a file is added to the collection of lists. It makes sure the attributes share the index.
+     * @struct PictureData
+     * @brief
+     * @param
+     * @details
      */
-    LevelData(int id, const QString md5sum)
-    : id(id), zipMd5sum(md5sum)  {}
-    const int id;
-    const QString zipMd5sum;
-    /**
-     * 
-     */
-    const QString& getZipMd5sum() const { return zipMd5sum; }
-    /**
-     * 
-     */
-    const int& getId() const { return id; }
-    
-    /**
-     * 
-     */
-    const QString& getTitle() const { return title; }
-    /**
-     * 
-     */
-    void setTitle(const QString& s) { title = s; }
+    PictureData( QString name, QByteArray imageData ):
+        name(name)
+    {
+        QPixmap pixmap;
+        pixmap.loadFromData(imageData, "JPG");
+        QIcon data(pixmap);
+    }
+    QString name;
+    QIcon data;
+};
 
+struct ZipData
+{
     /**
-     * 
+     * @struct ZipData
+     * @brief
+     * @param
+     * @details
      */
-    const QString& getAuthor() const { return author; }
-    /**
-     * 
-     */
-    void setAuthor(const QString& s) { author = s; }
+    ZipData( QString zipName, float zipSize, QString md5sum ):
+        name(zipName),
+        megabyteSize(zipSize),
+        md5sum(md5sum)
+    {}
+    QString name;
+    float megabyteSize;
+    QString md5sum;
+};
 
+struct InfoData
+{
     /**
-     * 
+     * @struct InfoData
+     * @brief
+     * @param
+     * @details
      */
-    const QString& getType() const { return type; }
-    /**
-     * 
-     */
-    void setType(const QString& s) { type = s; }
-
-    /**
-     * 
-     */
-    const QString& getLevelclass() const { return levelclass; }
-    /**
-     * 
-     */
-    void setLevelclass(const QString& s) { levelclass = s; }
-
-    /**
-     * 
-     */
-    const QString& getReleasedate() const { return releasedate; }
-    /**
-     * 
-     */
-    void setReleasedate(const QString& s) { releasedate = s; }
-
-    /**
-     * 
-     */
-    const QString& getDifficulty() const { return difficulty; }
-    /**
-     * 
-     */
-    void setDifficulty(const QString& s) { difficulty = s; }
-
-    /**
-     * 
-     */
-    const QString& getDuration() const { return duration; }
-    /**
-     * 
-     */
-    void setDuration(const QString& s) { duration = s; }
-
-    /**
-     * 
-     */
-    const QString& getScreensLarge() const { return screensLarge; }
-    /**
-     * 
-     */
-    void setScreensLarge(const QString& s) { screensLarge = s; }
-
-    /**
-     * 
-     */
-    const QString& getScreen() const { return screen; }
-    /**
-     * 
-     */
-    void setScreen(const QString& s) { screen = s; }
-
-    /**
-     * 
-     */
-    const QString& getBody() const { return body; }
-    /**
-     * 
-     */
-    void setBody(const QString& s) { body = s; }
-
-    /**
-     * 
-     */
-    const QString& getWalkthrough() const { return walkthrough; }
-    /**
-     * 
-     */
-    void setWalkthrough(const QString& s) { walkthrough = s; }
-
-    /**
-     * 
-     */
-    const float& getZipSize() const { return zipSize; }
-    /**
-     * 
-     */
-    void setZipSize(const float& s) { zipSize = s; }
-
-    /**
-     * 
-     */
-    const QString& getZipName() const { return zipName; }
-    /**
-     * 
-     */
-    void setZipName(const QString& s) { zipName = s; }
-
-private:
+    InfoData( QString title, QString author, QString type,
+              QString class_, QString releaseDate, QString difficulty,
+              QString duration ):
+        title(title),
+        author(author),
+        type(type),
+        class_(class_),
+        releaseDate(releaseDate),
+        difficulty(difficulty),
+        duration(duration)
+    {}
     QString title;
     QString author;
     QString type; // like TR4
-    QString levelclass;
-    QString releasedate;
+    QString class_;
+    QString releaseDate;
     QString difficulty;
     QString duration;
+};
+
+struct LevelData
+{
+    /**
+     * @struct LevelData
+     * @brief Game List of file names and md5sum
+     * @param name Name of game release or game level
+     * @details
+     */
+    LevelData(
+        InfoData info,
+        ZipData zip,
+        PictureData picture,
+        QString screen,
+        QString screenLarge,
+        QString body,
+        QString walkthrough ):
+        info(info),
+        zip(zip),
+        picture(picture),
+        screen(screen),
+        screensLarge(screenLarge),
+        body(body),
+        walkthrough(walkthrough)
+    {}
+    InfoData info;
+    ZipData zip;
+    PictureData picture;
     QString screen;
     QString screensLarge; // separated by ,
     QString body; //html
     QString walkthrough; //html
-    float zipSize;
-    QString zipName;
 };
 
-/**
- *
- *
- */
-/*
 class pool
 {
 public:
@@ -283,85 +224,76 @@ public:
     const QString screensUrl = "https://www.trle.net/screens/{id}.jpg";
     const QString screensLargeUrl = "https://www.trle.net/screens/large/{id}[a-z].jpg";
     const QString downloadUrl = "https://www.trle.net/levels/levels/{year}/{id}/{zipName}";
+/**
+ *
+ *
+ *
+ */
+    pool(const QString path)
+    {
+        // Add SQLite database driver
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
-    /**
-     * 
-     */
-    //void setName(const QString newName) { name.push_back(newName); }
-    /**
-     * 
-     */
-    //void setFileList(const gameFileList& newFileList) { fileList.push_back(newFileList); }
-    /**
-     * 
-     */
-    //void setData(const leveldata& newData) { data.push_back(newData); }
-    /**
-     * 
-     */
-    //int getSize() const { return name.size(); }
-    /**
-     * 
-     */
-    //const gameFileList& getFileList(int index) const { return fileList[index]; }
-    /**
-     * 
-     */
-    //const gameFileList& getFileList(const QString& gameName) const
-    /*
-    {
-        int index = name.indexOf(gameName);
-        return fileList[index];
+        // Set the database name and file mode (ReadOnly)
+        db.setDatabaseName(path+"/tombll.db");
+        db.setConnectOptions("QSQLITE_OPEN_READONLY");
+
+        // Open the database
+        if (db.open()) {
+            qDebug() << "Database opened in read-only mode.";
+
+            QSqlQuery query;
+            query.prepare("SELECT Level.*, Info.*, Zip.*, Picture.* "
+                          "FROM Level "
+                          "JOIN Info ON Level.infoID = Info.InfoID "
+                          "JOIN Zip ON Level.zipID = Zip.ZipID "
+                          "JOIN Picture ON Level.pictureID = Picture.PictureID "
+                          "WHERE Level.LevelID = :id");
+            query.bindValue(":id", 1); // Set the ID
+
+            // Execute the query
+            if (query.exec()) {
+                // Iterate over the result set
+                while (query.next()) {
+                    InfoData info(
+                        query.value("Info.title").toString(),
+                        query.value("Info.author").toString(),
+                        query.value("Info.release").toString(),
+                        query.value("Info.difficulty").toString(),
+                        query.value("Info.duration").toString(),
+                        query.value("Info.type").toString(),
+                        query.value("Info.class").toString());
+
+                    // Extract data from Zip table
+                    ZipData zip(
+                        query.value("Zip.name").toString(),
+                        query.value("Zip.size").toFloat(),
+                        query.value("Zip.md5sum").toString());
+
+                    // Extract data from Picture table
+                    // Assuming PictureData is a class with a constructor that takes name and data
+                    PictureData picture(query.value("Picture.name").toString(), query.value("Picture.data").toByteArray());
+
+                    data.push_back(
+                        LevelData(info, zip, picture, QString(""), QString(""), QString(""), QString(""))
+                        );
+                }
+            } else {
+                qDebug() << "Error executing query:" << query.lastError().text();
+            }
+            // Close the database when done
+            db.close();
+            qDebug() << "Database closed.";
+        } else {
+            // Handle the case when the database cannot be opened
+            qDebug() << "Failed to open the database.";
+        }
     }
-    */
-    /**
-     * 
-     */
-    //const leveldata& getLevelData(int index) const { return data[index]; }
-    /**
-     * 
-     */
-    /*
-    const leveldata& getLevelData(const QString& gameName) const
-    {
-        int index = name.indexOf(gameName);
-        return data[index];
-    }
+
 
 private:
-    QStringList name;
-    QList<gameFileList> fileList;
-    QList<leveldata> data;
-
-
+    QList<LevelData> data;
 };
-
-*/
-
-   /* 
-    QCoreApplication a(argc, argv);
-
-    // Add SQLite database driver
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-
-    // Set the database name and file mode (ReadOnly)
-    db.setDatabaseName("your_database_file.sqlite3");
-    db.setConnectOptions("QSQLITE_OPEN_READONLY");
-
-    // Open the database
-    if (db.open()) {
-        qDebug() << "Database opened in read-only mode.";
-
-        // Perform read-only operations here
-
-        // Close the database when done
-        db.close();
-        qDebug() << "Database closed.";
-    } else {
-        // Handle the case when the database cannot be opened
-        qDebug() << "Failed to open the database.";
-    }
-    */
 // WorkerThread class for hard drive and database operations
     // Create an instance of the worker thread
     // WorkerThread workerThread;
@@ -372,8 +304,6 @@ private:
     // Wait for the worker thread to finish
     // workerThread.wait();
 
-/**
- */
 class WorkerThread : public QThread
 {
     Q_OBJECT
@@ -381,16 +311,14 @@ class WorkerThread : public QThread
     bool original;
     QString folderPath;
     QString directoryPath;
-    GameFileList TR3FileList;
-    GameFileList TRLE3573FileList;
-    LevelData TRLE3573;
+    GameFileList TR3FileList = QString("TR3.Original");
+
 public:
     /**
      * 
      */
     WorkerThread(uint id, bool original, QString folderPath="", QString directoryPath="")
-    : id(id), original(original), folderPath(folderPath), directoryPath(directoryPath),
-      TR3FileList("TR3.Original"), TRLE3573(3573, "152d33e5c28d7db6458975a5e53a3122")
+    : id(id), original(original), folderPath(folderPath), directoryPath(directoryPath)
     {
         TR3FileList.addFile("61f1377c2123f1c971cbfbf9c7ce8faf", "DATA.TAG");
         TR3FileList.addFile("d09677d10864caa509ab2ffbd7ad37e7", "DEC130.DLL");
@@ -474,131 +402,6 @@ public:
         TR3FileList.addFile("a1030488e87c0edbdfc5b8ebeba53235", "support/info/tr3logo.jpg");
 
 
-        TRLE3573FileList.addFile("f220b7353e550c8e017ab2d90fd83ae3", "/WINSDEC.DLL");
-        TRLE3573FileList.addFile("8b1ad46066f4db6a035b70845671e518", "/tomb3.exe");
-        TRLE3573FileList.addFile("8cae30f072ddb6abe23d4b349145428f", "/ReadmeHost.txt");
-        TRLE3573FileList.addFile("31269ef2475300687fd75c33e39c2062", "/WINSTR.DLL");
-        TRLE3573FileList.addFile("b8f5730d4c67260c0c1060f6c0fe88e8", "/tomb3_ConfigTool.exe");
-        TRLE3573FileList.addFile("d09677d10864caa509ab2ffbd7ad37e7", "/DEC130.DLL");
-        TRLE3573FileList.addFile("24be28857d11447aa580d39b9c1d601d", "/tomb3_ConfigTool.json");
-        TRLE3573FileList.addFile("e1cd821e799f27721edea04bc246c762", "/WINPLAY.DLL");
-        TRLE3573FileList.addFile("2400496dc550471ffde509b0f9e53aa7", "/ReadMe.pdf");
-        TRLE3573FileList.addFile("26b1f5d031c67a0b4a1832d1b4e6422c", "/EDEC.DLL");
-        TRLE3573FileList.addFile("3e5bcf084a9e69a24a6b462736b11722", "/Uninst.isu");
-        TRLE3573FileList.addFile("c89cb2b4c028b8099bef44f4ebb3fb94", "/ExtraOptions/reset all options.reg");
-        TRLE3573FileList.addFile("91ef536ce11ceca31a8c5662276b7ede", "/ExtraOptions/Lara's moveset/slide_to_run_ON.reg");
-        TRLE3573FileList.addFile("bbd248cecd6b833cf3907de747e47cb7", "/ExtraOptions/Lara's moveset/crawl_tilt_OFF.reg");
-        TRLE3573FileList.addFile("805e5aae04b982fb60a20ee3327ac0c4", "/ExtraOptions/Lara's moveset/duck_roll_ON.reg");
-        TRLE3573FileList.addFile("d0e157876fdba4d04b29b2b8847e4c14", "/ExtraOptions/Lara's moveset/crawl_tilt_ON.reg");
-        TRLE3573FileList.addFile("8a9a664f801f9da2731a15409a68a3be", "/ExtraOptions/Lara's moveset/flexible_sprint_OFF.reg");
-        TRLE3573FileList.addFile("09864d3abd224a24775204577ed08eb0", "/ExtraOptions/Lara's moveset/flexible_crawl_OFF.reg");
-        TRLE3573FileList.addFile("50b6c2d958bac000d6faac5b5b5e0c13", "/ExtraOptions/Lara's moveset/flexible_sprint_ON.reg");
-        TRLE3573FileList.addFile("ace28f2de47360fd2a3a8727d8a1e5b9", "/ExtraOptions/Lara's moveset/flexible_crawl_ON.reg");
-        TRLE3573FileList.addFile("8d28bd23f83d2fdfb49a711bafa327a8", "/ExtraOptions/Lara's moveset/duck_roll_OFF.reg");
-        TRLE3573FileList.addFile("9679b35677e5953a8ac361766818b98b", "/ExtraOptions/Lara's moveset/slide_to_run_OFF.reg");
-        TRLE3573FileList.addFile("d12c18d2b38f064f278b4393f4b89f1f", "/ExtraOptions/View/psx_fov_OFF.reg");
-        TRLE3573FileList.addFile("7a04a5952acc2b96a01f3fca0a6f1c08", "/ExtraOptions/View/psx_fov_ON.reg");
-        TRLE3573FileList.addFile("0fec096967e1eeb3547e9c9d091bc93d", "/ExtraOptions/GUI Style/bar_positions_Improved.reg");
-        TRLE3573FileList.addFile("fe1e86b1a01f237be71cdf50f96bb165", "/ExtraOptions/GUI Style/Bars_PC.reg");
-        TRLE3573FileList.addFile("3b7003f51c05a402482d0ecb98cafdad", "/ExtraOptions/GUI Style/ammo_counter_PC.reg");
-        TRLE3573FileList.addFile("5075bbdb1fa1a7a40ed6e6eceb44985f", "/ExtraOptions/GUI Style/psx_boxes_ON.reg");
-        TRLE3573FileList.addFile("5da364fe2a5f286171769a7d54abde42", "/ExtraOptions/GUI Style/psx_text_colors_ON.reg");
-        TRLE3573FileList.addFile("a99c3655a1e056fc2e18d0610a0e3cc5", "/ExtraOptions/GUI Style/bar_positions_PC.reg");
-        TRLE3573FileList.addFile("cfc266afd1c25bf2dccc5d880abbda2c", "/ExtraOptions/GUI Style/improved_poison_bar_OFF.reg");
-        TRLE3573FileList.addFile("0393df69447132c9b741c73b598c0c2a", "/ExtraOptions/GUI Style/improved_poison_bar_ON.reg");
-        TRLE3573FileList.addFile("443ac350e3e08af839843901b20b3a1d", "/ExtraOptions/GUI Style/PickupDisplay_ON.reg");
-        TRLE3573FileList.addFile("20b106bdb7c4a05f07b8b7ff49e751ce", "/ExtraOptions/GUI Style/PickupDisplay_OFF.reg");
-        TRLE3573FileList.addFile("57ea0818cca0a9dce7b99590d5e4fde9", "/ExtraOptions/GUI Style/Bars_PSX.reg");
-        TRLE3573FileList.addFile("f42c4fd8ce5bbe150c1f6bbea95f44ba", "/ExtraOptions/GUI Style/psx_boxes_OFF.reg");
-        TRLE3573FileList.addFile("c63a5b9da0343b68447a2e0454c309e4", "/ExtraOptions/GUI Style/Shadow_PSX.reg");
-        TRLE3573FileList.addFile("5b01ad5d4be935c0777d784bcbc8d278", "/ExtraOptions/GUI Style/bar_positions_PSX.reg");
-        TRLE3573FileList.addFile("f19eda36f5e97626b649b2df9cc8bad0", "/ExtraOptions/GUI Style/ammo_counter_PSX.reg");
-        TRLE3573FileList.addFile("75a4856a052357b038ec43de4f01f62a", "/ExtraOptions/GUI Style/Shadow_PC.reg");
-        TRLE3573FileList.addFile("cca4085fa0de17c54454c103ec04e742", "/ExtraOptions/GUI Style/psx_text_colors_OFF.reg");
-        TRLE3573FileList.addFile("7001c46cf9fe3f751b36e544f65c8109", "/ExtraOptions/Sound/UnderwaterMusicMute_Full.reg");
-        TRLE3573FileList.addFile("48ae12d793d8dd741b1dda57562612ae", "/ExtraOptions/Sound/UnderwaterMusicMute_Quiet.reg");
-        TRLE3573FileList.addFile("fb8af6d2ced17d3c4b1312fdf2e08e6c", "/ExtraOptions/Sound/UnderwaterMusicMute_None.reg");
-        TRLE3573FileList.addFile("b0d466d8ef363721e39a656811a33a71", "/ExtraOptions/Sound/InventoryMusicMute_Quiet.reg");
-        TRLE3573FileList.addFile("0de4c1702d041cd557c633fe86e133e0", "/ExtraOptions/Sound/InventoryMusicMute_None.reg");
-        TRLE3573FileList.addFile("015c00e0a706a767579b9744cc715b70", "/ExtraOptions/Sound/InventoryMusicMute_Full.reg");
-        TRLE3573FileList.addFile("ca2e4c3d02727f65db5ab51be6623e7b", "/ExtraOptions/Effects/improved lasers_ON.reg");
-        TRLE3573FileList.addFile("80145a877b983c60dda924ad1a4b297f", "/ExtraOptions/Effects/Sophia Rings_PSX.reg");
-        TRLE3573FileList.addFile("afabd81bfd654176497901e74c6577b7", "/ExtraOptions/Effects/improved rain_ON.reg");
-        TRLE3573FileList.addFile("d2a4536647f82eb9ce61a33cc01d01c5", "/ExtraOptions/Effects/upv_wake_ON.reg");
-        TRLE3573FileList.addFile("56ebe5afd886d41bdb4e6214377e0335", "/ExtraOptions/Effects/kayak_mist_OFF.reg");
-        TRLE3573FileList.addFile("5d41904671ea84e5d95ae20bd439771e", "/ExtraOptions/Effects/improved rain_OFF.reg");
-        TRLE3573FileList.addFile("d2312710675ad5be54675082b43dfb1b", "/ExtraOptions/Effects/Footprints_ON.reg");
-        TRLE3573FileList.addFile("f92154d0ca24c85e067c38066a598c1a", "/ExtraOptions/Effects/improved lasers_OFF.reg");
-        TRLE3573FileList.addFile("152c54fec741230680413c6fd229d82d", "/ExtraOptions/Effects/kayak_mist_ON.reg");
-        TRLE3573FileList.addFile("ef9799a0d6fe9f037a4f7639e9a3b7ef", "/ExtraOptions/Effects/Sophia Rings_PC.reg");
-        TRLE3573FileList.addFile("87be25a06c21ddd16534d9a6663901c9", "/ExtraOptions/Effects/Footprints_OFF.reg");
-        TRLE3573FileList.addFile("82d51412712f3a0ab7cb729ec9c2abdc", "/ExtraOptions/Effects/underwater dust_OFF.reg");
-        TRLE3573FileList.addFile("8e152bb8c09e3bcb9a662fa1ff347444", "/ExtraOptions/Effects/Sophia Rings_ImprovedPC.reg");
-        TRLE3573FileList.addFile("5723ebf2a2badc0429a2652d9d94f597", "/ExtraOptions/Effects/upv_wake_OFF.reg");
-        TRLE3573FileList.addFile("e8e59ead6119eb2af3746b77991f2f08", "/ExtraOptions/Effects/underwater dust_ON.reg");
-        TRLE3573FileList.addFile("4ecdb91641adf3c16f005bd802a9e333", "/ExtraOptions/misc/dozy_OFF.reg");
-        TRLE3573FileList.addFile("fc59ee21c06fd42e57fd623537eade87", "/ExtraOptions/misc/psx_crystal_sfx_ON.reg");
-        TRLE3573FileList.addFile("b0bf896fa48764a85bcbe98af4db08e7", "/ExtraOptions/misc/disable_colorkey_OFF.reg");
-        TRLE3573FileList.addFile("e68ccd528be17fc34c489630f8920c76", "/ExtraOptions/misc/disable_gamma_OFF.reg");
-        TRLE3573FileList.addFile("ca345258ca3950c953cfd7c47ea6556a", "/ExtraOptions/misc/disable_gamma_ON.reg");
-        TRLE3573FileList.addFile("6f265bcfe94f7ac609e376cfccf47108", "/ExtraOptions/misc/psx_water_color_OFF.reg");
-        TRLE3573FileList.addFile("fe253133c575a0039fc0c874949bc0fe", "/ExtraOptions/misc/psx_water_color_ON.reg");
-        TRLE3573FileList.addFile("3d0bf00136697ba33fcf3d5385bbb92b", "/ExtraOptions/misc/psx_crystal_sfx_OFF.reg");
-        TRLE3573FileList.addFile("7d105006d834d997bcfb9f4fb2558a1e", "/ExtraOptions/misc/dozy_ON.reg");
-        TRLE3573FileList.addFile("2bd25a166b921bc5cf0c608f169927a9", "/ExtraOptions/misc/disable_colorkey_ON.reg");
-        TRLE3573FileList.addFile("db3c5c1378f2b6da5619d8c8e7cff0ec", "/ExtraOptions/GUI scale/InvGuiScale_0_5.reg");
-        TRLE3573FileList.addFile("6a3bee2eabab2b916066f63f6d3278df", "/ExtraOptions/GUI scale/GameGuiScale_0_7.reg");
-        TRLE3573FileList.addFile("253688d9e4847fe0d0dff7682802ff00", "/ExtraOptions/GUI scale/InvGuiScale_2_0.reg");
-        TRLE3573FileList.addFile("62f0cecfd157cc7b7f9dfcdf7d06d990", "/ExtraOptions/GUI scale/GameGuiScale_1_5.reg");
-        TRLE3573FileList.addFile("e99c1a6ebef83f000237b3138ea060f3", "/ExtraOptions/GUI scale/InvGuiScale_0_7.reg");
-        TRLE3573FileList.addFile("f24622eff6a816d423efb9776fbc0905", "/ExtraOptions/GUI scale/InvGuiScale_1_5.reg");
-        TRLE3573FileList.addFile("add7deba55bc8c473b75c7b11a103082", "/ExtraOptions/GUI scale/InvGuiScale_1_0.reg");
-        TRLE3573FileList.addFile("b68e98ef2fea09531fa4b8a807a04dad", "/ExtraOptions/GUI scale/GameGuiScale_0_5.reg");
-        TRLE3573FileList.addFile("7b1985a180a99a984e553f8373f5e553", "/ExtraOptions/GUI scale/GameGuiScale_1_0.reg");
-        TRLE3573FileList.addFile("eeae233feea92a37ff9a08fd2d3e714d", "/ExtraOptions/GUI scale/GameGuiScale_2_0.reg");
-        TRLE3573FileList.addFile("d41d8cd98f00b204e9800998ecf8427e", "/saves/DoNotDeleteMe.txt");
-        TRLE3573FileList.addFile("b6b9558acd88d27d178f5ddd93712539", "/pix/CREDIT08.bmp");
-        TRLE3573FileList.addFile("19717be459462654588e8c04af835aa1", "/pix/CREDIT09.bmp");
-        TRLE3573FileList.addFile("d4d4f7f732b22d5663083a95a2990a8f", "/pix/CREDIT03.bmp");
-        TRLE3573FileList.addFile("3e890a03be2103e28bee9b477a614be4", "/pix/JUNGLE.bmp");
-        TRLE3573FileList.addFile("871667781ffd7b5aa62ff5d8fe200d8b", "/pix/CREDIT02.bmp");
-        TRLE3573FileList.addFile("7456ab850b9444fa622250ca70aac6d5", "/pix/HOUSE.BMP");
-        TRLE3573FileList.addFile("7a326ead2573ef384a7ed66cfe811455", "/pix/CREDIT07.bmp");
-        TRLE3573FileList.addFile("a96adc2e023c956585da49ca602cc736", "/pix/THEEND2.BMP");
-        TRLE3573FileList.addFile("5e01244292efd5a3d0778bd8c6c8206d", "/pix/CULT.BMP");
-        TRLE3573FileList.addFile("9b6ffaa5aedbadb963bd17cb5e4dddfd", "/pix/CREDIT04.bmp");
-        TRLE3573FileList.addFile("15b6a39694385b99fd4af1408914216b", "/pix/Shivaville.bmp");
-        TRLE3573FileList.addFile("fd75cb4a4dd6ac3f926c9d379fdf3e24", "/pix/THEEND.BMP");
-        TRLE3573FileList.addFile("baed7ff30d55b1988e06b67530a7babe", "/pix/CREDIT01.BMP");
-        TRLE3573FileList.addFile("92b252f2f7a15312933944edc7d73985", "/pix/TEMPLE.bmp");
-        TRLE3573FileList.addFile("4a805c7a26e8dba8f77907ffda8670fe", "/pix/LEGAL.BMP");
-        TRLE3573FileList.addFile("4ee7698bb0eb16e11e2a89b785ff6309", "/pix/TITLEUK.bmp");
-        TRLE3573FileList.addFile("57383262f0911906bed674e7cc675467", "/pix/CREDIT06.bmp");
-        TRLE3573FileList.addFile("deca815eb164646d9a1809dc28a193fb", "/pix/CREDIT05.bmp");
-        TRLE3573FileList.addFile("4268b6a03d90684c6c683138105f00ad", "/audio/cdaudio.wad");
-        TRLE3573FileList.addFile("d22b338dfd742b37bbd5db972f58fcec", "/data/HOUSE.tr2");
-        TRLE3573FileList.addFile("0be8a7cbe3ae6343c08551517da79caf", "/data/Level3.tr2");
-        TRLE3573FileList.addFile("8dabee4f0fd2721fd387a119114ef5a6", "/data/MAIN.SFX");
-        TRLE3573FileList.addFile("8ed418451486f9528cf3432c85fb4280", "/data/tombpc.dat");
-        TRLE3573FileList.addFile("6975ec26d2eb0f424d52357a9518a4de", "/data/Level1.tr2");
-        TRLE3573FileList.addFile("28395720a88971b6dc590489ff47d9e3", "/data/TITLE.TR2");
-        TRLE3573FileList.addFile("9daadb00c31009b332195f513e04c555", "/data/Level2.tr2");
-        TRLE3573FileList.addFile("54476f906908bf70d73f9ec6d00b8cf4", "/data/Level4.tr2");
-        TRLE3573FileList.addFile("90e439c3da36ff390c7aa51eea01a83a", "/data/Test.tr2");
-
-        TRLE3573.setTitle("The Infada Cult");
-        TRLE3573.setAuthor("Jonson");
-        TRLE3573.setDifficulty("medium");
-        TRLE3573.setDuration("long");
-        TRLE3573.setLevelclass("Jungle");
-        TRLE3573.setReleasedate("09-Nov-2023");
-        TRLE3573.setType("TR3");
-        TRLE3573.setScreen("");
-        TRLE3573.setScreensLarge("");
-        TRLE3573.setBody("Notes:\n13/11/2023 V1.2 Removed some statics from Level 1 to optimize stability. Texture Corrections on Level 3. Removed two misplaced statics in Level 3. ReadMe Corrections. No need to update, if you play with an older version.\n11/11/2023 V1.1 Only with some minor collision corrections on level 1. No need to update, if you play with an older version.\n\"There must be a few more of these!\" thinks Lara, sitting in her treasure chamber and looking at the Infada stone in her collection of Polynesian meteor artefacts. There are rumours of Shiva statues becoming alive. Also, a sinister cult founded by former RX Tech members, whose leader is able to shoot fireballs, is wreaking havoc in the small country of Shivania (fictional, in South Asia). To prevent such parties with bad intentions from misusing these additional artifacts, she decides to travel there and find them herself.\n\nImportant: Please do play this game with the executable in this package!\n\nHow to leave the boat? Stop it completely and press the duck roll key (default is the 'End' key) and left or right.");
-        TRLE3573.setWalkthrough("some other day...");
-        TRLE3573.setZipName("Jonson-TheInfadaCult.zip");
-        TRLE3573.setZipSize(255.0);
     }
     /**
      * 
@@ -619,30 +422,6 @@ public:
             //TRLE3573FileList
             //TRLE3573
         }
-        /*
-
-        qDebug() << "Hard drive operation in progress...";
-
-        // Simulate hard drive operation
-        sleep(2);
-
-        // Perform database operations
-        qDebug() << "Database operation in progress...";
-
-        // Connect to the database
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName("mydatabase.db");
-
-        if (db.open()) {
-            // Simulate database operation
-            QSqlQuery query;
-            query.exec("CREATE TABLE IF NOT EXISTS mytable (id INTEGER PRIMARY KEY, name TEXT)");
-            query.exec("INSERT INTO mytable (name) VALUES ('John')");
-            qDebug() << "Database operation completed.";
-        } else {
-            qDebug() << "Failed to open the database.";
-        }
-        */
     }
 private:
     /**

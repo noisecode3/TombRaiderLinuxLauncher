@@ -1,9 +1,6 @@
-"""
-My mamma bakes em potatis
-"""
 import os
-import hashlib
 import json
+import hashlib
 DIRECTORY = os.path.expanduser("~") + "/.local/share/TombRaiderLinuxLauncher/Original.TR3"
 file_info = {}
 

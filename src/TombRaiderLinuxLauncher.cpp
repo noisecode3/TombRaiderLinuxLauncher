@@ -20,10 +20,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->pushButtonDownload, SIGNAL (clicked()), this, SLOT (downloadClicked()));
     connect(ui->setOptions, SIGNAL (clicked()), this, SLOT (setOptionsClicked()));
 
-    //pool games;
-    //games.setName("Jonson-TheInfadaCult.TR3");
-    //games.setFileList(TRLE3573FileList);
-    //games.setData(TRLE3573);
+    //pool games("/home/USER/.local/share/TombRaiderLinuxLauncher");
 
     // Read settings
     QString value = settings.value("setup").toString();
