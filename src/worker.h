@@ -126,12 +126,13 @@ struct PictureData
      * @param
      * @details
      */
+    PictureData(){}
     PictureData( QString name, QByteArray imageData ):
         name(name)
     {
         QPixmap pixmap;
         pixmap.loadFromData(imageData, "JPG");
-        QIcon data(pixmap);
+        data.addPixmap(pixmap);
     }
     QString name;
     QIcon data;
@@ -145,6 +146,7 @@ struct ZipData
      * @param
      * @details
      */
+    ZipData(){}
     ZipData( QString zipName, float zipSize, QString md5sum ):
         name(zipName),
         megabyteSize(zipSize),
@@ -163,6 +165,7 @@ struct InfoData
      * @param
      * @details
      */
+    InfoData(){};
     InfoData( QString title, QString author, QString type,
               QString class_, QString releaseDate, QString difficulty,
               QString duration ):
@@ -191,6 +194,7 @@ struct LevelData
      * @param name Name of game release or game level
      * @details
      */
+    LevelData(){};
     LevelData(
         InfoData info,
         ZipData zip,
@@ -216,7 +220,7 @@ struct LevelData
     QString walkthrough; //html
 };
 
-class pool
+class Pool
 {
 public:
     const QString levelUrl = "https://www.trle.net/sc/levelfeatures.php?lid={id}";
@@ -229,7 +233,8 @@ public:
  *
  *
  */
-    pool(const QString path)
+    Pool(){}
+    Pool(const QString path)
     {
         // Add SQLite database driver
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
@@ -289,8 +294,14 @@ public:
             qDebug() << "Failed to open the database.";
         }
     }
-
-
+    LevelData getData(int index)
+    {
+        return data.at(index);
+    }
+    size_t getSize()
+    {
+        return data.size();
+    }
 private:
     QList<LevelData> data;
 };

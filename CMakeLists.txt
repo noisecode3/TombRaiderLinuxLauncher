@@ -17,6 +17,7 @@ set(SOURCES
     src/controller.cpp
     src/controller.h
     src/TombRaiderLinuxLauncher.cpp
+    src/TombRaiderLinuxLauncher.h
     src/TombRaiderLinuxLauncher.ui
     src/resources.qrc
 )
@@ -33,10 +34,17 @@ target_link_libraries(${PROJECT_NAME}
     QuaZip
 )
 
-
 target_include_directories(${PROJECT_NAME} PRIVATE ${CURL_INCLUDE_DIR} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
+)
+
+install(TARGETS ${PROJECT_NAME}
+    DESTINATION bin
+)
+
+install(FILES ${CMAKE_SOURCE_DIR}/utils/tombll.db
+    DESTINATION share/${PROJECT_NAME}
 )

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QSettings>
 #include "controller.h"
+#include "worker.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
@@ -38,6 +39,10 @@ public slots:
      * 
      */
     void setOptionsClicked();
+    /**
+     * 
+     */
+    void onListItemSelected();
 
 private:
     /**
@@ -64,6 +69,7 @@ private:
      * 3 value 3:The path is not a directory.
      */
     int checkGameDirectory(int game);
+    Pool poolData;
     QString selected;
     QSettings settings;
     Ui::TombRaiderLinuxLauncher *ui;

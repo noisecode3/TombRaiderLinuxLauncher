@@ -8,19 +8,23 @@
 #include <QStringList>
 #include <QDebug>
 #include "TombRaiderLinuxLauncher.h"
-#include "worker.h"
+
 #include "ui_TombRaiderLinuxLauncher.h"
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::TombRaiderLinuxLauncher)
+    :QMainWindow(parent),
+    poolData(QStandardPaths::writableLocation(QStandardPaths::HomeLocation)
+        + QString("/.local/share/TombRaiderLinuxLauncher")),
+    ui(new Ui::TombRaiderLinuxLauncher)
 {
     ui->setupUi(this);
     connect(ui->pushButtonLink, SIGNAL (clicked()), this, SLOT (linkClicked()));
     connect(ui->pushButtonDownload, SIGNAL (clicked()), this, SLOT (downloadClicked()));
     connect(ui->setOptions, SIGNAL (clicked()), this, SLOT (setOptionsClicked()));
-
-    //pool games("/home/USER/.local/share/TombRaiderLinuxLauncher");
+    connect(ui->listWidgetModds, SIGNAL(itemSelectionChanged()), this, SLOT(onListItemSelected()));
+    ui->pushButtonLink->setEnabled(false);
+    ui->pushButtonInfo->setEnabled(false);
+    ui->pushButtonDownload->setEnabled(false);
 
     // Read settings
     QString value = settings.value("setup").toString();
@@ -29,10 +33,8 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         setup();
     else
         readSavedSettings();
-
 }
-/*
- */
+
 int TombRaiderLinuxLauncher::checkGameDirectory(int game)
 {
     struct FolderNames folder;
@@ -82,12 +84,7 @@ int TombRaiderLinuxLauncher::checkGameDirectory(int game)
         return 3;
     }
 }
-/*
- *
- *
- * this should be in the worker class 
- *
- */
+
 void TombRaiderLinuxLauncher::checkCommonFiles()
 {
     int dirStaus = checkGameDirectory(TR3); // we only setup tr3 for now
@@ -125,14 +122,7 @@ void TombRaiderLinuxLauncher::checkCommonFiles()
         generateList();
     }
 }
-/*
- *
- *
- *
- *
- */
-
-
+//TODO/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void TombRaiderLinuxLauncher::generateList()
 {
     ui->listWidgetModds->setIconSize(QSize(320, 240));
@@ -147,54 +137,40 @@ void TombRaiderLinuxLauncher::generateList()
 
     foreach (const QFileInfo &file, enteryInfoList)
     {
-        QString ending = file.fileName().right(3);
-        if (ending == "TR3")
+        QString Ending = file.fileName().right(4);
+        if (Ending == ".TR3")
         {
-            qDebug() << "The last three characters are 'TR3'.";
-                if(file.fileName() == "Original.TR3")
-                {
-                    QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III.jpg"),"Tomb Raider III Original");
-                    ui->listWidgetModds->addItem(wi);
-                }
-                else if(file.fileName() == "Jonson-TheInfadaCult.TR3")
-                {
-                    QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"trle.net/3573.jpg"),"The Infada Cult\nby Jonson");
-                    ui->listWidgetModds->addItem(wi);
-                }
-                else
-                {
-                    QListWidgetItem *wi = new QListWidgetItem(file.fileName());
-                    ui->listWidgetModds->addItem(wi);
-                }
+            if(file.fileName() == "Original.TR3")
+            {
+                QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III.jpg"),"Tomb Raider III Original");
+                ui->listWidgetModds->addItem(wi);
+            }
+            else
+            {
+                QListWidgetItem *wi = new QListWidgetItem(file.fileName());
+                ui->listWidgetModds->addItem(wi);
+            }
         }
-        else
-        {
-            qDebug() << "The last three characters are not 'TR3'.";
-        }
-
+    }
+    const int s = poolData.getSize();
+    for (int i = 0; i<s;i++)
+    {
+        LevelData level = poolData.getData(i);
+        QListWidgetItem *wi = new QListWidgetItem(level.picture.data,"The Infada Cult\nby Jonson");
+        wi->setData(Qt::UserRole, QVariant(i+1));
+        ui->listWidgetModds->addItem(wi);
     }
 }
-/*
- *
- *
- *
- *
- */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void TombRaiderLinuxLauncher::readSavedSettings()
 {
-    // Read a setting
     QString gamePathValue = settings.value("gamePath").toString();
     qDebug() << "Read game path value:" << gamePathValue;
     QString levelPathValue = settings.value("levelPath").toString();
     qDebug() << "Read level path value:" << levelPathValue;
     checkCommonFiles();
 }
-/*
- *
- *
- *
- *
- */
+
 void TombRaiderLinuxLauncher::setup()
 {
     ui->Tabs->setCurrentIndex(ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Setup")));
@@ -210,12 +186,70 @@ void TombRaiderLinuxLauncher::setup()
     ui->gamePathEdit->setText(homeDir + s);
     ui->levelPathEdit->setText(homeDir + l);
 }
-/*
- *
- *
- *
- *
- */
+//TODO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void TombRaiderLinuxLauncher::onListItemSelected()
+{
+    QString directoryPath = settings.value("levelPath").toString();
+    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
+    if (selectedItem)
+    {
+        int retrievedIdentifier = selectedItem->data(Qt::UserRole).toInt();
+        // Activate or deactivate pushbuttons based on the selected item
+        qDebug() << retrievedIdentifier << Qt::endl;
+        if (retrievedIdentifier)
+        {
+            QString id = selectedItem->data(Qt::UserRole).toString();
+            QString finalPath = directoryPath + "/" + id + ".TRLE";
+            QDir directory(finalPath);
+            if (directory.exists()) {
+                qDebug() << "Directory exists.";
+                ui->pushButtonLink->setEnabled(true);
+                ui->pushButtonDownload->setEnabled(false);
+                ui->pushButtonInfo->setEnabled(false);
+            } else {
+                qDebug() << "Directory does not exist.";
+                ui->pushButtonLink->setEnabled(false);
+                ui->pushButtonDownload->setEnabled(true);
+                ui->pushButtonInfo->setEnabled(false);
+            }
+        }
+        else
+        {
+            QString tag = selectedItem->text();
+            if (tag == "Tomb Raider III Original")
+                tag="Original.TR3";
+
+            QString finalPath = directoryPath + "/" + tag;
+            QDir directory(finalPath);
+            if (directory.exists()) {
+                qDebug() << "Directory exists.";
+                ui->pushButtonLink->setEnabled(true);
+                ui->pushButtonDownload->setEnabled(false);
+                ui->pushButtonInfo->setEnabled(false);
+            } else {
+                qDebug() << "Directory does not exist.";
+                ui->pushButtonLink->setEnabled(false);
+                ui->pushButtonDownload->setEnabled(false);
+                ui->pushButtonInfo->setEnabled(false);
+            }
+
+        }
+        /*
+        if (selectedItem->text() == "SomeCondition") {
+            ui->pushButtonLink->setEnabled(true);
+            ui->pushButtonInfo->setEnabled(true);
+            ui->pushButtonDownload->setEnabled(true);
+        }
+        else
+        {
+            ui->pushButtonLink->setEnabled(false);
+            ui->pushButtonInfo->setEnabled(false);
+            ui->pushButtonDownload->setEnabled(false);
+        }
+        */
+    }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void TombRaiderLinuxLauncher::setOptionsClicked()
 {
     QString gamePath = ui->gamePathEdit->text();
@@ -234,17 +268,11 @@ void TombRaiderLinuxLauncher::setOptionsClicked()
 
     readSavedSettings();
 }
-/*
- *
- *
- *
- *
- */
-
+//TODO///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void TombRaiderLinuxLauncher::linkClicked()
 {
     struct FolderNames folder;
-    const QString gamePath = settings.value("gamePath").toString() + folder.TR3;
+    const QString gamePath = settings.value("gamePath").toString() + "TombRaider (III)";
     qDebug() << "Read game path value:" << gamePath;
     const QString levelPath = settings.value("levelPath").toString();
     qDebug() << "Read level path value:" << levelPath;
@@ -256,7 +284,7 @@ void TombRaiderLinuxLauncher::linkClicked()
         if (s == "Tomb Raider III Original")
             s = "Original.TR3";
         else if (s == "The Infada Cult\nby Jonson")
-            s = "Jonson-TheInfadaCult.TR3";
+            s = "1.TRLE";
         const QString p = levelPath + "/" + s;
         if (QFile::link(p, gamePath))
         {
@@ -264,8 +292,6 @@ void TombRaiderLinuxLauncher::linkClicked()
         }
         else
         {
-            if (QFile::exists(gamePath))
-            {
                 QFileInfo i(gamePath);
                 if (i.isSymLink())
                 {
@@ -277,14 +303,11 @@ void TombRaiderLinuxLauncher::linkClicked()
                 }
                 else
                     qDebug() << "Failed to create symbolic link.";
-            }
-            else
-                qDebug() << "Failed to create symbolic link.";
         }
     QApplication::quit();
     }
 }
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void TombRaiderLinuxLauncher::downloadClicked()
 {
 }
