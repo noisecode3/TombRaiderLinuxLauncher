@@ -11,6 +11,7 @@
 
 #include "ui_TombRaiderLinuxLauncher.h"
 
+
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     :QMainWindow(parent),
     poolData(QStandardPaths::writableLocation(QStandardPaths::HomeLocation)
@@ -122,7 +123,7 @@ void TombRaiderLinuxLauncher::checkCommonFiles()
         generateList();
     }
 }
-//TODO/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void TombRaiderLinuxLauncher::generateList()
 {
     ui->listWidgetModds->setIconSize(QSize(320, 240));
@@ -161,7 +162,7 @@ void TombRaiderLinuxLauncher::generateList()
         ui->listWidgetModds->addItem(wi);
     }
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void TombRaiderLinuxLauncher::readSavedSettings()
 {
     QString gamePathValue = settings.value("gamePath").toString();
@@ -186,7 +187,7 @@ void TombRaiderLinuxLauncher::setup()
     ui->gamePathEdit->setText(homeDir + s);
     ui->levelPathEdit->setText(homeDir + l);
 }
-//TODO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void TombRaiderLinuxLauncher::onListItemSelected()
 {
     QString directoryPath = settings.value("levelPath").toString();
@@ -201,12 +202,15 @@ void TombRaiderLinuxLauncher::onListItemSelected()
             QString id = selectedItem->data(Qt::UserRole).toString();
             QString finalPath = directoryPath + "/" + id + ".TRLE";
             QDir directory(finalPath);
-            if (directory.exists()) {
+            if (directory.exists())
+            {
                 qDebug() << "Directory exists.";
                 ui->pushButtonLink->setEnabled(true);
                 ui->pushButtonDownload->setEnabled(false);
                 ui->pushButtonInfo->setEnabled(false);
-            } else {
+            }
+            else
+            {
                 qDebug() << "Directory does not exist.";
                 ui->pushButtonLink->setEnabled(false);
                 ui->pushButtonDownload->setEnabled(true);
@@ -232,24 +236,10 @@ void TombRaiderLinuxLauncher::onListItemSelected()
                 ui->pushButtonDownload->setEnabled(false);
                 ui->pushButtonInfo->setEnabled(false);
             }
-
         }
-        /*
-        if (selectedItem->text() == "SomeCondition") {
-            ui->pushButtonLink->setEnabled(true);
-            ui->pushButtonInfo->setEnabled(true);
-            ui->pushButtonDownload->setEnabled(true);
-        }
-        else
-        {
-            ui->pushButtonLink->setEnabled(false);
-            ui->pushButtonInfo->setEnabled(false);
-            ui->pushButtonDownload->setEnabled(false);
-        }
-        */
     }
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void TombRaiderLinuxLauncher::setOptionsClicked()
 {
     QString gamePath = ui->gamePathEdit->text();
@@ -268,7 +258,7 @@ void TombRaiderLinuxLauncher::setOptionsClicked()
 
     readSavedSettings();
 }
-//TODO///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void TombRaiderLinuxLauncher::linkClicked()
 {
     struct FolderNames folder;
@@ -282,9 +272,13 @@ void TombRaiderLinuxLauncher::linkClicked()
         // Create a symbolic link
         QString s = list.first()->text();
         if (s == "Tomb Raider III Original")
+        {
             s = "Original.TR3";
+        }
         else if (s == "The Infada Cult\nby Jonson")
+        {
             s = "1.TRLE";
+        }
         const QString p = levelPath + "/" + s;
         if (QFile::link(p, gamePath))
         {
@@ -292,26 +286,69 @@ void TombRaiderLinuxLauncher::linkClicked()
         }
         else
         {
-                QFileInfo i(gamePath);
-                if (i.isSymLink())
+            QFileInfo i(gamePath);
+            if (i.isSymLink())
+            {
+                QFile::remove(gamePath);
+                if (QFile::link(p, gamePath))
                 {
-                    QFile::remove(gamePath);
-                    if (QFile::link(p, gamePath))
-                        qDebug() << "Symbolic link created successfully.";
-                    else
-                        qDebug() << "Failed to create symbolic link.";
+                    qDebug() << "Symbolic link created successfully.";
                 }
                 else
+                {
                     qDebug() << "Failed to create symbolic link.";
+                }
+            }
+            else
+            {
+                qDebug() << "Failed to create symbolic link.";
+            }
         }
-    QApplication::quit();
+        QApplication::quit();
     }
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void TombRaiderLinuxLauncher::downloadClicked()
 {
+    struct FolderNames folder;
+    QString directoryPath = settings.value("levelPath").toString();
+    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
+
+    int retrievedIdentifier = selectedItem->data(Qt::UserRole).toInt();
+    if (retrievedIdentifier)
+    {
+        LevelData level =  poolData.getData(retrievedIdentifier-1);
+        Downloader d;
+        //this should be in the pool
+        QUrl url("https://www.trle.net/levels/levels/2023/1123/Jonson-TheInfadaCult.zip");
+        QString path =  directoryPath+"/"+level.zip.name;
+        QString levelDir = settings.value("levelPath").toString() + "/"+
+                           QString::number(retrievedIdentifier)+".TRLE";
+        d.setUrl(url);
+        d.setSavePath(path);
+        d.run();
+        WorkerThread unpackLevel(1, false, path, levelDir);
+        unpackLevel.run();
+
+        if (ui->listWidgetModds->currentItem() == selectedItem)
+        {
+            ui->pushButtonLink->setEnabled(true);
+            ui->pushButtonDownload->setEnabled(false);
+        }
+    }
 }
 
+void TombRaiderLinuxLauncher::installTrle()
+{
+    struct FolderNames folder;
+
+        WorkerThread unpackLevel(1, false, settings.value("gamePath").toString()
+            + folder.TR3, settings.value("levelPath").toString() + "/" +"1"+".TRLE");
+        unpackLevel.run();
+
+        ui->pushButtonLink->setEnabled(true);
+        ui->pushButtonDownload->setEnabled(false);
+}
 TombRaiderLinuxLauncher::~TombRaiderLinuxLauncher()
 {
     delete ui;
