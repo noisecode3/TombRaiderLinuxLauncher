@@ -280,33 +280,33 @@ void TombRaiderLinuxLauncher::linkClicked()
         QString id = selectedItem->data(Qt::UserRole).toString();
         s = id + ".TRLE";
     }
-        // Create a symbolic link
-        const QString p = levelPath + "/" + s;
-        if (QFile::link(p, gamePath))
+    // Create a symbolic link
+    const QString p = levelPath + "/" + s;
+    if (QFile::link(p, gamePath))
+    {
+        qDebug() << "Symbolic link created successfully.";
+    }
+    else
+    {
+        QFileInfo i(gamePath);
+        if (i.isSymLink())
         {
-            qDebug() << "Symbolic link created successfully.";
-        }
-        else
-        {
-            QFileInfo i(gamePath);
-            if (i.isSymLink())
+            QFile::remove(gamePath);
+            if (QFile::link(p, gamePath))
             {
-                QFile::remove(gamePath);
-                if (QFile::link(p, gamePath))
-                {
-                    qDebug() << "Symbolic link created successfully.";
-                }
-                else
-                {
-                    qDebug() << "Failed to create symbolic link.";
-                }
+                qDebug() << "Symbolic link created successfully.";
             }
             else
             {
                 qDebug() << "Failed to create symbolic link.";
             }
         }
-        QApplication::quit();
+        else
+        {
+            qDebug() << "Failed to create symbolic link.";
+        }
+    }
+    QApplication::quit();
 }
 //TODO/////////////////////////////////////////////////////////////////////////////////////////////////
 void TombRaiderLinuxLauncher::downloadClicked()
@@ -316,21 +316,18 @@ void TombRaiderLinuxLauncher::downloadClicked()
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
 
     int retrievedIdentifier = selectedItem->data(Qt::UserRole).toInt();
-    if (retrievedIdentifier == 2)
-        return;
     if (retrievedIdentifier)
     {
         LevelData level =  poolData.getData(retrievedIdentifier-1);
         Downloader d;
-        //this should be in the pool
-        QUrl url("https://www.trle.net/levels/levels/2023/1123/Jonson-TheInfadaCult.zip");
+        QUrl url(level.zip.url);
         QString path =  directoryPath+"/"+level.zip.name;
         QString levelDir = settings.value("levelPath").toString() + "/"+
                            QString::number(retrievedIdentifier)+".TRLE";
         d.setUrl(url);
         d.setSavePath(path);
         d.run();
-        WorkerThread unpackLevel(1, false, path, levelDir);
+        WorkerThread unpackLevel(retrievedIdentifier, false, path, levelDir);
         unpackLevel.run();
 
         if (ui->listWidgetModds->currentItem() == selectedItem)

@@ -146,14 +146,16 @@ struct ZipData
      * @details
      */
     ZipData(){}
-    ZipData( QString zipName, float zipSize, QString md5sum ):
+    ZipData( QString zipName, float zipSize, QString md5sum, QString url ):
         name(zipName),
         megabyteSize(zipSize),
-        md5sum(md5sum)
+        md5sum(md5sum),
+        url(url)
     {}
     QString name;
     float megabyteSize;
     QString md5sum;
+    QString url;
 };
 
 struct InfoData
@@ -294,7 +296,8 @@ public:
                         ZipData zip(
                             query.value("Zip.name").toString(),
                             query.value("Zip.size").toFloat(),
-                            query.value("Zip.md5sum").toString());
+                            query.value("Zip.md5sum").toString(),
+                            query.value("Zip.url").toString());
 
                         // Extract data from Picture table
                         // Assuming PictureData is a class with a constructor that takes name and data
@@ -446,7 +449,7 @@ public:
         {
             packOriginalGame(3, folderPath, levelPath);
         }
-        else if (original == false && id == 1)
+        else if (original == false)
         {
             FileManager e;
             e.extractZip(folderPath, levelPath);
@@ -577,8 +580,5 @@ private:
 
     }
 };
-
-
-
 
 #endif

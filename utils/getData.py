@@ -33,9 +33,16 @@ if response.status_code == 200:
     soup = BeautifulSoup(response.text, 'html.parser')
     # print(f'response.text: {response.text}')
 
-    # Extracting information
-    title = soup.find('span', class_='subHeader').get_text(strip=True) \
-        or "missing"
+    title_span = soup.find('span', class_='subHeader')
+
+    if title_span:
+        title = title_span.get_text(strip=True)
+        br_tag = title_span.find('br')
+        if br_tag:
+            title = title_span.contents[0].strip()
+    else:
+        title = "missing"
+
     author = soup.find('a', class_='linkl').get_text(strip=True) \
         or "missing"
     type = soup.find('td', string='file type:').find_next('td').get_text(strip=True) \

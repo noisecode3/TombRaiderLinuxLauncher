@@ -47,7 +47,9 @@ c = conn.cursor()
 
 zip_name = file_info.get('zipFileName')
 zip_size = file_info.get('zipFileSize')
-c.execute("INSERT INTO Zip (name, size, md5sum) VALUES (?, ?, ?)", (zip_name, zip_size, md5_hash))
+zip_url = file_info.get('download_url')
+c.execute("INSERT INTO Zip (name, size, md5sum, url) VALUES (?, ?, ?, ?)",
+          (zip_name, zip_size, md5_hash, zip_url))
 
 c.execute("SELECT last_insert_rowid()")
 zip_id = c.fetchone()[0]
@@ -63,11 +65,11 @@ c.execute('''INSERT INTO Info (title, author, release, difficulty, duration, typ
 VALUES (?,?,?,?,?,?,?)''', (
     info_title,
     info_author,
-    info_type,
-    info_class,
     info_releaseDate,
     info_difficulty,
-    info_difficulty)
+    info_duration,
+    info_type,
+    info_class)
 )
 c.execute("SELECT last_insert_rowid()")
 info_id = c.fetchone()[0]
