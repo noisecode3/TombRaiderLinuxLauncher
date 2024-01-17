@@ -245,45 +245,68 @@ public:
         // Open the database
         if (db.open()) {
             qDebug() << "Database opened in read-only mode.";
+            QSqlQuery index;
+            int rowCount = 0;
+            index.prepare("SELECT COUNT(*) FROM Level");
 
-            QSqlQuery query;
-            query.prepare("SELECT Level.*, Info.*, Zip.*, Picture.* "
-                          "FROM Level "
-                          "JOIN Info ON Level.infoID = Info.InfoID "
-                          "JOIN Zip ON Level.zipID = Zip.ZipID "
-                          "JOIN Picture ON Level.pictureID = Picture.PictureID "
-                          "WHERE Level.LevelID = :id");
-            query.bindValue(":id", 1); // Set the ID
+            if (!index.exec()) {
+                // Handle the error if needed
+                qDebug() << "Error executing query:" << index.lastError().text();
+                return;
+            }
 
-            // Execute the query
-            if (query.exec()) {
-                // Iterate over the result set
-                while (query.next()) {
-                    InfoData info(
-                        query.value("Info.title").toString(),
-                        query.value("Info.author").toString(),
-                        query.value("Info.release").toString(),
-                        query.value("Info.difficulty").toString(),
-                        query.value("Info.duration").toString(),
-                        query.value("Info.type").toString(),
-                        query.value("Info.class").toString());
+            // Move to the first (and only) result row
+            if (index.next()) {
+                // Retrieve the count value (assuming it's in the first column, index 0)
+                rowCount = index.value(0).toInt();
 
-                    // Extract data from Zip table
-                    ZipData zip(
-                        query.value("Zip.name").toString(),
-                        query.value("Zip.size").toFloat(),
-                        query.value("Zip.md5sum").toString());
-
-                    // Extract data from Picture table
-                    // Assuming PictureData is a class with a constructor that takes name and data
-                    PictureData picture(query.value("Picture.name").toString(), query.value("Picture.data").toByteArray());
-
-                    data.push_back(
-                        LevelData(info, zip, picture, QString(""), QString(""), QString(""), QString(""))
-                        );
-                }
+                // Now, 'rowCount' contains the count of rows in the 'Level' table
+                qDebug() << "Number of rows in 'Level' table:" << rowCount;
             } else {
-                qDebug() << "Error executing query:" << query.lastError().text();
+                // Handle the case where no rows are returned
+                qDebug() << "No rows returned from the query";
+            }
+            for(int i=0; i<rowCount;i++)
+            {
+                QSqlQuery query;
+                query.prepare("SELECT Level.*, Info.*, Zip.*, Picture.* "
+                              "FROM Level "
+                              "JOIN Info ON Level.infoID = Info.InfoID "
+                              "JOIN Zip ON Level.zipID = Zip.ZipID "
+                              "JOIN Picture ON Level.pictureID = Picture.PictureID "
+                              "WHERE Level.LevelID = :id");
+                query.bindValue(":id", i+1); // Set the ID autoincrament starts at 1
+
+                // Execute the query
+                if (query.exec()) {
+                    // Iterate over the result set
+                    while (query.next()) {
+                        InfoData info(
+                            query.value("Info.title").toString(),
+                            query.value("Info.author").toString(),
+                            query.value("Info.release").toString(),
+                            query.value("Info.difficulty").toString(),
+                            query.value("Info.duration").toString(),
+                            query.value("Info.type").toString(),
+                            query.value("Info.class").toString());
+
+                        // Extract data from Zip table
+                        ZipData zip(
+                            query.value("Zip.name").toString(),
+                            query.value("Zip.size").toFloat(),
+                            query.value("Zip.md5sum").toString());
+
+                        // Extract data from Picture table
+                        // Assuming PictureData is a class with a constructor that takes name and data
+                        PictureData picture(query.value("Picture.name").toString(), query.value("Picture.data").toByteArray());
+
+                        data.push_back(
+                            LevelData(info, zip, picture, QString(""), QString(""), QString(""), QString(""))
+                            );
+                    }
+                } else {
+                    qDebug() << "Error executing query:" << query.lastError().text();
+                }
             }
             // Close the database when done
             db.close();

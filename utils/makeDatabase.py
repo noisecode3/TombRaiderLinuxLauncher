@@ -33,8 +33,9 @@ CREATE TABLE Zip (
 c.execute('''
 CREATE TABLE Files (
     FileID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    md5sum TEXT UNIQUE NOT NULL,
-    path TEXT NOT NULL
+    md5sum TEXT NOT NULL,
+    path TEXT NOT NULL,
+    url TEXT
 )''')
 
 c.execute('''

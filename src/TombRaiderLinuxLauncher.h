@@ -43,10 +43,6 @@ public slots:
      * 
      */
     void onListItemSelected();
-    /**
-     *
-     */
-    void installTrle();
 
 
 private:

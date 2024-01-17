@@ -48,7 +48,9 @@ c = conn.cursor()
 zip_name = file_info.get('zipFileName')
 zip_size = file_info.get('zipFileSize')
 c.execute("INSERT INTO Zip (name, size, md5sum) VALUES (?, ?, ?)", (zip_name, zip_size, md5_hash))
-zip_id = c.lastrowid
+
+c.execute("SELECT last_insert_rowid()")
+zip_id = c.fetchone()[0]
 
 info_title = file_info.get('title')
 info_author = file_info.get('author')
@@ -67,14 +69,16 @@ VALUES (?,?,?,?,?,?,?)''', (
     info_difficulty,
     info_difficulty)
 )
-info_id = c.lastrowid
+c.execute("SELECT last_insert_rowid()")
+info_id = c.fetchone()[0]
 
 screen_url = file_info.get('screen')
 screen_response = requests.get(screen_url)
 screen_content = screen_response.content
 screen_file_name = os.path.basename(screen_url)
 c.execute("INSERT INTO Picture (name, data) VALUES (?, ?)", (screen_file_name, screen_content))
-screen_id = c.lastrowid
+c.execute("SELECT last_insert_rowid()")
+screen_id = c.fetchone()[0]
 
 # for screen_large in file_info.get("screensLarge", []):
 #    response = requests.get(screen_large)
@@ -85,10 +89,15 @@ screen_id = c.lastrowid
 level_body = file_info.get('body')
 level_walkthrough = file_info.get('walkthrough')
 
-c.execute("INSERT INTO Level (body, walkthrough, pictureID, zipID, infoID) VALUES (?, ?, ?, ?, ?)",
-          (level_body, level_walkthrough, screen_id, zip_id, info_id))
+try:
+    c.execute("INSERT INTO Level (screenName, screenLargeNames, body, walkthrough, pictureID, zipID, infoID) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    ("", "", level_body, level_walkthrough, screen_id, zip_id, info_id))
+except sqlite3.Error as e:
+    print(f"SQLite error: {e}")
 
-level_id = c.lastrowid
+c.execute("SELECT MAX(LevelID) FROM Level")
+level_id = c.fetchone()[0]
+print("Current level_id:", level_id)
 
 with open(zip_name, 'wb') as zip_file:
     zip_file.write(zip_content)
@@ -103,13 +112,37 @@ for root, dirs, files in os.walk('extracted_files'):
         with open(file_path, 'rb') as f:
             file_content = f.read()
             file_md5 = hashlib.md5(file_content).hexdigest()
-            c.execute("INSERT INTO Files (md5sum, path) VALUES (?, ?)", (file_md5, relative_path))
-            file_id = c.lastrowid
 
-            c.execute("INSERT INTO LevelFileList (fileID, levelID) VALUES (?, ?)", (
-                file_id,
-                level_id)
-            )
+            # Check if the file with the same md5sum already exists in Files table
+            c.execute("SELECT FileID FROM Files WHERE md5sum = ? AND path = ?", (file_md5, relative_path))
+            existing_file = c.fetchone()
+
+            if existing_file:
+                # File already exists, use the existing FileID
+                file_id = existing_file[0]
+                print(f"File with md5sum {file_md5} and path {relative_path} already exists. Using existing FileID: {file_id}")
+            else:
+                # File doesn't exist, insert it into Files table
+                c.execute("INSERT INTO Files (md5sum, path) VALUES (?, ?)", (file_md5, relative_path))
+                file_id = c.lastrowid
+                print(f"Inserted new file with md5sum {file_md5}. New FileID: {file_id}")
+
+        try:
+            # Check if the combination of fileID and levelID already exists in LevelFileList
+            c.execute("SELECT 1 FROM LevelFileList WHERE fileID = ? AND levelID = ?", (file_id, level_id))
+            existing_combination = c.fetchone()
+
+            if not existing_combination:
+                # Combination doesn't exist, insert it into LevelFileList
+                c.execute("INSERT INTO LevelFileList (fileID, levelID) VALUES (?, ?)", (file_id, level_id))
+            else:
+                # Combination already exists, print a message or handle it as needed
+                print(f"Combination of FileID {file_id} and LevelID {level_id} already exists in LevelFileList. Skipping insertion.")
+
+        except sqlite3.IntegrityError as e:
+            # Print more details about the uniqueness violation
+            print(f"Uniqueness violation in LevelFileList: {e}")
+            print(f"FileID: {file_id}, LevelID: {level_id}")
 
 conn.commit()
 conn.close()
