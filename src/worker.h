@@ -457,16 +457,50 @@ public:
     }
 private:
     /**
-     * 
+     *
      */
+    void removeFileOrDirectory(const QString &path)
+    {
+        QDir dir(path);
+
+        if (dir.exists()) {
+            // Remove directory and its contents
+            if (dir.removeRecursively()) {
+                qDebug() << "Directory removed successfully:" << path;
+            }
+            else
+            {
+                qWarning() << "Failed to remove directory:" << path;
+            }
+        }
+        else
+        {
+            QFile file(path);
+            // Check if the file exists before attempting to remove it
+            if (file.exists())
+            {
+                if (file.remove())
+                {
+                    qDebug() << "File removed successfully:" << path;
+                }
+                else
+                {
+                    qWarning() << "Failed to remove file:" << path;
+                }
+            }
+            else
+            {
+                qDebug() << "File or directory does not exist:" << path;
+            }
+        }
+    }
     /**
      * 
      */
-    void packOriginalGame(int game , const QString folderPath, const QString directoryPath )
+    void packOriginalGame(int game , const QString source, const QString directoryPath )
     {
         const size_t s = TR3FileList.getSize();
     
-
         // Create the directory if it doesn't exist
         if (!QDir(directoryPath).exists())
         {
@@ -490,7 +524,7 @@ private:
             FileManager e;
             const QString fMd5sum = TR3FileList.getMd5sum(i);
             const QString fPath = TR3FileList.getPath(i);
-            const QString sourcePath = folderPath + "/" + fPath;
+            const QString sourcePath = source + "/" + fPath;
             const QString destinationPath = directoryPath + "/" + fPath;
 
             const QString  calculated = e.calculateMD5(sourcePath);
@@ -511,7 +545,7 @@ private:
                 // Copy the file
                 if (QFile::copy(sourcePath, destinationPath))
                 {
-                    qDebug() << "File copy successfully.";
+                    qDebug() << "File copy to " + destinationPath +" successfully.";
                 }
                 else
                 {
@@ -550,34 +584,45 @@ private:
                 return;
             }
         }
-        QDir directory(folderPath);
-
+        QDir directory(source);
         if (directory.exists())
         {
-            if (directory.removeRecursively())
+            for (size_t i = 0; i < s; i++)
             {
-                qDebug() << "Copied Directory removed successfully.";
-            }
-            else
-            {
-                qDebug() << "Error removing directory.";
+                const QString fPath = TR3FileList.getPath(i);
+                const QString sourcePath = source + fPath;
+                removeFileOrDirectory(sourcePath);
             }
         }
         else
         {
             qDebug() << "Directory does not exist.";
         }
-
-        // Create a symbolic link
-        if (QFile::link(directoryPath, folderPath))
+        removeFileOrDirectory(source + "/audio");
+        removeFileOrDirectory(source + "/cuts");
+        removeFileOrDirectory(source + "/data");
+        removeFileOrDirectory(source + "/fmv");
+        removeFileOrDirectory(source + "/pix");
+        removeFileOrDirectory(source + "/support");
+        removeFileOrDirectory(source + "/support/info");
+        QString des = source + ".old";
+        if (directory.rename(source, des))
         {
-            qDebug() << "Symbolic link created successfully.";
+            qDebug() << "Directory renamed successfully. New path:" << des;
+            // Create a symbolic link
+            if (QFile::link(directoryPath, source))
+            {
+                qDebug() << "Symbolic link created successfully.";
+            }
+            else
+            {
+                qDebug() << "Failed to create symbolic link.";
+            }
         }
         else
         {
-            qDebug() << "Failed to create symbolic link.";
+            qWarning() << "Failed to rename directory:" << source;
         }
-
     }
 };
 

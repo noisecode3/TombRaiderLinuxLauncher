@@ -319,14 +319,29 @@ void TombRaiderLinuxLauncher::downloadClicked()
     if (retrievedIdentifier)
     {
         LevelData level =  poolData.getData(retrievedIdentifier-1);
-        Downloader d;
         QUrl url(level.zip.url);
         QString path =  directoryPath+"/"+level.zip.name;
+        QFile zip(path);
         QString levelDir = settings.value("levelPath").toString() + "/"+
                            QString::number(retrievedIdentifier)+".TRLE";
-        d.setUrl(url);
-        d.setSavePath(path);
-        d.run();
+        if (zip.exists()) {
+            qDebug() << "File exists:" << path;
+            FileManager f;
+            if(f.calculateMD5(path) != level.zip.md5sum)
+            {
+                Downloader d;
+                d.setUrl(url);
+                d.setSavePath(path);
+                d.run();
+            }
+        } else {
+            qWarning() << "File does not exist:" << path;
+            Downloader d;
+            d.setUrl(url);
+            d.setSavePath(path);
+            d.run();
+        }
+
         WorkerThread unpackLevel(retrievedIdentifier, false, path, levelDir);
         unpackLevel.run();
 
