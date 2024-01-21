@@ -38,6 +38,14 @@ public slots:
     /**
      * 
      */
+    void infoClicked();
+    /**
+     *
+     */
+    void backClicked();
+    /**
+     *
+     */
     void setOptionsClicked();
     /**
      * 

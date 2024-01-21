@@ -304,7 +304,7 @@ public:
                         PictureData picture(query.value("Picture.name").toString(), query.value("Picture.data").toByteArray());
 
                         data.push_back(
-                            LevelData(info, zip, picture, QString(""), QString(""), QString(""), QString(""))
+                            LevelData(info, zip, picture, QString(""), QString(""), query.value("Level.body").toString(), QString(""))
                             );
                     }
                 } else {

@@ -15,14 +15,18 @@
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     :QMainWindow(parent),
     poolData(QStandardPaths::writableLocation(QStandardPaths::HomeLocation)
-        + QString("/.local/share/TombRaiderLinuxLauncher")),
+        + QString("/.local/share/TombRaiderLinuxLauncher")), //should be hardcoded to /usr/share/TombRaiderLinuxLauncher
     ui(new Ui::TombRaiderLinuxLauncher)
 {
     ui->setupUi(this);
+
     connect(ui->pushButtonLink, SIGNAL (clicked()), this, SLOT (linkClicked()));
     connect(ui->pushButtonDownload, SIGNAL (clicked()), this, SLOT (downloadClicked()));
+    connect(ui->pushButtonInfo, SIGNAL (clicked()), this, SLOT (infoClicked()));
+    connect(ui->infoBackButton, SIGNAL (clicked()), this, SLOT (backClicked()));
     connect(ui->setOptions, SIGNAL (clicked()), this, SLOT (setOptionsClicked()));
     connect(ui->listWidgetModds, SIGNAL(itemSelectionChanged()), this, SLOT(onListItemSelected()));
+
     ui->pushButtonLink->setEnabled(false);
     ui->pushButtonInfo->setEnabled(false);
     ui->pushButtonDownload->setEnabled(false);
@@ -148,7 +152,7 @@ void TombRaiderLinuxLauncher::generateList()
             }
             else
             {
-                QListWidgetItem *wi = new QListWidgetItem(file.fileName());
+                QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III_unkown.jpg"),file.fileName());
                 ui->listWidgetModds->addItem(wi);
             }
         }
@@ -208,14 +212,14 @@ void TombRaiderLinuxLauncher::onListItemSelected()
                 qDebug() << "Directory exists.";
                 ui->pushButtonLink->setEnabled(true);
                 ui->pushButtonDownload->setEnabled(false);
-                ui->pushButtonInfo->setEnabled(false);
+                ui->pushButtonInfo->setEnabled(true);
             }
             else
             {
                 qDebug() << "Directory does not exist.";
                 ui->pushButtonLink->setEnabled(false);
                 ui->pushButtonDownload->setEnabled(true);
-                ui->pushButtonInfo->setEnabled(false);
+                ui->pushButtonInfo->setEnabled(true);
             }
         }
         else
@@ -308,7 +312,7 @@ void TombRaiderLinuxLauncher::linkClicked()
     }
     QApplication::quit();
 }
-//TODO/////////////////////////////////////////////////////////////////////////////////////////////////
+
 void TombRaiderLinuxLauncher::downloadClicked()
 {
     struct FolderNames folder;
@@ -349,8 +353,28 @@ void TombRaiderLinuxLauncher::downloadClicked()
         {
             ui->pushButtonLink->setEnabled(true);
             ui->pushButtonDownload->setEnabled(false);
+            ui->pushButtonInfo->setEnabled(true);
         }
     }
+}
+//TODO/////////////////////////////////////////////////////////////////////////////////////////////////
+void TombRaiderLinuxLauncher::infoClicked()
+{
+    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
+
+    int retrievedIdentifier = selectedItem->data(Qt::UserRole).toInt();
+    if (retrievedIdentifier)
+    {
+        LevelData level =  poolData.getData(retrievedIdentifier-1);
+        ui->infowebEngineView->setHtml(level.body);
+        ui->infowebEngineView->show();
+        ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("info"));
+    }
+}
+
+void TombRaiderLinuxLauncher::backClicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("select"));
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 TombRaiderLinuxLauncher::~TombRaiderLinuxLauncher()
