@@ -136,7 +136,7 @@ void TombRaiderLinuxLauncher::generateList()
     defaultFont.setPointSize(newSize);
     ui->listWidgetModds->setFont(defaultFont);
     QString directoryPath = settings.value("levelPath").toString();
-    QString pictures = directoryPath + "/pictures/";
+    QString pictures = ":/pictures/pictures/";
     QDir info(directoryPath);
     QFileInfoList enteryInfoList = info.entryInfoList();
 
