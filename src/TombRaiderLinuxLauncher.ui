@@ -46,7 +46,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QWidget" name="widget" native="true">
+             <widget class="QWidget" name="selectBar" native="true">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -107,7 +107,7 @@
           <widget class="QWidget" name="info">
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
-             <widget class="QWebEngineView" name="infowebEngineView" native="true">
+             <widget class="QWebEngineView" name="infoWebEngineView" native="true">
               <property name="url" stdset="0">
                <url>
                 <string>about:blank</string>
@@ -116,7 +116,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QWidget" name="widget_2" native="true">
+             <widget class="QWidget" name="infoBar" native="true">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -144,7 +144,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_2">
+                <widget class="QPushButton" name="pushButtonWalkthrough">
                  <property name="minimumSize">
                   <size>
                    <width>0</width>
@@ -164,7 +164,7 @@
           <widget class="QWidget" name="walkthrough">
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
-             <widget class="QWebEngineView" name="webEngineView_2" native="true">
+             <widget class="QWebEngineView" name="walkthroughWebEngineView" native="true">
               <property name="url" stdset="0">
                <url>
                 <string>about:blank</string>
@@ -173,7 +173,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QWidget" name="widget_3" native="true">
+             <widget class="QWidget" name="walkthroughBar" native="true">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -188,7 +188,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
-                <widget class="QPushButton" name="pushButton_4">
+                <widget class="QPushButton" name="walkthroughBackButton">
                  <property name="minimumSize">
                   <size>
                    <width>0</width>

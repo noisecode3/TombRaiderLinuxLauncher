@@ -23,7 +23,9 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->pushButtonLink, SIGNAL (clicked()), this, SLOT (linkClicked()));
     connect(ui->pushButtonDownload, SIGNAL (clicked()), this, SLOT (downloadClicked()));
     connect(ui->pushButtonInfo, SIGNAL (clicked()), this, SLOT (infoClicked()));
+    connect(ui->pushButtonWalkthrough, SIGNAL (clicked()), this, SLOT (walkthroughClicked()));
     connect(ui->infoBackButton, SIGNAL (clicked()), this, SLOT (backClicked()));
+    connect(ui->walkthroughBackButton, SIGNAL (clicked()), this, SLOT (backClicked()));
     connect(ui->setOptions, SIGNAL (clicked()), this, SLOT (setOptionsClicked()));
     connect(ui->listWidgetModds, SIGNAL(itemSelectionChanged()), this, SLOT(onListItemSelected()));
 
@@ -366,15 +368,44 @@ void TombRaiderLinuxLauncher::infoClicked()
     if (retrievedIdentifier)
     {
         LevelData level =  poolData.getData(retrievedIdentifier-1);
-        ui->infowebEngineView->setHtml(level.body);
-        ui->infowebEngineView->show();
+        ui->infoWebEngineView->setHtml(level.body);
+        ui->infoWebEngineView->show();
         ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("info"));
+        if(level.walkthrough != "")
+        {
+            ui->pushButtonWalkthrough->setEnabled(true);
+        }
+        else
+        {
+            ui->pushButtonWalkthrough->setEnabled(false);
+        }
+    }
+}
+
+void TombRaiderLinuxLauncher::walkthroughClicked()
+{
+    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
+
+    int retrievedIdentifier = selectedItem->data(Qt::UserRole).toInt();
+    if (retrievedIdentifier)
+    {
+        LevelData level =  poolData.getData(retrievedIdentifier-1);
+        ui->walkthroughWebEngineView->setHtml(level.walkthrough);
+        ui->walkthroughWebEngineView->show();
+        ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("walkthrough"));
     }
 }
 
 void TombRaiderLinuxLauncher::backClicked()
 {
-    ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("select"));
+    if(ui->stackedWidget->currentWidget() == ui->stackedWidget->findChild<QWidget*>("info"))
+    {
+        ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("select"));
+    }
+    else if (ui->stackedWidget->currentWidget() == ui->stackedWidget->findChild<QWidget*>("walkthrough"))
+    {
+        ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("select"));
+    }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 TombRaiderLinuxLauncher::~TombRaiderLinuxLauncher()

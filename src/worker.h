@@ -304,7 +304,14 @@ public:
                         PictureData picture(query.value("Picture.name").toString(), query.value("Picture.data").toByteArray());
 
                         data.push_back(
-                            LevelData(info, zip, picture, QString(""), QString(""), query.value("Level.body").toString(), QString(""))
+                            LevelData(
+                                info,
+                                zip,
+                                picture, 	 //
+                                QString(""), // replase with list of picurest
+                                QString(""), //
+                                query.value("Level.body").toString(),
+                                query.value("Level.walkthrough").toString())
                             );
                     }
                 } else {

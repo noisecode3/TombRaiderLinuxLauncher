@@ -42,6 +42,10 @@ public slots:
     /**
      *
      */
+    void walkthroughClicked();
+    /**
+     *
+     */
     void backClicked();
     /**
      *
