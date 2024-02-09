@@ -181,7 +181,7 @@ void TombRaiderLinuxLauncher::onListItemSelected()
         else if (state == 0)
         {
             ui->pushButtonLink->setEnabled(false);
-            ui->pushButtonInfo->setEnabled(false);
+            ui->pushButtonInfo->setEnabled(true);
             ui->pushButtonDownload->setEnabled(true);
         }
         else if (state == -1)
@@ -242,6 +242,7 @@ void TombRaiderLinuxLauncher::downloadClicked()
     int id = selectedItem->data(Qt::UserRole).toInt();
     if (id)
     {
+        controller.setupLevel(id);
         if (ui->listWidgetModds->currentItem() == selectedItem)
         {
             ui->pushButtonLink->setEnabled(true);
@@ -258,7 +259,6 @@ void TombRaiderLinuxLauncher::infoClicked()
     {
         InfoData info = controller.getInfo(id);
         ui->infoWebEngineView->setHtml(info.body);
-        //ui->infoWebEngineView->
         ui->infoListWidget->setViewMode(QListView::IconMode);
         ui->infoListWidget->setIconSize(QSize(502, 377));
         ui->infoListWidget->clear();

@@ -54,6 +54,11 @@ bool Controller::setupOg(int id)
     return model.setUpOg(id);
 }
 
+bool Controller::setupLevel(int id)
+{
+    return model.getGame(id);
+}
+
 void Controller::getList(QVector<ListItemData>& list)
 {
     return model.getList(list);

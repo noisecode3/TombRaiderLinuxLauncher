@@ -21,6 +21,7 @@ public:
     void stopWorkerThread();
     bool setupCamp(const QString& level, const QString& game);
     bool setupOg(int id);
+    bool setupLevel(int id);
     void getList(QVector<ListItemData>& list);
     bool link(int id);
     bool link(const QString& levelDir);
