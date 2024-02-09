@@ -1,0 +1,701 @@
+{
+  "name": "TR4",
+  "file_data_list": [
+    {
+      "filename": "DATA.TAG",
+      "md5sum": "91706f405173ff36a9dbfd3c264da9ad"
+    },
+    {
+      "filename": "SCRIPT.DAT",
+      "md5sum": "172daafe17e5cee2773f8d1d3b6796be"
+    },
+    {
+      "filename": "English.dat",
+      "md5sum": "6f99565028852ed7ad0de85feda865f0"
+    },
+    {
+      "filename": "readme.txt",
+      "md5sum": "3ee0b38528657a175cb0c3d8bd084b6c"
+    },
+    {
+      "filename": "binkw32.dll",
+      "md5sum": "71f0294906ee3da26499b7fce1dff180"
+    },
+    {
+      "filename": "tomb4.exe",
+      "md5sum": "bff3fea78480671ee81831cc6c6e8805"
+    },
+    {
+      "filename": "fmv/Fmv09.bik",
+      "md5sum": "0a1b69e49a7e7c0bf6edba6b05013941"
+    },
+    {
+      "filename": "fmv/Fmv00.bik",
+      "md5sum": "d76f06cca306df1e1d09d6894ce377cc"
+    },
+    {
+      "filename": "fmv/Fmv03.bik",
+      "md5sum": "e9a64457556e854a7e5347273332e450"
+    },
+    {
+      "filename": "fmv/Fmv06.bik",
+      "md5sum": "af772505a86faa645deecb86191d4cee"
+    },
+    {
+      "filename": "fmv/Fmv07.bik",
+      "md5sum": "424eb07724a3bc7f9ddb2f1c8cdef57f"
+    },
+    {
+      "filename": "fmv/Fmv12.bik",
+      "md5sum": "aff5bc76c42070561f24d96fa1f4b178"
+    },
+    {
+      "filename": "fmv/Fmv10.bik",
+      "md5sum": "82685c4358b774416f4546b2951dc3df"
+    },
+    {
+      "filename": "fmv/Fmv01.bik",
+      "md5sum": "e7456ad9ea862703fe527e7d8dde378b"
+    },
+    {
+      "filename": "fmv/Fmv04.bik",
+      "md5sum": "f444110f6db7970f041dbc27e501deba"
+    },
+    {
+      "filename": "fmv/Fmv05.bik",
+      "md5sum": "fe257d1f3dedc6f635ddbca0bcea6d4b"
+    },
+    {
+      "filename": "fmv/Fmv02.bik",
+      "md5sum": "fcdf86aa4001fea08b1c6d25de8d9c1b"
+    },
+    {
+      "filename": "fmv/Fmv11.bik",
+      "md5sum": "d038d36e3d28d1f8bcbdd72a0c1a4bb1"
+    },
+    {
+      "filename": "fmv/Fmv08.bik",
+      "md5sum": "deec0df6a34a6354eead11f65f0d1274"
+    },
+    {
+      "filename": "audio/077_crocgod.wav",
+      "md5sum": "3558800280ed5bb72768562ce5479f7f"
+    },
+    {
+      "filename": "audio/111_charmer.wav",
+      "md5sum": "5aeddb7658d37ef138f5f15ab052aa86"
+    },
+    {
+      "filename": "audio/094_minilib4.wav",
+      "md5sum": "ee94835ca782485ef4796d44924be5a4"
+    },
+    {
+      "filename": "audio/023_VonCroy23.wav",
+      "md5sum": "95b5bfe8ac0bb868f6bfcfc269b6fc97"
+    },
+    {
+      "filename": "audio/026_VC25_L9_VC26_L10.wav",
+      "md5sum": "341d3e84f43f80f8668ab8902afa3906"
+    },
+    {
+      "filename": "audio/075_captain1.wav",
+      "md5sum": "1ea36fb826b4ac924de7d97cdc62d486"
+    },
+    {
+      "filename": "audio/084_inscrip.wav",
+      "md5sum": "7795a40752ec8b07229fe120834905f2"
+    },
+    {
+      "filename": "audio/001_VonCroy2.wav",
+      "md5sum": "00456e6d858071bee1afca348e3ca073"
+    },
+    {
+      "filename": "audio/055_General_Part_iii.wav",
+      "md5sum": "a47ddc4a41ea201695019799be95a79b"
+    },
+    {
+      "filename": "audio/079_crypt1.wav",
+      "md5sum": "12b752e1ac3870562c5a930bd432db1d"
+    },
+    {
+      "filename": "audio/013_VonCroy12_13a_Lara4.wav",
+      "md5sum": "ae092bed9ad1849eb142f8079e26b1ac"
+    },
+    {
+      "filename": "audio/063_Misc_Inc_01.wav",
+      "md5sum": "905a906624d884b28e4fb9ddeac69d69"
+    },
+    {
+      "filename": "audio/049_Close_to_the_End_part_ii.wav",
+      "md5sum": "4ea491cc330c14e5f1554161806e3e4b"
+    },
+    {
+      "filename": "audio/036_VonCroy36.wav",
+      "md5sum": "d6983803780ee6705a477cd9cadfacf2"
+    },
+    {
+      "filename": "audio/039_TR4_Title_Q10.wav",
+      "md5sum": "2c01b04747ab2940e74ba79f0cb172d8"
+    },
+    {
+      "filename": "audio/085_intro.wav",
+      "md5sum": "a5339ec1a75e37f092221553177d1f18"
+    },
+    {
+      "filename": "audio/104_A4_Weird1.wav",
+      "md5sum": "398eb99e1e899aba32c680f4d4d0f803"
+    },
+    {
+      "filename": "audio/109_Lyre_01.wav",
+      "md5sum": "f618a696647bbf46c4069ef28d15a688"
+    },
+    {
+      "filename": "audio/090_libend.wav",
+      "md5sum": "3d504234abc3e41714a26b9b733e9099"
+    },
+    {
+      "filename": "audio/031_VonCroy31_L12.wav",
+      "md5sum": "2ad67014399c9731edd5e9f44d93773c"
+    },
+    {
+      "filename": "audio/083_horus.wav",
+      "md5sum": "988afa8430568247d5720bd069bbd470"
+    },
+    {
+      "filename": "audio/060_Gods_Part_iii.wav",
+      "md5sum": "978ef2b7d504af3735421a03e716a33c"
+    },
+    {
+      "filename": "audio/007_VonCroy8.wav",
+      "md5sum": "7f93aa14091269130d8f18b37ec1cb68"
+    },
+    {
+      "filename": "audio/064_Misc_Inc_02.wav",
+      "md5sum": "a091e3b5766e34d04a5971c085a60210"
+    },
+    {
+      "filename": "audio/106_A6_Out_Day.wav",
+      "md5sum": "a21fbae271110c6ca55e7a7a8f407dc6"
+    },
+    {
+      "filename": "audio/074_backpack.wav",
+      "md5sum": "a4971fc5c2a78f6c3a6ca3be9fc9753e"
+    },
+    {
+      "filename": "audio/076_captain2.wav",
+      "md5sum": "386699827f92e49720b987bd45ffbe19"
+    },
+    {
+      "filename": "audio/068_Mystery_Part_ii.wav",
+      "md5sum": "9f1072b8b10e0dab90927208a297b280"
+    },
+    {
+      "filename": "audio/009_VonCroy9b_Lara3.wav",
+      "md5sum": "390fbbb9599dac1a040bbf4f7f537874"
+    },
+    {
+      "filename": "audio/003_VonCroy4.wav",
+      "md5sum": "bed6953512fe50387d286d3417c4f881"
+    },
+    {
+      "filename": "audio/016_VonCroy15.wav",
+      "md5sum": "d90edebd624cd8fa6fa215d62ff274a1"
+    },
+    {
+      "filename": "audio/056_General_Part_iv.wav",
+      "md5sum": "70ee1edeb79e192bd0adf544308fce80"
+    },
+    {
+      "filename": "audio/006_VonCroy7.wav",
+      "md5sum": "0516b7154b4cad44a4f0d83b9c0d4c72"
+    },
+    {
+      "filename": "audio/051_Egyptian_Mood_Part_i.wav",
+      "md5sum": "62aaafb6dfce9c09acecc6789722792b"
+    },
+    {
+      "filename": "audio/082_finale.wav",
+      "md5sum": "56d48766d092d4a4f8f1cb620216f23f"
+    },
+    {
+      "filename": "audio/022_VonCroy22b.wav",
+      "md5sum": "ef450395e0823d4e1faeba817fe8164e"
+    },
+    {
+      "filename": "audio/100_Attack_part_ii.wav",
+      "md5sum": "2523664e7d525b608b27e6bd1dad6f9c"
+    },
+    {
+      "filename": "audio/040_Action_Part_ii.wav",
+      "md5sum": "728b7cfa40ec5ec86551bfb445d33182"
+    },
+    {
+      "filename": "audio/099_whouse.wav",
+      "md5sum": "71dde9cadc2603f6afe5c5a7ee5a1a81"
+    },
+    {
+      "filename": "audio/102_A2_In_Drips.wav",
+      "md5sum": "5249573644285fd6ec186118d91ebd0a"
+    },
+    {
+      "filename": "audio/078_croywon.wav",
+      "md5sum": "b97adb22f17394de8eddd609c407a6ad"
+    },
+    {
+      "filename": "audio/046_Boss_01.wav",
+      "md5sum": "dd66caa5eda3608324807321faa841ce"
+    },
+    {
+      "filename": "audio/047_Boss_02.wav",
+      "md5sum": "8e802ff8c2539b9a3480eb697e72f570"
+    },
+    {
+      "filename": "audio/089_larawon.wav",
+      "md5sum": "c1c3d111ba8a7b2cb33d692c4ff317ff"
+    },
+    {
+      "filename": "audio/033_VonCroy33.wav",
+      "md5sum": "1ca08105e2125c8344cc7bda282aaa3e"
+    },
+    {
+      "filename": "audio/010_VonCroy10.wav",
+      "md5sum": "323e597a3a2e64315c158add9345f5dd"
+    },
+    {
+      "filename": "audio/015_VonCroy14.wav",
+      "md5sum": "7444eb402a3dfdd9dbeecbce756972d4"
+    },
+    {
+      "filename": "audio/008_VonCroy9a.wav",
+      "md5sum": "cbe030d74c4025d9fed5d7a9dfa8f513"
+    },
+    {
+      "filename": "audio/112_Gods_part_iv.wav",
+      "md5sum": "4bce816e61fa49d8f851931efb8756dc"
+    },
+    {
+      "filename": "audio/018_VonCroy17.wav",
+      "md5sum": "d9c5d9e40da07b3b4599eaeca28df2cd"
+    },
+    {
+      "filename": "audio/037_VC37_L15_VC38.wav",
+      "md5sum": "9bda53b9f6952594c73b3529969c49c1"
+    },
+    {
+      "filename": "audio/048_Close_to_the_End.wav",
+      "md5sum": "e35535de788fbc59049a074aa3ea927e"
+    },
+    {
+      "filename": "audio/025_VonCroy24b.wav",
+      "md5sum": "f7db385fe77e984c6cb934a2bad2fc81"
+    },
+    {
+      "filename": "audio/059_Gods_Part_ii.wav",
+      "md5sum": "7586bb5c472ebe320c2b5d999992cec7"
+    },
+    {
+      "filename": "audio/012_VonCroy11b.wav",
+      "md5sum": "8fcb843b90ce53748eeadb094e655029"
+    },
+    {
+      "filename": "audio/032_VonCroy32_L13.wav",
+      "md5sum": "bda3515fc9145efae8db3592f2ae08cd"
+    },
+    {
+      "filename": "audio/017_VonCroy16_lara5.wav",
+      "md5sum": "83b4493d597593a21aec77266b715312"
+    },
+    {
+      "filename": "audio/028_VonCroy28_L11.wav",
+      "md5sum": "c252c869c9389420910f9dcc452a617c"
+    },
+    {
+      "filename": "audio/073_Secret.wav",
+      "md5sum": "bae267542c94fab36b1911276050709e"
+    },
+    {
+      "filename": "audio/052_Egyptian_Mood_Part_ii.wav",
+      "md5sum": "a05ada736d47fd667d2d1102b8777dc5"
+    },
+    {
+      "filename": "audio/081_dig.wav",
+      "md5sum": "74689fe6ffbf69a0b84cce825c1d4071"
+    },
+    {
+      "filename": "audio/096_sarcoph.wav",
+      "md5sum": "292d3328ff92a0b62a012819aa069841"
+    },
+    {
+      "filename": "audio/045_Authentic_TR.wav",
+      "md5sum": "fe08b274806e89114bce29942be6297d"
+    },
+    {
+      "filename": "audio/044_Attack_part_i.wav",
+      "md5sum": "6cf49255ad8927de87b9786e90f3900e"
+    },
+    {
+      "filename": "audio/020_VonCroy19.wav",
+      "md5sum": "e7240f3609e978eb86dfc601e7e8fd30"
+    },
+    {
+      "filename": "audio/034_VonCroy34.wav",
+      "md5sum": "54a6a4db68945a90c9f469fcfdf23913"
+    },
+    {
+      "filename": "audio/058_Gods_Part_i.wav",
+      "md5sum": "45fd69edef8f8ef34ddf1c44f97e245b"
+    },
+    {
+      "filename": "audio/095_phildoor.wav",
+      "md5sum": "0989b62c099e251e42a49a23b0f08c1b"
+    },
+    {
+      "filename": "audio/088_key.wav",
+      "md5sum": "a770989f2c4779bfc7dfcf08802b5222"
+    },
+    {
+      "filename": "audio/043_Action_Part_v.wav",
+      "md5sum": "d47a1f5cfecad1a7453d5328c434d883"
+    },
+    {
+      "filename": "audio/103_A3_Out_Night.wav",
+      "md5sum": "98304811a09eeb5bed3ab3e860539fce"
+    },
+    {
+      "filename": "audio/027_VonCroy27.wav",
+      "md5sum": "537575e6528e44af7d950fc05a0e33c2"
+    },
+    {
+      "filename": "audio/110_Lyre_02.wav",
+      "md5sum": "643de95ac359be61f43e1e25842e0a5e"
+    },
+    {
+      "filename": "audio/067_Mystery_Part_i.wav",
+      "md5sum": "f9b936ec791dabcf0f2bfcc43a24d1ab"
+    },
+    {
+      "filename": "audio/014_VonCroy13b.wav",
+      "md5sum": "710492402c88f2c439a12efb8e5972b9"
+    },
+    {
+      "filename": "audio/069_Mystery_Part_iii.wav",
+      "md5sum": "78128664335bc5a4375b9a30d73ccb5b"
+    },
+    {
+      "filename": "audio/097_scorpion.wav",
+      "md5sum": "1b192a3be5c11a692fa099e76ba75f3c"
+    },
+    {
+      "filename": "audio/108_A8_Coastal.wav",
+      "md5sum": "23d482697b03538d4bf0d30188fd157b"
+    },
+    {
+      "filename": "audio/042_Action_Part_iv.wav",
+      "md5sum": "522d12820eb1483c6bf83626beab2d3c"
+    },
+    {
+      "filename": "audio/002_VonCroy3.wav",
+      "md5sum": "17fa0ef5be0187a826a4b1500732013c"
+    },
+    {
+      "filename": "audio/061_In_The_Pyramid_Part_i.wav",
+      "md5sum": "dd5faa8c3887e5d7d0827ca1fa54ec03"
+    },
+    {
+      "filename": "audio/053_General_Part_i.wav",
+      "md5sum": "45946bc1c59761950612c42efecfd855"
+    },
+    {
+      "filename": "audio/041_Action_Part_iii.wav",
+      "md5sum": "5a9fc1780e8617778c8d3fa193aef868"
+    },
+    {
+      "filename": "audio/005_VonCroy6_Lara2.wav",
+      "md5sum": "affeb8a073e3d0218879a7d945b88acd"
+    },
+    {
+      "filename": "audio/029_VonCroy29.wav",
+      "md5sum": "e735bcddcc6edca0e8ceab4b4260eee3"
+    },
+    {
+      "filename": "audio/107_A7_Train+.wav",
+      "md5sum": "a974a7ceff282698cdcf009e91953d07"
+    },
+    {
+      "filename": "audio/105_A5_Battle.wav",
+      "md5sum": "86036ba7914a8ff80846a555edb1c94a"
+    },
+    {
+      "filename": "audio/054_General_Part_ii.wav",
+      "md5sum": "2f77d0bd351adaaa58534bec72381b8d"
+    },
+    {
+      "filename": "audio/024_VonCroy24a.wav",
+      "md5sum": "69cee70f1048fae4283102b8af51a495"
+    },
+    {
+      "filename": "audio/080_crypt2.wav",
+      "md5sum": "72887366d1910b3ed2fd7312c8d0ac56"
+    },
+    {
+      "filename": "audio/087_jeepB.wav",
+      "md5sum": "d4f2425165ccf096effc4c999e1c3c4d"
+    },
+    {
+      "filename": "audio/093_minilib3.wav",
+      "md5sum": "a48e2136940e405e6220fd9ed79ffaf9"
+    },
+    {
+      "filename": "audio/038_A_Short_01.wav",
+      "md5sum": "087bd30d3f458f0710de4cdecce60417"
+    },
+    {
+      "filename": "audio/098_throne.wav",
+      "md5sum": "f5781aaadfdf6e646fad8d51b9e5934e"
+    },
+    {
+      "filename": "audio/092_minilib2.wav",
+      "md5sum": "90b254467066d1db144683a0f91eafa7"
+    },
+    {
+      "filename": "audio/072_Puzzle_part_i.wav",
+      "md5sum": "8ba135ab0b45adb427f842db660a72a0"
+    },
+    {
+      "filename": "audio/050_Underwater_Find_part_i.wav",
+      "md5sum": "4330d973cd873e56efaa0ad58d1c6873"
+    },
+    {
+      "filename": "audio/086_jeepA.wav",
+      "md5sum": "c4b0af187d54c4ba31e35e4aff43933a"
+    },
+    {
+      "filename": "audio/011_VonCroy11a.wav",
+      "md5sum": "2b52b46d3c53ed73c75c8235fdfbf5b8"
+    },
+    {
+      "filename": "audio/071_Ominous_Part_i.wav",
+      "md5sum": "f45517d9d4196216e97f3cc3b838063f"
+    },
+    {
+      "filename": "audio/066_Misc_Inc_04.wav",
+      "md5sum": "fef77aca716be4d65c291e946b019276"
+    },
+    {
+      "filename": "audio/070_Mystery_Part_iv.wav",
+      "md5sum": "7aabc4ed04795bda64d43bfd42257b78"
+    },
+    {
+      "filename": "audio/035_VonCroy35.wav",
+      "md5sum": "587ce7876ec1ea30cb97f8ef583f8ed1"
+    },
+    {
+      "filename": "audio/101_A1_In_Dark.wav",
+      "md5sum": "012c1215f652024043df0cdac3663a6c"
+    },
+    {
+      "filename": "audio/004_VonCroy5.wav",
+      "md5sum": "2499e2d5d0491844cd389abc234876c3"
+    },
+    {
+      "filename": "audio/091_minilib1.wav",
+      "md5sum": "78ae213d277b812b71363405f5404348"
+    },
+    {
+      "filename": "audio/030_VonCroy30.wav",
+      "md5sum": "53363896c30b8bfe12fe55517e79f859"
+    },
+    {
+      "filename": "audio/057_General_Part_v.wav",
+      "md5sum": "d84d69db8ad7ea0cdb561818fce28614"
+    },
+    {
+      "filename": "audio/019_Lara6_VonCroy18.wav",
+      "md5sum": "6c12977535da7e11443ad80b0a345a77"
+    },
+    {
+      "filename": "audio/021_VC20_L7_VC21_L8_VC22a.wav",
+      "md5sum": "9a62050896d426e3a88e35f5456093e3"
+    },
+    {
+      "filename": "audio/065_Misc_Inc_03.wav",
+      "md5sum": "dcb0f654974db7a99938dd8e754bc7d6"
+    },
+    {
+      "filename": "audio/062_Jeep_Thrills_max.wav",
+      "md5sum": "325e8b7e56fa0f49219d5d0b71e55c26"
+    },
+    {
+      "filename": "data/karnak1.tr4",
+      "md5sum": "1621b8f2dbf4adc3f3ab2a9351d83cd7"
+    },
+    {
+      "filename": "data/lowstrt.tr4",
+      "md5sum": "589da31c448dc74516ffc9820704b807"
+    },
+    {
+      "filename": "data/uslogo.pak",
+      "md5sum": "f01c2dde34ea407b39352a965ce8c99c"
+    },
+    {
+      "filename": "data/jeepchas.tr4",
+      "md5sum": "83735b8934b7325621a7d4f1a56726dd"
+    },
+    {
+      "filename": "data/grlogo.pak",
+      "md5sum": "699ac51dee27e4087057cd1be17fd7b8"
+    },
+    {
+      "filename": "data/highstrt.tr4",
+      "md5sum": "8c19d8337693714c1136f44308f6ea09"
+    },
+    {
+      "filename": "data/cutseq.pak",
+      "md5sum": "2495b1d21d6d2021612134f3399db74d"
+    },
+    {
+      "filename": "data/settomb1.tr4",
+      "md5sum": "f5f3fe5f82ab7495483bc99c214a69e6"
+    },
+    {
+      "filename": "data/joby4b.tr4",
+      "md5sum": "a1da613cc6f32f5132113c558b4bdbcd"
+    },
+    {
+      "filename": "data/csplit1.tr4",
+      "md5sum": "581cbff747fdbefcb8510cf7aad1a2be"
+    },
+    {
+      "filename": "data/angkor1.tr4",
+      "md5sum": "a7d5c461d6c15d845905c3047d00551d"
+    },
+    {
+      "filename": "data/bikebit.tr4",
+      "md5sum": "4b3dee8a4ff7e0044d024ac6e8f36d39"
+    },
+    {
+      "filename": "data/semer2.tr4",
+      "md5sum": "b3dfd3c070ce80bd81a7983caf5f6a4e"
+    },
+    {
+      "filename": "data/csplit2.tr4",
+      "md5sum": "1736fcd6589a0ddcb9a57784394ced4c"
+    },
+    {
+      "filename": "data/joby1a.tr4",
+      "md5sum": "c9be707d69c486bfb01e0a73fd12b486"
+    },
+    {
+      "filename": "data/title.tr4",
+      "md5sum": "43553820827a7d69212f64de72d89623"
+    },
+    {
+      "filename": "data/hall.tr4",
+      "md5sum": "768973831e19af2c1071f15ad300d2c1"
+    },
+    {
+      "filename": "data/joby4c.tr4",
+      "md5sum": "31baeeb0d0ba7db5a338408f0b2e3f8c"
+    },
+    {
+      "filename": "data/semer.tr4",
+      "md5sum": "e855971405162282d1f40b7f8e4f3443"
+    },
+    {
+      "filename": "data/joby5b.tr4",
+      "md5sum": "471dc7a848a590d135c3f833099ae9d1"
+    },
+    {
+      "filename": "data/jeepchs2.tr4",
+      "md5sum": "ea5dbcaa2f03cb9186e216f0bf2635a8"
+    },
+    {
+      "filename": "data/train.tr4",
+      "md5sum": "0488a20103895dfd249d79d9755c2f2a"
+    },
+    {
+      "filename": "data/palaces2.tr4",
+      "md5sum": "bcf1ac7c496578ca52465aa32ca8c04f"
+    },
+    {
+      "filename": "data/ang_race.tr4",
+      "md5sum": "8f91220734ecd6b001e3a0f512dff232"
+    },
+    {
+      "filename": "data/citnew.tr4",
+      "md5sum": "8508cd8e1e1268455efe2445ba5185f2"
+    },
+    {
+      "filename": "data/joby1b.tr4",
+      "md5sum": "f50194fccb5cda8056eabf82a7c6060a"
+    },
+    {
+      "filename": "data/libend.tr4",
+      "md5sum": "95ed8065c82ade4f9f9a1eb0f19ccf09"
+    },
+    {
+      "filename": "data/uklogo.pak",
+      "md5sum": "56ab653aaa816ec5f30a61adf36ca13e"
+    },
+    {
+      "filename": "data/settomb2.tr4",
+      "md5sum": "b9be0805a8157032c4f7d1bb4bae0ee1"
+    },
+    {
+      "filename": "data/joby5c.tr4",
+      "md5sum": "fed10450013471b2cf41b1e25828fad0"
+    },
+    {
+      "filename": "data/library.tr4",
+      "md5sum": "12804dd166dd99e8927f20864bd191fd"
+    },
+    {
+      "filename": "data/joby2.tr4",
+      "md5sum": "e92cc9d76a061d52565c12d01382f7f2"
+    },
+    {
+      "filename": "data/joby3a.tr4",
+      "md5sum": "025b03dfcbe4ad62d24796f924b241e1"
+    },
+    {
+      "filename": "data/alexhub.tr4",
+      "md5sum": "a3aa0e8f4c12a0186b511b6a116c7af0"
+    },
+    {
+      "filename": "data/frlogo.pak",
+      "md5sum": "5f5821ee763747d72c8040bd4f773b13"
+    },
+    {
+      "filename": "data/nutrench.tr4",
+      "md5sum": "132e211c20068d12d6c03930afe12fc1"
+    },
+    {
+      "filename": "data/joby3b.tr4",
+      "md5sum": "a21ea07bfa1066ba3260076dc37b7212"
+    },
+    {
+      "filename": "data/cortyard.tr4",
+      "md5sum": "30c7945d73e01b3f4a80959d7784a881"
+    },
+    {
+      "filename": "data/lake.tr4",
+      "md5sum": "fe6beb43fbef03049aee414434fb4c6d"
+    },
+    {
+      "filename": "data/joby4a.tr4",
+      "md5sum": "829a2a7862b03f669aa27d526572bb4d"
+    },
+    {
+      "filename": "data/palaces.tr4",
+      "md5sum": "f49fdd11cfa594d97e0300935d164ca8"
+    },
+    {
+      "filename": "data/joby5a.tr4",
+      "md5sum": "a4d92b51480ad38c961de40d6f96ffc8"
+    },
+    {
+      "filename": "data/alexhub2.tr4",
+      "md5sum": "8226ce5a5fcac730446a5d7edb7cc576"
+    }
+  ]
+}

@@ -15,20 +15,23 @@ add_subdirectory(libs/quazip)
 
 set(SOURCES
     src/main.cpp
-    src/network.cpp
-    src/network.h
-    src/worker.h
-    src/controller.cpp
-    src/controller.h
-    src/fileop.h
-    src/fileop.cpp
-    src/TombRaiderLinuxLauncher.cpp
+    src/Network.h
+    src/Network.cpp
+    src/Controller.h
+    src/Controller.cpp
+    src/FileManager.h
+    src/FileManager.cpp
+    src/Model.h
+    src/Model.cpp
+    src/Data.h
+    src/Data.cpp
     src/TombRaiderLinuxLauncher.h
+    src/TombRaiderLinuxLauncher.cpp
     src/TombRaiderLinuxLauncher.ui
     src/resources.qrc
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES} )
 
 target_link_libraries(${PROJECT_NAME}
     Qt5::Core

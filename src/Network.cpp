@@ -1,7 +1,15 @@
-#include "network.h"
+#include "Network.h"
 
-Downloader::Downloader(QObject *parent) :
-    QObject(parent){}
+bool Downloader::setUpCamp(const QString& levelDir)
+{
+    QFileInfo levelPathInfo(levelDir);
+    if (levelPathInfo.isDir())
+    {
+        levelDir_m.setPath(levelDir);
+        return true;
+    }
+    return false;
+}
 
 size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp)  {
     size_t total_size = size * nmemb;
@@ -9,8 +17,15 @@ size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp)  {
     buffer->append(static_cast<char*>(contents), total_size);
     return total_size;
 }
-void Downloader::setUrl(QUrl url){ url_m=url; }
-void Downloader::setSavePath(QString path){ path_m=path; }
+void Downloader::setUrl(QUrl url)
+{
+    url_m=url;
+}
+
+void Downloader::setSaveFile(const QString& file)
+{
+    file_m=file;
+}
 
 void Downloader::saveToFile(const QByteArray& data, const QString& filePath) {
     QFile file(filePath);
@@ -22,14 +37,15 @@ void Downloader::saveToFile(const QByteArray& data, const QString& filePath) {
         qDebug() << "Error saving data to file:" << file.errorString();
     }
 }
+
 void Downloader::run()
 {
-    if (url_m.isEmpty()) {return;}
+    if (url_m.isEmpty() || file_m.isEmpty() || levelDir_m.isEmpty())
+        return;
+
     QString urlString = url_m.toString();
     QByteArray byteArray = urlString.toUtf8();
     const char* url_cstring = byteArray.constData();
-
-    if (path_m.isEmpty()) {return;}
 
     // Initialize libcurl
     curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -51,7 +67,7 @@ void Downloader::run()
             qDebug() << "curl_easy_perform() failed:" << curl_easy_strerror(res);
         } else {
             qDebug() << "Downloaded successful\n";
-            saveToFile(data, path_m);
+            saveToFile(data, levelDir_m.absolutePath() + QDir::separator() + file_m);
         }
         curl_easy_cleanup(curl);
     }

@@ -1,0 +1,745 @@
+{
+  "name": "TR5",
+  "file_data_list": [
+    {
+      "filename": "DATA.TAG",
+      "md5sum": "e5c8e3c33ba2f156d56ed601e4b3d6ec"
+    },
+    {
+      "filename": "SINGLE.DAT",
+      "md5sum": "fa9716c64b0a65ec9d548f4d184e1b3d"
+    },
+    {
+      "filename": "SCRIPT.DAT",
+      "md5sum": "d74e5f33b2fff6a50bc67230f24849bd"
+    },
+    {
+      "filename": "ENGLISH.DAT",
+      "md5sum": "c49277e708dc965a5df6d7a4ec7e8ea9"
+    },
+    {
+      "filename": "readme.txt",
+      "md5sum": "6f5c471afacc797c262401ee17829bc7"
+    },
+    {
+      "filename": "binkw32.dll",
+      "md5sum": "4f3d3c8e19f58d44a0560d317cbf2f6c"
+    },
+    {
+      "filename": "cfgmgr32.dll",
+      "md5sum": "1fb1bc76d7802828c32a9e23a6e2118e"
+    },
+    {
+      "filename": "ITALIAN.DAT",
+      "md5sum": "c49277e708dc965a5df6d7a4ec7e8ea9"
+    },
+    {
+      "filename": "US.DAT",
+      "md5sum": "5b6cdfdf3d6e11bbd51265da4483fe7f"
+    },
+    {
+      "filename": "DUTCH.DAT",
+      "md5sum": "748bd5ec7e2d7c5bc788dca7c1866c6e"
+    },
+    {
+      "filename": "JAPAN.DAT",
+      "md5sum": "bf82440e9f5a3992a73a51f36fc172c4"
+    },
+    {
+      "filename": "PCTomb5.exe",
+      "md5sum": "179164156e3ca6641708d0419d6a91e9"
+    },
+    {
+      "filename": "GERMAN.DAT",
+      "md5sum": "3286f29f05cdb9c49fab536bc4619973"
+    },
+    {
+      "filename": "SPANISH.DAT",
+      "md5sum": "9375f1f90d7525e97585894301ddd14a"
+    },
+    {
+      "filename": "FRENCH.DAT",
+      "md5sum": "f5a18a979b3c8824279bdcdba1461b89"
+    },
+    {
+      "filename": "screens/story2.str",
+      "md5sum": "adb7b3693561aafda6c5b7f699de4735"
+    },
+    {
+      "filename": "screens/nxg.str",
+      "md5sum": "cab6c8f801f7b3cfb9f4d9c093ff79d5"
+    },
+    {
+      "filename": "screens/screens.str",
+      "md5sum": "80a799adc9915862e0c443d16d3ade9d"
+    },
+    {
+      "filename": "screens/gallery.str",
+      "md5sum": "b3cfc2d8bfada6c626751958e559a893"
+    },
+    {
+      "filename": "screens/story1.str",
+      "md5sum": "698d3f13cfd1647f269e6ef78776c6bb"
+    },
+    {
+      "filename": "audio/xa12_z_01.wav",
+      "md5sum": "511cb131f4d7fbb1934df6008cf47769"
+    },
+    {
+      "filename": "audio/xa11_vc01atv.wav",
+      "md5sum": "0bc9861ba09b9224bcb71a608f94de26"
+    },
+    {
+      "filename": "audio/xa8_jobyalrm.wav",
+      "md5sum": "3998a428bf14ae7d4e6085b04fbc3aea"
+    },
+    {
+      "filename": "audio/xa16_Joby10.wav",
+      "md5sum": "3f9711a68a24a3876f1e2441e0905206"
+    },
+    {
+      "filename": "audio/xa11_flyby2.wav",
+      "md5sum": "88f77413ac4987a38c79a3a3009eeaee"
+    },
+    {
+      "filename": "audio/xa2_UWATER2B.wav",
+      "md5sum": "39070af9d743f372b09bfbafc9f3d686"
+    },
+    {
+      "filename": "audio/xa7_z_06.wav",
+      "md5sum": "834c0dcc93fb6b83196ab2e905de69dd"
+    },
+    {
+      "filename": "audio/xa11_andy3.wav",
+      "md5sum": "55d7ec1014ee2274bd3c5c079714f642"
+    },
+    {
+      "filename": "audio/xa5_HMMM03.WAV",
+      "md5sum": "5806b04f3fd1af364103bd641e81de86"
+    },
+    {
+      "filename": "audio/xa17_A_Rome_Night.wav",
+      "md5sum": "11867af172924dd64859ab4bc7ff042d"
+    },
+    {
+      "filename": "audio/xa14_andy10.wav",
+      "md5sum": "aaecc9daaec67a6a4637bb1124f530bc"
+    },
+    {
+      "filename": "audio/xa15_joby5.wav",
+      "md5sum": "2a64a6dbea9428e88e883696ffe69a5f"
+    },
+    {
+      "filename": "audio/xa9_richcut4.wav",
+      "md5sum": "37e50b5c548b299030a3356491483a9d"
+    },
+    {
+      "filename": "audio/xa3_TL_03.wav",
+      "md5sum": "b172bb3fc7364fd8375747347971b44f"
+    },
+    {
+      "filename": "audio/xa17_Andrea4.wav",
+      "md5sum": "e25c1d8c769f803125cdec96813ad2bd"
+    },
+    {
+      "filename": "audio/xa8_uwater2a.wav",
+      "md5sum": "caa188ad39768ab44cf05a01c8e7d209"
+    },
+    {
+      "filename": "audio/xa7_z_06a.wav",
+      "md5sum": "3949c9f8393a7bdff8b4ec8af2a278d9"
+    },
+    {
+      "filename": "audio/xa15_joby4.wav",
+      "md5sum": "8580b19cff83a9f19f53de108d8a55d9"
+    },
+    {
+      "filename": "audio/xa6_Stealth3.wav",
+      "md5sum": "89dde418eac81de84c445548242cac07"
+    },
+    {
+      "filename": "audio/xa14_joby6.wav",
+      "md5sum": "96dd2208637e58d8c68ce998889d9346"
+    },
+    {
+      "filename": "audio/xa10_vc01.wav",
+      "md5sum": "b68dac427e80a88fbf72fdc11b5f2cd0"
+    },
+    {
+      "filename": "audio/xa16_Joby8.wav",
+      "md5sum": "4c276e0e5f9cb0c988f0ecab6a16f856"
+    },
+    {
+      "filename": "audio/xa4_Z_03.wav",
+      "md5sum": "9da41a359ab4505eb857d8be0ebf4eb4"
+    },
+    {
+      "filename": "audio/xa14_uwater1.wav",
+      "md5sum": "1724bcaecbd02e642bf8889bcd768a53"
+    },
+    {
+      "filename": "audio/xa10_spooky04.wav",
+      "md5sum": "b77b4d3ae592b46f73f33912b4d5f867"
+    },
+    {
+      "filename": "audio/xa9_title4.wav",
+      "md5sum": "457c30fc3989b7b8532a1a7a69eb0730"
+    },
+    {
+      "filename": "audio/xa13_Andy6.wav",
+      "md5sum": "943c81eb4f8e77946fb334ee1096374e"
+    },
+    {
+      "filename": "audio/xa6_Spooky03.wav",
+      "md5sum": "45e482049e4bc3e399d5a0a263d83a5c"
+    },
+    {
+      "filename": "audio/xa13_Z_07.wav",
+      "md5sum": "ba0657fc46faddcb27154b80ed16970e"
+    },
+    {
+      "filename": "audio/xa11_title1.wav",
+      "md5sum": "8a00fb673ee07288f24da62dff44c345"
+    },
+    {
+      "filename": "audio/xa13_cossack.wav",
+      "md5sum": "4551e57e20419b10fd7aacf588a15d8b"
+    },
+    {
+      "filename": "audio/xa5_MIL02.WAV",
+      "md5sum": "69beb3e824a37f45d17b3e36759f8b2b"
+    },
+    {
+      "filename": "audio/xa8_richcut3.wav",
+      "md5sum": "8ee1e3e40bfab010abe23a1f4241225f"
+    },
+    {
+      "filename": "audio/xa12_z_05.wav",
+      "md5sum": "8b7ebff152e0ad3da6b04d843cc4f236"
+    },
+    {
+      "filename": "audio/xa5_MIL06.WAV",
+      "md5sum": "dfae06d51c0e920928019327fe2e86d9"
+    },
+    {
+      "filename": "audio/xa13_Joby3.wav",
+      "md5sum": "1e6d595740836690830bd1472cf2f3cf"
+    },
+    {
+      "filename": "audio/xa10_z_10.wav",
+      "md5sum": "a1d7e2268fc1df0bc72d9569d69e675f"
+    },
+    {
+      "filename": "audio/xa9_swampy.wav",
+      "md5sum": "3f99f78fd675e2b59007d2906942e44c"
+    },
+    {
+      "filename": "audio/xa11_flyby3.wav",
+      "md5sum": "aaac48e7129ef11e3ae27d6e892b247b"
+    },
+    {
+      "filename": "audio/xa1_Secret.wav",
+      "md5sum": "32624f3e036081d95d904874451ba03c"
+    },
+    {
+      "filename": "audio/xa3_tl_06.wav",
+      "md5sum": "233e46d725406107ffada640408644b1"
+    },
+    {
+      "filename": "audio/xa1_TL_08.wav",
+      "md5sum": "f3c884e1506eb825f4991ca5fb86b41e"
+    },
+    {
+      "filename": "audio/xa6_Mil04.wav",
+      "md5sum": "2cb64cf2390570bc2b6b4f5e40f8369f"
+    },
+    {
+      "filename": "audio/xa14_andrea1.wav",
+      "md5sum": "9acae01fd5a6ff96b007377f7fdfa873"
+    },
+    {
+      "filename": "audio/xa8_z_08.wav",
+      "md5sum": "1cce3afe7661f495f640022d265efeb4"
+    },
+    {
+      "filename": "audio/xa16_A_Andy_Out_Norm.wav",
+      "md5sum": "07121541088f14dedf781ffa065cc8c7"
+    },
+    {
+      "filename": "audio/xa2_HMMM05.WAV",
+      "md5sum": "ae6fe7adb3fff51f5ec85d0f72158397"
+    },
+    {
+      "filename": "audio/xa9_evibes02.wav",
+      "md5sum": "0873b70aa28442a5094c071dbac4db5e"
+    },
+    {
+      "filename": "audio/xa17_Andrea2.wav",
+      "md5sum": "1de4758440505a3dad1de1c4345660ae"
+    },
+    {
+      "filename": "audio/xa4_mil05.wav",
+      "md5sum": "cabef39055f605be55fb501325b5980f"
+    },
+    {
+      "filename": "audio/xa15_boss_01.wav",
+      "md5sum": "297b3c4a2424c04c6855a34a45389f5e"
+    },
+    {
+      "filename": "audio/xa17_Andy9.wav",
+      "md5sum": "ff816e07cfb6054bb7b9a84b5da3c4e3"
+    },
+    {
+      "filename": "audio/xa8_mil03.wav",
+      "md5sum": "ddec9e5194fcb0eeaa9f528f51303bff"
+    },
+    {
+      "filename": "audio/xa3_ATTACK01.WAV",
+      "md5sum": "27e38a2bac0bcd059146d940dbcbc2c6"
+    },
+    {
+      "filename": "audio/xa7_tl_07.wav",
+      "md5sum": "57b05328f3302cf59bc4725407beb345"
+    },
+    {
+      "filename": "audio/xa11_monk_2.wav",
+      "md5sum": "233ef508d85c9b01a1ecae413505871e"
+    },
+    {
+      "filename": "audio/xa10_title2.wav",
+      "md5sum": "9699fa353372eb551ddd2430628fd9f2"
+    },
+    {
+      "filename": "audio/xa1_TL_10b.wav",
+      "md5sum": "c9c4faf959a5bdc64689c5cd5aefe4fb"
+    },
+    {
+      "filename": "audio/xa6_Z12.wav",
+      "md5sum": "ffdd827f611612025e4b1b5153e487da"
+    },
+    {
+      "filename": "audio/xa12_andy5.wav",
+      "md5sum": "f5e24f5114db77f4287c39ffea1e414e"
+    },
+    {
+      "filename": "audio/xa3_ATTACK03.WAV",
+      "md5sum": "d2c9a202653e24c7278a0924b98d1f75"
+    },
+    {
+      "filename": "audio/xa15_andy2.wav",
+      "md5sum": "2e1c7cd75c799e751eb72b022990fe30"
+    },
+    {
+      "filename": "audio/xa2_TL_01.wav",
+      "md5sum": "5af69ea45c90dc3f8fbe79c8820f261b"
+    },
+    {
+      "filename": "audio/xa8_z_13.wav",
+      "md5sum": "109d170f2d30c4fc3308bbabf14fa269"
+    },
+    {
+      "filename": "audio/xa17_Andy1.wav",
+      "md5sum": "100e71a7e7644cf231a7157516a72dac"
+    },
+    {
+      "filename": "audio/xa11_flyby1.wav",
+      "md5sum": "5842201dab5a92e8a2284fabb35d2e5d"
+    },
+    {
+      "filename": "audio/xa7_evibes01.wav",
+      "md5sum": "1434376c3c4130b4f69c6587aed80847"
+    },
+    {
+      "filename": "audio/xa8_fightsc.wav",
+      "md5sum": "573b4eaef5ac391937b996f963e6a445"
+    },
+    {
+      "filename": "audio/xa13_Andrea3.wav",
+      "md5sum": "1455be306224665d4f92036e822c7b07"
+    },
+    {
+      "filename": "audio/xa2_ATTACK04.wav",
+      "md5sum": "fc6d787584f10d0b8649cf0fe3d06573"
+    },
+    {
+      "filename": "audio/xa2_TOMS01.wav",
+      "md5sum": "9e57f818e1894b5d67c02e59beae18b4"
+    },
+    {
+      "filename": "audio/xa4_drama01.wav",
+      "md5sum": "89667c5cd830168b83cebed20616ece2"
+    },
+    {
+      "filename": "audio/xa15_a_rome.wav",
+      "md5sum": "4dcf10893061b09284f0004b5086ebfb"
+    },
+    {
+      "filename": "audio/xa7_authtr.wav",
+      "md5sum": "5358ca0e4c6e5c4fc109d26af3bd1493"
+    },
+    {
+      "filename": "audio/xa9_chopin01.wav",
+      "md5sum": "7cf8a9158e12f929ab5b448eb558cd6f"
+    },
+    {
+      "filename": "audio/xa7_andyooer.wav",
+      "md5sum": "6d032470f3e5b59c699ebb1dfa1e80e3"
+    },
+    {
+      "filename": "audio/xa16_A_Andy_Out_Spooky.wav",
+      "md5sum": "61c47b6f9f5236282c6f13becd847d25"
+    },
+    {
+      "filename": "audio/xa13_Andy7.wav",
+      "md5sum": "0409ff0c89cf77c305f7bae8314ae486"
+    },
+    {
+      "filename": "audio/xa16_A_Harbour_out.wav",
+      "md5sum": "d775df898e370637d58af1151d93dd48"
+    },
+    {
+      "filename": "audio/xa9_spooky01.wav",
+      "md5sum": "d1343efc6fc26ca7fa54755924deec0f"
+    },
+    {
+      "filename": "audio/xa12_moses01.wav",
+      "md5sum": "e36da0debbaaa7130ef2c8d22b6b8e25"
+    },
+    {
+      "filename": "audio/xa16_A_Sub_Amb.wav",
+      "md5sum": "7e793c044b02416c7be149e3faee7d2d"
+    },
+    {
+      "filename": "audio/xa6_Z13.wav",
+      "md5sum": "337b35daa154a3cddeb1b311da853959"
+    },
+    {
+      "filename": "audio/xa3_stealth2.wav",
+      "md5sum": "7d9468bd24a2bbdb23fdf7c52f38fa39"
+    },
+    {
+      "filename": "audio/xa6_Z_04anim.wav",
+      "md5sum": "f7b17b7eaa3d780b2365c157e17247be"
+    },
+    {
+      "filename": "audio/xa1_TL_05.wav",
+      "md5sum": "8be868c32bea2ca317c228d01ba1d067"
+    },
+    {
+      "filename": "audio/xa1_TL_02.wav",
+      "md5sum": "5711d6e128f4c6cd358e8d8d2df04697"
+    },
+    {
+      "filename": "audio/xa17_A_VC_Saga.wav",
+      "md5sum": "54adb82d2478cc4131c8fe9017bec4bf"
+    },
+    {
+      "filename": "audio/xa9_z_03.wav",
+      "md5sum": "cc66461fb79c8a66e6af3776eb37d3ee"
+    },
+    {
+      "filename": "audio/xa9_gods01.wav",
+      "md5sum": "350c4315d5f8f0fd45d5eea98ba20cdc"
+    },
+    {
+      "filename": "audio/xa15_joby9.wav",
+      "md5sum": "a0a06072663542d0e8478f531a0f1f04"
+    },
+    {
+      "filename": "audio/xa5_TL_04.WAV",
+      "md5sum": "71986df3169583b51d3f283b8153f8b8"
+    },
+    {
+      "filename": "audio/xa14_ecredits.wav",
+      "md5sum": "f1562385e3857bbc105a43e5978b8c4a"
+    },
+    {
+      "filename": "audio/xa1_AndyPew.wav",
+      "md5sum": "a1628b41c9573623cefbbc74d0e07801"
+    },
+    {
+      "filename": "audio/xa4_mil01.wav",
+      "md5sum": "2b7832595c42ae363b9ebb473007acc6"
+    },
+    {
+      "filename": "audio/xa12_andy4b.wav",
+      "md5sum": "d7fc66f594c9fc47f2bfd8027d740cb5"
+    },
+    {
+      "filename": "audio/xa5_HMMM04.WAV",
+      "md5sum": "06e0160574179c3e546204d1f408a820"
+    },
+    {
+      "filename": "audio/xa15_a_andy.wav",
+      "md5sum": "202975024aaa0c7dc6cbaaf7cdafccde"
+    },
+    {
+      "filename": "audio/xa4_hmmm06.wav",
+      "md5sum": "65437056315c7021ff1f43dffe66a567"
+    },
+    {
+      "filename": "audio/xa4_hit01.wav",
+      "md5sum": "ab7b6ff642cbf2d92050127484f60bd0"
+    },
+    {
+      "filename": "audio/xa7_z_02.wav",
+      "md5sum": "af42918989be741c6391c13d524780fe"
+    },
+    {
+      "filename": "audio/xa2_HMMM02.WAV",
+      "md5sum": "6e63280c8a48a44ae09b6bff86ffd8e1"
+    },
+    {
+      "filename": "audio/xa14_andy8.wav",
+      "md5sum": "1471ba32a1e5d22ba9b6d74dd7f841a6"
+    },
+    {
+      "filename": "audio/xa3_stealth1.wav",
+      "md5sum": "6d50582a916714cdd56fd9d6b690a0da"
+    },
+    {
+      "filename": "audio/xa3_HMMM01.WAV",
+      "md5sum": "6fc29acaf7793594aed60dc3a3440e73"
+    },
+    {
+      "filename": "audio/xa6_AuthSolo.wav",
+      "md5sum": "5b9e137d77494a46e67679e67769fbc3"
+    },
+    {
+      "filename": "audio/xa5_MIL02A.WAV",
+      "md5sum": "f84a6c9151b8c2bf1ffae9048f581b4d"
+    },
+    {
+      "filename": "audio/xa10_z_09.wav",
+      "md5sum": "5bd27967ba6366c4bbcdb396e20bb994"
+    },
+    {
+      "filename": "audio/xa5_SPOOKY02.WAV",
+      "md5sum": "f0db638d1879fb4bc3dd121a9892a209"
+    },
+    {
+      "filename": "audio/xa12_z_10.wav",
+      "md5sum": "e5070213d3271720176b4061b80ef70d"
+    },
+    {
+      "filename": "audio/xa16_A_Underwater.wav",
+      "md5sum": "c0ca1d9529a681717ea27ef426312128"
+    },
+    {
+      "filename": "audio/xa10_echoir01.wav",
+      "md5sum": "eb1c14c3df1c38322fb7196a2ec7499f"
+    },
+    {
+      "filename": "audio/xa13_Andrea3B.wav",
+      "md5sum": "da279d32f6d533a84b1f65227c403489"
+    },
+    {
+      "filename": "audio/xa17_A_Industry.wav",
+      "md5sum": "3814325be920c772ded2598865275a6d"
+    },
+    {
+      "filename": "audio/xa11_andy4.wav",
+      "md5sum": "8619032b0937549ea4a9f7b58050770f"
+    },
+    {
+      "filename": "audio/xa4_stealth4.wav",
+      "md5sum": "0c21c7f503b1d25d724d39b941a17af3"
+    },
+    {
+      "filename": "audio/xa1_TL_11.wav",
+      "md5sum": "6b6c1075d7f3964836ecf3c428172e59"
+    },
+    {
+      "filename": "audio/xa1_Z_10.wav",
+      "md5sum": "ccfb5ef6c45ef6d1e27cd40a46ca9eaf"
+    },
+    {
+      "filename": "audio/xa8_mil02b.wav",
+      "md5sum": "b92706515502e8f80f745cd281e7739e"
+    },
+    {
+      "filename": "audio/xa4_spooky05.wav",
+      "md5sum": "beb40246a2d3976c79d253da9f35a40a"
+    },
+    {
+      "filename": "audio/xa12_richcut1.wav",
+      "md5sum": "5566b91586cc67a263802051275fa1c6"
+    },
+    {
+      "filename": "audio/xa13_Joby7.wav",
+      "md5sum": "93e01b7cc52d172ffa0d6df43c337d1c"
+    },
+    {
+      "filename": "audio/xa2_SPOOKY2A.WAV",
+      "md5sum": "3c947edb91dbfffdd61c067a85508c18"
+    },
+    {
+      "filename": "audio/xa14_joby1.wav",
+      "md5sum": "893c721e71bb930ab429baf436860493"
+    },
+    {
+      "filename": "audio/xa6_Solo01.wav",
+      "md5sum": "30b06cd8a1624cdcdf72493767f38e6c"
+    },
+    {
+      "filename": "audio/xa3_ATTACK02.WAV",
+      "md5sum": "d67b0ce11dd9e679d327561be1fee524"
+    },
+    {
+      "filename": "audio/xa7_andyoooh.wav",
+      "md5sum": "729c28970ace31915818b5df0099c44b"
+    },
+    {
+      "filename": "audio/xa12_flyby4.wav",
+      "md5sum": "0a929d7026964b6c5e903f7e3dfdfe18"
+    },
+    {
+      "filename": "audio/xa2_tl_10a.wav",
+      "md5sum": "5ed8c7a9a15d4643152b3f511d227ccc"
+    },
+    {
+      "filename": "audio/xa10_perc01.wav",
+      "md5sum": "7ef736d64d03964927b253fe46e27b13"
+    },
+    {
+      "filename": "audio/xa16_A_Rome_Day.wav",
+      "md5sum": "d8dd02e1be2c300cc123b57cdedab066"
+    },
+    {
+      "filename": "audio/xa10_title3.wav",
+      "md5sum": "3e507588e3a92fab7e7c376aab1df28a"
+    },
+    {
+      "filename": "audio/xa17_Andy11.wav",
+      "md5sum": "f5be166c69588d871bae32ebdde053f8"
+    },
+    {
+      "filename": "audio/xa14_richcut2.wav",
+      "md5sum": "583cdd1d5604a6ee0e43d9a395176855"
+    },
+    {
+      "filename": "audio/xa5_TL_12.WAV",
+      "md5sum": "f1697508545e427543c6880f1d5da966"
+    },
+    {
+      "filename": "audio/xa15_joby2.wav",
+      "md5sum": "86d3dbe0b000ea42e0406d9ca419f15b"
+    },
+    {
+      "filename": "data/uslogo.pak",
+      "md5sum": "f01c2dde34ea407b39352a965ce8c99c"
+    },
+    {
+      "filename": "data/richcut2.trc",
+      "md5sum": "7c05145f686570c60149e32d8384687f"
+    },
+    {
+      "filename": "data/joby5.trc",
+      "md5sum": "d9663849214adc7772a711cdabe76805"
+    },
+    {
+      "filename": "data/rich1.trc",
+      "md5sum": "668a568434b3afbddfddf5629c89df0e"
+    },
+    {
+      "filename": "data/Andrea2.trc",
+      "md5sum": "d008a041b7dff4f92c2bab251e3411e5"
+    },
+    {
+      "filename": "data/rich3.trc",
+      "md5sum": "799dce47896e9cf7ca27b0ab35dfc874"
+    },
+    {
+      "filename": "data/Title.trc",
+      "md5sum": "86fa2320d5b1857f233d6fc640c6fc5f"
+    },
+    {
+      "filename": "data/Andrea1.trc",
+      "md5sum": "3c0765fc396739a00058051544da91ac"
+    },
+    {
+      "filename": "data/Andrea3.trc",
+      "md5sum": "de070d89a31def85c0e836feb8e2b8a5"
+    },
+    {
+      "filename": "data/joby4.trc",
+      "md5sum": "fa30fb90acd4eac1b668c92314ff796c"
+    },
+    {
+      "filename": "data/uklogo.pak",
+      "md5sum": "56ab653aaa816ec5f30a61adf36ca13e"
+    },
+    {
+      "filename": "data/del.trc",
+      "md5sum": "b64c1d28ca7b44523481ba729972e64d"
+    },
+    {
+      "filename": "data/rich2.trc",
+      "md5sum": "832b5f965c3d1e9407f0f87fdcefc90e"
+    },
+    {
+      "filename": "data/andy1.trc",
+      "md5sum": "423b6656b845bbed5d333e4aecf27132"
+    },
+    {
+      "filename": "data/Andy2.trc",
+      "md5sum": "a73e437ca8d0f49272dec9c7d66413e3"
+    },
+    {
+      "filename": "data/andy3.trc",
+      "md5sum": "d8ad767c3987e911d52c79a50f630126"
+    },
+    {
+      "filename": "data/LOGO512.pak",
+      "md5sum": "7c22c5e2ef3da19927f6409a0a5b0349"
+    },
+    {
+      "filename": "data/cutseq.bin",
+      "md5sum": "5b664e0f149412382960c57060d8daed"
+    },
+    {
+      "filename": "data/joby2.trc",
+      "md5sum": "de27e12f7c859fc754ae6c1d67100a3e"
+    },
+    {
+      "filename": "data/joby3.trc",
+      "md5sum": "662ee706ca56b7f8f8bc8340d885000d"
+    },
+    {
+      "filename": "movie/fmv5.bik",
+      "md5sum": "3c3b24ac7d7eeff054eae9e727da3c58"
+    },
+    {
+      "filename": "movie/FMV2.bik",
+      "md5sum": "371c44b5175ff93f045838bee1376943"
+    },
+    {
+      "filename": "movie/fmv7.bik",
+      "md5sum": "12c015f2605273f2d96173fd5dd49aba"
+    },
+    {
+      "filename": "movie/fmv6.bik",
+      "md5sum": "1aab7e9143df18bdef844506a8f3acfa"
+    },
+    {
+      "filename": "movie/fmv4.bik",
+      "md5sum": "254c2fd51229d01170e87ca303ada656"
+    },
+    {
+      "filename": "movie/Fmv0.bik",
+      "md5sum": "d76f06cca306df1e1d09d6894ce377cc"
+    },
+    {
+      "filename": "movie/FMV1.bik",
+      "md5sum": "18784986a3bbc647915acf228f7829a1"
+    },
+    {
+      "filename": "movie/fmv8.bik",
+      "md5sum": "7298afe08c366099ce7ab8ba69e04551"
+    },
+    {
+      "filename": "movie/fmv3.bik",
+      "md5sum": "9b0a757e0c46e8644a7b59305dbcb928"
+    }
+  ]
+}

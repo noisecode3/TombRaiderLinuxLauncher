@@ -1,0 +1,577 @@
+{
+  "name": "TR2",
+  "file_data_list": [
+    {
+      "filename": "WINSDEC.DLL",
+      "md5sum": "3e81974ab0a22b640b5a52b41d6a3913"
+    },
+    {
+      "filename": "tombpc.dat",
+      "md5sum": "d48757da01f8642f1a3d82fae0fc99e4"
+    },
+    {
+      "filename": "readme.txt",
+      "md5sum": "f6ad9626fafbb4a6f46e39ae9ab13d11"
+    },
+    {
+      "filename": "sound.dll",
+      "md5sum": "5d0355849a06a2270c2880c4615d8cab"
+    },
+    {
+      "filename": "msvcp90.dll",
+      "md5sum": "6de5c66e434a9c1729575763d891c6c2"
+    },
+    {
+      "filename": "Edec.dll",
+      "md5sum": "385a43ba3173c0617c3ce3f3ae0c302c"
+    },
+    {
+      "filename": "WINSTR.DLL",
+      "md5sum": "bd9397ee53c1dbe34d1b4fc168d8025e"
+    },
+    {
+      "filename": "msvcr90.dll",
+      "md5sum": "e7d91d008fe76423962b91c43c88e4eb"
+    },
+    {
+      "filename": "audiere.dll",
+      "md5sum": "14fdbcf78f39553202d382d9082dc9cb"
+    },
+    {
+      "filename": "Tomb2.exe",
+      "md5sum": "964f0c4e08ff44a905e8fc9a78f605dc"
+    },
+    {
+      "filename": "WINPLAY.DLL",
+      "md5sum": "4ee5d4026f15c967ed3ae599885018b0"
+    },
+    {
+      "filename": "Dec130.dll",
+      "md5sum": "a3a3379012c60dd882760cc47c5cbe5f"
+    },
+    {
+      "filename": "fmv/LOGO.RPL",
+      "md5sum": "20be937db48b25b57bc88e9d47517905"
+    },
+    {
+      "filename": "fmv/CRASH.RPL",
+      "md5sum": "0896c7e1600e7d841ac79762ba77b780"
+    },
+    {
+      "filename": "fmv/ANCIENT.RPL",
+      "md5sum": "8900a61895597eec87daa558b2a22805"
+    },
+    {
+      "filename": "fmv/MODERN.RPL",
+      "md5sum": "a1c6f33399f5f9ae5fa41496e30cffad"
+    },
+    {
+      "filename": "fmv/MS.RPL",
+      "md5sum": "fa6aa575354759a2a1c25c3f074ec961"
+    },
+    {
+      "filename": "fmv/LANDING.RPL",
+      "md5sum": "71de2ea3664867d32ea135f3de7a7289"
+    },
+    {
+      "filename": "fmv/JEEP.RPL",
+      "md5sum": "94d010cdbd108de01fdb8535314e77a3"
+    },
+    {
+      "filename": "fmv/END.RPL",
+      "md5sum": "3d60c928baa5a5211478e15e4a3e0ce2"
+    },
+    {
+      "filename": "music/45.mp3",
+      "md5sum": "facc5a77278692d408fca1ebed43c94e"
+    },
+    {
+      "filename": "music/36.mp3",
+      "md5sum": "f7deee0a2c7634891b980cc1ea73e58b"
+    },
+    {
+      "filename": "music/24.mp3",
+      "md5sum": "0d689db4cdbbc367d410dcdc3b39aec3"
+    },
+    {
+      "filename": "music/51.mp3",
+      "md5sum": "8424a73c6d05b50ef9fd7e24a6097a62"
+    },
+    {
+      "filename": "music/14.mp3",
+      "md5sum": "3ad9c80d0b6c802039e02dbf7297fd04"
+    },
+    {
+      "filename": "music/41.mp3",
+      "md5sum": "4c26c1779d3f61828b637c16735b69cf"
+    },
+    {
+      "filename": "music/61.mp3",
+      "md5sum": "d6933ebd2fe5b80bf72426bb9a6d404f"
+    },
+    {
+      "filename": "music/46.mp3",
+      "md5sum": "4bc1029d8f8230539d19fc91d96469af"
+    },
+    {
+      "filename": "music/44.mp3",
+      "md5sum": "7353c1f113ea31d3ffd09943cc4dbdfa"
+    },
+    {
+      "filename": "music/52.mp3",
+      "md5sum": "fab5f6bb30d3c87bae8588ea3fd0d309"
+    },
+    {
+      "filename": "music/19.mp3",
+      "md5sum": "2aa1567018e01f9f51a79ccc3cdfdb01"
+    },
+    {
+      "filename": "music/22.mp3",
+      "md5sum": "3e3a6806cb599a18cf39eac836ff2f66"
+    },
+    {
+      "filename": "music/6.mp3",
+      "md5sum": "712acfb3fe6d2f3b5458615d28b9c536"
+    },
+    {
+      "filename": "music/31.mp3",
+      "md5sum": "199652277e646dd2c8a42f6c3bca7611"
+    },
+    {
+      "filename": "music/10.mp3",
+      "md5sum": "b2441816b0c394f40fa0d08c389e97ba"
+    },
+    {
+      "filename": "music/20.mp3",
+      "md5sum": "fa05a47f22a3a039317fb36e3c105797"
+    },
+    {
+      "filename": "music/25.mp3",
+      "md5sum": "f8c3a67f1bad29dc66f365ed8ba97878"
+    },
+    {
+      "filename": "music/57.mp3",
+      "md5sum": "2611d6d4b07b74811aa01a21bce8e0d0"
+    },
+    {
+      "filename": "music/13.mp3",
+      "md5sum": "cb5181fafa18677d9bd48c24bfd95116"
+    },
+    {
+      "filename": "music/60.mp3",
+      "md5sum": "d61ea4e80193f226b5550401aff94586"
+    },
+    {
+      "filename": "music/12.mp3",
+      "md5sum": "e80bad5aad5a9509bab865e8d170586a"
+    },
+    {
+      "filename": "music/28.mp3",
+      "md5sum": "7b390b1f0888702913bd9c74017fb990"
+    },
+    {
+      "filename": "music/43.mp3",
+      "md5sum": "9214317eb2bd1a7f4de62732fe84f03c"
+    },
+    {
+      "filename": "music/23.mp3",
+      "md5sum": "7ed475391096b3e92a7e5fdbeff7170e"
+    },
+    {
+      "filename": "music/49.mp3",
+      "md5sum": "b67288276db58bf7223c1a50403cdffc"
+    },
+    {
+      "filename": "music/32.mp3",
+      "md5sum": "bec33ad35664b42920254923d47d65f2"
+    },
+    {
+      "filename": "music/53.mp3",
+      "md5sum": "d171545a15bcbdb7143ff4f0b765a007"
+    },
+    {
+      "filename": "music/34.mp3",
+      "md5sum": "4fdb5b3f7aae6901329d6df3ea0181aa"
+    },
+    {
+      "filename": "music/16.mp3",
+      "md5sum": "c0df816acc94ac652efab064a0862b2f"
+    },
+    {
+      "filename": "music/55.mp3",
+      "md5sum": "38c01f8b22207f22bc187198aa6aa6f1"
+    },
+    {
+      "filename": "music/11.mp3",
+      "md5sum": "556ede9b43a5813c9befd13994e3f74d"
+    },
+    {
+      "filename": "music/3.mp3",
+      "md5sum": "80d92120c84f2002676b15591b9d00e5"
+    },
+    {
+      "filename": "music/40.mp3",
+      "md5sum": "027acf8c3ca73196705f4062b6b1d4a7"
+    },
+    {
+      "filename": "music/54.mp3",
+      "md5sum": "7dff3b601a27c0f2d89109da32fdf225"
+    },
+    {
+      "filename": "music/2.mp3",
+      "md5sum": "9cef8b5de815f733c30472b2d0d9fac3"
+    },
+    {
+      "filename": "music/35.mp3",
+      "md5sum": "da1809db76381487eb5deed4084a410a"
+    },
+    {
+      "filename": "music/42.mp3",
+      "md5sum": "a1b1a8ce48e74f1e5810db4df200a60c"
+    },
+    {
+      "filename": "music/18.mp3",
+      "md5sum": "506bdc7e6deaabcf5c74a4e4be0f12a4"
+    },
+    {
+      "filename": "music/17.mp3",
+      "md5sum": "f2fcff40b46e6adca42c6b38cddd49c2"
+    },
+    {
+      "filename": "music/15.mp3",
+      "md5sum": "5071415a523739f2a5d71561b2da7e8a"
+    },
+    {
+      "filename": "music/7.mp3",
+      "md5sum": "8a4047aea423952fccb9586da57400bd"
+    },
+    {
+      "filename": "music/47.mp3",
+      "md5sum": "48074c4b3b3aeccbdabf309bda3e304d"
+    },
+    {
+      "filename": "music/56.mp3",
+      "md5sum": "002cdb7eddda03c94ccddac5107dc01b"
+    },
+    {
+      "filename": "music/38.mp3",
+      "md5sum": "cdb08f1dea5da94b0f8f3bb03b9dc2e4"
+    },
+    {
+      "filename": "music/29.mp3",
+      "md5sum": "703b5a92dbff3fb18fcabac825535b5f"
+    },
+    {
+      "filename": "music/27.mp3",
+      "md5sum": "b335245fa47a420e83dd5a845deb006e"
+    },
+    {
+      "filename": "music/33.mp3",
+      "md5sum": "5ae8c081b62e24c18796bbf851e33fe5"
+    },
+    {
+      "filename": "music/50.mp3",
+      "md5sum": "5e07a4a9b27b3f69e2981745fc38d674"
+    },
+    {
+      "filename": "music/59.mp3",
+      "md5sum": "4902f766bfaac46b190e7bfed19104da"
+    },
+    {
+      "filename": "music/5.mp3",
+      "md5sum": "8489bbdafc1666d799c659017aeefa23"
+    },
+    {
+      "filename": "music/58.mp3",
+      "md5sum": "731744483494f87aa298552f64ff993b"
+    },
+    {
+      "filename": "music/4.mp3",
+      "md5sum": "a01ab274bf96602d3778ada03ea32d7b"
+    },
+    {
+      "filename": "music/37.mp3",
+      "md5sum": "ffe9c5e7a2b9f403202173b6cbe71197"
+    },
+    {
+      "filename": "music/9.mp3",
+      "md5sum": "f7fe916bdcbce7bf823ecde91c17b8d7"
+    },
+    {
+      "filename": "music/8.mp3",
+      "md5sum": "3c52339795f1c1628cdaed6454b79eed"
+    },
+    {
+      "filename": "music/48.mp3",
+      "md5sum": "0821d9912f45dce57460adc8ee928fc3"
+    },
+    {
+      "filename": "music/30.mp3",
+      "md5sum": "8bf35bb99c707e1ba526ed226187137c"
+    },
+    {
+      "filename": "music/21.mp3",
+      "md5sum": "75b1501a17f29d6af11f54fb4326b4f7"
+    },
+    {
+      "filename": "music/39.mp3",
+      "md5sum": "53a6bcafe996b2e00b47213afe8b6a24"
+    },
+    {
+      "filename": "music/26.mp3",
+      "md5sum": "e0d98e57f2f2cbf040461441ca7b9f38"
+    },
+    {
+      "filename": "audio/cdaudio.mp3",
+      "md5sum": "39a48e6750b8f546149eadae58d0a27a"
+    },
+    {
+      "filename": "audio/cdaudio.dat",
+      "md5sum": "a3bbf0cc3c70fb08e0b79a32b7f37f09"
+    },
+    {
+      "filename": "data/END.PCX",
+      "md5sum": "72169691f91ed6fb4f3914aab8febfcd"
+    },
+    {
+      "filename": "data/TOMBPC.DAT",
+      "md5sum": "d48757da01f8642f1a3d82fae0fc99e4"
+    },
+    {
+      "filename": "data/dsetup.dll",
+      "md5sum": "9cf66de71dc7143006c9cd719dcbf32f"
+    },
+    {
+      "filename": "data/setup.lid",
+      "md5sum": "2aea6c00031f7392f7ee7ab48b1c48cb"
+    },
+    {
+      "filename": "data/DATA.TAG",
+      "md5sum": "4945551ee03b0ba808c0764c01e1dc27"
+    },
+    {
+      "filename": "data/data1.cab",
+      "md5sum": "1461a540ee9e581c8de4f4fccc6412cd"
+    },
+    {
+      "filename": "data/cut2.TR2",
+      "md5sum": "b3992380d8aa167b13f8e01a20ce2d7f"
+    },
+    {
+      "filename": "data/_setup.dll",
+      "md5sum": "c4f7328b247c09c93d284f3e5fc5fcac"
+    },
+    {
+      "filename": "data/TITLE.PCX",
+      "md5sum": "a5dad5ff5cb275825ff1895ca76fa908"
+    },
+    {
+      "filename": "data/SKIDOO.TR2",
+      "md5sum": "7c219c269643bb4c8d67498f4664946e"
+    },
+    {
+      "filename": "data/RIG.TR2",
+      "md5sum": "d236fac172c123de71e0d1a196266fd8"
+    },
+    {
+      "filename": "data/unwater.TR2",
+      "md5sum": "da46d03096a76e9d9ed9f51e3c614a29"
+    },
+    {
+      "filename": "data/language.dat",
+      "md5sum": "4408de76f0ee100fc9fc1904a0b559c5"
+    },
+    {
+      "filename": "data/SETUP.EXE",
+      "md5sum": "5debe4269d18c2036764dc7269294760"
+    },
+    {
+      "filename": "data/credit09.PCX",
+      "md5sum": "851d622449b9004fb578523706cb99d5"
+    },
+    {
+      "filename": "data/MAIN.SFX",
+      "md5sum": "31157b9ad747ad1cba2b0de13a637534"
+    },
+    {
+      "filename": "data/WALL.TR2",
+      "md5sum": "da1e01683dad5fabbfff89c267b75b9e"
+    },
+    {
+      "filename": "data/BOAT.TR2",
+      "md5sum": "361a49ac2e9c58e2ac70f0b667ddbd54"
+    },
+    {
+      "filename": "data/dsetup16.dll",
+      "md5sum": "550c643fbe00165634cfeff9bde3fb69"
+    },
+    {
+      "filename": "data/_sys1.cab",
+      "md5sum": "a4d442db0ea5657f55003d416a725797"
+    },
+    {
+      "filename": "data/credit01.PCX",
+      "md5sum": "2b5d853a943141596bacfa3a051c235d"
+    },
+    {
+      "filename": "data/FLOATING.TR2",
+      "md5sum": "1e7d0d88ff9d569e22982af761bb006b"
+    },
+    {
+      "filename": "data/OPERA.TR2",
+      "md5sum": "5a1d02fc5b33900250563b5481f062ed"
+    },
+    {
+      "filename": "data/os.dat",
+      "md5sum": "94d9f85ad98bd25100dacee96b438900"
+    },
+    {
+      "filename": "data/cut4.TR2",
+      "md5sum": "afda52933e133a64f7cf624371e7445a"
+    },
+    {
+      "filename": "data/setup.BMP",
+      "md5sum": "571141d7865e748d214bdfe71f947c8a"
+    },
+    {
+      "filename": "data/_ISDEL.EXE",
+      "md5sum": "38cacf5a4997363829a9901d627f80e3"
+    },
+    {
+      "filename": "data/icecave.TR2",
+      "md5sum": "6781ace1c3584f440fd0b61ca280f034"
+    },
+    {
+      "filename": "data/keel.TR2",
+      "md5sum": "6011c18086245fabf16c8265601451d6"
+    },
+    {
+      "filename": "data/layout.bin",
+      "md5sum": "2c6c4295f91a2fd48311b351197945dd"
+    },
+    {
+      "filename": "data/credit02.PCX",
+      "md5sum": "6c42318682cfcec26efbfaa4d62ba79d"
+    },
+    {
+      "filename": "data/MONASTRY.TR2",
+      "md5sum": "b9edd6b3c561289463e65475563b3264"
+    },
+    {
+      "filename": "data/credit08.PCX",
+      "md5sum": "806be113f1d5e4066b211ff0386f24cd"
+    },
+    {
+      "filename": "data/autorun.ico",
+      "md5sum": "b512d29fe40c5dcd46bd801bb2dbdbcd"
+    },
+    {
+      "filename": "data/legal.PCX",
+      "md5sum": "e80d1f4b487576485b278068c78e1cb3"
+    },
+    {
+      "filename": "data/Emprtomb.tr2",
+      "md5sum": "38c933bd3d019ed1338749b78b07d82f"
+    },
+    {
+      "filename": "data/credit03.PCX",
+      "md5sum": "8ddede569b8ece0e0d5a3eae839a452a"
+    },
+    {
+      "filename": "data/TITLE.tr2",
+      "md5sum": "5154d720880db8774c7dfbefdd16f2a8"
+    },
+    {
+      "filename": "data/dsetup32.dll",
+      "md5sum": "3d98c98e3a859bb26aca297b6fff3cde"
+    },
+    {
+      "filename": "data/xian.TR2",
+      "md5sum": "fd8c45efc3f5e690edd0796d350a28ba"
+    },
+    {
+      "filename": "data/SETUP.INI",
+      "md5sum": "4ffa7e7074a5cc3c7af7ff60cd721b9a"
+    },
+    {
+      "filename": "data/credit05.PCX",
+      "md5sum": "c30b43bb33cf0df43d6cea1c610db201"
+    },
+    {
+      "filename": "data/lang.dat",
+      "md5sum": "fd117b58c15db10821aee6029ea829f8"
+    },
+    {
+      "filename": "data/platform.TR2",
+      "md5sum": "b3501c67e828452cd58644ae5c3dd854"
+    },
+    {
+      "filename": "data/catacomb.TR2",
+      "md5sum": "f719b6a79d80da85440eaa923a2b1ae6"
+    },
+    {
+      "filename": "data/house.TR2",
+      "md5sum": "b56c04ea52227eb7fdebd0665b45357a"
+    },
+    {
+      "filename": "data/setup.ins",
+      "md5sum": "2864d18c6d827c5fa8569702f052833d"
+    },
+    {
+      "filename": "data/autorun.exe",
+      "md5sum": "31ee93840f985c82473148b88d0adfb4"
+    },
+    {
+      "filename": "data/credit06.PCX",
+      "md5sum": "eb2cee75c9c41867a1c13234fcc69767"
+    },
+    {
+      "filename": "data/credit07.PCX",
+      "md5sum": "04c23117c5ede7f4b77677775677652b"
+    },
+    {
+      "filename": "data/CUT1.TR2",
+      "md5sum": "bc6bd4af656c6ce5ea4c388b23365f0a"
+    },
+    {
+      "filename": "data/deck.TR2",
+      "md5sum": "35afe8b754f3c786ae02a716bf193ed9"
+    },
+    {
+      "filename": "data/credit04.PCX",
+      "md5sum": "003b2b13f3bc6667c55a6b6748a9c688"
+    },
+    {
+      "filename": "data/venice.TR2",
+      "md5sum": "d16aca39d8cf8aed74366f8fa1c0009a"
+    },
+    {
+      "filename": "data/data",
+      "md5sum": "d48757da01f8642f1a3d82fae0fc99e4"
+    },
+    {
+      "filename": "data/cut3.TR2",
+      "md5sum": "170950c16fc31be97dbd42547acbf398"
+    },
+    {
+      "filename": "data/ASSAULT.TR2",
+      "md5sum": "d6f218e32d172e67db60daa35ef7e114"
+    },
+    {
+      "filename": "data/_INST32I.EX_",
+      "md5sum": "a755efdaa55974c1a5dba5eefa0a5ebe"
+    },
+    {
+      "filename": "data/autorun.inf",
+      "md5sum": "629d893cf661a83dcb0ba3a16d81436f"
+    },
+    {
+      "filename": "data/living.TR2",
+      "md5sum": "f16bb5d048ce82cdaa86114e0ae90c2b"
+    },
+    {
+      "filename": "data/_user1.cab",
+      "md5sum": "c76b2d4ffedb8adf1611616f77eaf5c4"
+    }
+  ]
+}

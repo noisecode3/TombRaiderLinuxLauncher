@@ -1,0 +1,325 @@
+{
+  "name": "TR3",
+  "file_data_list": [
+    {
+      "filename": "DATA.TAG",
+      "md5sum": "61f1377c2123f1c971cbfbf9c7ce8faf"
+    },
+    {
+      "filename": "DEC130.DLL",
+      "md5sum": "d09677d10864caa509ab2ffbd7ad37e7"
+    },
+    {
+      "filename": "WINPLAY.DLL",
+      "md5sum": "4ee5d4026f15c967ed3ae599885018b0"
+    },
+    {
+      "filename": "os.dat",
+      "md5sum": "af1d8d9435cb10fe2f4b4215eaf6bec4"
+    },
+    {
+      "filename": "data.bin",
+      "md5sum": "3561c0dffdb90248fa1fc2d4fb86f08a"
+    },
+    {
+      "filename": "tomb3.exe",
+      "md5sum": "4044dc2c58f02bfea2572e80dd8f2abb"
+    },
+    {
+      "filename": "layout.bin",
+      "md5sum": "d0f7f7eda9e692eac06b32813a86e0c3"
+    },
+    {
+      "filename": "EDEC.DLL",
+      "md5sum": "26b1f5d031c67a0b4a1832d1b4e6422c"
+    },
+    {
+      "filename": "WINSTR.DLL",
+      "md5sum": "bd9397ee53c1dbe34d1b4fc168d8025e"
+    },
+    {
+      "filename": "WINSDEC.DLL",
+      "md5sum": "f220b7353e550c8e017ab2d90fd83ae3"
+    },
+    {
+      "filename": "lang.dat",
+      "md5sum": "90e64689804b4f4b0197c07290965a3c"
+    },
+    {
+      "filename": "audio/cdaudio.wad",
+      "md5sum": "0e4643dc86f0228969c0e0c1b30c0711"
+    },
+    {
+      "filename": "pix/TITLEUK.BMP",
+      "md5sum": "7d88aa20642a41e9d68558456683f57b"
+    },
+    {
+      "filename": "pix/SOUTHPAC.BMP",
+      "md5sum": "ffb8d2d1cc6a4723e0c58a2fe548f94f"
+    },
+    {
+      "filename": "pix/CREDIT07.BMP",
+      "md5sum": "2e5453045748420e576806917e0a30e3"
+    },
+    {
+      "filename": "pix/CREDIT03.BMP",
+      "md5sum": "5511970cf790c81a351e19baab1b1068"
+    },
+    {
+      "filename": "pix/CREDIT05.BMP",
+      "md5sum": "17e2230f562c04d2f0c0afabcad60629"
+    },
+    {
+      "filename": "pix/CREDIT04.BMP",
+      "md5sum": "88332670006eb121a705c839288c0e36"
+    },
+    {
+      "filename": "pix/CREDIT01.BMP",
+      "md5sum": "05608fdd5355624192a2b95eeaf21bc5"
+    },
+    {
+      "filename": "pix/ANTARC.BMP",
+      "md5sum": "8682420d6bdefcb87820065dd87e50f0"
+    },
+    {
+      "filename": "pix/THEEND.BMP",
+      "md5sum": "d942b38b5ce68d4a96b8b484e38f486f"
+    },
+    {
+      "filename": "pix/CREDIT08.BMP",
+      "md5sum": "deb5c81fc134fb2207f16df45bf97352"
+    },
+    {
+      "filename": "pix/CREDIT09.BMP",
+      "md5sum": "f1928fd6d00e1aefff2338f681c5a229"
+    },
+    {
+      "filename": "pix/HOUSE.BMP",
+      "md5sum": "7456ab850b9444fa622250ca70aac6d5"
+    },
+    {
+      "filename": "pix/CREDIT02.BMP",
+      "md5sum": "7fa680415bbabe15b155632a722b2ea0"
+    },
+    {
+      "filename": "pix/INDIA.BMP",
+      "md5sum": "92756534d2ac4dc9e118c906c7c16098"
+    },
+    {
+      "filename": "pix/CREDIT06.BMP",
+      "md5sum": "abb63ed2a790b5795082324b14a1fea7"
+    },
+    {
+      "filename": "pix/LEGAL.BMP",
+      "md5sum": "b59fc9ad5f0bd64000c73bed4c2c6e21"
+    },
+    {
+      "filename": "pix/NEVADA.BMP",
+      "md5sum": "db7ae096fced4eaa630c0bec83114ee4"
+    },
+    {
+      "filename": "pix/LONDON.BMP",
+      "md5sum": "67b5cab900f04c913f6bab241c4638ff"
+    },
+    {
+      "filename": "pix/THEEND2.BMP",
+      "md5sum": "f56331cf11bf04dfef47492626cc9073"
+    },
+    {
+      "filename": "data/JUNGLE.TR2",
+      "md5sum": "9befdc5075fdb84450d2ed0533719b12"
+    },
+    {
+      "filename": "data/CITY.TR2",
+      "md5sum": "69daad41e8a9ac9fad5aab6d22908de7"
+    },
+    {
+      "filename": "data/MAIN.SFX",
+      "md5sum": "508ba45acbe4317e23daaf54ba919d04"
+    },
+    {
+      "filename": "data/ANTARC.TR2",
+      "md5sum": "80f7907ded8a372bb87b1bcea178f94e"
+    },
+    {
+      "filename": "data/TOWER.TR2",
+      "md5sum": "7a46c92685674a95024a9886152f8c2c"
+    },
+    {
+      "filename": "data/NEVADA.TR2",
+      "md5sum": "8dc8bdc53dc53e1ec7943fac3b680a7c"
+    },
+    {
+      "filename": "data/TITLE.TR2",
+      "md5sum": "28395720a88971b6dc590489ff47d9e3"
+    },
+    {
+      "filename": "data/TONYBOSS.TR2",
+      "md5sum": "070d4a7b486c234d3e84ebaba904d48a"
+    },
+    {
+      "filename": "data/VICT.TR2",
+      "md5sum": "01e6f703493807dfd513d4fcd7f29ffd"
+    },
+    {
+      "filename": "data/TOMBPC.DAT",
+      "md5sum": "3ae21d4e98daf1692a1eaf0acd9d6958"
+    },
+    {
+      "filename": "data/TEMPLE.TR2",
+      "md5sum": "18af2d4384904bf48c6941fb51382672"
+    },
+    {
+      "filename": "data/QUADCHAS.TR2",
+      "md5sum": "ee80c9522dffc40aef5576de09ad5ded"
+    },
+    {
+      "filename": "data/AREA51.TR2",
+      "md5sum": "59dc31d9020943e5ef85942df0a88c58"
+    },
+    {
+      "filename": "data/CHAMBER.TR2",
+      "md5sum": "438cd76e0e7be12464c3bef35d0216f5"
+    },
+    {
+      "filename": "data/SEWER.TR2",
+      "md5sum": "d2f6ef3fbd87a86f9c2d561765a19d89"
+    },
+    {
+      "filename": "data/SHORE.TR2",
+      "md5sum": "7b064a9d5b7cb17bd4e16261242bc940"
+    },
+    {
+      "filename": "data/MINES.TR2",
+      "md5sum": "538f602ac876cee837a07760a3dbe3aa"
+    },
+    {
+      "filename": "data/ROOFS.TR2",
+      "md5sum": "9b3f54902d526472008408949f23032b"
+    },
+    {
+      "filename": "data/COMPOUND.TR2",
+      "md5sum": "1630b3f25a226d51d7f4875300133e8e"
+    },
+    {
+      "filename": "data/CRASH.TR2",
+      "md5sum": "ab8b5f6f568432666aaf5c4d83b9f6f2"
+    },
+    {
+      "filename": "data/OFFICE.TR2",
+      "md5sum": "ba54a5782912a4ef83929f687009377e"
+    },
+    {
+      "filename": "data/STPAUL.TR2",
+      "md5sum": "0275cb33c94e840859a622763865a2e9"
+    },
+    {
+      "filename": "data/TRIBOSS.TR2",
+      "md5sum": "c9c011b71964426ecd269c314ad5f4c1"
+    },
+    {
+      "filename": "data/RAPIDS.TR2",
+      "md5sum": "f080de24577654474fa1ebd6d07673e2"
+    },
+    {
+      "filename": "data/HOUSE.TR2",
+      "md5sum": "5e11d251ddb12b98ebead1883dc12d2a"
+    },
+    {
+      "filename": "fmv/Crsh_Eng.rpl",
+      "md5sum": "ee2d0aa76754fe0744c47f4ad9fcd607"
+    },
+    {
+      "filename": "fmv/Sail_Eng.rpl",
+      "md5sum": "6947a8a13b70235f9fc1aa3ea4db1da9"
+    },
+    {
+      "filename": "fmv/logo.rpl",
+      "md5sum": "20be937db48b25b57bc88e9d47517905"
+    },
+    {
+      "filename": "fmv/Intr_Eng.rpl",
+      "md5sum": "3afa8b9903af0c8dabee5f6f1eb396d0"
+    },
+    {
+      "filename": "fmv/Endgame.rpl",
+      "md5sum": "24b90bdd3219facfdde240c954164a59"
+    },
+    {
+      "filename": "cuts/CUT1.TR2",
+      "md5sum": "e54ce1ac0106a76f72432db8e02c8dbf"
+    },
+    {
+      "filename": "cuts/CUT2.TR2",
+      "md5sum": "81ff9f99044738510cccacc3646fc347"
+    },
+    {
+      "filename": "cuts/CUT6.TR2",
+      "md5sum": "e93435fb9577ed5da27b8cb95e6a85f0"
+    },
+    {
+      "filename": "cuts/CUT11.TR2",
+      "md5sum": "a75d14b398ffbbca13bee7bc3ff0c080"
+    },
+    {
+      "filename": "cuts/CUT9.TR2",
+      "md5sum": "28180b6e049b439413cd657870bf8474"
+    },
+    {
+      "filename": "cuts/CUT4.TR2",
+      "md5sum": "4a061d14750d36c236ae4e2c22e75aa4"
+    },
+    {
+      "filename": "cuts/CUT7.TR2",
+      "md5sum": "19b04538646d2603308f37cea64d8e66"
+    },
+    {
+      "filename": "cuts/CUT12.TR2",
+      "md5sum": "0bfe24996a41984434de13470e359b05"
+    },
+    {
+      "filename": "cuts/CUT5.TR2",
+      "md5sum": "86290b1ac08dfb0d500357d9e861c072"
+    },
+    {
+      "filename": "cuts/CUT3.TR2",
+      "md5sum": "3135f022bceccc129c43997c2e53320c"
+    },
+    {
+      "filename": "cuts/CUT8.TR2",
+      "md5sum": "ab459301b03aab6c35327284cacbd0bd"
+    },
+    {
+      "filename": "support/info/Readme.txt",
+      "md5sum": "72890403f686d0a199cfcfed5296fed0"
+    },
+    {
+      "filename": "support/info/ninjahead.gif",
+      "md5sum": "746c9a7ab8cd2bd375f6520b5cf4ae3a"
+    },
+    {
+      "filename": "support/info/support.htm",
+      "md5sum": "3f463cc01e32b8de7542b1f9a2aa9e91"
+    },
+    {
+      "filename": "support/info/slegal.gif",
+      "md5sum": "bb72ad0b84f5d6cad35b6a3a7cb28ab9"
+    },
+    {
+      "filename": "support/info/eidos.gif",
+      "md5sum": "cf6df27145b94333dffa488e52a905ff"
+    },
+    {
+      "filename": "support/info/Ninja.jpg",
+      "md5sum": "cfaa679cd484b0709c36c8324dbf0960"
+    },
+    {
+      "filename": "support/info/core.jpg",
+      "md5sum": "a78b2f1ec41c1443d04592714b9ab36c"
+    },
+    {
+      "filename": "support/info/tr3logo.jpg",
+      "md5sum": "a1030488e87c0edbdfc5b8ebeba53235"
+    }
+  ]
+}

@@ -3,8 +3,7 @@
 
 #include <QMainWindow>
 #include <QSettings>
-#include "controller.h"
-#include "worker.h"
+#include "Controller.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
@@ -18,41 +17,38 @@ class TombRaiderLinuxLauncher : public QMainWindow
     Q_OBJECT
 public:
     /**
-     * 
+     * Create Main Window
      */
     TombRaiderLinuxLauncher(QWidget *parent = nullptr);
-    /**
-     * 
-     */
     ~TombRaiderLinuxLauncher();
 
 public slots:
     /**
-     * 
+     * Called by Link function button
      */
     void linkClicked();
     /**
-     * 
+     * Called by Download function button
      */
     void downloadClicked();
     /**
-     * 
+     * Called by Info navigation button
      */
     void infoClicked();
     /**
-     *
+     *  Called by Walkthrough navigation button
      */
     void walkthroughClicked();
     /**
-     *
+     *  Called by Back navigation button
      */
     void backClicked();
     /**
-     *
+     * Called by first time setup button
      */
     void setOptionsClicked();
     /**
-     * 
+     * Called when selecting menu level, for disable and enable buttons
      */
     void onListItemSelected();
 
@@ -74,18 +70,9 @@ private:
      * 
      */
     void generateList();
-    
-    /**
-     * 0 Game dose not exist.
-     * 1 The path is a symbolic link.
-     * 2 The path is not a symbolic link.
-     * 3 value 3:The path is not a directory.
-     */
-    int checkGameDirectory(int game);
-    Pool poolData;
-    QString selected;
+
+    Controller& controller = Controller::getInstance();
     QSettings settings;
     Ui::TombRaiderLinuxLauncher *ui;
-    enum TRVER {TR1=1,TR2,TR3,TR4,TR5};
 };
 #endif // TOMBRAIDERPWMODDER_H

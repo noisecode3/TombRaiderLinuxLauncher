@@ -61,45 +61,68 @@ info_class = file_info.get('class_')
 info_releaseDate = file_info.get('releaseDate')
 info_difficulty = file_info.get('difficulty')
 info_duration = file_info.get('duration')
-c.execute('''INSERT INTO Info (title, author, release, difficulty, duration, type, class)
-VALUES (?,?,?,?,?,?,?)''', (
+
+# Retrieve the corresponding IDs from other tables
+c.execute("SELECT InfoDifficultyID FROM InfoDifficulty WHERE value = ?", (info_difficulty,))
+difficulty_id = c.fetchone()[0]
+
+c.execute("SELECT InfoDurationID FROM InfoDuration WHERE value = ?", (info_duration,))
+duration_id = c.fetchone()[0]
+
+c.execute("SELECT InfoTypeID FROM InfoType WHERE value = ?", (info_type,))
+type_id = c.fetchone()[0]
+
+c.execute("SELECT InfoClassID FROM InfoClass WHERE value = ?", (info_class,))
+class_id = c.fetchone()[0]
+
+# Insert data into the Info table using the retrieved IDs
+c.execute('''
+INSERT INTO Info (title, author, release, difficulty, duration, type, class)
+VALUES (?,?,?,?,?,?,?)
+''', (
     info_title,
     info_author,
     info_releaseDate,
-    info_difficulty,
-    info_duration,
-    info_type,
-    info_class)
-)
+    difficulty_id,
+    duration_id,
+    type_id,
+    class_id
+))
+
 c.execute("SELECT last_insert_rowid()")
 info_id = c.fetchone()[0]
-
-screen_url = file_info.get('screen')
-screen_response = requests.get(screen_url)
-screen_content = screen_response.content
-screen_file_name = os.path.basename(screen_url)
-c.execute("INSERT INTO Picture (name, data) VALUES (?, ?)", (screen_file_name, screen_content))
-c.execute("SELECT last_insert_rowid()")
-screen_id = c.fetchone()[0]
-
-# for screen_large in file_info.get("screensLarge", []):
-#    response = requests.get(screen_large)
-#    screen_content = response.content
-#    file_name = os.path.basename(screen_large)
-#    c.execute("INSERT INTO Picture (name, data) VALUES (?, ?)", (file_name, screen_content))
 
 level_body = file_info.get('body')
 level_walkthrough = file_info.get('walkthrough')
 
 try:
-    c.execute("INSERT INTO Level (screenName, screenLargeNames, body, walkthrough, pictureID, zipID, infoID) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    ("", "", level_body, level_walkthrough, screen_id, zip_id, info_id))
+    c.execute("INSERT INTO Level (body, walkthrough, zipID, infoID) VALUES (?, ?, ?, ?)",
+    (level_body, level_walkthrough, zip_id, info_id))
 except sqlite3.Error as e:
     print(f"SQLite error: {e}")
 
 c.execute("SELECT MAX(LevelID) FROM Level")
 level_id = c.fetchone()[0]
 print("Current level_id:", level_id)
+
+screen_url = file_info.get('screen')
+screen_response = requests.get(screen_url)
+screen_content = screen_response.content
+screen_file_name = os.path.basename(screen_url)
+c.execute("INSERT INTO Picture (data) VALUES (?)", (screen_content,))
+c.execute("SELECT last_insert_rowid()")
+screen_id = c.fetchone()[0]
+c.execute("INSERT INTO Screens (pictureID, levelID) VALUES (?, ?)", (screen_id, level_id))
+
+for screen_large in file_info.get("screensLarge", []):
+    response = requests.get(screen_large)
+    screen_content = response.content
+    file_name = os.path.basename(screen_large)
+    c.execute("INSERT INTO Picture (data) VALUES (?)", (screen_content,))
+    c.execute("SELECT last_insert_rowid()")
+    screen_id = c.fetchone()[0]
+    c.execute("INSERT INTO Screens (pictureID, levelID) VALUES (?, ?)", (screen_id, level_id))
+
 
 with open(zip_name, 'wb') as zip_file:
     zip_file.write(zip_content)

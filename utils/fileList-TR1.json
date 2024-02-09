@@ -1,0 +1,537 @@
+{
+  "name": "TR1",
+  "file_data_list": [
+    {
+      "filename": "04.mp3",
+      "md5sum": "b7229546197c2e33de5a829d1d87b9b9"
+    },
+    {
+      "filename": "dosbox.conf",
+      "md5sum": "1f3d3244d30769d23058bb2e6235a68f"
+    },
+    {
+      "filename": "3dfxSpl2.dll",
+      "md5sum": "b453996bc7985e7d1a8b48831daa7a7d"
+    },
+    {
+      "filename": "libfluidsynth-1.dll",
+      "md5sum": "8ce351ad43ed8d9e3b6d1b3a842f2789"
+    },
+    {
+      "filename": "dosbox.exe",
+      "md5sum": "de6b2bf4c04a93f0833b9717386e4a3b"
+    },
+    {
+      "filename": "03.mp3",
+      "md5sum": "03031873a2a45ebd085f84ff227ce0b4"
+    },
+    {
+      "filename": "06.mp3",
+      "md5sum": "4a219f7a181a9ca2068d9dfa8f34ce50"
+    },
+    {
+      "filename": "SDL.dll",
+      "md5sum": "763057b3f5079aab685945e1a77b4a4c"
+    },
+    {
+      "filename": "libphysfs.dll",
+      "md5sum": "5750c6a9871009ed8d925219b84351d1"
+    },
+    {
+      "filename": "05.mp3",
+      "md5sum": "dcc958898c8218fa8d49aee09441a88c"
+    },
+    {
+      "filename": "glide2x.dll",
+      "md5sum": "4950f903bab791564b136aa92e3c333d"
+    },
+    {
+      "filename": "10.mp3",
+      "md5sum": "a1a811f0c76e5f223cb8ce61844ad0e2"
+    },
+    {
+      "filename": "TOMBPATH.TXT",
+      "md5sum": "88580decaed7af42ffec1c5ccb17b2aa"
+    },
+    {
+      "filename": "libgthread-2.0-0.dll",
+      "md5sum": "b80679f24ce110663f0f9dbe92b243f9"
+    },
+    {
+      "filename": "dosboxTR.conf",
+      "md5sum": "39e35d3590eeec2c3739f2d01b27690f"
+    },
+    {
+      "filename": "SDL_net.dll",
+      "md5sum": "d5732558c257c0d2e45b35c419231795"
+    },
+    {
+      "filename": "libglib-2.0-0.dll",
+      "md5sum": "19908faf75b07511cbc8ffc040bbdc07"
+    },
+    {
+      "filename": "gogwrap.exe",
+      "md5sum": "b149d7dac553ed845722d4139f417e09"
+    },
+    {
+      "filename": "glide.ini",
+      "md5sum": "5e279729dfe2addfb92613cfb460f1fb"
+    },
+    {
+      "filename": "08.mp3",
+      "md5sum": "a11b84d99cd2ce662d37ce5b7f260b71"
+    },
+    {
+      "filename": "d3dx9.dll",
+      "md5sum": "797e24743937d67d69f28f2cf5052ee8"
+    },
+    {
+      "filename": "dosboxTRWindowed.conf",
+      "md5sum": "ac6eea2e65ea0cfd957d7503cf680a3a"
+    },
+    {
+      "filename": "glide2x_emu.ovl",
+      "md5sum": "341b8f5d82daa46fd1ce236300317c3c"
+    },
+    {
+      "filename": "07.mp3",
+      "md5sum": "e8e61589f92f6300643af967b8e63cce"
+    },
+    {
+      "filename": "02.mp3",
+      "md5sum": "8407542e5cfbc2c46e52bb1571822b10"
+    },
+    {
+      "filename": "glide2x.ovl",
+      "md5sum": "0dd7a09a4e097e92945f18ab2fd277dc"
+    },
+    {
+      "filename": "GAME.DAT",
+      "md5sum": "4092a81c9000706a43fc639dd5051e2d"
+    },
+    {
+      "filename": "GAME.GOG",
+      "md5sum": "97f582a1a309838df9a1c6ab65d35521"
+    },
+    {
+      "filename": "09.mp3",
+      "md5sum": "a515cdd5bfa365ab9c33cf2e1ef971eb"
+    },
+    {
+      "filename": "TOMBRAID/HMIDET.386",
+      "md5sum": "b6656f8af855be3184d2b9f10de91ef5"
+    },
+    {
+      "filename": "TOMBRAID/SETUP.EXE",
+      "md5sum": "c0c35fe1608b98b95ee8ee8f5cbbddaa"
+    },
+    {
+      "filename": "TOMBRAID/HMISET.CFG",
+      "md5sum": "9993e1830c3d34a7a12219cbe7dae402"
+    },
+    {
+      "filename": "TOMBRAID/DOS4GW.EXE",
+      "md5sum": "006211ca60fa3d4b38a9a8da2ade1056"
+    },
+    {
+      "filename": "TOMBRAID/TOMBno3Dfx.EXE",
+      "md5sum": "e8125fc28230822a032f545c5003dd67"
+    },
+    {
+      "filename": "TOMBRAID/SETTINGS.DAT",
+      "md5sum": "afa50782b18ab2e5609dfa2289819cd1"
+    },
+    {
+      "filename": "TOMBRAID/tomb.exe",
+      "md5sum": "a791a2c724fb9a972342340bec88cd0c"
+    },
+    {
+      "filename": "TOMBRAID/TOMB.SP",
+      "md5sum": "e8d50559aeb287ede8bd76bbc42c8b85"
+    },
+    {
+      "filename": "TOMBRAID/HMIDRV.386",
+      "md5sum": "2de5f490362469628841199644a38e02"
+    },
+    {
+      "filename": "DOCS/ChangeLog_SVN.txt",
+      "md5sum": "3bf7e67149e77fbba3f8ff8725d92758"
+    },
+    {
+      "filename": "DOCS/ChangeLog.txt",
+      "md5sum": "251b593f924244b654051cc049eef31f"
+    },
+    {
+      "filename": "DOCS/INSTALL.txt",
+      "md5sum": "a1ce6ac808c21c12ce64509b07cc15a6"
+    },
+    {
+      "filename": "DOCS/THANKS.txt",
+      "md5sum": "b91a51d623d72137b92932060cfa32e7"
+    },
+    {
+      "filename": "DOCS/VERSION.txt",
+      "md5sum": "e0c78649e5e6536c4cd3157bd5aa5d3f"
+    },
+    {
+      "filename": "DOCS/AUTHORS.txt",
+      "md5sum": "b218dd39016f8a1c01d355ca0b399073"
+    },
+    {
+      "filename": "DOCS/COPYING.txt",
+      "md5sum": "46aaf69a91703493b666f212a04f2d8d"
+    },
+    {
+      "filename": "DOCS/Official manuals/README_KR.txt",
+      "md5sum": "aa92c7c1c19f555afc826c7b4b0f5a5b"
+    },
+    {
+      "filename": "DOCS/Official manuals/Video Instructions.txt",
+      "md5sum": "d1b77c6c4eee3bbac911cb6614695f9e"
+    },
+    {
+      "filename": "DOCS/Official manuals/Video instructions_KR.txt",
+      "md5sum": "0969a7a6ec6f3b2734e79715e0a31254"
+    },
+    {
+      "filename": "DOCS/Official manuals/README.TXT",
+      "md5sum": "23b96d88f386e5270dba50b86b17949d"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/index.html",
+      "md5sum": "3abd4cba2b78d80639ea380f28a30238"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/always_up.html",
+      "md5sum": "dcd6e672c89849cf84e314dc4576677e"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/main_en.html",
+      "md5sum": "ae452978dede256f4a21a35d17bf065e"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/index.html",
+      "md5sum": "0f1f016b73f317e4c176d364eae32712"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/usage_ko.html",
+      "md5sum": "d4a6e52450b6379eebcd9f3ff9443bae"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/pppatch.html",
+      "md5sum": "3727bd3700a76c665a1d9fcb0922fb1c"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/usage_en.html",
+      "md5sum": "1f208a12c35ceef4645e1995440381d5"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/main_ko.html",
+      "md5sum": "f428b84b046eb77384f5950f6e6867db"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/db_ne2000.html",
+      "md5sum": "4f9b1cb0902b92a27ff088697203a098"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_ne2000patch_1.png",
+      "md5sum": "c4bbc39effa555580173cbb0bd7112f5"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_ne2000patch_tvwin.png",
+      "md5sum": "3369efff11719106a94184d963cb103e"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_ne2000patch_3.png",
+      "md5sum": "b792b8f0b53acb79541423fc897a861c"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_vesamodes.png",
+      "md5sum": "9f024350054d530e31d812e553c74043"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_ne2000patch_cfg1.png",
+      "md5sum": "8dae77edb40168829c50a54631bd5a03"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_ne2000patch_dosodi.png",
+      "md5sum": "17cd0a6b3379d94dc0c74c4fe5eeca7f"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_ne2000patch_arachne.png",
+      "md5sum": "3c80f4a264744bbd7791cb47ce752e0c"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_ne2000patch_2.png",
+      "md5sum": "f0a00a207dd1f901a803631b90077814"
+    },
+    {
+      "filename": "DOCS/SVN-specific manuals/data/images/db_ne2000patch_cfg2.png",
+      "md5sum": "c7b0bd7fa4caa6f96100008cd70ea7e2"
+    },
+    {
+      "filename": "TOOLS/Reset DOSBox configuration.bat",
+      "md5sum": "c2141defd137380252427874c798046f"
+    },
+    {
+      "filename": "TOOLS/Run DOSBox without GUI.bat",
+      "md5sum": "22451e0fe6df5ce62df40d704ca03ef7"
+    },
+    {
+      "filename": "TOOLS/Run DOSBox configuration.bat",
+      "md5sum": "5a68b05a8f4e7c3ef9f858470a0e4a0c"
+    },
+    {
+      "filename": "TOOLS/Run DOSBox with WINDIB driver.bat",
+      "md5sum": "d5f67d24eb6fd98d5bfb383de87569f0"
+    },
+    {
+      "filename": "TOOLS/Read manuals.bat",
+      "md5sum": "10c39cbb63d460e6930275115176185c"
+    },
+    {
+      "filename": "TOOLS/Install movie codec.bat",
+      "md5sum": "096eeb5e597315abaec37029082fe424"
+    },
+    {
+      "filename": "TOOLS/Run save states manager.bat",
+      "md5sum": "eafbcb6a18cf829dacd717bcfc9f8d0d"
+    },
+    {
+      "filename": "TOOLS/config_template/dosbox_default.conf",
+      "md5sum": "973f0d2b3af2803865716dff5118b57a"
+    },
+    {
+      "filename": "TOOLS/config_template/dosbox_direct3d.conf",
+      "md5sum": "1f3d3244d30769d23058bb2e6235a68f"
+    },
+    {
+      "filename": "TOOLS/config_template/dosbox_ddraw.conf",
+      "md5sum": "59ff071d13cdd403ba83815883b76458"
+    },
+    {
+      "filename": "TOOLS/zmbv/zmbv.inf",
+      "md5sum": "d7128e50659cf55483c971b5d4805a6a"
+    },
+    {
+      "filename": "TOOLS/zmbv/zmbv.dll",
+      "md5sum": "19cef6175f9fc9c860351836d9409109"
+    },
+    {
+      "filename": "FONTS/license.txt",
+      "md5sum": "f76fd19f489982315d0dc6fe19edfbf7"
+    },
+    {
+      "filename": "FONTS/OCRA.ttf",
+      "md5sum": "cc4a7a8da4c5d4af9361d85a1d1c0bba"
+    },
+    {
+      "filename": "FONTS/Script.ttf",
+      "md5sum": "28678218d34d5e5a4e9ff12585c7c789"
+    },
+    {
+      "filename": "FONTS/sansserif.ttf",
+      "md5sum": "944d4a878347308d4388a8d64b354eb6"
+    },
+    {
+      "filename": "FONTS/Courier.ttf",
+      "md5sum": "a00621915d1b4fef1944e50ca9bc98a0"
+    },
+    {
+      "filename": "FONTS/Roman.ttf",
+      "md5sum": "c67f857f9e515dfd1294f3fb07fd53e7"
+    },
+    {
+      "filename": "SHADERS/Sketch.fx",
+      "md5sum": "c136d701ba4bc4019aa16f2569d029f7"
+    },
+    {
+      "filename": "SHADERS/MCAmber.fx",
+      "md5sum": "d0091bebc2cee161779c468acb267af7"
+    },
+    {
+      "filename": "SHADERS/MCGreen.fx",
+      "md5sum": "6e93af6c8aaf3ce75e1f5a1cf2617aba"
+    },
+    {
+      "filename": "SHADERS/HQ2x.fx",
+      "md5sum": "81d4681f7e5a1a7b35836cd54a37bd4e"
+    },
+    {
+      "filename": "SHADERS/scale2x_ps14.fx",
+      "md5sum": "7dc47e39b4397e7628f7a14794608ffb"
+    },
+    {
+      "filename": "SHADERS/Lanczos16.fx",
+      "md5sum": "d0c557be0d9a616d2fe5c7b0f204c84d"
+    },
+    {
+      "filename": "SHADERS/Tv.fx",
+      "md5sum": "d36c766230b919d2459dbc014e7d8e94"
+    },
+    {
+      "filename": "SHADERS/shader.code",
+      "md5sum": "14e93ddcc6109841b5b31f7d5d2e60dc"
+    },
+    {
+      "filename": "SHADERS/GS2xSuper.fx",
+      "md5sum": "e89b877fa483e44eee0ff05f7eb39f74"
+    },
+    {
+      "filename": "SHADERS/Lanczos.fx",
+      "md5sum": "4ff07b4434eec5db42cb80224fa1c539"
+    },
+    {
+      "filename": "SHADERS/GS2xTwo.fx",
+      "md5sum": "52afcb695cde54a82bb86f4aca61000b"
+    },
+    {
+      "filename": "SHADERS/point.fx",
+      "md5sum": "e37fdc77af24f64dcdf7a0383c654045"
+    },
+    {
+      "filename": "SHADERS/Gs2xSmartFilter.fx",
+      "md5sum": "d557fed7addb7760af22039fb14c45c4"
+    },
+    {
+      "filename": "SHADERS/GS4x.fx",
+      "md5sum": "7a54fa03d429706c1217ec9a42ae6d1a"
+    },
+    {
+      "filename": "SHADERS/2xSaI.fx",
+      "md5sum": "67222df3620e43da05498fb62dd2129a"
+    },
+    {
+      "filename": "SHADERS/AdvancedAA.fx",
+      "md5sum": "82f7e4f7bab09698a14e843f762e261f"
+    },
+    {
+      "filename": "SHADERS/scale2x.fx",
+      "md5sum": "6842982774a2f7eee0c4717f4ee95a8a"
+    },
+    {
+      "filename": "SHADERS/2xSaL.fx",
+      "md5sum": "9a1aad88c553fa21704f0b9d02e07a7c"
+    },
+    {
+      "filename": "SHADERS/4xSoft.fx",
+      "md5sum": "df51710e362aa200db95bfdc43d6bcbf"
+    },
+    {
+      "filename": "SHADERS/GS4xFilter.fx",
+      "md5sum": "e91cf205c29930d1590cd1978f858d3b"
+    },
+    {
+      "filename": "SHADERS/2xSaL_Ls.fx",
+      "md5sum": "422756e15bf703a12bf3969a86fe43bb"
+    },
+    {
+      "filename": "SHADERS/Gs2xLS.fx",
+      "md5sum": "5e7d2005e37a65396d4ad288ce7eed77"
+    },
+    {
+      "filename": "SHADERS/Scale4x.fx",
+      "md5sum": "a014e6c3a3896962427a13524ee60263"
+    },
+    {
+      "filename": "SHADERS/SuperEagle.fx",
+      "md5sum": "fa741ea078270365034a864899c66be3"
+    },
+    {
+      "filename": "SHADERS/Matrix.fx",
+      "md5sum": "c1734d1d26ee115fd5f705b3cd5f5c58"
+    },
+    {
+      "filename": "SHADERS/Super2xSaI.fx",
+      "md5sum": "b9960fc64435e72aaaa19f49473c285d"
+    },
+    {
+      "filename": "SHADERS/gpl.txt",
+      "md5sum": "3515835a89d4c99214d0ab65d433af16"
+    },
+    {
+      "filename": "SHADERS/4xSoft_PS3.0.fx",
+      "md5sum": "c0b87014de56ad8da8c98feb95488522"
+    },
+    {
+      "filename": "SHADERS/2xSaLAA.fx",
+      "md5sum": "407443dc60f1d3ed753e777a160e53a4"
+    },
+    {
+      "filename": "SHADERS/none.fx",
+      "md5sum": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "filename": "SHADERS/Scale2xPlus.fx",
+      "md5sum": "aca593d4ecd5b7c7472eda2292ab3c02"
+    },
+    {
+      "filename": "SHADERS/SimpleAA.fx",
+      "md5sum": "b1cd81bfe3ad50434b4dd2585e39e836"
+    },
+    {
+      "filename": "SHADERS/GS2xFilter.fx",
+      "md5sum": "b2b64e065ff254f4da29c163b2bfcfd8"
+    },
+    {
+      "filename": "SHADERS/GS4xHqFilter.fx",
+      "md5sum": "d2afec1623810e0952ce130d07567b49"
+    },
+    {
+      "filename": "SHADERS/MCHerc.fx",
+      "md5sum": "88fcaca562529830e4a86a4466080d4a"
+    },
+    {
+      "filename": "SHADERS/GS2x.fx",
+      "md5sum": "df9b5fdb03fd6c08588c11cc7454a0a4"
+    },
+    {
+      "filename": "SHADERS/Cartoon.fx",
+      "md5sum": "0cef2630b971f9754293ebf9680beb70"
+    },
+    {
+      "filename": "SHADERS/GS4xScale.fx",
+      "md5sum": "f6052614a735b4a9171d0627aa45855b"
+    },
+    {
+      "filename": "SHADERS/GS4xSoft.fx",
+      "md5sum": "84a5b8a7548187cae475ecf7feed422a"
+    },
+    {
+      "filename": "SHADERS/Lanczos12.fx",
+      "md5sum": "039abf62cff7beaa4731a787d9fa176e"
+    },
+    {
+      "filename": "SHADERS/ColorSketch.fx",
+      "md5sum": "36a04f513cf957b0331f582012462f60"
+    },
+    {
+      "filename": "SHADERS/2xSaI_sRGB.fx",
+      "md5sum": "cac6fb77e8ee8c10ec7a458e0dc04d1c"
+    },
+    {
+      "filename": "SHADERS/GS4xColorScale.fx",
+      "md5sum": "958050ce5507c2d2e7e4c2189f436040"
+    },
+    {
+      "filename": "SHADERS/scaling.inc",
+      "md5sum": "85b33541372b7cbe40f3c95cc4e0abe8"
+    },
+    {
+      "filename": "SHADERS/bilinear.fx",
+      "md5sum": "ed4b55ca446b7b391f211e2ab44f6399"
+    },
+    {
+      "filename": "SHADERS/MCOrange.fx",
+      "md5sum": "87a65dee356fb32682254467a262e029"
+    },
+    {
+      "filename": "SHADERS/4xSaL.fx",
+      "md5sum": "32c7e5d8b26cb8c3ed81d8b554536c7f"
+    },
+    {
+      "filename": "SHADERS/2xSaL2xAA.fx",
+      "md5sum": "88de4638d114cd6a6c1c6d37f6b9ec4d"
+    }
+  ]
+}
