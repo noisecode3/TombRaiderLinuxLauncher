@@ -133,7 +133,7 @@ bool Model::getGame(int id)
         downloader.setUrl(zipData.url);
         downloader.setSaveFile(zipData.name);
 
-        if (fileManager.checkFileInfo(zipData.name,false))
+        if (fileManager.checkFile(zipData.name,false))
         {
             qDebug() << "File exists:" << zipData.name;
             if(fileManager.calculateMD5(zipData.name,false) != zipData.md5sum)

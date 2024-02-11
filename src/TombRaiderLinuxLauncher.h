@@ -70,6 +70,10 @@ private:
      * 
      */
     void generateList();
+    /**
+     *
+     */
+    int testallGames(int id);
 
     Controller& controller = Controller::getInstance();
     QSettings settings;

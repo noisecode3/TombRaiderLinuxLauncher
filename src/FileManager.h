@@ -20,6 +20,7 @@ public:
     const QString calculateMD5(const QString& file, bool lookGameDir);
     void extractZip(const QString& zipFile, const QString& extractPath);
     bool checkDir(const QString& file, bool lookGameDir);
+    bool checkFile(const QString& file, bool lookGameDir );
     int checkFileInfo(const QString& file, bool lookGameDir=true);
     int removeFileOrDirectory(const QString &file, bool lookGameDir);
     int createDirectory(const QString &file, bool gameDir);

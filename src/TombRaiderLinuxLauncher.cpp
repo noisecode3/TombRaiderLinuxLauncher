@@ -42,11 +42,9 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 }
 
 
-void TombRaiderLinuxLauncher::checkCommonFiles()
-{
-    int dirStaus = controller.checkGameDirectory(3);
-    // should go to Controller->Model->FileManager->Model->Controller
-    //FolderNames folder;
+int TombRaiderLinuxLauncher::testallGames(int id){
+    // this should be in model if it works
+    int dirStaus = controller.checkGameDirectory(id);
     if (dirStaus)
     {
         if(dirStaus == 1)// The path is a symbolic link.
@@ -57,15 +55,16 @@ void TombRaiderLinuxLauncher::checkCommonFiles()
         else if(dirStaus == 2)// The path is not a symbolic link.
         {
             //this means we backup the game to levelPath IF that is whats inside
+
             QMessageBox msgBox;
             msgBox.setWindowTitle("Confirmation");
-            msgBox.setText("TombRaider III found, you want to proceed?\nThis will erase saved games and is only for testing");
+            msgBox.setText("TombRaider "+QString::number(id)+" found, you want to proceed?");
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::No);
             int result = msgBox.exec();
             if (result == QMessageBox::Yes) {
                 qDebug() << "User clicked Yes.";
-                controller.setupOg(3);
+                controller.setupOg(id);
             }
             else
             {
@@ -77,8 +76,15 @@ void TombRaiderLinuxLauncher::checkCommonFiles()
             //it has been replaced by a file from somewhere else or the user
             // or is missing
         }
-        generateList();
     }
+    return -1;
+}
+
+void TombRaiderLinuxLauncher::checkCommonFiles()
+{
+    testallGames(3);
+    testallGames(4);
+    generateList();
 }
 
 void TombRaiderLinuxLauncher::generateList()
@@ -103,6 +109,21 @@ void TombRaiderLinuxLauncher::generateList()
             {
                 QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III.jpg"),"Tomb Raider III Original");
                 wi->setData(Qt::UserRole, QVariant(-3));
+                ui->listWidgetModds->addItem(wi);
+            }
+            else
+            {
+                qDebug() << "No link or id implementation";
+                //QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III_unkown.jpg"),file.fileName());
+                //ui->listWidgetModds->addItem(wi);
+            }
+        }
+        if (Ending == ".TR4")
+        {
+            if(file.fileName() == "Original.TR4")
+            {
+                QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_IIII.jpg"),"Tomb Raider IV Original");
+                wi->setData(Qt::UserRole, QVariant(-4));
                 ui->listWidgetModds->addItem(wi);
             }
             else

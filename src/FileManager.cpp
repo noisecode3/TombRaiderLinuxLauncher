@@ -105,6 +105,23 @@ bool FileManager::checkDir(const QString& file, bool lookGameDir )
     return directory.exists();
 }
 
+bool FileManager::checkFile(const QString& file, bool lookGameDir )
+{
+    QString path;
+    if (!lookGameDir)
+    {
+        path = levelDir_m.absolutePath() + QDir::separator() + file;
+    }
+    else {
+        path = gameDir_m.absolutePath() + QDir::separator() + file;
+    }
+    QFile fFile(path);
+    return fFile.exists();
+
+}
+
+
+
 int FileManager::checkFileInfo(const QString& file, bool lookGameDir)
 {
     const QString& path = (lookGameDir ? gameDir_m.absolutePath() + QDir::separator()+file : levelDir_m.absolutePath() + QDir::separator()+file);
