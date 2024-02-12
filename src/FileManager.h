@@ -25,6 +25,7 @@ public:
     int removeFileOrDirectory(const QString &file, bool lookGameDir);
     int createDirectory(const QString &file, bool gameDir);
     int copyFile(const QString &gameFile, const QString &levelFile, bool fromGameDir);
+    bool makeRelativeLink(const QString& levelDir ,const QString& from, const QString& to);
     int cleanWorkingDir(const QString &levelDir);
     bool backupGameDir(const QString &gameDir);
     bool linkGameDir(const QString& levelDir ,const QString& gameDir);

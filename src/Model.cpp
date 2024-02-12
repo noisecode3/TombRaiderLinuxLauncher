@@ -146,6 +146,7 @@ bool Model::getGame(int id)
         }
         //fileManager.createDirectory(QString::number(id)+".TRLE", false);
         fileManager.extractZip(zipData.name, QString::number(id)+".TRLE");
+        manager.executeInstruction(4);
     }
     return false;
 }

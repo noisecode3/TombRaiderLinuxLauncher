@@ -182,6 +182,41 @@ bool FileManager::linkGameDir(const QString& levelDir ,const QString& gameDir)
     }
 }
 
+bool FileManager::makeRelativeLink(const QString& levelDir ,const QString& from ,const QString& to)
+{
+    const QString& l = levelDir_m.absolutePath() + levelDir;
+    const QString& f = l + from;
+    const QString& t = l + to;
+
+    if (QFile::link(f, t))
+    {
+        qDebug() << "Symbolic link created successfully.";
+        return 0;
+    }
+    else
+    {
+        QFileInfo i(t);
+        if (i.isSymLink())
+        {
+            QFile::remove(t);
+            if (QFile::link(f, t))
+            {
+                qDebug() << "Symbolic link created successfully.";
+                return 0;
+            }
+            else
+            {
+                qDebug() << "Failed to create symbolic link.";
+                return 1;
+            }
+        }
+        else
+        {
+            qDebug() << "Failed to create symbolic link.";
+            return 1;
+        }
+    }
+}
 
 int FileManager::removeFileOrDirectory(const QString &file, bool lookGameDir)
 {

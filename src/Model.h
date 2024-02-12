@@ -2,9 +2,34 @@
 #define MODEL_H
 
 #include <QObject>
+#include <QMap>
+#include <QDebug>
 #include "Data.h"
 #include "FileManager.h"
 #include "Network.h"
+
+class InstructionManager : public QObject {
+    Q_OBJECT
+public:
+    using Instruction = std::function<void(int id)>;
+
+    void addInstruction(int id, const Instruction& instruction) {
+        instructionsMap[id] = instruction;
+    }
+
+public slots:
+    void executeInstruction(int id) {
+        auto it = instructionsMap.find(id);
+        if (it != instructionsMap.end()) {
+            it.value()(id);
+        } else {
+            qDebug() << "Invalid instruction ID";
+        }
+    }
+
+private:
+    QMap<int, Instruction> instructionsMap;
+};
 
 class Model : public QObject
 {
@@ -30,9 +55,16 @@ private:
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
     Downloader& downloader = Downloader::getInstance();
-    Model(QObject *parent = nullptr) : QObject(parent) {};
+    Model(QObject *parent = nullptr) : QObject(parent) {
+        manager.addInstruction(4, [this](int id) {
+            qDebug() << "Perform Operation A";
+            const QString s = "/"+QString::number(id) + ".TRLE";
+            fileManager.makeRelativeLink(s,"/The Rescue.exe","/tomb4.exe");
+        });
+    };
     ~Model() {};
 
+    InstructionManager manager;
     Q_DISABLE_COPY(Model)
 };
 
