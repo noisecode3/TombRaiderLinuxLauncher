@@ -1,4 +1,14 @@
 CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+compile_commands.json
+TombRaiderLinuxLauncher
+TombRaiderLinuxLauncher_autogen
+cmake_install.cmake
+Makefile
 build-Debug
 build
 .cache
+libs/quazip/quazip/QuaZip-Qt5Config.cmake
+libs/quazip/quazip/QuaZip-Qt5ConfigVersion.cmake
+libs/quazip/quazip/quazip1-qt5.pc

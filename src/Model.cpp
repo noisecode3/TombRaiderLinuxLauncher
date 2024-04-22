@@ -1,5 +1,21 @@
 #include <QDebug>
 #include "Model.h"
+
+Model::Model(QObject *parent) : QObject(parent)
+{
+    instructionManager.addInstruction(4, [this](int id) {
+        qDebug() << "Perform Operation A";
+        const QString s = "/"+QString::number(id) + ".TRLE";
+        fileManager.makeRelativeLink(s,"/The Rescue.exe","/tomb4.exe");
+    });
+    instructionManager.addInstruction(5, [this](int id) {
+        qDebug() << "Perform Operation B";
+        const QString s = QString::number(id) + ".TRLE/Titak-MistsOfAvalon-final";
+        fileManager.moveFilesToParentDirectory(s);
+    });
+}
+
+
 bool Model::setDirectory(const QString& level, const QString& game)
 {
     if (fileManager.setUpCamp(level,game) &&
@@ -146,7 +162,7 @@ bool Model::getGame(int id)
         }
         //fileManager.createDirectory(QString::number(id)+".TRLE", false);
         fileManager.extractZip(zipData.name, QString::number(id)+".TRLE");
-        manager.executeInstruction(id);
+        instructionManager.executeInstruction(id);
     }
     return false;
 }
@@ -161,4 +177,4 @@ const QString Model::getWalkthrough(int id)
     return data.getWalkthrough(id);
 }
 
-#include "Model.moc"
+//#include "Model.moc"

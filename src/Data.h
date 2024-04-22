@@ -66,6 +66,12 @@ struct ListItemData
         QPixmap pixmap;
         pixmap.loadFromData(imageData, "JPG");
         picture.addPixmap(pixmap);
+        // Scale the pixmap to fit within a 640x480 rectangle while maintaining aspect ratio
+        QSize newSize = pixmap.size().scaled(640, 480, Qt::KeepAspectRatio);
+        // Resize the pixmap to the scaled size
+        pixmap = pixmap.scaled(newSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        // Create QIcon and add the scaled pixmap
+        picture.addPixmap(pixmap);
     };
     QString title;
     QString author;

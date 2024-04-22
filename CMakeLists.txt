@@ -51,9 +51,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 install(TARGETS ${PROJECT_NAME}
-    DESTINATION bin
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
 )
 
 install(FILES ${CMAKE_SOURCE_DIR}/utils/tombll.db
-    DESTINATION share/${PROJECT_NAME}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
 )

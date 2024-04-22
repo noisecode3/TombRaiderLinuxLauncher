@@ -18,7 +18,10 @@ bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir)
 
 const QString FileManager::calculateMD5(const QString& file, bool lookGameDir)
 {
-    const QString& path = (lookGameDir ? gameDir_m.absolutePath() + QDir::separator()+file : levelDir_m.absolutePath() + QDir::separator()+file);
+    const QString& path = lookGameDir ?
+        gameDir_m.absolutePath() + QDir::separator()+file :
+        levelDir_m.absolutePath() + QDir::separator()+file;
+
     QFile f(path);
     if (!f.open(QIODevice::ReadOnly))
     {
@@ -124,7 +127,10 @@ bool FileManager::checkFile(const QString& file, bool lookGameDir )
 
 int FileManager::checkFileInfo(const QString& file, bool lookGameDir)
 {
-    const QString& path = (lookGameDir ? gameDir_m.absolutePath() + QDir::separator()+file : levelDir_m.absolutePath() + QDir::separator()+file);
+    const QString& path = lookGameDir ?
+        gameDir_m.absolutePath() + QDir::separator()+file :
+        levelDir_m.absolutePath() + QDir::separator()+file;
+
     QFileInfo fileInfo(path);
     if (fileInfo.isDir())
     {
@@ -220,7 +226,10 @@ bool FileManager::makeRelativeLink(const QString& levelDir ,const QString& from 
 
 int FileManager::removeFileOrDirectory(const QString &file, bool lookGameDir)
 {
-    const QString& path = (lookGameDir ? gameDir_m.absolutePath() + QDir::separator()+file : levelDir_m.absolutePath() + QDir::separator()+file);
+    const QString& path = lookGameDir ?
+            gameDir_m.absolutePath() + QDir::separator()+file :
+            levelDir_m.absolutePath() + QDir::separator()+file;
+
     QDir dir(path);
     if (dir.exists()) {
         // Remove directory and its contents
@@ -262,7 +271,10 @@ int FileManager::removeFileOrDirectory(const QString &file, bool lookGameDir)
 
 int FileManager::createDirectory(const QString &file, bool gameDir)
 {
-    const QString& path = (gameDir ? gameDir_m.absolutePath() + QDir::separator()+file : levelDir_m.absolutePath() + QDir::separator()+file);
+    const QString& path = gameDir ?
+            gameDir_m.absolutePath() + QDir::separator()+file :
+            levelDir_m.absolutePath() + QDir::separator()+file;
+
     // Create the directory if it doesn't exist
         if (!QDir(path).exists())
         {
@@ -396,3 +408,79 @@ bool FileManager::backupGameDir(const QString &gameDir)
         return false;
     }
 }
+
+
+bool FileManager::moveFilesToDirectory(const QString& fromLevelDirectory, const QString& toLevelDirectory)
+{
+    const QString& directoryFromPath = levelDir_m.absolutePath() + QDir::separator() + fromLevelDirectory;
+    const QString& directoryToPath = levelDir_m.absolutePath() + QDir::separator() + toLevelDirectory;
+    QDir dir(directoryFromPath);
+
+    // Get list of all entries (files and directories) excluding '.' and '..'
+    QStringList entryFileList = dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+
+    // Move files and recursively move directories
+    for (const QString& entry : entryFileList)
+    {
+        QString entryPath = directoryFromPath + QDir::separator() + entry;
+
+        if (!QFile::rename(entryPath, directoryToPath + QDir::separator() + entry))
+        {
+            qWarning() << "Failed to move file:" << entryPath;
+            return false;
+        }
+    }
+    return true;
+}
+
+bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory)
+{
+    const QString& directoryPath = levelDir_m.absolutePath() + QDir::separator() + levelDirectory;
+    QRegExp regex("/[^/]+$"); // Matches the last component of the path starting with a slash
+    int indexOfRegex = regex.indexIn(levelDirectory);
+
+    QString tmp = levelDirectory;
+    if (indexOfRegex == -1) {
+        return false;
+    }
+    const QString& parentDirectory = tmp.remove(indexOfRegex, tmp.length() - indexOfRegex);
+    const QString& directoryParentPath = levelDir_m.absolutePath() + QDir::separator() + parentDirectory;
+
+    QDir dir(directoryPath);
+
+    if(!moveFilesToDirectory(levelDirectory, parentDirectory))
+    {
+        return false;
+    }
+
+    // Get list of all entries (files and directories) excluding '.' and '..'
+    QStringList entryDirList = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+    //TODO: make it look recursively and delete empty dir
+
+    // Move files and recursively move directories
+    for (const QString& entry : entryDirList)
+    {
+        QString entryPath = directoryPath + QDir::separator() + entry;
+        createDirectory(parentDirectory + QDir::separator() + entry, false);
+        if (!moveFilesToDirectory(levelDirectory + QDir::separator() + entry, parentDirectory + QDir::separator() + entry))
+        {
+            qWarning() << "Failed to move directory:" << entryPath;
+            return false;
+        }
+    }
+    
+    // Remove the directory if it's not the root directory
+    /*
+    if (dir != levelDir_m)
+    {
+        if (!dir.rmdir("."))
+        {
+            qWarning() << "Failed to remove directory:" << directoryPath;
+            return false;
+        }
+    }
+    */
+    return true;
+}
+

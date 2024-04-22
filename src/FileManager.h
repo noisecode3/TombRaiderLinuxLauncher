@@ -23,6 +23,8 @@ public:
     bool checkFile(const QString& file, bool lookGameDir );
     int checkFileInfo(const QString& file, bool lookGameDir=true);
     int removeFileOrDirectory(const QString &file, bool lookGameDir);
+    bool moveFilesToDirectory(const QString& fromLevelDirectory, const QString& toLevelDirectory);
+    bool moveFilesToParentDirectory(const QString& directoryPath);
     int createDirectory(const QString &file, bool gameDir);
     int copyFile(const QString &gameFile, const QString &levelFile, bool fromGameDir);
     bool makeRelativeLink(const QString& levelDir ,const QString& from, const QString& to);

@@ -55,16 +55,11 @@ private:
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
     Downloader& downloader = Downloader::getInstance();
-    Model(QObject *parent = nullptr) : QObject(parent) {
-        manager.addInstruction(4, [this](int id) {
-            qDebug() << "Perform Operation A";
-            const QString s = "/"+QString::number(id) + ".TRLE";
-            fileManager.makeRelativeLink(s,"/The Rescue.exe","/tomb4.exe");
-        });
-    };
+    InstructionManager instructionManager;
+
+    Model(QObject *parent = nullptr);
     ~Model() {};
 
-    InstructionManager manager;
     Q_DISABLE_COPY(Model)
 };
 

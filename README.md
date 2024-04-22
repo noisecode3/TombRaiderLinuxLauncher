@@ -1,7 +1,15 @@
 # Tomb Raider Linux Launcher
-A tool to run Tomb Raider classics 1, 2, 3, 4, 5 on Linux with Wine/Proton. Problems that you may face for 3 and 4 are one particular input problem and sometimes graphical glitches, crashes or lags. The work around for the input problem is to avoid ctrl alt. The other work around is to use a kernel suitable for gaming/wine and try to use mature suitable graphics drivers, usually open source. That will get you far if you want to play those games, but you should also know modding is tricky and only some might work. I'm doing it for fun and I would love to learn more c++ and Qt
+A tool to run Tomb Raider classics 1, 2, 3, 4, 5 on Linux with Wine/Proton.
+Problems that you may face for 3 and 4 are one particular input problem and
+sometimes graphical glitches, crashes or lags. The work around for the input
+problem is to avoid ctrl alt. The other work around is to use a kernel suitable
+for gaming/wine and try to use mature suitable graphics drivers, usually open
+source. That will get you far if you want to play those games, but you should
+also know modding is tricky and only some might work. I'm doing it for fun
+and I would love to learn more c++ and Qt
 
-This application will be written in c++ for the GUI and for modding and manipulation configuration files. Bash for launching with Steam or Lutris or just Wine.
+This application will be written in c++ for the GUI and for modding and
+manipulation configuration files. Bash for launching with Steam or Lutris or just Wine.
 
 # Features
 * with steam or Lutris to select a map from trle.net to play
@@ -13,11 +21,35 @@ This application will be written in c++ for the GUI and for modding and manipula
 * implement patching of files and backup.
 * checksums
 * download maps/mods, and install them
+* add a filter for html in database
 
 # trle.net mods the launcher will download and play with wine-tkg that I tested
 * [Calypsis Jungle - Part One](https://www.trle.net/sc/levelfeatures.php?lid=3500)
 * [Feder - Templars Secret](https://www.trle.net/sc/levelfeatures.php?lid=3082)
 * [Delca - Kitten Adventure](https://www.trle.net/sc/levelfeatures.php?lid=3379)
+
+
+# test
+This install the program in you're ".local" home directory
+QuaZip should be build in, sorry I will fix.
+
+```shell
+cmake -DCMAKE_INSTALL_PREFIX=~/.local .
+make install
+```
+
+You can add maps to the database if you cd into utils
+This should add Kitten Adventure Demo, but there is a bug
+because the download link is not a zip file its a another html page. 
+
+If it don't work try installing the
+python3 module from the error.
+
+```shell
+python3 getData.py https://www.trle.net/sc/levelfeatures.php?lid=3379
+python3 addData.py data.json
+
+```
 
 # Guide
 

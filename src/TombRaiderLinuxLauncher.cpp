@@ -114,6 +114,7 @@ void TombRaiderLinuxLauncher::generateList()
             else
             {
                 qDebug() << "No link or id implementation";
+                //read some json file 
                 //QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III_unkown.jpg"),file.fileName());
                 //ui->listWidgetModds->addItem(wi);
             }
