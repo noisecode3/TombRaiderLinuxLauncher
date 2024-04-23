@@ -31,7 +31,12 @@ manipulation configuration files. Bash for launching with Steam or Lutris or jus
 
 # test
 This install the program in you're ".local" home directory
-QuaZip should be build in, sorry I will fix.
+You need those, should be installed an desktop linux
+
+* curl
+* Qt5
+* libz
+* libbz2
 
 ```shell
 cmake -DCMAKE_INSTALL_PREFIX=~/.local .
