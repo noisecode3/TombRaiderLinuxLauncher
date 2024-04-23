@@ -5,6 +5,8 @@ project(TombRaiderLinuxLauncher)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+set(BUILD_SHARED_LIBS OFF)
+set(QUAZIP_INSTALL OFF)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets WebEngineWidgets Sql REQUIRED)
 
@@ -43,7 +45,7 @@ target_link_libraries(${PROJECT_NAME}
     ${CURL_LIBRARY}
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CURL_INCLUDE_DIR} )
+target_include_directories(${PROJECT_NAME} PRIVATE ${CURL_INCLUDE_DIR} libs/quazip )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
