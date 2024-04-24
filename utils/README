@@ -1,0 +1,37 @@
+This is a test database.
+I will list the games in the database here by id number.
+Only the ones that I can play through without getting stuck
+because of a bug will stay in the database. You can access the
+files here like this ~/.local/share/TombRaiderLinuxLauncher/5.TRLE
+If the directory 5.TRLE would be missing it will attempt to try
+installing it.
+
+1.The Infada Cult
+  https://www.trle.net/sc/levelfeatures.php?lid=3573
+  have played through
+  no problems
+
+2.Templars Secret
+  https://www.trle.net/sc/levelfeatures.php?lid=3082
+  have played through
+  no problems
+
+3.Secret of the Skull Temple
+  https://www.trle.net/sc/levelfeatures.php?lid=3377
+  have played through
+  lags sometimes
+  plying with lutris and dgvoodoo, can help
+
+4.The Rescue 1-4
+  https://www.trle.net/sc/levelfeatures.php?lid=318
+  have not played through all of the game
+  no problems
+
+5.War of the Worlds
+  https://www.trle.net/sc/levelfeatures.php?lid=3430
+  have not played through all of the game
+  no problems, seem to work with proton
+  This was changed from Mists of Avalon - First Clues
+  but that one got me stuck where a door was supposed
+  to open for a key.
+

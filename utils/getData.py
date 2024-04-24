@@ -65,8 +65,10 @@ if response.status_code == 200:
         soup.find('td', string='file size:')
         .find_next('td')
         .get_text(strip=True)
+        .replace(',', '')
         .replace('MB', '')
-    ) or 0.0
+        ) or 0.0
+
     download_link = soup.find('a', string='Download')
     if download_link:
         url = download_link['href']

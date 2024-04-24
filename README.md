@@ -22,6 +22,7 @@ manipulation configuration files. Bash for launching with Steam or Lutris or jus
 * checksums
 * download maps/mods, and install them
 * add a filter for html in database
+* add a progress bar when downloading
 
 # trle.net mods the launcher will download and play with wine-tkg that I tested
 * [Calypsis Jungle - Part One](https://www.trle.net/sc/levelfeatures.php?lid=3500)

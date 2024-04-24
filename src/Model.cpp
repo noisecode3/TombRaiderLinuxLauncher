@@ -10,9 +10,16 @@ Model::Model(QObject *parent) : QObject(parent)
     });
     instructionManager.addInstruction(5, [this](int id) {
         qDebug() << "Perform Operation B";
+        const QString s = "/"+QString::number(id) + ".TRLE";
+        fileManager.makeRelativeLink(s,"/War of the Worlds.exe","/tomb4.exe");
+    });
+    /*
+    instructionManager.addInstruction(5, [this](int id) {
+        qDebug() << "Perform Operation B";
         const QString s = QString::number(id) + ".TRLE/Titak-MistsOfAvalon-final";
         fileManager.moveFilesToParentDirectory(s);
     });
+*/
 }
 
 
