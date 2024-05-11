@@ -29,6 +29,10 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->setOptions, SIGNAL (clicked()), this, SLOT (setOptionsClicked()));
     connect(ui->listWidgetModds, SIGNAL(itemSelectionChanged()), this, SLOT(onListItemSelected()));
 
+    connect(&Model::getInstance(), SIGNAL(modelTickSignal()), this, SLOT(workTick()));
+    connect(&FileManager::getInstance(), SIGNAL(fileWorkTickSignal()), this, SLOT(workTick()));
+    connect(&Downloader::getInstance(), &Downloader::networkWorkTickSignal, this, &TombRaiderLinuxLauncher::workTick);
+
     ui->pushButtonLink->setEnabled(false);
     ui->pushButtonInfo->setEnabled(false);
     ui->pushButtonDownload->setEnabled(false);
@@ -260,17 +264,12 @@ void TombRaiderLinuxLauncher::linkClicked()
 void TombRaiderLinuxLauncher::downloadClicked()
 {
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
-
     int id = selectedItem->data(Qt::UserRole).toInt();
     if (id)
     {
+        ui->progressBar->setValue(0);
+        ui->stackedWidgetBar->setCurrentWidget(ui->stackedWidgetBar->findChild<QWidget*>("progress"));
         controller.setupLevel(id);
-        if (ui->listWidgetModds->currentItem() == selectedItem)
-        {
-            ui->pushButtonLink->setEnabled(true);
-            ui->pushButtonDownload->setEnabled(false);
-            ui->pushButtonInfo->setEnabled(true);
-        }
     }
 }
 void TombRaiderLinuxLauncher::infoClicked()
@@ -325,7 +324,23 @@ void TombRaiderLinuxLauncher::backClicked()
         ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("select"));
     }
 }
+
+void TombRaiderLinuxLauncher::workTick()
+{
+    int value = ui->progressBar->value();
+    ui->progressBar->setValue(value + 1);
+    qDebug() << ui->progressBar->value() << "%";
+    if(ui->progressBar->value() >= 100)
+    {
+        ui->pushButtonLink->setEnabled(true);
+        ui->pushButtonDownload->setEnabled(false);
+        ui->pushButtonInfo->setEnabled(true);
+        ui->stackedWidgetBar->setCurrentWidget(ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
+    }
+}
+
 TombRaiderLinuxLauncher::~TombRaiderLinuxLauncher()
 {
     delete ui;
 }
+

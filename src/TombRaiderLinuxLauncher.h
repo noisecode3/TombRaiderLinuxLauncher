@@ -51,6 +51,10 @@ public slots:
      * Called when selecting menu level, for disable and enable buttons
      */
     void onListItemSelected();
+    /**
+     * Called when 1% work done calculated from total work steps
+     */
+    void workTick();
 
 
 private:

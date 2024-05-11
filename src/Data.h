@@ -107,18 +107,6 @@ struct InfoData
     QVector<QIcon> imageList;
 };
 
-/**
- * Data& data = Data::getInstance();
- * if (data.initializeDatabase("/your/path")) {
- *     // Database is successfully opened, perform your read operations here
- *
- *     // ...
- *
- *     // Release the database when done
- *     data.releaseDatabase();
- * }
- *
- */
 class Data : public QObject
 {
     Q_OBJECT
@@ -129,42 +117,42 @@ public:
         return instance;
     }
 
-    // Method to initialize the database connection
     bool initializeDatabase(QString path)
     {
-        // Set the database name and file mode (ReadOnly)
+        db = QSqlDatabase::addDatabase("QSQLITE");
         db.setDatabaseName(path + "/tombll.db");
         db.setConnectOptions("QSQLITE_OPEN_READONLY");
 
-        // Open the database
-        if (db.open()) {
-            return true; // Successfully opened
-        } else {
+        if (db.open())
+        {
+            return true;
+        }
+        else
+        {
             qDebug() << "Error opening database:" << db.lastError().text();
-            return false; // Failed to open
+            return false;
         }
     }
 
-    // Method to release the database connection
     void releaseDatabase()
     {
         db.close();
     }
 
-    std::array<QVector<QString>, 2> getFileList(const int id, bool trleList);
     QVector<ListItemData> getListItems();
     InfoData getInfo(int id);
     QString getWalkthrough(int id);
-    ZipData getDownload(int id);
-
     int getType(int id);
+
+    std::array<QVector<QString>, 2> getFileList(const int id, bool trleList);
+    ZipData getDownload(int id);
 
 private:
     Data(QObject *parent = nullptr) : QObject(parent) { }
     ~Data() { db.close(); }
 
     Q_DISABLE_COPY(Data)
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    QSqlDatabase db;
 };
 
 #endif // DATA_H

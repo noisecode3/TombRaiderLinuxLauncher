@@ -1,6 +1,12 @@
 #include "FileManager.h"
-#include "quazip/quazip.h"
-#include "quazip/quazipfile.h"
+#include <QFile>
+#include <QIODevice>
+#include <QDir>
+#include <QDebug>
+#include <QDirIterator>
+#include <QtCore>
+#include <QByteArray>
+#include <QDataStream>
 
 bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir)
 {
@@ -42,55 +48,110 @@ const QString FileManager::calculateMD5(const QString& file, bool lookGameDir)
     f.close();
     return QString(md5.result().toHex());
 }
-/**
- *
- */
-void FileManager::extractZip(const QString& zipFile, const QString& extractDir)
+
+bool FileManager::extractZip(const QString& zipFilename, const QString& outputFolder)
 {
-    const QString& zipPath = levelDir_m.absolutePath() + QDir::separator()+zipFile;
-    const QString& extractPath = levelDir_m.absolutePath() + QDir::separator()+extractDir;
-    QuaZip zip(zipPath);
-    if (!zip.open(QuaZip::mdUnzip))
+    const QString& zipPath = levelDir_m.absolutePath() + QDir::separator() + zipFilename;
+    const QString& outputPath = levelDir_m.absolutePath() + QDir::separator() + outputFolder;
+
+    qDebug() << "Unzipping file" << zipFilename << "to" << outputPath;
+
+    // Create output folder if it doesn't exist
+    QDir dir(outputPath);
+    if (!dir.exists())
     {
-        qDebug() << "Error opening ZIP file" << Qt::endl;
-        return;
+        dir.mkpath(".");
     }
 
-    QuaZipFileInfo info;
-    QuaZipFile file(&zip);
-
-    for (bool more = zip.goToFirstFile(); more; more = zip.goToNextFile())
+    // Open the zip file
+    mz_zip_archive zip;
+    memset(&zip, 0, sizeof(zip));
+    mz_bool result = mz_zip_reader_init_file(&zip, zipPath.toUtf8().constData(), 0);
+    if (!result)
     {
-        if (zip.getCurrentFileInfo(&info) && file.open(QIODevice::ReadOnly))
+        qWarning() << "Failed to open zip file" << zipPath;
+        return false;
+    }
+
+    // Extract each file in the zip archive
+    mz_uint numFiles = mz_zip_reader_get_num_files(&zip);
+
+    unsigned int gotoPercent = 50; // Percentage of total work
+    unsigned int scale = 1000; // Resolution scale
+
+    unsigned int progress = 0; // Current progress
+    unsigned int lastPrintedPercent = 0; // Last printed percentage
+
+    // Calculate progress increment per iteration
+    unsigned int progressIncrement = scale / numFiles;
+
+    // Calculate remainder
+    unsigned int remainder = scale % numFiles;
+
+    qDebug() << "Zip file contains" << numFiles << "files";
+    for (uint i = 0; i < numFiles; i++)
+    {
+        mz_zip_archive_file_stat file_stat;
+        if (!mz_zip_reader_file_stat(&zip, i, &file_stat))
         {
-            QByteArray data = file.readAll();
-            file.close();
-
-            // Create directories if they don't exist
-            QString filePath = extractPath + QDir::separator() + info.name;
-            QString directory = filePath.left(filePath.lastIndexOf(QDir::separator()));
-
-            QDir().mkpath(directory);
-
-            // Create a new file on disk and write the data
-            QFile outFile(filePath);
-            if (outFile.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
-            {
-                outFile.write(data);
-                outFile.close();
-            }
-            else if (!filePath.endsWith('/'))
-            {
-                qDebug() << "Error opening file for writing: " << filePath << Qt::endl;
-            }
+            qWarning() << "Failed to get file info for file" << i << "in zip file" << zipPath;
+            mz_zip_reader_end(&zip);
+            return false;
         }
-        else
+
+        QString filename = QString::fromUtf8(file_stat.m_filename);
+        if (filename.endsWith('/'))
         {
-            qDebug() << "Error reading file info from ZIP archive" << Qt::endl;
+            progress += progressIncrement;
+            if (remainder > 0)
+            {
+                ++progress;
+                --remainder;
+            }
+            unsigned int scaledProgress = progress * gotoPercent / scale;
+            if (scaledProgress != lastPrintedPercent)
+            {
+                emit this->fileWorkTickSignal();
+                lastPrintedPercent = scaledProgress;
+            }
+            continue;
+        }
+        QString outFile = outputPath + "/" + filename;
+        qDebug() << "Extracting" << filename;
+
+        if (!QDir().mkpath(QFileInfo(outFile).path()))
+        {
+            qWarning() << "Failed to create directory for file" << outFile;
+            mz_zip_reader_end(&zip);
+            return false;
+        }
+
+        if (!mz_zip_reader_extract_to_file(&zip, i, outFile.toUtf8().constData(), 0))
+        {
+            qWarning() << "Failed to extract file" << filename << "from zip file" << zipPath;
+            mz_zip_reader_end(&zip);
+            return false;
+        }
+
+        progress += progressIncrement;
+        if (remainder > 0)
+        {
+            ++progress;
+            --remainder;
+        }
+        unsigned int scaledProgress = progress * gotoPercent / scale;
+        if (scaledProgress != lastPrintedPercent)
+        {
+            emit this->fileWorkTickSignal();
+            lastPrintedPercent = scaledProgress;
         }
     }
-    zip.close();
+    // Clean up
+    mz_zip_reader_end(&zip);
+    qDebug() << "Unzip complete";
+    return true;
 }
+
 /**
  *
  */
@@ -122,8 +183,6 @@ bool FileManager::checkFile(const QString& file, bool lookGameDir )
     return fFile.exists();
 
 }
-
-
 
 int FileManager::checkFileInfo(const QString& file, bool lookGameDir)
 {
@@ -268,7 +327,6 @@ int FileManager::removeFileOrDirectory(const QString &file, bool lookGameDir)
     }
 }
 
-
 int FileManager::createDirectory(const QString &file, bool gameDir)
 {
     const QString& path = gameDir ?
@@ -295,44 +353,6 @@ int FileManager::createDirectory(const QString &file, bool gameDir)
             return 0;
         }
 }
-/*
-int FileManager::copyFile(const QString &gameFile, const QString &levelFile, bool fromGameDir)
-{
-    const QString sourcePath = (fromGameDir ? gameDir_m.path() : levelDir_m.path()) + (fromGameDir ? gameFile : levelFile);
-    const QString destinationPath = (fromGameDir ? levelDir_m.path() : gameDir_m.path()) + (fromGameDir ? levelFile : gameFile);
-
-    // Ensure the destination directory exists
-    QDir destinationDir(QFileInfo(destinationPath).absolutePath());
-    if (!destinationDir.exists() && !QDir().mkpath(destinationDir.absolutePath()))
-    {
-        qDebug() << "Error creating destination directory.";
-        return 1;
-    }
-
-    // Copy the file
-    if (QFile::copy(sourcePath, destinationPath))
-    {
-        qDebug() << "File copy to " + destinationPath + " successfully.";
-        return 0;
-    }
-    else
-    {
-        if (QFile::exists(destinationPath))
-        {
-            qDebug() << "File already exists.";
-            return 2;
-        }
-        else
-        {
-            qDebug() << "Failed to copy file " << destinationPath << Qt::endl;
-            return 3;
-        }
-    }
-}
-
-*/
-
-
 
 int FileManager::copyFile(const QString &gameFile, const QString &levelFile, bool fromGameDir)
 {
@@ -409,7 +429,6 @@ bool FileManager::backupGameDir(const QString &gameDir)
     }
 }
 
-
 bool FileManager::moveFilesToDirectory(const QString& fromLevelDirectory, const QString& toLevelDirectory)
 {
     const QString& directoryFromPath = levelDir_m.absolutePath() + QDir::separator() + fromLevelDirectory;
@@ -484,3 +503,4 @@ bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory)
     return true;
 }
 
+void fileWorkTickSignal(){};

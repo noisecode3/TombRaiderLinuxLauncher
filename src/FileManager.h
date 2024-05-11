@@ -1,6 +1,9 @@
 #ifndef FILEMANAGER_H
 #define FILEMANAGER_H
 
+#include "miniz.h"
+#include "miniz_zip.h"
+#include <QString>
 #include <QObject>
 #include <QFile>
 #include <QDir>
@@ -16,9 +19,8 @@ public:
         static FileManager instance;
         return instance;
     }
-
     const QString calculateMD5(const QString& file, bool lookGameDir);
-    void extractZip(const QString& zipFile, const QString& extractPath);
+    bool extractZip(const QString& zipFile, const QString& extractPath);
     bool checkDir(const QString& file, bool lookGameDir);
     bool checkFile(const QString& file, bool lookGameDir );
     int checkFileInfo(const QString& file, bool lookGameDir=true);
@@ -32,8 +34,11 @@ public:
     bool backupGameDir(const QString &gameDir);
     bool linkGameDir(const QString& levelDir ,const QString& gameDir);
     bool setUpCamp(const QString& levelDir, const QString& gameDir);
-private:
 
+signals:
+    void fileWorkTickSignal();
+
+private:
     FileManager(QObject *parent = nullptr)  : QObject(parent) {};
     Q_DISABLE_COPY(FileManager)
 

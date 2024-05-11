@@ -3,23 +3,27 @@
 
 Controller::Controller(QObject *parent) : QObject(parent), workerRunning(false)
 {
+    /* 
+    Im not sure I need the thread for something else but found that
+    it was working by just using signals/slots to update the gui
     workerThread = new QThread();
 
     // Move the Controller to a separate thread
     this->moveToThread(workerThread);
 
     // Connect signals and slots for thread management
-    connect(workerThread, &QThread::started, this, &Controller::doWork);
+    connect(workerThread, SIGNAL(started()), this, SLOT(doSetupOgWork()));
+    connect(workerThread, SIGNAL(started()), this, SLOT(doSetupLevelWork()));
     connect(workerThread, &QThread::finished, workerThread, &QThread::deleteLater);
-    connect(this, &Controller::workFinished, this, &Controller::onWorkerThreadFinished);
+    */
 }
 
 Controller::~Controller()
 {
     // Cleanup: Ensure the worker thread is stopped and cleaned up
-    stopWorkerThread();
+   // stopWorkerThread();
 }
-
+/*
 void Controller::startWorkerThread()
 {
     if (!workerRunning)
@@ -38,7 +42,7 @@ void Controller::stopWorkerThread()
         workerRunning = false;
     }
 }
-
+*/
 int Controller::checkGameDirectory(int id)
 {
     return model.checkGameDirectory(id);
@@ -56,7 +60,11 @@ bool Controller::setupOg(int id)
 
 bool Controller::setupLevel(int id)
 {
-    return model.getGame(id);
+    id_m = id;
+    //startWorkerThread();
+    doSetupLevelWork();
+    //stopWorkerThread();
+    return true;
 }
 
 void Controller::getList(QVector<ListItemData>& list)
@@ -89,16 +97,22 @@ int Controller::getItemState(int id)
     return model.getItemState(id);
 }
 
-void Controller::doWork()
+void Controller::doSetupOgWork()
+{
+    model.getGame(id_m);
+}
+
+void Controller::doSetupLevelWork()
 {
     // Your worker functionality goes here
     qDebug() << "Worker is doing some work...";
+    model.getGame(id_m);
 
     // Emit a signal to indicate the work is finished
-    emit workFinished();
+    //emit workFinished();
 }
 
-void Controller::onWorkerThreadFinished()
+void Controller::WorkerThreadFinished()
 {
     qDebug() << "Worker thread finished.";
     // Handle worker thread finished event

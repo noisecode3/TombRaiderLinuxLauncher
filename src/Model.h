@@ -51,6 +51,10 @@ public:
     bool getGame(int id);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
+
+signals:
+    void modelTickSignal();
+
 private:
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();

@@ -159,6 +159,11 @@ bool Model::getGame(int id)
         if (fileManager.checkFile(zipData.name,false))
         {
             qDebug() << "File exists:" << zipData.name;
+            //send 50% signal here
+            for (int i=0; i<50; i++)
+            {
+                emit this->modelTickSignal();
+            }
             if(fileManager.calculateMD5(zipData.name,false) != zipData.md5sum)
             {
                 downloader.run();
@@ -184,4 +189,4 @@ const QString Model::getWalkthrough(int id)
     return data.getWalkthrough(id);
 }
 
-//#include "Model.moc"
+void modelTickSignal(){};

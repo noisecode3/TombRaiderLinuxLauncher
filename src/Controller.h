@@ -31,15 +31,17 @@ public:
     int checkGameDirectory(int id);
 
 signals:
-    void workFinished();  // Declare the signal
+    void workFinished();
 
-private slots:
-    void doWork();  // Worker functionality
-    void onWorkerThreadFinished();
+public slots:
+    void doSetupOgWork();
+    void doSetupLevelWork();
+    void WorkerThreadFinished();
 
 private:
     QThread* workerThread;
     bool workerRunning;
+    int id_m;
 
     Model& model = Model::getInstance();
 

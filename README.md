@@ -36,8 +36,6 @@ You need those, should be installed an desktop linux
 
 * curl
 * Qt5
-* libz
-* libbz2
 
 ```shell
 cmake -DCMAKE_INSTALL_PREFIX=~/.local .
@@ -70,7 +68,7 @@ No special graphics card, but if you gonna play mods you could need
 One 2010+ card that has about 2-4 Gb for some Tomb Raider 4 mods with enhanced graphics
 recommend patches, on steam proton 7
 * https://github.com/Trxyebeep/tomb3
-* https://github.com/dege-diosg/dgVoodoo2
+* https://github.com/dege-diosg/dgVoodoo2 (use Lutris, not manual)
 * https://tombraiders.net/stella/downloads/widescreen.html
 * https://core-design.com/community_tr3withoutcrystals.html
 
