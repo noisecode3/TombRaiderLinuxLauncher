@@ -115,6 +115,8 @@ if response.status_code == 200:
     image_tag = soup.find('img', class_='border')
 
     screen = 'https://www.trle.net' + image_tag['src']
+    def get_var(var_name):
+        return globals().get(var_name, "")
 
     # Create a dictionary with your variables
     data = {
@@ -131,13 +133,16 @@ if response.status_code == 200:
         "zipFileName": zipFileName,
         "zipFileMd5": zipFileMd5,
         "body": body,
-        "walkthrough": walkthrough,
+        "walkthrough": get_var("walkthrough"),
         "download_url": download_url,
     }
     if body:
         data["body"] = str(body)
-    if walkthrough:
-        data["walkthrough"] = str(walkthrough)
+    try:
+        if walkthrough:
+            data["walkthrough"] = str(walkthrough)
+    except NameError:
+        data["walkthrough"] = ""
     # Write the dictionary to a JSON file
     with open('data.json', 'w') as json_file:
         json.dump(data, json_file)

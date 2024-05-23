@@ -111,7 +111,10 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
             unsigned int scaledProgress = progress * gotoPercent / scale;
             if (scaledProgress != lastPrintedPercent)
             {
-                emit this->fileWorkTickSignal();
+                for(int j=0; j<scaledProgress; j++)
+                {
+                    emit this->fileWorkTickSignal();
+                }
                 lastPrintedPercent = scaledProgress;
             }
             continue;
@@ -139,11 +142,23 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
             ++progress;
             --remainder;
         }
+
         unsigned int scaledProgress = progress * gotoPercent / scale;
         if (scaledProgress != lastPrintedPercent)
         {
-            emit this->fileWorkTickSignal();
+            for(int j=0; j<scaledProgress; j++)
+            {
+                emit this->fileWorkTickSignal();
+            }
             lastPrintedPercent = scaledProgress;
+        }
+    }
+    if(lastPrintedPercent <= gotoPercent)
+    {
+        unsigned int left = gotoPercent - lastPrintedPercent;
+        for(int j=0; j< left; j++)
+        {
+            emit this->fileWorkTickSignal();
         }
     }
     // Clean up
