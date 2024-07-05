@@ -75,20 +75,11 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
 
     // Extract each file in the zip archive
     mz_uint numFiles = mz_zip_reader_get_num_files(&zip);
+    qDebug() << "Zip file contains" << numFiles << "files";
 
     unsigned int gotoPercent = 50; // Percentage of total work
-    unsigned int scale = 1000; // Resolution scale
-
-    unsigned int progress = 0; // Current progress
     unsigned int lastPrintedPercent = 0; // Last printed percentage
 
-    // Calculate progress increment per iteration
-    unsigned int progressIncrement = scale / numFiles;
-
-    // Calculate remainder
-    unsigned int remainder = scale % numFiles;
-
-    qDebug() << "Zip file contains" << numFiles << "files";
     for (uint i = 0; i < numFiles; i++)
     {
         mz_zip_archive_file_stat file_stat;
@@ -102,23 +93,9 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
         QString filename = QString::fromUtf8(file_stat.m_filename);
         if (filename.endsWith('/'))
         {
-            progress += progressIncrement;
-            if (remainder > 0)
-            {
-                ++progress;
-                --remainder;
-            }
-            unsigned int scaledProgress = progress * gotoPercent / scale;
-            if (scaledProgress != lastPrintedPercent)
-            {
-                for(int j=0; j<scaledProgress; j++)
-                {
-                    emit this->fileWorkTickSignal();
-                }
-                lastPrintedPercent = scaledProgress;
-            }
-            continue;
+            continue; // Skip directories
         }
+
         QString outFile = outputPath + "/" + filename;
         qDebug() << "Extracting" << filename;
 
@@ -136,31 +113,24 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
             return false;
         }
 
-        progress += progressIncrement;
-        if (remainder > 0)
-        {
-            ++progress;
-            --remainder;
-        }
+        unsigned int currentPercent = ((i + 1) * gotoPercent) / numFiles;
 
-        unsigned int scaledProgress = progress * gotoPercent / scale;
-        if (scaledProgress != lastPrintedPercent)
+        if (currentPercent != lastPrintedPercent)
         {
-            for(int j=0; j<scaledProgress; j++)
+            for (unsigned int j = lastPrintedPercent + 1; j <= currentPercent; j++)
             {
                 emit this->fileWorkTickSignal();
             }
-            lastPrintedPercent = scaledProgress;
+            lastPrintedPercent = currentPercent;
         }
     }
-    if(lastPrintedPercent <= gotoPercent)
+
+    // Ensure any remaining progress is emitted
+    for (unsigned int j = lastPrintedPercent + 1; j <= gotoPercent; j++)
     {
-        unsigned int left = gotoPercent - lastPrintedPercent;
-        for(int j=0; j< left; j++)
-        {
-            emit this->fileWorkTickSignal();
-        }
+        emit this->fileWorkTickSignal();
     }
+
     // Clean up
     mz_zip_reader_end(&zip);
     qDebug() << "Unzip complete";
@@ -406,6 +376,7 @@ int FileManager::copyFile(const QString &gameFile, const QString &levelFile, boo
         }
     }
 }
+
 int FileManager::cleanWorkingDir(const QString &levelDir)
 {
     const QString& directoryPath = levelDir_m.absolutePath() + QDir::separator() + levelDir;
