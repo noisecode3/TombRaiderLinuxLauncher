@@ -282,6 +282,11 @@ void TombRaiderLinuxLauncher::infoClicked()
         ui->infoWebEngineView->setHtml(info.body);
         ui->infoListWidget->setViewMode(QListView::IconMode);
         ui->infoListWidget->setIconSize(QSize(502, 377));
+        ui->infoListWidget->setDragEnabled(false);
+        ui->infoListWidget->setAcceptDrops(false);
+        ui->infoListWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
+        ui->infoListWidget->setDefaultDropAction(Qt::IgnoreAction);
+        ui->infoListWidget->setSelectionMode(QAbstractItemView::NoSelection);
         ui->infoListWidget->clear();
         for (const QIcon &icon : info.imageList)
         {

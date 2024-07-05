@@ -177,8 +177,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>927</width>
-                 <height>596</height>
+                 <width>538</width>
+                 <height>70</height>
                 </rect>
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -233,6 +233,12 @@
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>532</width>
+                    <height>0</height>
+                   </size>
                   </property>
                   <property name="maximumSize">
                    <size>

@@ -53,10 +53,15 @@ python3 getData.py https://www.trle.net/sc/levelfeatures.php?lid=3379
 python3 addData.py data.json
 
 ```
+# Screenshots
+![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot1.jpg)
+![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot2.jpg)
+![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot3.jpg)
+![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot4.jpg)
 
 # Guide
 
-How to play Tomb Raider 3
+How to play Tomb Raider 3 (need to update)
 
 # Patches
 The game uses old API and old optimizations..
@@ -65,8 +70,9 @@ With wine you need a minimum
 It's a bit demanding on the memory, try use gallium nine if you have nouveau
 No special graphics card, but if you gonna play mods you could need
 One 2010+ card that has about 2-4 Gb for some Tomb Raider 4 mods with enhanced graphics
-recommend patches, on steam proton 7
+recommend patches, on steam proton 7 (old)
 * https://github.com/Trxyebeep/tomb3
+
 * https://github.com/dege-diosg/dgVoodoo2 (use Lutris, not manual)
 * https://tombraiders.net/stella/downloads/widescreen.html
 * https://core-design.com/community_tr3withoutcrystals.html
