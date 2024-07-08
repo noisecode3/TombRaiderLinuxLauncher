@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>969</width>
-    <height>700</height>
+    <width>1334</width>
+    <height>730</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>TombRaiderPWModder</string>
+   <string>TombRaiderLinuxLauncher</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayoutCentalGrid">
@@ -19,6 +19,9 @@
      <widget class="QTabWidget" name="Tabs">
       <property name="currentIndex">
        <number>0</number>
+      </property>
+      <property name="usesScrollButtons">
+       <bool>false</bool>
       </property>
       <widget class="QWidget" name="Levels">
        <attribute name="title">
@@ -378,6 +381,595 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="Filter">
+       <attribute name="title">
+        <string>Filter/Sort</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>640</width>
+            <height>640</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>1280</width>
+            <height>1280</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>:/pictures/pictures/Lara2.jpg</pixmap>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QWidget" name="widget_2" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_11">
+           <item>
+            <widget class="QWidget" name="widget_8" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <item>
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Filter the level list&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_5" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;search&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit"/>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox_6">
+                <item>
+                 <property name="text">
+                  <string>Level</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>User</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCommandLinkButton" name="commandLinkButton">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Go</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_3" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>45</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Class&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox_2">
+                <item>
+                 <property name="text">
+                  <string>Alien/Space</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Atlantis</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Base/Lab</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Cambodia</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Castle</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Cave/Cat</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>City</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Coastal</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Cold/Snowy</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Desert</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Easter</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Egypt</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Fantasy/Surreal</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Home</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Ireland</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Joke</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Jungle</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Kids</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Library</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Mystery/Horror</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>nc</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Nordic/Celtic</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Oriental</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Persia</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Pirates</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Remake</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Rome/Greece</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Ship</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Shooter</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>South America</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>South Pacific</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Steampunk</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Train</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Venice</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Wild West</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Xmas</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Young Lara</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="maximumSize">
+                 <size>
+                  <width>61</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Difficulty&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox_4">
+                <item>
+                 <property name="text">
+                  <string>easy</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>medium</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>challenging</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>very challenging</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_7">
+                <property name="maximumSize">
+                 <size>
+                  <width>44</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox_3">
+                <item>
+                 <property name="text">
+                  <string>TR1</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>TR2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>TR3</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>TR4</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>TR5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>TEN</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_8">
+                <property name="maximumSize">
+                 <size>
+                  <width>61</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Duration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBox">
+                <item>
+                 <property name="text">
+                  <string>short</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>medium</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>long</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>very long</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_6" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_11"/>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_9" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_13">
+              <item>
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Sort the level list&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_10" native="true">
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="1" column="0">
+               <widget class="QRadioButton" name="radioButton">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Duration</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QRadioButton" name="radioButton_3">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Difficulty</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="checkBox">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Original games first</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QRadioButton" name="radioButton_5">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Type</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QRadioButton" name="radioButton_4">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Level name</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QRadioButton" name="radioButton_2">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Class</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QRadioButton" name="radioButton_6">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>User name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::MinimumExpanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="Modding">
        <attribute name="title">
         <string>Modding</string>
@@ -480,8 +1072,20 @@
               <layout class="QVBoxLayout" name="verticalLayout_8">
                <item>
                 <widget class="QLabel" name="lara">
+                 <property name="minimumSize">
+                  <size>
+                   <width>454</width>
+                   <height>616</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>454</width>
+                   <height>616</height>
+                  </size>
+                 </property>
                  <property name="text">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/pictures/pictures/Lara.jpg&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/pictures/pictures/Lara.jpg&quot; width=&quot;454&quot; height=&quot;616&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
@@ -638,11 +1242,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell'; font-size:10pt;&quot;&gt;Hi this is my first official Qt program for fun&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cantarell'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell'; font-size:10pt;&quot;&gt;This program takes a Tomb Raider installation with cresponding Wine or Proton prefix and and modifies it. It will launch diffrent wine exe for modding and manage all you're Tomb Rader mods and maps from trle.net&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cantarell'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell'; font-size:10pt;&quot;&gt;It will move you're steam proton Tomb Raider (for now 3 and 4) installation and prefix and link to it with hard links. So you can easaly relink and launch you mod with steam without needing to move you directory into the game launch path. I will later try to move away from dependent wine modding aplications and implament the moding direktly into the program. For fun.I play tomb raider 3 and 4 mostly and with both  lutris and steam proton and this will work for both lutris and steam proton. But no linking for lutris should be needed&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;About&lt;/span&gt;&lt;/h3&gt;
+&lt;h4 style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:medium; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;&lt;/h4&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Welcome to the &lt;span style=&quot; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;! This application is designed to provide a streamlined and convenient way to launch your favorite Tomb Raider games on Linux. Currently, the launcher supports Tomb Raider III and Tomb Raider: The Last Revelation (Tomb Raider IV).&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Our aim is to enhance your gaming experience by offering a user-friendly interface that simplifies game management and launching. The launcher is still a work in progress, and we are actively working on adding support for more games and improving functionality.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Stay tuned for updates and new features as we continue to develop and refine the Tomb Raider Linux Launcher. Your feedback and suggestions are always welcome to help us create the best possible tool for Tomb Raider fans.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Thank you for using the Tomb Raider Linux Launcher!&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/pictures/pictures/Lara3.jpg&quot; width=&quot;400&quot; height=&quot;350&quot; /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>

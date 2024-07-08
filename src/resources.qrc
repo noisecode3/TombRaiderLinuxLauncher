@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/pictures">
         <file>pictures/Lara.jpg</file>
+        <file>pictures/Lara2.jpg</file>
+        <file>pictures/Lara3.jpg</file>
         <file>pictures/Tomb_Raider_I.jpg</file>
         <file>pictures/Tomb_Raider_II.jpg</file>
         <file>pictures/Tomb_Raider_III.jpg</file>
