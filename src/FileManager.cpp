@@ -440,52 +440,51 @@ bool FileManager::moveFilesToDirectory(const QString& fromLevelDirectory, const 
 
 bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory)
 {
-    const QString& directoryPath = levelDir_m.absolutePath() + QDir::separator() + levelDirectory;
-    QRegExp regex("/[^/]+$"); // Matches the last component of the path starting with a slash
-    int indexOfRegex = regex.indexIn(levelDirectory);
+    QDir dir(levelDir_m.absolutePath() + QDir::separator() + levelDirectory);
 
-    QString tmp = levelDirectory;
-    if (indexOfRegex == -1) {
-        return false;
-    }
-    const QString& parentDirectory = tmp.remove(indexOfRegex, tmp.length() - indexOfRegex);
-    const QString& directoryParentPath = levelDir_m.absolutePath() + QDir::separator() + parentDirectory;
-
-    QDir dir(directoryPath);
-
-    if(!moveFilesToDirectory(levelDirectory, parentDirectory))
-    {
+    // Kontrollera om katalogen finns
+    if (!dir.exists()) {
+        qWarning() << "Directory does not exist:" << dir.absolutePath();
         return false;
     }
 
-    // Get list of all entries (files and directories) excluding '.' and '..'
-    QStringList entryDirList = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    // Hämta föräldrakatalogen
+    QDir parentDir = dir;
+    if (!parentDir.cdUp()) {
+        qWarning() << "Failed to access parent directory of:" << dir.absolutePath();
+        return false;
+    }
 
-    //TODO: make it look recursively and delete empty dir
+    // Lista alla filer och kataloger (exklusive '.' och '..')
+    QFileInfoList fileList = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
-    // Move files and recursively move directories
-    for (const QString& entry : entryDirList)
-    {
-        QString entryPath = directoryPath + QDir::separator() + entry;
-        createDirectory(parentDirectory + QDir::separator() + entry, false);
-        if (!moveFilesToDirectory(levelDirectory + QDir::separator() + entry, parentDirectory + QDir::separator() + entry))
-        {
-            qWarning() << "Failed to move directory:" << entryPath;
-            return false;
+    // Flytta alla filer och kataloger till föräldrakatalogen
+    for (const QFileInfo& fileInfo : fileList) {
+        QString srcPath = fileInfo.absoluteFilePath();
+        QString destPath = parentDir.absolutePath() + QDir::separator() + fileInfo.fileName();
+
+        if (fileInfo.isDir()) {
+            // Flytta katalogen rekursivt
+            QDir srcDir(srcPath);
+            if (!srcDir.rename(srcPath, destPath)) {
+                qWarning() << "Failed to move directory:" << srcPath;
+                return false;
+            }
+        } else {
+            // Flytta filen
+            if (!QFile::rename(srcPath, destPath)) {
+                qWarning() << "Failed to move file:" << srcPath;
+                return false;
+            }
         }
     }
-    
-    // Remove the directory if it's not the root directory
-    /*
-    if (dir != levelDir_m)
-    {
-        if (!dir.rmdir("."))
-        {
-            qWarning() << "Failed to remove directory:" << directoryPath;
-            return false;
-        }
+
+    // Ta bort den ursprungliga (nu tomma) katalogen
+    if (!dir.rmdir(".")) {
+        qWarning() << "Failed to remove directory:" << dir.absolutePath();
+        return false;
     }
-    */
+
     return true;
 }
 

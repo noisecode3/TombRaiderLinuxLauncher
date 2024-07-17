@@ -22,6 +22,7 @@ manipulation configuration files. Bash for launching with Steam or Lutris or jus
 * checksums
 * download maps/mods, and install them
 * add a filter for html in database
+* make sure the rest of the GUI still updates while downloading 
 
 # trle.net mods the launcher will download and play with wine-tkg that I tested
 * [Calypsis Jungle - Part One](https://www.trle.net/sc/levelfeatures.php?lid=3500)
@@ -35,6 +36,19 @@ You need those, should be installed an desktop linux
 
 * curl
 * Qt5
+
+To ensure that our application works properly right now, you need to download the
+required certificates from Firefox and add them to your system’s certificate store.
+Unfortunately, I cannot share these certificates directly.
+
+```
+/etc/ssl/certs/trle-net-chain.pem
+/etc/ssl/certs/trle-net.pem
+```
+Something like that should work on you're system
+```
+sudo update-ca-certificates
+```
 
 ```shell
 cmake -DCMAKE_INSTALL_PREFIX=~/.local .

@@ -10,3 +10,4 @@ Makefile
 build-Debug
 build
 .cache
+.gdb/qt5prettyprinters/__pycache__

@@ -8,33 +8,47 @@ import json
 import fcntl
 import hashlib
 import requests
+import logging
 from bs4 import BeautifulSoup
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
+logging.getLogger("requests").setLevel(logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.DEBUG)
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python3 getData.py URL")
+        logging.error("Usage: python3 getData.py URL")
         sys.exit(1)
     else:
         url = sys.argv[1]
+
 lock_file = '/tmp/TRLE.lock'
 try:
     lock_fd = open(lock_file, 'w')
     fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
 except IOError:
-    print("Another instance is already running")
+    logging.error("Another instance is already running")
     sys.exit(1)
 
 time.sleep(2)
 # test url
 # url = 'https://www.trle.net/sc/levelfeatures.php?lid=3573'
 
-response = requests.get(url)
+cert = '/home/noisecode3/mySecretVirusFolder/trle-net-chain.pem'
+
+try:
+    response = requests.get(url, verify=cert)
+    response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    logging.error(f"Error fetching URL {url}: {e}")
+    sys.exit(1)
 
 if response.status_code == 200:
     soup = BeautifulSoup(response.text, 'html.parser')
-    # print(f'response.text: {response.text}')
+    logging.debug(f'response.text: {response.text}')
 
     title_span = soup.find('span', class_='subHeader')
-
     if title_span:
         title = title_span.get_text(strip=True)
         br_tag = title_span.find('br')
@@ -43,23 +57,15 @@ if response.status_code == 200:
     else:
         title = "missing"
 
-    author = soup.find('a', class_='linkl').get_text(strip=True) \
-        or "missing"
-    type = soup.find('td', string='file type:').find_next('td').get_text(strip=True) \
-        or "missing"
-    class_ = soup.find('td', string='class:').find_next('td').get_text(strip=True) \
-        or "missing"
-    releaseDate = soup.find('td', string='release date:').find_next('td').get_text(strip=True) \
-        or "missing"
-    difficulty = soup.find('td', string='difficulty:').find_next('td').get_text(strip=True) \
-        or "missing"
-    duration = soup.find('td', string='duration:').find_next('td').get_text(strip=True) \
-        or "missing"
+    author = soup.find('a', class_='linkl').get_text(strip=True) or "missing"
+    type = soup.find('td', string='file type:').find_next('td').get_text(strip=True) or "missing"
+    class_ = soup.find('td', string='class:').find_next('td').get_text(strip=True) or "missing"
+    releaseDate = soup.find('td', string='release date:').find_next('td').get_text(strip=True) or "missing"
+    difficulty = soup.find('td', string='difficulty:').find_next('td').get_text(strip=True) or "missing"
+    duration = soup.find('td', string='duration:').find_next('td').get_text(strip=True) or "missing"
+    
     specific_tags = soup.find_all('td', class_='medGText', align='left', valign='top')
-    if len(specific_tags) >= 2:
-        body = specific_tags[1]
-    else:
-        body = "missing"
+    body = specific_tags[1] if len(specific_tags) >= 2 else "missing"
 
     zipFileSize = float(
         soup.find('td', string='file size:')
@@ -67,58 +73,52 @@ if response.status_code == 200:
         .get_text(strip=True)
         .replace(',', '')
         .replace('MB', '')
-        ) or 0.0
+    ) or 0.0
 
     download_link = soup.find('a', string='Download')
     if download_link:
         url = download_link['href']
         time.sleep(2)
-        response2 = requests.head(url, allow_redirects=True)
-
-        if response2.status_code == 200:
+        try:
+            response2 = requests.head(url, verify=cert, allow_redirects=True)
+            response2.raise_for_status()
             download_url = response2.url
-            # Extract the file name from the URL
             file_name = response2.url.split('/')[-1]
             zipFileName = file_name
-
-            md5_checksum = hashlib.md5(requests.get(url).content).hexdigest()
+            md5_checksum = hashlib.md5(requests.get(url, verify=cert).content).hexdigest()
             zipFileMd5 = md5_checksum
-        else:
-            print(f'Failed to retrieve file information. Status code: {response2.status_code}')
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to retrieve file information from {url}: {e}")
 
     walkthrough_link = soup.find('a', string='Walkthrough')
     if walkthrough_link:
         url = 'https://www.trle.net/sc/' + walkthrough_link['href']
         time.sleep(2)
-        response3 = requests.get(url)
-
-        if response3.status_code == 200:
+        try:
+            response3 = requests.get(url, verify=cert)
+            response3.raise_for_status()
             soup2 = BeautifulSoup(response3.text, 'html.parser')
             iframe_tag = soup2.find('iframe')
             iframe_src = iframe_tag['src']
             url = "https://www.trle.net" + iframe_src
-            response4 = requests.get(url)
+            response4 = requests.get(url, verify=cert)
             if response4.status_code == 200:
                 walkthrough = response4.text
             else:
-                print(f'Failed to retrieve file information. Status code: {response3.status_code}')
-        else:
-            print(f'Failed to retrieve file information. Status code: {response3.status_code}')
+                logging.error(f'Failed to retrieve iframe content. Status code: {response4.status_code}')
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to retrieve Walkthrough from {url}: {e}")
 
-    # Find all the onmouseover links
     onmouseover_links = soup.find_all(lambda tag: tag.name == 'a' and 'onmouseover' in tag.attrs)
-
-    # Extract the href attribute from the onmouseover links
     hrefs = [link['href'] for link in onmouseover_links]
     screensLarge = hrefs
 
     image_tag = soup.find('img', class_='border')
-
     screen = 'https://www.trle.net' + image_tag['src']
+
     def get_var(var_name):
         return globals().get(var_name, "")
 
-    # Create a dictionary with your variables
     data = {
         "title": title,
         "author": author,
@@ -143,12 +143,11 @@ if response.status_code == 200:
             data["walkthrough"] = str(walkthrough)
     except NameError:
         data["walkthrough"] = ""
-    # Write the dictionary to a JSON file
+
     with open('data.json', 'w') as json_file:
         json.dump(data, json_file)
 else:
-    print(f'Failed to retrieve content. Status code: {response.status_code}')
+    logging.error(f'Failed to retrieve content. Status code: {response.status_code}')
 
 lock_fd.close()
 os.remove(lock_file)
-

@@ -86,6 +86,7 @@ int TombRaiderLinuxLauncher::testallGames(int id){
 
 void TombRaiderLinuxLauncher::checkCommonFiles()
 {
+    testallGames(2);
     testallGames(3);
     testallGames(4);
     generateList();
@@ -107,6 +108,22 @@ void TombRaiderLinuxLauncher::generateList()
     foreach (const QFileInfo &file, enteryInfoList)
     {
         QString Ending = file.fileName().right(4);
+        if (Ending == ".TR2")
+        {
+            if(file.fileName() == "Original.TR2")
+            {
+                QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_II.jpg"),"Tomb Raider II Original");
+                wi->setData(Qt::UserRole, QVariant(-2));
+                ui->listWidgetModds->addItem(wi);
+            }
+            else
+            {
+                qDebug() << "No link or id implementation";
+                //read some json file 
+                //QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_II_unkown.jpg"),file.fileName());
+                //ui->listWidgetModds->addItem(wi);
+            }
+        }
         if (Ending == ".TR3")
         {
             if(file.fileName() == "Original.TR3")

@@ -1,6 +1,7 @@
 #include <QDebug>
 #include "Model.h"
 
+// Those lambda should be in another header file
 Model::Model(QObject *parent) : QObject(parent)
 {
     instructionManager.addInstruction(4, [this](int id) {
@@ -111,7 +112,7 @@ bool Model::setUpOg(int id)
     const size_t sm = list[1].size();
     if (s!=sm)
     {
-        qDebug() << "Corrupt List";
+        qDebug() << "Corrupt list, there seems to bee more or less checksums for the files\n";
         return false;
     }
     const QString& sd = "/Original.TR" + QString::number(id) +"/";

@@ -48,6 +48,7 @@ class QByteArrayPrinter:
 
     def __init__(self, val):
         self.val = val
+        self.size = self.val['d']['size']
         # Qt4 has 'data', Qt5 doesn't
         self.isQt4 = has_field(self.val['d'], 'data')
         # Qt6 has d.ptr, Qt5 doesn't
@@ -78,11 +79,11 @@ class QByteArrayPrinter:
             return self.val['d'].cast(gdb.lookup_type("char").const().pointer()) + self.val['d']['offset']
 
     def children(self):
-        return self._iterator(self.stringData(), self.val['d']['size'])
+        return self._iterator(self.stringData(), self.size)
 
     def to_string(self):
         #todo: handle charset correctly
-        return self.stringData()
+        return self.stringData().string(length = self.size)
 
     def display_hint (self):
         return 'string'
@@ -755,7 +756,7 @@ def build_dictionary ():
     pretty_printers_dict[re.compile('^QByteArray$')] = lambda val: QByteArrayPrinter(val)
     pretty_printers_dict[re.compile('^QList<.*>$')] = lambda val: QListPrinter(val, 'QList', None)
     pretty_printers_dict[re.compile('^QStringList$')] = lambda val: QListPrinter(val, 'QStringList', 'QString')
-    pretty_printers_dict[re.compile('^QQueue')] = lambda val: QListPrinter(val, 'QQueue', None)
+    pretty_printers_dict[re.compile('^QQueue<.*>$')] = lambda val: QListPrinter(val, 'QQueue', None)
     pretty_printers_dict[re.compile('^QVector<.*>$')] = lambda val: QVectorPrinter(val, 'QVector')
     pretty_printers_dict[re.compile('^QStack<.*>$')] = lambda val: QVectorPrinter(val, 'QStack')
     pretty_printers_dict[re.compile('^QLinkedList<.*>$')] = lambda val: QLinkedListPrinter(val)
@@ -769,8 +770,8 @@ def build_dictionary ():
     pretty_printers_dict[re.compile('^QUrl$')] = lambda val: QUrlPrinter(val)
     pretty_printers_dict[re.compile('^QSet<.*>$')] = lambda val: QSetPrinter(val)
     pretty_printers_dict[re.compile('^QChar$')] = lambda val: QCharPrinter(val)
-    pretty_printers_dict[re.compile('^QUuid')] = lambda val: QUuidPrinter(val)
-    pretty_printers_dict[re.compile('^QVariant')] = lambda val: QVariantPrinter(val)
+    pretty_printers_dict[re.compile('^QUuid$')] = lambda val: QUuidPrinter(val)
+    pretty_printers_dict[re.compile('^QVariant$')] = lambda val: QVariantPrinter(val)
 
 
 build_dictionary ()
