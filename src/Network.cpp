@@ -84,6 +84,7 @@ void Downloader::run()
             else
             {
                 qDebug() << "Failed to retrieve file size from header";
+                // handle ssl error
                 return;
             }
         }
