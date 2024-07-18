@@ -35,3 +35,8 @@ installing it.
 6.The Hidden Dagger II - Dragon's Legacy
   https://www.trle.net/sc/levelfeatures.php?lid=3621
   Starts the game and first map, backgrund audio is missing
+Note: I got it partly fixed here https://github.com/noisecode3/ogg-winmm
+but you need to replace winmm.dll remove ffplay.dll and convert the files
+in the music map to ogg and then rename the tracks to Track02.ogg, Track03.ogg.
+I gott something playing in the background at the start of the map. I could work on it
+a bit more maybe I could figure it out. Or you can.
