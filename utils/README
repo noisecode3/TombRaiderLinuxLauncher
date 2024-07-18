@@ -41,3 +41,7 @@ installing it.
   I left a script called convert.sh you have to it copy to
   ~/.local/share/TombRaiderLinuxLauncher/6.TRLE/music
   and run it from there
+
+  Works with GEproton9-10 dgvoodoo2 disable, dll ovride winmm=n,b
+  I also use just with esync and restrict number of cores to 1
+  I played just one map and the audio worked like on youtube walkthrough
