@@ -38,10 +38,18 @@ installing it.
 
   Note: I got the build fix here https://github.com/noisecode3/ogg-winmm
   but you need to replace winmm.dll remove ffplay.dll and convert the files
-  I left a script called convert.sh you have to it copy to
+  I left a script called convert.sh you have to copy it to
   ~/.local/share/TombRaiderLinuxLauncher/6.TRLE/music
-  and run it from there
+  and run it from there right now
+  use dll ovride winmm=n,b
 
-  Works with GEproton9-10 dgvoodoo2 disable, dll ovride winmm=n,b
-  I also use just with esync and restrict number of cores to 1
-  I played just one map and the audio worked like on youtube walkthrough
+7.Create a Classic 2021 - The City of Petra
+  https://www.trle.net/sc/levelfeatures.php?lid=3417
+  have not played through all of the game
+  no problems
+
+8.Into the Realm of Eternal Darkness
+  https://www.trle.net/sc/levelfeatures.php?lid=3557
+  have not played through all of the game
+  no problems
+
