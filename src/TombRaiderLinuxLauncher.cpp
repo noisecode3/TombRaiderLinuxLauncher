@@ -86,9 +86,11 @@ int TombRaiderLinuxLauncher::testallGames(int id){
 
 void TombRaiderLinuxLauncher::checkCommonFiles()
 {
+    testallGames(1);
     testallGames(2);
     testallGames(3);
     testallGames(4);
+    testallGames(5);
     generateList();
 }
 
@@ -103,56 +105,35 @@ void TombRaiderLinuxLauncher::generateList()
     const QString& pictures = ":/pictures/pictures/";
 
     QDir info(directoryPath);
-    QFileInfoList enteryInfoList = info.entryInfoList();
+    QFileInfoList entryInfoList = info.entryInfoList();
 
-    foreach (const QFileInfo &file, enteryInfoList)
+    QMap<QString, QPair<QString, int>> fileMap = {
+        {".TR1", {"Tomb_Raider_I.jpg", -1}},
+        {".TR2", {"Tomb_Raider_II.jpg", -2}},
+        {".TR3", {"Tomb_Raider_III.jpg", -3}},
+        {".TR4", {"Tomb_Raider_IIII.jpg", -4}},
+        {".TR5", {"Tomb_Raider_IIIII.jpg", -5}}
+    };
+
+    foreach (const QFileInfo &file, entryInfoList)
     {
-        QString Ending = file.fileName().right(4);
-        if (Ending == ".TR2")
+        QString extension = file.suffix().prepend(".");
+        if (fileMap.contains(extension))
         {
-            if(file.fileName() == "Original.TR2")
+            if (file.fileName() == "Original" + extension)
             {
-                QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_II.jpg"),"Tomb Raider II Original");
-                wi->setData(Qt::UserRole, QVariant(-2));
+                QString iconPath = pictures + fileMap[extension].first;
+                QString itemName = QString("Tomb Raider %1 Original").arg(extension.mid(3));
+                int userRole = fileMap[extension].second;
+
+                QListWidgetItem *wi = new QListWidgetItem(QIcon(iconPath), itemName);
+                wi->setData(Qt::UserRole, QVariant(userRole));
                 ui->listWidgetModds->addItem(wi);
             }
             else
             {
                 qDebug() << "No link or id implementation";
-                //read some json file 
-                //QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_II_unkown.jpg"),file.fileName());
-                //ui->listWidgetModds->addItem(wi);
-            }
-        }
-        if (Ending == ".TR3")
-        {
-            if(file.fileName() == "Original.TR3")
-            {
-                QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III.jpg"),"Tomb Raider III Original");
-                wi->setData(Qt::UserRole, QVariant(-3));
-                ui->listWidgetModds->addItem(wi);
-            }
-            else
-            {
-                qDebug() << "No link or id implementation";
-                //read some json file 
-                //QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III_unkown.jpg"),file.fileName());
-                //ui->listWidgetModds->addItem(wi);
-            }
-        }
-        if (Ending == ".TR4")
-        {
-            if(file.fileName() == "Original.TR4")
-            {
-                QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_IIII.jpg"),"Tomb Raider IV Original");
-                wi->setData(Qt::UserRole, QVariant(-4));
-                ui->listWidgetModds->addItem(wi);
-            }
-            else
-            {
-                qDebug() << "No link or id implementation";
-                //QListWidgetItem *wi = new QListWidgetItem(QIcon(pictures+"Tomb_Raider_III_unkown.jpg"),file.fileName());
-                //ui->listWidgetModds->addItem(wi);
+                // Implement logic to handle other files
             }
         }
     }
