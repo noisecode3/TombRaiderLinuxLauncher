@@ -41,8 +41,8 @@ CREATE TABLE Info (
     title TEXT NOT NULL,
     author TEXT NOT NULL,
     release DATE NOT NULL,
-    difficulty INT NOT NULL,
-    duration INT NOT NULL,
+    difficulty INT,
+    duration INT,
     type INT NOT NULL,
     class INT NOT NULL,
     FOREIGN KEY (difficulty) REFERENCES InfoDifficulty(InfoDifficultyID),
@@ -117,7 +117,7 @@ CREATE TABLE Screens (
     FOREIGN KEY (levelID) REFERENCES Level(LevelID)
 )''')
 
-c.execute("INSERT INTO InfoClass (value) VALUES (?)", ('Alien/Space',))
+c.execute("INSERT INTO infoclass (value) VALUES (?)", ('Alien/Space',))
 c.execute("INSERT INTO InfoClass (value) VALUES (?)", ('Atlantis',))
 c.execute("INSERT INTO InfoClass (value) VALUES (?)", ('Base/Lab',))
 c.execute("INSERT INTO InfoClass (value) VALUES (?)", ('Cambodia',))

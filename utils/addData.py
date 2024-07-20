@@ -91,11 +91,19 @@ info_releaseDate = file_info.get('releaseDate')
 info_difficulty = file_info.get('difficulty')
 info_duration = file_info.get('duration')
 
-c.execute("SELECT InfoDifficultyID FROM InfoDifficulty WHERE value = ?", (info_difficulty,))
-difficulty_id = c.fetchone()[0]
+difficulty_id = None
+if info_difficulty != "missing":
+    c.execute("SELECT InfoDifficultyID FROM InfoDifficulty WHERE value = ?", (info_difficulty,))
+    result = c.fetchone()
+    if result:
+        difficulty_id = result[0]
 
-c.execute("SELECT InfoDurationID FROM InfoDuration WHERE value = ?", (info_duration,))
-duration_id = c.fetchone()[0]
+duration_id = None
+if info_duration != "missing":
+    c.execute("SELECT InfoDurationID FROM InfoDuration WHERE value = ?", (info_duration,))
+    result = c.fetchone()
+    if result:
+        duration_id = result[0]
 
 c.execute("SELECT InfoTypeID FROM InfoType WHERE value = ?", (info_type,))
 type_id = c.fetchone()[0]

@@ -61,8 +61,24 @@ if response.status_code == 200:
     type = soup.find('td', string='file type:').find_next('td').get_text(strip=True) or "missing"
     class_ = soup.find('td', string='class:').find_next('td').get_text(strip=True) or "missing"
     releaseDate = soup.find('td', string='release date:').find_next('td').get_text(strip=True) or "missing"
-    difficulty = soup.find('td', string='difficulty:').find_next('td').get_text(strip=True) or "missing"
-    duration = soup.find('td', string='duration:').find_next('td').get_text(strip=True) or "missing"
+    difficulty_td = soup.find('td', string='difficulty:')
+    if difficulty_td:
+        next_td = difficulty_td.find_next('td')
+        if next_td:
+            difficulty = next_td.get_text(strip=True)
+        else:
+            difficulty = "missing"
+    else:
+        difficulty = "missing"
+    duration_td = soup.find('td', string='duration:')
+    if duration_td:
+        next_td = duration_td.find_next('td')
+        if next_td:
+            duration = next_td.get_text(strip=True)
+        else:
+            duration = "missing"
+    else:
+        duration = "missing"
     
     specific_tags = soup.find_all('td', class_='medGText', align='left', valign='top')
     body = specific_tags[1] if len(specific_tags) >= 2 else "missing"
