@@ -55,13 +55,9 @@ with updateDB_1.0.0.py.
   have not played through all of the game
   no problems
   I manage to port this one to Linux native thru TR1X
-  I got the fist level, sound and video working
-  but start menu is now different from original
-  If i do this is should be exactly like the original
-  but with restored braid, better graphics, but most important no lags.
-  And it should be dark. I will put a patch for TR1X and a bash script
-  that will install all the game data into to built game or something
-  like that.
+  the patch for TR1X is in fixes/8/IntoTheRealmOfEternalDarkness.patch
+  then you need to add all data from the zip, dont add the cfg part
+  It is the same for the most part but with 60 fps
 
 9.The Experiment 3/1 - Under the Moonlight
   https://www.trle.net/sc/levelfeatures.php?lid=1388
