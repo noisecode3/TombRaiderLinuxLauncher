@@ -1,5 +1,5 @@
 diff --git a/data/ship/cfg/TR1X_gameflow.json5 b/data/ship/cfg/TR1X_gameflow.json5
-index f15a010a..1e7dd857 100644
+index f15a010a..468aeb21 100644
 --- a/data/ship/cfg/TR1X_gameflow.json5
 +++ b/data/ship/cfg/TR1X_gameflow.json5
 @@ -4,15 +4,15 @@
@@ -24,7 +24,7 @@ index f15a010a..1e7dd857 100644
      "injections": [
          "data/injections/backpack.bin",
          "data/injections/braid.bin",
-@@ -23,554 +23,190 @@
+@@ -23,554 +23,191 @@
      "convert_dropped_guns": false,
  
      "levels": [
@@ -159,6 +159,7 @@ index f15a010a..1e7dd857 100644
 -            ],
              "sequence": [
 -                {"type": "loading_screen", "picture_path": "data/images/peru.webp", "display_time": 5},
++                {"type": "fix_trapdoor"},
                  {"type": "start_game"},
                  {"type": "loop_game"},
                  {"type": "stop_game"},
@@ -679,10 +680,10 @@ index f15a010a..1e7dd857 100644
              "title": "Current Position",
              "file": "data/current.phd",
 diff --git a/src/config_map.def b/src/config_map.def
-index c2e9c683..01899ac1 100644
+index c2e9c683..d2c92c43 100644
 --- a/src/config_map.def
 +++ b/src/config_map.def
-@@ -9,21 +9,21 @@ CFG_BOOL(enable_enhanced_look, true)
+@@ -9,39 +9,39 @@ CFG_BOOL(enable_enhanced_look, true)
  CFG_BOOL(enable_shotgun_flash, true)
  CFG_BOOL(fix_shotgun_targeting, true)
  CFG_BOOL(enable_cheats, false)
@@ -711,7 +712,10 @@ index c2e9c683..01899ac1 100644
  CFG_BOOL(fix_bridge_collision, true)
  CFG_BOOL(fix_qwop_glitch, false)
  CFG_BOOL(fix_alligator_ai, true)
-@@ -33,15 +33,15 @@ CFG_INT32(fov_value, 65)
+-CFG_BOOL(change_pierre_spawn, true)
++CFG_BOOL(change_pierre_spawn, false)
+ CFG_BOOL(fix_bear_ai, true)
+ CFG_INT32(fov_value, 65)
  CFG_INT32(resolution_width, -1)
  CFG_INT32(resolution_height, -1)
  CFG_BOOL(fov_vertical, true)
@@ -760,6 +764,7 @@ index c2e9c683..01899ac1 100644
  CFG_BOOL(enable_swing_cancel, true)
 -CFG_BOOL(enable_tr2_jumping, false)
 +CFG_BOOL(enable_tr2_jumping, true)
+ CFG_BOOL(enable_tr2_swimming, false)
  CFG_BOOL(load_current_music, true)
  CFG_BOOL(load_music_triggers, true)
  CFG_BOOL(fix_item_rots, true)
@@ -769,7 +774,7 @@ index c2e9c683..01899ac1 100644
  CFG_BOOL(enable_save_crystals, false)
  CFG_BOOL(enable_uw_roll, true)
  CFG_BOOL(enable_buffering, false)
-@@ -87,15 +87,15 @@ CFG_INT32(rendering.window_x, -1)
+@@ -88,15 +88,15 @@ CFG_INT32(rendering.window_x, -1)
  CFG_INT32(rendering.window_y, -1)
  CFG_INT32(rendering.window_width, -1)
  CFG_INT32(rendering.window_height, -1)
@@ -788,6 +793,160 @@ index c2e9c683..01899ac1 100644
  CFG_INT32(input.layout, 0)
  CFG_INT32(input.cntlr_layout, 0)
  CFG_FLOAT(brightness, DEFAULT_BRIGHTNESS)
+diff --git a/src/game/gameflow.c b/src/game/gameflow.c
+index 026e846c..5bc83eec 100644
+--- a/src/game/gameflow.c
++++ b/src/game/gameflow.c
+@@ -9,6 +9,8 @@
+ #include "game/lara.h"
+ #include "game/music.h"
+ #include "game/objects/creatures/bacon_lara.h"
++#include "game/objects/traps/rolling_ball.h"
++#include "game/objects/general/trapdoor.h"
+ #include "game/phase/phase.h"
+ #include "game/phase/phase_cutscene.h"
+ #include "game/phase/phase_picture.h"
+@@ -89,6 +91,7 @@ static const STRING_TO_ENUM_TYPE m_GameflowSeqTypeEnumMap[] = {
+     { "set_cam_z", GFS_SET_CAM_Z },
+     { "set_cam_angle", GFS_SET_CAM_ANGLE },
+     { "flip_map", GFS_FLIP_MAP },
++    { "fix_trapdoor", GFS_FIX_TRAPDOOR },
+     { "remove_guns", GFS_REMOVE_GUNS },
+     { "remove_scions", GFS_REMOVE_SCIONS },
+     { "remove_ammo", GFS_REMOVE_AMMO },
+@@ -406,6 +409,8 @@ static bool GameFlow_LoadLevelSequence(
+             break;
+         }
+         case GFS_FLIP_MAP:
++        case GFS_FIX_TRAPDOOR:
++            break;
+         case GFS_REMOVE_GUNS:
+         case GFS_REMOVE_SCIONS:
+         case GFS_REMOVE_AMMO:
+@@ -990,6 +995,7 @@ void GameFlow_Shutdown(void)
+                     case GFS_SET_CAM_Z:
+                     case GFS_SET_CAM_ANGLE:
+                     case GFS_FLIP_MAP:
++                    case GFS_FIX_TRAPDOOR:
+                     case GFS_REMOVE_GUNS:
+                     case GFS_REMOVE_SCIONS:
+                     case GFS_PLAY_SYNCED_AUDIO:
+@@ -1248,6 +1254,11 @@ GameFlow_InterpretSequence(int32_t level_num, GAMEFLOW_LEVEL_TYPE level_type)
+         case GFS_FLIP_MAP:
+             Room_FlipMap();
+             break;
++        case GFS_FIX_TRAPDOOR:
++                LOG_INFO("Load timed trapdoor fix");
++                g_RollingBallFix = 1;
++                g_TrapDoorFix = 1;
++            break;
+         case GFS_PLAY_SYNCED_AUDIO:
+             Music_Play((int32_t)(intptr_t)seq->data);
+             break;
+@@ -1433,6 +1444,8 @@ GameFlow_StorySoFar(int32_t level_num, int32_t savegame_level)
+         case GFS_FLIP_MAP:
+             Room_FlipMap();
+             break;
++        case GFS_FIX_TRAPDOOR:
++            break;
+         case GFS_PLAY_SYNCED_AUDIO:
+             Music_Play((int32_t)(intptr_t)seq->data);
+             break;
+diff --git a/src/game/objects/general/trapdoor.c b/src/game/objects/general/trapdoor.c
+index 0021839f..148bcb34 100644
+--- a/src/game/objects/general/trapdoor.c
++++ b/src/game/objects/general/trapdoor.c
+@@ -5,6 +5,8 @@
+ 
+ #include <stdbool.h>
+ 
++int g_TrapDoorFix = 0;
++
+ static bool TrapDoor_StandingOn(ITEM_INFO *item, int32_t x, int32_t z);
+ 
+ static bool TrapDoor_StandingOn(ITEM_INFO *item, int32_t x, int32_t z)
+@@ -34,12 +36,28 @@ void TrapDoor_Setup(OBJECT_INFO *obj)
+     obj->save_flags = 1;
+ }
+ 
++int testCounter = 50;
++
+ void TrapDoor_Control(int16_t item_num)
+ {
+     ITEM_INFO *item = &g_Items[item_num];
+     if (Item_IsTriggerActive(item)) {
+         if (item->current_anim_state == DOOR_CLOSED) {
+-            item->goal_anim_state = DOOR_OPEN;
++            if(g_TrapDoorFix && (item_num == 12))
++            {
++                if(testCounter)
++                {
++                    item->goal_anim_state = DOOR_CLOSED;
++                    testCounter -=1;
++                }
++                else
++                {
++                    item->goal_anim_state = DOOR_OPEN;
++                    testCounter = 50;
++                }
++            }
++            else
++                item->goal_anim_state = DOOR_OPEN;
+         }
+     } else if (item->current_anim_state == DOOR_OPEN) {
+         item->goal_anim_state = DOOR_CLOSED;
+diff --git a/src/game/objects/general/trapdoor.h b/src/game/objects/general/trapdoor.h
+index ac38b3dc..531290b3 100644
+--- a/src/game/objects/general/trapdoor.h
++++ b/src/game/objects/general/trapdoor.h
+@@ -4,6 +4,8 @@
+ 
+ #include <stdint.h>
+ 
++extern int g_TrapDoorFix;
++
+ void TrapDoor_Setup(OBJECT_INFO *obj);
+ void TrapDoor_Control(int16_t item_num);
+ void TrapDoor_Floor(
+diff --git a/src/game/objects/traps/rolling_ball.c b/src/game/objects/traps/rolling_ball.c
+index 7b42b8e1..1308c10b 100644
+--- a/src/game/objects/traps/rolling_ball.c
++++ b/src/game/objects/traps/rolling_ball.c
+@@ -18,6 +18,8 @@
+ 
+ #define ROLLINGBALL_DAMAGE_AIR 100
+ 
++int g_RollingBallFix = 0;
++
+ void RollingBall_Setup(OBJECT_INFO *obj)
+ {
+     obj->initialise = RollingBall_Initialise;
+@@ -42,6 +44,12 @@ void RollingBall_Initialise(int16_t item_num)
+ void RollingBall_Control(int16_t item_num)
+ {
+     ITEM_INFO *item = &g_Items[item_num];
++    if(g_RollingBallFix && (item_num == 23) && (item->timer == -1))
++    {
++        g_Items[10].timer = -1;
++        g_Items[12].timer = -1;
++        g_Items[17].timer = -1;
++    }
+     if (item->status == IS_ACTIVE) {
+         if (item->pos.y < item->floor) {
+             if (!item->gravity_status) {
+diff --git a/src/game/objects/traps/rolling_ball.h b/src/game/objects/traps/rolling_ball.h
+index 5db84d57..60982153 100644
+--- a/src/game/objects/traps/rolling_ball.h
++++ b/src/game/objects/traps/rolling_ball.h
+@@ -3,7 +3,7 @@
+ #include "global/types.h"
+ 
+ #include <stdint.h>
+-
++extern int g_RollingBallFix;
+ void RollingBall_Setup(OBJECT_INFO *obj);
+ void RollingBall_Initialise(int16_t item_num);
+ void RollingBall_Control(int16_t item_num);
 diff --git a/src/game/option/option_passport.c b/src/game/option/option_passport.c
 index fb3f8619..320eeafb 100644
 --- a/src/game/option/option_passport.c
@@ -830,3 +989,15 @@ index b77761bd..02409f5e 100644
  
  #define MAX_MATRICES 40
  #define MAX_NESTED_MATRICES 32
+diff --git a/src/global/types.h b/src/global/types.h
+index 7586ef7e..9d9d975d 100644
+--- a/src/global/types.h
++++ b/src/global/types.h
+@@ -998,6 +998,7 @@ typedef enum GAMEFLOW_SEQUENCE_TYPE {
+     GFS_SET_CAM_Z,
+     GFS_SET_CAM_ANGLE,
+     GFS_FLIP_MAP,
++    GFS_FIX_TRAPDOOR,
+     GFS_REMOVE_GUNS,
+     GFS_REMOVE_SCIONS,
+     GFS_GIVE_ITEM,

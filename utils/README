@@ -56,10 +56,16 @@ with updateDB_1.0.0.py.
   no problems
   I manage to port this one to Linux native thru TR1X
   the patch for TR1X is in fixes/8/IntoTheRealmOfEternalDarkness.patch
-  then you need to add all data from the zip, dont add the cfg part
+  then you need to add all data from the zip, that is
+  (data fmv music and pictures) should be put next to TR1X 
+
   It is the same for the most part but with 60 fps
-  The second map is broken, but it works as prof of concept
+  The second level had broken timer, but works now
   Some issues can be addressed next time.
 
+  git clone --recurse-submodules  https://github.com/LostArtefacts/TR1X
+  cd TR1X
+  cat ../TombRaiderLinuxLauncher/fixes/8/IntoTheRealmOfEternalDarkness.patch | patch -p1
+  just package-linux
 9.The Experiment 3/1 - Under the Moonlight
   https://www.trle.net/sc/levelfeatures.php?lid=1388
