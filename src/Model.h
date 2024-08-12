@@ -62,7 +62,7 @@ private:
     InstructionManager instructionManager;
 
     Model(QObject *parent = nullptr);
-    ~Model() {};
+    ~Model();
 
     Q_DISABLE_COPY(Model)
 };

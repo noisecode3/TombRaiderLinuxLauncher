@@ -29,9 +29,10 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->setOptions, SIGNAL (clicked()), this, SLOT (setOptionsClicked()));
     connect(ui->listWidgetModds, SIGNAL(itemSelectionChanged()), this, SLOT(onListItemSelected()));
 
-    connect(&Model::getInstance(), SIGNAL(modelTickSignal()), this, SLOT(workTick()));
-    connect(&FileManager::getInstance(), SIGNAL(fileWorkTickSignal()), this, SLOT(workTick()));
-    connect(&Downloader::getInstance(), &Downloader::networkWorkTickSignal, this, &TombRaiderLinuxLauncher::workTick);
+    connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()), this, SLOT(workTick()));
+
+    // Thread work done
+    connect(&Controller::getInstance(), SIGNAL(setupCampDone(bool)), this, SLOT(checkCommonFiles(bool)));
 
     ui->pushButtonLink->setEnabled(false);
     ui->pushButtonInfo->setEnabled(false);
@@ -84,7 +85,7 @@ int TombRaiderLinuxLauncher::testallGames(int id){
     return -1;
 }
 
-void TombRaiderLinuxLauncher::checkCommonFiles()
+void TombRaiderLinuxLauncher::checkCommonFiles(bool status)
 {
     testallGames(1);
     testallGames(2);
@@ -156,8 +157,7 @@ void TombRaiderLinuxLauncher::readSavedSettings()
     qDebug() << "Read game path value:" << gamePathValue;
     const QString& levelPathValue = settings.value("levelPath").toString();
     qDebug() << "Read level path value:" << levelPathValue;
-    if (controller.setupCamp(levelPathValue, gamePathValue))
-        checkCommonFiles();
+    controller.setupCamp(levelPathValue, gamePathValue);
 }
 
 void TombRaiderLinuxLauncher::setup()

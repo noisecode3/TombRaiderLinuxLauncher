@@ -128,4 +128,3 @@ void Downloader::run()
     fclose(file);
 }
 
-void networkWorkTickSignal(){};

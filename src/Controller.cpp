@@ -1,56 +1,61 @@
 #include "Controller.h"
 #include <QDebug>
 
-Controller::Controller(QObject *parent) : QObject(parent), workerRunning(false)
+Controller::Controller(QObject *parent) : QObject(parent), ControllerThread(nullptr)
 {
-    /* 
-    Im not sure I need the thread for something else but found that
-    it was working by just using signals/slots to update the gui
-    workerThread = new QThread();
+    ControllerThread = new QThread();
+    this->moveToThread(ControllerThread);
+    connect(ControllerThread, &QThread::finished, ControllerThread, &QThread::deleteLater);
+    ControllerThread->start();
+    /* this should make emits to signals from the controller and to the controller happen
+     * on another thread event loop so TombRaiderLinuxLauncher (view object) should have a slot for
+     * getting the results, update the GUI state, if the controller returns something it's just the
+     * state of some logic right before it calls the thread signal.
+     * Every method here should emit a signal to this object here again and use only quick logic
+     * in order to get back out again and never hold up the GUI thread, never. Even if someone have like
+     * the slowest hard drives in the world, so the game couldn't even run probably it will not wait for
+     * it and keep updating the GUI. This is the most safe and correct way to do this I think.
+     */
 
-    // Move the Controller to a separate thread
-    this->moveToThread(workerThread);
+    // Those start threaded work a signal hub
+    connect(this, SIGNAL(setupCampThreadSignal(const QString&, const QString&)),
+        this, SLOT(setupCampThread(const QString&, const QString&)));
+    connect(this, SIGNAL(setupLevelThreadSignal(int)), this, SLOT(setupLevelThread(int)));
 
-    // Connect signals and slots for thread management
-    connect(workerThread, SIGNAL(started()), this, SLOT(doSetupOgWork()));
-    connect(workerThread, SIGNAL(started()), this, SLOT(doSetupLevelWork()));
-    connect(workerThread, &QThread::finished, workerThread, &QThread::deleteLater);
-    */
+
+    // Those work like a signal hub for threaded work, like in between callback
+    connect(&Model::getInstance(), SIGNAL(modelTickSignal()), this, SLOT(passTickSignal()));
+    connect(&FileManager::getInstance(), SIGNAL(fileWorkTickSignal()), this, SLOT(passTickSignal()));
+    connect(&Downloader::getInstance(), SIGNAL(networkWorkTickSignal()), this, SLOT(passTickSignal()));
+
+    // The TombRaiderLinuxLauncher object have the connect and slot for last signal emit that displays
+    // the result, we pass back what was return before like this
+    // connect(&Controller::getInstance(), SIGNAL(setupCampDone(bool)), this, SLOT(checkCommonFiles(bool)));
 }
 
 Controller::~Controller()
 {
-    // Cleanup: Ensure the worker thread is stopped and cleaned up
-   // stopWorkerThread();
-}
-/*
-void Controller::startWorkerThread()
-{
-    if (!workerRunning)
-    {
-        workerThread->start();
-        workerRunning = true;
-    }
+    ControllerThread->quit();
+    ControllerThread->wait();
+    delete ControllerThread;
+    ControllerThread = nullptr;
 }
 
-void Controller::stopWorkerThread()
-{
-    if (workerRunning)
-    {
-        workerThread->quit();
-        workerThread->wait();
-        workerRunning = false;
-    }
-}
-*/
 int Controller::checkGameDirectory(int id)
 {
     return model.checkGameDirectory(id);
 }
 
-bool Controller::setupCamp(const QString& level, const QString& game)
+
+void Controller::setupCamp(const QString& level, const QString& game)
 {
-    return model.setDirectory(level,game);
+    emit setupCampThreadSignal(level,game);
+}
+
+void Controller::setupCampThread(const QString& level, const QString& game)
+{
+    bool status = model.setDirectory(level,game);
+    emit setupCampDone(status);
 }
 
 bool Controller::setupOg(int id)
@@ -58,13 +63,14 @@ bool Controller::setupOg(int id)
     return model.setUpOg(id);
 }
 
-bool Controller::setupLevel(int id)
+void Controller::setupLevel(int id)
 {
-    id_m = id;
-    //startWorkerThread();
-    doSetupLevelWork();
-    //stopWorkerThread();
-    return true;
+    emit setupLevelThreadSignal(id);
+}
+
+void Controller::setupLevelThread(int id)
+{
+    bool staus = model.getGame(id);
 }
 
 void Controller::getList(QVector<ListItemData>& list)
@@ -87,33 +93,13 @@ bool Controller::link(int id)
     return model.setLink(id);
 }
 
-bool Controller::link(const QString& levelDir)
-{
-    return false;
-}
-
 int Controller::getItemState(int id)
 {
     return model.getItemState(id);
 }
 
-void Controller::doSetupOgWork()
+void Controller::passTickSignal()
 {
-    model.getGame(id_m);
+    emit controllerTickSignal();
 }
 
-void Controller::doSetupLevelWork()
-{
-    // Your worker functionality goes here
-    qDebug() << "Worker is doing some work...";
-    model.getGame(id_m);
-
-    // Emit a signal to indicate the work is finished
-    //emit workFinished();
-}
-
-void Controller::WorkerThreadFinished()
-{
-    qDebug() << "Worker thread finished.";
-    // Handle worker thread finished event
-}

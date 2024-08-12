@@ -680,7 +680,7 @@ index f15a010a..468aeb21 100644
              "title": "Current Position",
              "file": "data/current.phd",
 diff --git a/src/config_map.def b/src/config_map.def
-index c2e9c683..d2c92c43 100644
+index f449a25f..fe964da7 100644
 --- a/src/config_map.def
 +++ b/src/config_map.def
 @@ -9,39 +9,39 @@ CFG_BOOL(enable_enhanced_look, true)
@@ -734,7 +734,7 @@ index c2e9c683..d2c92c43 100644
  CFG_FLOAT(rendering.anisotropy_filter, 16.0f)
  CFG_INT32(rendering.turbo_speed, 0)
  CFG_BOOL(walk_to_items, false)
-@@ -52,29 +52,29 @@ CFG_ENUM(airbar_show_mode, BSM_DEFAULT, BAR_SHOW_MODE)
+@@ -52,30 +52,30 @@ CFG_ENUM(airbar_show_mode, BSM_DEFAULT, BAR_SHOW_MODE)
  CFG_ENUM(enemy_healthbar_show_mode, BSM_ALWAYS, BAR_SHOW_MODE)
  CFG_ENUM(healthbar_location, BL_TOP_LEFT, BAR_LOCATION)
  CFG_ENUM(airbar_location, BL_TOP_RIGHT, BAR_LOCATION)
@@ -774,7 +774,7 @@ index c2e9c683..d2c92c43 100644
  CFG_BOOL(enable_save_crystals, false)
  CFG_BOOL(enable_uw_roll, true)
  CFG_BOOL(enable_buffering, false)
-@@ -88,15 +88,15 @@ CFG_INT32(rendering.window_x, -1)
+@@ -88,7 +88,7 @@ CFG_INT32(rendering.window_x, -1)
  CFG_INT32(rendering.window_y, -1)
  CFG_INT32(rendering.window_width, -1)
  CFG_INT32(rendering.window_height, -1)
@@ -783,18 +783,8 @@ index c2e9c683..d2c92c43 100644
  CFG_INT32(rendering.texture_filter, GFX_TF_BILINEAR)
  CFG_INT32(rendering.fbo_filter, GFX_TF_NN)
  CFG_BOOL(rendering.enable_wireframe, false)
- CFG_DOUBLE(rendering.wireframe_width, 2.5)
- CFG_BOOL(rendering.enable_perspective_filter, true)
- CFG_BOOL(rendering.enable_vsync, true)
--CFG_INT32(music_volume, 8)
--CFG_INT32(sound_volume, 8)
-+CFG_INT32(music_volume, 10)
-+CFG_INT32(sound_volume, 7)
- CFG_INT32(input.layout, 0)
- CFG_INT32(input.cntlr_layout, 0)
- CFG_FLOAT(brightness, DEFAULT_BRIGHTNESS)
 diff --git a/src/game/gameflow.c b/src/game/gameflow.c
-index 026e846c..5bc83eec 100644
+index 4d537771..6e2ea7fc 100644
 --- a/src/game/gameflow.c
 +++ b/src/game/gameflow.c
 @@ -9,6 +9,8 @@
@@ -853,7 +843,7 @@ index 026e846c..5bc83eec 100644
              Music_Play((int32_t)(intptr_t)seq->data);
              break;
 diff --git a/src/game/objects/general/trapdoor.c b/src/game/objects/general/trapdoor.c
-index 0021839f..148bcb34 100644
+index 46f6cc11..3e9d0a1c 100644
 --- a/src/game/objects/general/trapdoor.c
 +++ b/src/game/objects/general/trapdoor.c
 @@ -5,6 +5,8 @@
@@ -862,10 +852,10 @@ index 0021839f..148bcb34 100644
  
 +int g_TrapDoorFix = 0;
 +
- static bool TrapDoor_StandingOn(ITEM_INFO *item, int32_t x, int32_t z);
+ static bool TrapDoor_StandingOn(const ITEM_INFO *item, int32_t x, int32_t z);
  
- static bool TrapDoor_StandingOn(ITEM_INFO *item, int32_t x, int32_t z)
-@@ -34,12 +36,28 @@ void TrapDoor_Setup(OBJECT_INFO *obj)
+ static bool TrapDoor_StandingOn(const ITEM_INFO *item, int32_t x, int32_t z)
+@@ -35,12 +37,28 @@ void TrapDoor_Setup(OBJECT_INFO *obj)
      obj->save_flags = 1;
  }
  
@@ -896,7 +886,7 @@ index 0021839f..148bcb34 100644
      } else if (item->current_anim_state == DOOR_OPEN) {
          item->goal_anim_state = DOOR_CLOSED;
 diff --git a/src/game/objects/general/trapdoor.h b/src/game/objects/general/trapdoor.h
-index ac38b3dc..531290b3 100644
+index 54e0ea09..81df4dd4 100644
 --- a/src/game/objects/general/trapdoor.h
 +++ b/src/game/objects/general/trapdoor.h
 @@ -4,6 +4,8 @@
@@ -907,9 +897,9 @@ index ac38b3dc..531290b3 100644
 +
  void TrapDoor_Setup(OBJECT_INFO *obj);
  void TrapDoor_Control(int16_t item_num);
- void TrapDoor_Floor(
+ int16_t TrapDoor_GetFloorHeight(
 diff --git a/src/game/objects/traps/rolling_ball.c b/src/game/objects/traps/rolling_ball.c
-index 7b42b8e1..1308c10b 100644
+index 97c448d0..7942e9d5 100644
 --- a/src/game/objects/traps/rolling_ball.c
 +++ b/src/game/objects/traps/rolling_ball.c
 @@ -18,6 +18,8 @@
@@ -973,7 +963,7 @@ index fb3f8619..320eeafb 100644
      req->line_offset = 0;
      req->requested = 0;
 diff --git a/src/global/const.h b/src/global/const.h
-index b77761bd..02409f5e 100644
+index d3c03e5c..6fc74a5b 100644
 --- a/src/global/const.h
 +++ b/src/global/const.h
 @@ -17,10 +17,10 @@
@@ -990,7 +980,7 @@ index b77761bd..02409f5e 100644
  #define MAX_MATRICES 40
  #define MAX_NESTED_MATRICES 32
 diff --git a/src/global/types.h b/src/global/types.h
-index 7586ef7e..9d9d975d 100644
+index 0093d802..869de585 100644
 --- a/src/global/types.h
 +++ b/src/global/types.h
 @@ -998,6 +998,7 @@ typedef enum GAMEFLOW_SEQUENCE_TYPE {

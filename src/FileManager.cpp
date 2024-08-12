@@ -487,5 +487,3 @@ bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory)
 
     return true;
 }
-
-void fileWorkTickSignal(){};

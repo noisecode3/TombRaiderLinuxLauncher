@@ -17,37 +17,34 @@ public:
         static Controller instance;
         return instance;
     }
-    void startWorkerThread();
-    void stopWorkerThread();
-    bool setupCamp(const QString& level, const QString& game);
+    void setupCamp(const QString& level, const QString& game);
     bool setupOg(int id);
-    bool setupLevel(int id);
+    void setupLevel(int id);
     void getList(QVector<ListItemData>& list);
     bool link(int id);
-    bool link(const QString& levelDir);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     int getItemState(int id);
     int checkGameDirectory(int id);
 
-signals:
-    void workFinished();
-
-public slots:
-    void doSetupOgWork();
-    void doSetupLevelWork();
-    void WorkerThreadFinished();
-
 private:
-    QThread* workerThread;
-    bool workerRunning;
-    int id_m;
-
     Model& model = Model::getInstance();
 
     Controller(QObject *parent = nullptr);
     ~Controller();
+    QThread* ControllerThread;
     Q_DISABLE_COPY(Controller)
+
+public slots:
+    void passTickSignal();
+    void setupCampThread(const QString& level, const QString& game);
+    void setupLevelThread(int id);
+signals:
+    void controllerTickSignal();
+    void setupCampThreadSignal(const QString& level, const QString& game);
+    void setupCampDone(bool status);
+    void setupLevelThreadSignal(int id);
+    //void setupLevelDone(bool status);
 };
 
 #endif // CONTROLLER_H

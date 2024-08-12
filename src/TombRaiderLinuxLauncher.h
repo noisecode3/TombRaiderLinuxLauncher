@@ -55,7 +55,10 @@ public slots:
      * Called when 1% work done calculated from total work steps
      */
     void workTick();
-
+    /**
+     *
+     */
+    void checkCommonFiles(bool status);
 
 private:
     /**
@@ -66,10 +69,6 @@ private:
      * 
      */
     void readSavedSettings();
-    /**
-     * 
-     */
-    void checkCommonFiles();
     /**
      * 
      */

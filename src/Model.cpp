@@ -20,9 +20,14 @@ Model::Model(QObject *parent) : QObject(parent)
         const QString s = QString::number(id) + ".TRLE/Titak-MistsOfAvalon-final";
         fileManager.moveFilesToParentDirectory(s);
     });
-*/
+    */
+
 }
 
+Model::~Model()
+{
+
+}
 
 bool Model::setDirectory(const QString& level, const QString& game)
 {
@@ -68,7 +73,6 @@ void Model::getList(QVector<ListItemData>& list)
     list = data.getListItems();
 }
 
-
 int Model::getItemState(int id)
 {
     if(id < 0)
@@ -83,7 +87,6 @@ int Model::getItemState(int id)
     }
     return -1;
 }
-
 
 bool Model::setLink(int id)
 {
@@ -176,6 +179,7 @@ bool Model::getGame(int id)
         //fileManager.createDirectory(QString::number(id)+".TRLE", false);
         fileManager.extractZip(zipData.name, QString::number(id)+".TRLE");
         instructionManager.executeInstruction(id);
+        return true;
     }
     return false;
 }
@@ -190,4 +194,3 @@ const QString Model::getWalkthrough(int id)
     return data.getWalkthrough(id);
 }
 
-void modelTickSignal(){};

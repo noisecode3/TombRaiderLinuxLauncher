@@ -148,8 +148,13 @@ public:
     ZipData getDownload(int id);
 
 private:
-    Data(QObject *parent = nullptr) : QObject(parent) { }
-    ~Data() { db.close(); }
+    Data(QObject *parent = nullptr) : QObject(parent)
+    {
+    }
+    ~Data()
+    {
+        db.close();
+    }
 
     Q_DISABLE_COPY(Data)
     QSqlDatabase db;
