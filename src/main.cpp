@@ -14,6 +14,13 @@ int main(int argc, char *argv[])
 
     // Construct the QSettings object
     TombRaiderLinuxLauncher w;
-    w.show();
+
+    QStringList arguments = a.arguments();
+    if (arguments.contains("--fullscreen")) {
+        w.showFullScreen();
+    } else {
+        w.show();
+    }
+
     return a.exec();
 }

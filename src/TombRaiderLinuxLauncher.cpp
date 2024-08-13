@@ -97,11 +97,6 @@ void TombRaiderLinuxLauncher::checkCommonFiles(bool status)
 
 void TombRaiderLinuxLauncher::generateList()
 {
-    ui->listWidgetModds->setIconSize(QSize(320, 240));
-    QFont defaultFont = QApplication::font();
-    int newSize = 22;
-    defaultFont.setPointSize(newSize);
-    ui->listWidgetModds->setFont(defaultFont);
     const QString& directoryPath = settings.value("levelPath").toString();
     const QString& pictures = ":/pictures/pictures/";
 
