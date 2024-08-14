@@ -21,7 +21,7 @@ public:
     bool setUpCamp(const QString& levelDir);
     void setUrl(QUrl url);
     void setSaveFile(const QString& file);
-    static size_t write_callback(void* contents, size_t size, size_t nmemb, FILE* file);
+    static size_t write_callback(void* contents, size_t size, size_t nmemb, void* userData);
 
 signals:
     void networkWorkTickSignal();
@@ -32,7 +32,12 @@ private:
     QString file_m;
     QDir levelDir_m;
 
-    Downloader(QObject *parent = nullptr) : QObject(parent)
+    qint64 oneTick = 0;
+    qint64 remainderTick = 0;
+    int timesSent = 0;
+
+    Downloader(QObject *parent = nullptr) : QObject(parent),
+        oneTick(0), remainderTick(0), timesSent(0)
     {
         // Initialize libcurl
         curl_global_init(CURL_GLOBAL_DEFAULT);

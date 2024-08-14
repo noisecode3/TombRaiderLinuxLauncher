@@ -1,51 +1,65 @@
 #include "Network.h"
 
+struct WriteData
+{
+    Downloader* downloader;
+    FILE* file;
+};
+
 bool Downloader::setUpCamp(const QString& levelDir)
 {
     QFileInfo levelPathInfo(levelDir);
+
     if (levelPathInfo.isDir())
     {
         levelDir_m.setPath(levelDir);
         return true;
     }
+
     return false;
 }
 
-//FIXME I hate to use globals like this..
-qint64 oneTick=0;
-qint64 remainderTick=0;
-int timesSent=0;
-
-size_t Downloader::write_callback(void* contents, size_t size, size_t nmemb, FILE* file)
+size_t Downloader::write_callback(void* contents, size_t size, size_t nmemb, void* userData)
 {
-    qint64 bars = (nmemb+remainderTick)/oneTick;
-    remainderTick = (nmemb+remainderTick)%oneTick;
-    while(bars>0)
+    WriteData* data = static_cast<WriteData*>(userData);
+    Downloader* instance = data->downloader;
+    FILE* file = data->file;
+
+    qint64 bars = (nmemb + instance->remainderTick) / instance->oneTick;
+    instance->remainderTick = (nmemb + instance->remainderTick) % instance->oneTick;
+
+    while (bars > 0)
     {
-        emit Downloader::getInstance().networkWorkTickSignal();
-        timesSent+=1;
-        bars-=1;
+        emit instance->networkWorkTickSignal();
+        instance->timesSent += 1;
+        bars -= 1;
     }
+
     return fwrite(contents, size, nmemb, file);
 }
 
 void Downloader::setUrl(QUrl url)
 {
-    url_m=url;
+    url_m = url;
 }
 
 void Downloader::setSaveFile(const QString& file)
 {
-    file_m=file;
+    file_m = file;
 }
 
-void Downloader::saveToFile(const QByteArray& data, const QString& filePath) {
+void Downloader::saveToFile(const QByteArray& data, const QString& filePath)
+{
     QFile file(filePath);
-    if (file.open(QIODevice::WriteOnly)) {
+
+    if (file.open(QIODevice::WriteOnly))
+    {
         file.write(data);
         file.close();
         qDebug() << "Data saved to file:" << filePath;
-    } else {
+    }
+    else
+    {
         qDebug() << "Error saving data to file:" << file.errorString();
     }
 }
@@ -55,7 +69,7 @@ void Downloader::run()
     if (url_m.isEmpty() || file_m.isEmpty() || levelDir_m.isEmpty())
         return;
 
-    size_t zipFileSize=0; // I need to read filesize of the download link into this variable
+    size_t zipFileSize = 0; // I need to read filesize of the download link into this variable
 
     QString urlString = url_m.toString();
     QByteArray byteArray = urlString.toUtf8();
@@ -84,7 +98,8 @@ void Downloader::run()
             else
             {
                 qDebug() << "Failed to retrieve file size from header";
-                // handle ssl error
+                // handle SSL error, no connection, restore to previous state
+                // with an error on the GUI
                 return;
             }
         }
@@ -95,36 +110,39 @@ void Downloader::run()
         }
     }
 
-    oneTick = (zipFileSize/100)*2;
+    oneTick = (zipFileSize / 100) * 2;
     remainderTick = 0;
-    int timesSent = 0;
+    timesSent = 0;
 
-    // Open file for writing
     FILE* file = fopen(filePath.toUtf8().constData(), "wb");
-    if (!file) {
+    if (!file)
+    {
         qDebug() << "Error opening file for writing:" << filePath;
         return;
     }
 
-    // Initialize libcurl easy handle
+    WriteData writeData = { this, file };
+
     curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+    if (curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Downloader::write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeData);
         curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
 
         // Perform the download
         CURLcode res = curl_easy_perform(curl);
 
-        if (res != CURLE_OK) {
+        if (res != CURLE_OK)
+        {
             qDebug() << "curl_easy_perform() failed:" << curl_easy_strerror(res);
-        } else {
-            qDebug() << "Downloaded successful";
+        }
+        else
+        {
+            qDebug() << "Downloaded successfully";
         }
 
-        // Clean up libcurl
         curl_easy_cleanup(curl);
     }
     fclose(file);
 }
-
