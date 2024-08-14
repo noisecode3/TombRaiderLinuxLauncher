@@ -1,5 +1,5 @@
 #!/bin/bash
-cd $(dirname $0)
+cd "$(dirname $0)"
 # clean up command
 rm -fr CMakeCache.txt CMakeFiles Makefile cmake_install.cmake \
         compile_commands.json TombRaiderLinuxLauncher \

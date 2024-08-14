@@ -5,4 +5,4 @@ for file in *.ogg; do
     mv "$file" "Track$(printf %02d $i).ogg"
     ((i++))
 done
-rm -f *.wma
+rm -f ./*.wma

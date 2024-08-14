@@ -19,7 +19,7 @@ logging.getLogger("requests").setLevel(logging.DEBUG)
 logging.getLogger("urllib3").setLevel(logging.DEBUG)
 
 def download_file(url, cert, file_name):
-    response = requests.get(url, stream=True, verify=cert)
+    response = requests.get(url, stream=True, verify=cert, timeout=5)
     response.raise_for_status()
 
     total_size = int(response.headers.get('content-length', 0))
@@ -62,7 +62,7 @@ with open(file, 'r') as json_file:
 zip_url = file_info.get('download_url')
 
 cert = ('/etc/ssl/certs/ca-certificates.crt')
-response = requests.get(zip_url, verify=cert)
+response = requests.get(zip_url, verify=cert, timeout=5)
 zip_content = response.content
 
 md5_hash = hashlib.md5(zip_content).hexdigest()
@@ -141,7 +141,7 @@ level_id = c.fetchone()[0]
 logging.info(f"Current level_id: {level_id}")
 
 screen_url = file_info.get('screen')
-screen_response = requests.get(screen_url, verify=cert)
+screen_response = requests.get(screen_url, verify=cert, timeout=5)
 screen_content = screen_response.content
 screen_file_name = os.path.basename(screen_url)
 c.execute("INSERT INTO Picture (data) VALUES (?)", (screen_content,))
@@ -150,7 +150,7 @@ screen_id = c.fetchone()[0]
 c.execute("INSERT INTO Screens (pictureID, levelID) VALUES (?, ?)", (screen_id, level_id))
 
 for screen_large in file_info.get("screensLarge", []):
-    response = requests.get(screen_large, verify=cert)
+    response = requests.get(screen_large, verify=cert, timeout=5)
     screen_content = response.content
     file_name = os.path.basename(screen_large)
     c.execute("INSERT INTO Picture (data) VALUES (?)", (screen_content,))

@@ -36,7 +36,7 @@ time.sleep(2)
 cert = ('/etc/ssl/certs/ca-certificates.crt')
 
 try:
-    response = requests.get(url, verify=cert)
+    response = requests.get(url, verify=cert, timeout=5)
     response.raise_for_status()
 except requests.exceptions.RequestException as e:
     logging.error(f"Error fetching URL {url}: {e}")
@@ -94,7 +94,7 @@ if response.status_code == 200:
         url = download_link['href']
         time.sleep(2)
         try:
-            response2 = requests.head(url, verify=cert, allow_redirects=True)
+            response2 = requests.head(url, verify=cert, timeout=5, allow_redirects=True)
             response2.raise_for_status()
 
             # Check if the content type is a zip file
@@ -104,7 +104,7 @@ if response.status_code == 200:
                 zipFileName = file_name
 
                 # Download the file and calculate its MD5 checksum
-                response3 = requests.get(url, verify=cert)
+                response3 = requests.get(url, verify=cert, timeout=5)
                 response3.raise_for_status()  # Check again to ensure the GET request is successful
                 md5_checksum = hashlib.md5(response3.content).hexdigest()
                 zipFileMd5 = md5_checksum
@@ -127,13 +127,13 @@ if response.status_code == 200:
         url = 'https://www.trle.net/sc/' + walkthrough_link['href']
         time.sleep(2)
         try:
-            response3 = requests.get(url, verify=cert)
+            response3 = requests.get(url, verify=cert, timeout=5)
             response3.raise_for_status()
             soup2 = BeautifulSoup(response3.text, 'html.parser')
             iframe_tag = soup2.find('iframe')
             iframe_src = iframe_tag['src']
             url = "https://www.trle.net" + iframe_src
-            response4 = requests.get(url, verify=cert)
+            response4 = requests.get(url, verify=cert, timeout=5)
             if response4.status_code == 200:
                 walkthrough = response4.text
             else:
