@@ -60,8 +60,8 @@ with open(file, 'r') as json_file:
     file_info = json.load(json_file)
 
 zip_url = file_info.get('download_url')
-cert = '/home/noisecode3/mySecretVirusFolder/trle-net-chain.pem'
 
+cert = ('/etc/ssl/certs/ca-certificates.crt')
 response = requests.get(zip_url, verify=cert)
 zip_content = response.content
 

@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 logging.getLogger("requests").setLevel(logging.DEBUG)
-logging.getLogger("urllib3").setLevel(logging.DEBUG)
+#logging.getLogger("urllib3").setLevel(logging.DEBUG)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -32,10 +32,8 @@ except IOError:
     sys.exit(1)
 
 time.sleep(2)
-# test url
-# url = 'https://www.trle.net/sc/levelfeatures.php?lid=3573'
 
-cert = '/home/noisecode3/mySecretVirusFolder/trle-net-chain.pem'
+cert = ('/etc/ssl/certs/ca-certificates.crt')
 
 try:
     response = requests.get(url, verify=cert)
@@ -79,7 +77,7 @@ if response.status_code == 200:
             duration = "missing"
     else:
         duration = "missing"
-    
+
     specific_tags = soup.find_all('td', class_='medGText', align='left', valign='top')
     body = specific_tags[1] if len(specific_tags) >= 2 else "missing"
 
@@ -98,11 +96,29 @@ if response.status_code == 200:
         try:
             response2 = requests.head(url, verify=cert, allow_redirects=True)
             response2.raise_for_status()
-            download_url = response2.url
-            file_name = response2.url.split('/')[-1]
-            zipFileName = file_name
-            md5_checksum = hashlib.md5(requests.get(url, verify=cert).content).hexdigest()
-            zipFileMd5 = md5_checksum
+
+            # Check if the content type is a zip file
+            if 'Content-Type' in response2.headers and response2.headers['Content-Type'] == 'application/zip':
+                download_url = response2.url
+                file_name = response2.url.split('/')[-1]
+                zipFileName = file_name
+
+                # Download the file and calculate its MD5 checksum
+                response3 = requests.get(url, verify=cert)
+                response3.raise_for_status()  # Check again to ensure the GET request is successful
+                md5_checksum = hashlib.md5(response3.content).hexdigest()
+                zipFileMd5 = md5_checksum
+
+                # Do something with the download URL, file name, and MD5 checksum
+                print(f"Download URL: {download_url}")
+                print(f"File Name: {zipFileName}")
+                print(f"MD5 Checksum: {zipFileMd5}")
+            else:
+                logging.error(f"The file at {url} is not a ZIP file. Content-Type: {response2.headers.get('Content-Type')}")
+                download_url = ''
+                zipFileName = ''
+                zipFileMd5 = ''
+
         except requests.exceptions.RequestException as e:
             logging.error(f"Failed to retrieve file information from {url}: {e}")
 

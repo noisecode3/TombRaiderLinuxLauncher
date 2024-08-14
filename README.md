@@ -30,9 +30,9 @@ manipulation configuration files. Bash for launching with Steam or Lutris or jus
 * [Delca - Kitten Adventure](https://www.trle.net/sc/levelfeatures.php?lid=3379)
 
 
-# test
+# Prepare
 This install the program in you're ".local" home directory
-You need those, should be installed an desktop linux
+You need those, should be installed on a desktop linux
 
 * curl
 * Qt5
@@ -41,26 +41,65 @@ To ensure that our application works properly right now, you need to download th
 required certificates from Firefox and add them to your system’s certificate store.
 Unfortunately, I cannot share these certificates directly.
 
+Open Firefox go to trle.net and click the lock icon in the URL bar.
+Click more info, click View Certificate then in the new window
+there is a Miscellaneous section and 2 download links.
+
+Change the name from
+trle-net".pem" to trle-net".crt" so you'll have to
+
+```
+/usr/share/ca-certificates/mozilla/trle-net-chain.crt
+/usr/share/ca-certificates/mozilla/trle-net.crt
+```
+then add to /etc/ca-certificates.conf
+```
+mozilla/trle-net.crt
+mozilla/trle-net-chain.crt
+```
+you'll run:
+
+```
+update-ca-certificates
+```
+and you should see that you have those files as symbolic links.
+Then it should work with curl.
 ```
 /etc/ssl/certs/trle-net-chain.pem
 /etc/ssl/certs/trle-net.pem
 ```
-Something like that should work on you're system
-```
-sudo update-ca-certificates
-```
+
+# Build
 
 ```shell
 cmake -DCMAKE_INSTALL_PREFIX=~/.local .
 make install
 ```
 
-You can add maps to the database if you cd into utils
-This should add Kitten Adventure Demo, but there is a bug
-because the download link is not a zip file its a another html page. 
+# Use database
+
+You can add maps to the database if you cd into utils.
+This should add Kitten Adventure Demo.
+
 
 If it don't work try installing the
-python3 module from the error.
+python3 module from the error, with pip
+
+```shell
+python3 getData.py https://www.trle.net/sc/levelfeatures.php?lid=3379
+
+```
+
+It will show
+```
+ERROR:The file at https://www.trle.net/scadm/trle_dl.php?lid=3379 is not a ZIP file. Content-Type: text/html
+```
+This means that you have to open the data.json file and add those values
+```
+  "zipFileName": "",
+  "zipFileMd5": "",
+  "download_url": ""
+```
 
 ```shell
 python3 getData.py https://www.trle.net/sc/levelfeatures.php?lid=3379
