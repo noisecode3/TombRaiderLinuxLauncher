@@ -1,4 +1,5 @@
 # Tomb Raider Linux Launcher
+
 A tool to run Tomb Raider classics 1, 2, 3, 4, 5 on Linux with Wine/Proton.
 Problems that you may face for 3 and 4 are one particular input problem and
 sometimes graphical glitches, crashes or lags. The work around for the input
@@ -11,7 +12,8 @@ and I would love to learn more c++ and Qt
 This application will be written in c++ for the GUI and for modding and
 manipulation configuration files. Bash for launching with Steam or Lutris or just Wine.
 
-# Features
+## Features
+
 * with steam or Lutris to select a map from trle.net to play
 * launch along the game a controller mapper like qjoypad or antimicrox
 * script so that I dont have to manually move all game files when I want to play a mod with steam input to steams tomb raider game folder
@@ -22,15 +24,16 @@ manipulation configuration files. Bash for launching with Steam or Lutris or jus
 * checksums
 * download maps/mods, and install them
 * add a filter for html in database
-* make sure the rest of the GUI still updates while downloading 
+* make sure the rest of the GUI still updates while downloading
 
-# trle.net mods the launcher will download and play with wine-tkg that I tested
+## trle.net mods the launcher will download and play with wine-tkg that I tested
+
 * [Calypsis Jungle - Part One](https://www.trle.net/sc/levelfeatures.php?lid=3500)
 * [Feder - Templars Secret](https://www.trle.net/sc/levelfeatures.php?lid=3082)
 * [Delca - Kitten Adventure](https://www.trle.net/sc/levelfeatures.php?lid=3379)
 
+## Prepare
 
-# Prepare
 This install the program in you're ".local" home directory
 You need those, should be installed on a desktop linux
 
@@ -48,39 +51,43 @@ there is a Miscellaneous section and 2 download links.
 Change the name from
 trle-net".pem" to trle-net".crt" so you'll have to
 
-```
+```text
 /usr/share/ca-certificates/mozilla/trle-net-chain.crt
 /usr/share/ca-certificates/mozilla/trle-net.crt
 ```
+
 then add to /etc/ca-certificates.conf
-```
+
+```text
 mozilla/trle-net.crt
 mozilla/trle-net-chain.crt
 ```
+
 you'll run:
 
-```
+```shell
 update-ca-certificates
 ```
+
 and you should see that you have those files as symbolic links.
 Then it should work with curl.
-```
+
+```shell
 /etc/ssl/certs/trle-net-chain.pem
 /etc/ssl/certs/trle-net.pem
 ```
 
-# Build
+## Build
 
 ```shell
 cmake -DCMAKE_INSTALL_PREFIX=~/.local .
 make install
 ```
 
-# Use database
+## Use database
 
 You can add maps to the database if you cd into utils.
 This should add Kitten Adventure Demo.
-
 
 If it don't work try installing the
 python3 module from the error, with pip
@@ -91,11 +98,14 @@ python3 getData.py https://www.trle.net/sc/levelfeatures.php?lid=3379
 ```
 
 It will show
-```
+
+```text
 ERROR:The file at https://www.trle.net/scadm/trle_dl.php?lid=3379 is not a ZIP file. Content-Type: text/html
 ```
+
 This means that you have to open the data.json file and add those values
-```
+
+```text
   "zipFileName": "",
   "zipFileMd5": "",
   "download_url": ""
@@ -106,17 +116,20 @@ python3 getData.py https://www.trle.net/sc/levelfeatures.php?lid=3379
 python3 addData.py data.json
 
 ```
-# Screenshots
+
+## Screenshots
+
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot1.jpg)
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot2.jpg)
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot3.jpg)
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot4.jpg)
 
-# Guide
+## Guide
 
 How to play Tomb Raider 3 (need to update)
 
-# Patches
+## Patches
+
 The game uses old API and old optimizations..
 With wine you need a minimum
 4 x DDR3-1600mhz and 3.0 GHz CPU
@@ -124,26 +137,30 @@ It's a bit demanding on the memory, try use gallium nine if you have nouveau
 No special graphics card, but if you gonna play mods you could need
 One 2010+ card that has about 2-4 Gb for some Tomb Raider 4 mods with enhanced graphics
 recommend patches, on steam proton 7 (old)
-* https://github.com/Trxyebeep/tomb3
 
-* https://github.com/dege-diosg/dgVoodoo2 (use Lutris, not manual)
-* https://tombraiders.net/stella/downloads/widescreen.html
-* https://core-design.com/community_tr3withoutcrystals.html
+* <https://github.com/Trxyebeep/tomb3>
 
-## TR3
+* <https://github.com/dege-diosg/dgVoodoo2> (use Lutris, not manual)
+* <https://tombraiders.net/stella/downloads/widescreen.html>
+* <https://core-design.com/community_tr3withoutcrystals.html>
+
+### TR3
+
 Most, if not all trle.net tr3 mods will work with proton 7, if unpacked and configured with dgVoodoo2
 some new tr3 mods already comes with the tomb3 patch. A combination of tomb3 and dgVoodoo2 is recommended for the original game.
 
-# Tips
-## Recommended compatibility layer
+## Tips
+
+### Recommended compatibility layer
+
 * Proton 7.0 for TR3 - with dgVoodoo2
 * Proton 5.0-10 for TR3
 * Sometimes avoiding Ctrl and Alt will make wine/proton
 * [GloriousEggroll](https://github.com/GloriousEggroll/proton-ge-custom/releases/tag/6.21-GE-2)
 * [Wine-tkg](https://github.com/Frogging-Family/wine-tkg-git/releases/tag/7.6.r12.g51472395) tick "emulate a virtual desktop"
 
-## Recommended compatibility layer configuration and other tips
-### TR3
+### Recommended compatibility layer configuration and other tips
+
 * Use fsync or esync
 * If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under. Or use dgVoodoo2
 * Sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar like alt+tab could help you see the window
