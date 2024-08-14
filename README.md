@@ -90,7 +90,7 @@ You can add maps to the database if you cd into utils.
 This should add Kitten Adventure Demo.
 
 If it don't work try installing the
-python3 module from the error, with pip
+python3 module from the error, with pip, you'll need, beautifulsoup4 and tqdm
 
 ```shell
 python3 getData.py https://www.trle.net/sc/levelfeatures.php?lid=3379

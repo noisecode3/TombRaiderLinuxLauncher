@@ -10,11 +10,36 @@ import hashlib
 import requests
 import logging
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 logging.getLogger("requests").setLevel(logging.DEBUG)
-#logging.getLogger("urllib3").setLevel(logging.DEBUG)
+
+def calculate_md5(url, cert):
+    try:
+        # Stream the response to handle large files
+        response = requests.get(url, verify=cert, stream=True, timeout=10)
+        response.raise_for_status()
+        
+        # Get the total length of the file for the progress bar
+        total_length = int(response.headers.get('content-length', 0))
+        
+        # Initialize the MD5 hash object
+        md5_hash = hashlib.md5()
+
+        # Initialize the progress bar
+        with tqdm(total=total_length, unit='B', unit_scale=True, desc="Calculating MD5") as progress_bar:
+            for chunk in response.iter_content(chunk_size=4096):
+                if chunk:  # filter out keep-alive new chunks
+                    md5_hash.update(chunk)
+                    progress_bar.update(len(chunk))
+                    
+        # Return the hex digest of the MD5 hash
+        return md5_hash.hexdigest()
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to download {url}: {e}")
+        return None
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -100,19 +125,17 @@ if response.status_code == 200:
             # Check if the content type is a zip file
             if 'Content-Type' in response2.headers and response2.headers['Content-Type'] == 'application/zip':
                 download_url = response2.url
-                file_name = response2.url.split('/')[-1]
-                zipFileName = file_name
+                zipFileName = download_url.split('/')[-1]
 
-                # Download the file and calculate its MD5 checksum
-                response3 = requests.get(url, verify=cert, timeout=5)
-                response3.raise_for_status()  # Check again to ensure the GET request is successful
-                md5_checksum = hashlib.md5(response3.content).hexdigest()
-                zipFileMd5 = md5_checksum
+                # Calculate the MD5 checksum without saving the file to disk
+                zipFileMd5 = calculate_md5(download_url, cert)
 
-                # Do something with the download URL, file name, and MD5 checksum
-                print(f"Download URL: {download_url}")
-                print(f"File Name: {zipFileName}")
-                print(f"MD5 Checksum: {zipFileMd5}")
+                if zipFileMd5:
+                    print(f"Download URL: {download_url}")
+                    print(f"File Name: {zipFileName}")
+                    print(f"MD5 Checksum: {zipFileMd5}")
+                else:
+                    logging.error("Failed to calculate MD5 checksum.")
             else:
                 logging.error(f"The file at {url} is not a ZIP file. Content-Type: {response2.headers.get('Content-Type')}")
                 download_url = ''
