@@ -11,20 +11,43 @@ import requests
 import logging
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+from urllib.parse import urlparse
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 logging.getLogger("requests").setLevel(logging.DEBUG)
+
+def validate_url(url):
+    # Kontrollera att URL:en har rätt format
+    parsed_url = urlparse(url)
+
+    # Kontrollera att URL:en har ett giltigt schema och nätverksplats (domän)
+    if not all([parsed_url.scheme, parsed_url.netloc]):
+        logging.error("Invalid URL format.")
+        sys.exit(1)
+
+    # Kontrollera att protokollet är https
+    if parsed_url.scheme != "https":
+        logging.error("Only HTTPS URLs are allowed.")
+        sys.exit(1)
+
+    # Kontrollera att domänen är trle.net eller subdomäner av trle.net
+    if not parsed_url.netloc.endswith("trle.net"):
+        logging.error("URL must belong to the domain 'trle.net'.")
+        sys.exit(1)
+
+    # Om alla kontroller passerar, returnera True (eller inget om du bara vill validera)
+    return True
 
 def calculate_md5(url, cert):
     try:
         # Stream the response to handle large files
         response = requests.get(url, verify=cert, stream=True, timeout=10)
         response.raise_for_status()
-        
+
         # Get the total length of the file for the progress bar
         total_length = int(response.headers.get('content-length', 0))
-        
+
         # Initialize the MD5 hash object
         md5_hash = hashlib.md5()
 
@@ -34,12 +57,14 @@ def calculate_md5(url, cert):
                 if chunk:  # filter out keep-alive new chunks
                     md5_hash.update(chunk)
                     progress_bar.update(len(chunk))
-                    
+
         # Return the hex digest of the MD5 hash
         return md5_hash.hexdigest()
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to download {url}: {e}")
         return None
+
+url = None
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -47,6 +72,7 @@ if __name__ == "__main__":
         sys.exit(1)
     else:
         url = sys.argv[1]
+        validate_url(url)
 
 lock_file = '/tmp/TRLE.lock'
 try:
@@ -171,9 +197,6 @@ if response.status_code == 200:
     image_tag = soup.find('img', class_='border')
     screen = 'https://www.trle.net' + image_tag['src']
 
-    def get_var(var_name):
-        return globals().get(var_name, "")
-
     data = {
         "title": title,
         "author": author,
@@ -188,7 +211,7 @@ if response.status_code == 200:
         "zipFileName": zipFileName,
         "zipFileMd5": zipFileMd5,
         "body": body,
-        "walkthrough": get_var("walkthrough"),
+        "walkthrough": walkthrough,
         "download_url": download_url,
     }
     if body:

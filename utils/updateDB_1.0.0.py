@@ -68,3 +68,4 @@ def update_table_schema_and_data(db_path):
 
 # Usage
 update_table_schema_and_data(arg_path)
+

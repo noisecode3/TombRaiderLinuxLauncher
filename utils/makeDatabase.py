@@ -175,7 +175,7 @@ c.execute("INSERT INTO InfoDuration (value) VALUES (?)", ('very long',))
 # Add Game File data
 for i in range(1, 6):
     file = f'fileList-TR{i}.json'
-    
+
     # Load data from JSON file
     with open(file, 'r') as json_file:
         file_info = json.load(json_file)
@@ -225,3 +225,4 @@ for i in range(1, 6):
 
 conn.commit()
 conn.close()
+
