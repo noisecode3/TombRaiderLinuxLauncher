@@ -1,3 +1,19 @@
+/* TombRaiderLinuxLauncher
+ * Martin Bångens Copyright (C) 2024
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "FileManager.h"
 #include <QFile>
 #include <QIODevice>
@@ -7,6 +23,7 @@
 #include <QtCore>
 #include <QByteArray>
 #include <QDataStream>
+#include <algorithm>
 
 bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir)
 {
@@ -49,10 +66,15 @@ const QString FileManager::calculateMD5(const QString& file, bool lookGameDir)
     return QString(md5.result().toHex());
 }
 
-bool FileManager::extractZip(const QString& zipFilename, const QString& outputFolder)
+bool FileManager::extractZip(
+    const QString& zipFilename,
+    const QString& outputFolder)
 {
-    const QString& zipPath = levelDir_m.absolutePath() + QDir::separator() + zipFilename;
-    const QString& outputPath = levelDir_m.absolutePath() + QDir::separator() + outputFolder;
+    const QString& zipPath =
+        levelDir_m.absolutePath() + QDir::separator() + zipFilename;
+
+    const QString& outputPath =
+        levelDir_m.absolutePath() + QDir::separator() + outputFolder;
 
     qDebug() << "Unzipping file" << zipFilename << "to" << outputPath;
 
@@ -66,7 +88,8 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
     // Open the zip file
     mz_zip_archive zip;
     memset(&zip, 0, sizeof(zip));
-    mz_bool result = mz_zip_reader_init_file(&zip, zipPath.toUtf8().constData(), 0);
+    mz_bool result =
+        mz_zip_reader_init_file(&zip, zipPath.toUtf8().constData(), 0);
     if (!result)
     {
         qWarning() << "Failed to open zip file" << zipPath;
@@ -77,15 +100,16 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
     mz_uint numFiles = mz_zip_reader_get_num_files(&zip);
     qDebug() << "Zip file contains" << numFiles << "files";
 
-    unsigned int gotoPercent = 50; // Percentage of total work
-    unsigned int lastPrintedPercent = 0; // Last printed percentage
+    unsigned int gotoPercent = 50;  // Percentage of total work
+    unsigned int lastPrintedPercent = 0;  // Last printed percentage
 
     for (uint i = 0; i < numFiles; i++)
     {
         mz_zip_archive_file_stat file_stat;
         if (!mz_zip_reader_file_stat(&zip, i, &file_stat))
         {
-            qWarning() << "Failed to get file info for file" << i << "in zip file" << zipPath;
+            qWarning() << "Failed to get file info for file" << i
+            << "in zip file" << zipPath;
             mz_zip_reader_end(&zip);
             return false;
         }
@@ -93,7 +117,7 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
         QString filename = QString::fromUtf8(file_stat.m_filename);
         if (filename.endsWith('/'))
         {
-            continue; // Skip directories
+            continue;  // Skip directories
         }
 
         QString outFile = outputPath + "/" + filename;
@@ -106,9 +130,15 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
             return false;
         }
 
-        if (!mz_zip_reader_extract_to_file(&zip, i, outFile.toUtf8().constData(), 0))
+        if (!mz_zip_reader_extract_to_file(
+                &zip,
+                i,
+                outFile.toUtf8().constData(),
+                0)
+            )
         {
-            qWarning() << "Failed to extract file" << filename << "from zip file" << zipPath;
+            qWarning() << "Failed to extract file" << filename
+                    << "from zip file" << zipPath;
             mz_zip_reader_end(&zip);
             return false;
         }
@@ -117,7 +147,8 @@ bool FileManager::extractZip(const QString& zipFilename, const QString& outputFo
 
         if (currentPercent != lastPrintedPercent)
         {
-            for (unsigned int j = lastPrintedPercent + 1; j <= currentPercent; j++)
+            for (unsigned int j = lastPrintedPercent + 1;
+                            j <= currentPercent; j++)
             {
                 emit this->fileWorkTickSignal();
             }
@@ -147,7 +178,8 @@ bool FileManager::checkDir(const QString& file, bool lookGameDir )
     {
         path = levelDir_m.absolutePath() + QDir::separator() + file;
     }
-    else {
+    else
+    {
         path = gameDir_m.absolutePath() + QDir::separator() + file;
     }
     QDir directory(path);
@@ -161,12 +193,12 @@ bool FileManager::checkFile(const QString& file, bool lookGameDir )
     {
         path = levelDir_m.absolutePath() + QDir::separator() + file;
     }
-    else {
+    else
+    {
         path = gameDir_m.absolutePath() + QDir::separator() + file;
     }
     QFile fFile(path);
     return fFile.exists();
-
 }
 
 int FileManager::checkFileInfo(const QString& file, bool lookGameDir)
@@ -198,7 +230,7 @@ int FileManager::checkFileInfo(const QString& file, bool lookGameDir)
     }
 }
 
-bool FileManager::linkGameDir(const QString& levelDir ,const QString& gameDir)
+bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir)
 {
     const QString& l = levelDir_m.absolutePath() + levelDir;
     const QString& g = gameDir_m.absolutePath() + gameDir;
@@ -232,7 +264,10 @@ bool FileManager::linkGameDir(const QString& levelDir ,const QString& gameDir)
     }
 }
 
-bool FileManager::makeRelativeLink(const QString& levelDir ,const QString& from ,const QString& to)
+bool FileManager::makeRelativeLink(
+    const QString& levelDir,
+    const QString& from,
+    const QString& to)
 {
     const QString& l = levelDir_m.absolutePath() + levelDir;
     const QString& f = l + from;
@@ -314,9 +349,10 @@ int FileManager::removeFileOrDirectory(const QString &file, bool lookGameDir)
 
 int FileManager::createDirectory(const QString &file, bool gameDir)
 {
-    const QString& path = gameDir ?
-            gameDir_m.absolutePath() + QDir::separator()+file :
-            levelDir_m.absolutePath() + QDir::separator()+file;
+    const QString& sep = QDir::separator();
+    const QString& g = gameDir_m.absolutePath() + sep + file;
+    const QString& l = levelDir_m.absolutePath() + sep + file;
+    const QString& path = gameDir ? g : l;
 
     // Create the directory if it doesn't exist
         if (!QDir(path).exists())
@@ -339,10 +375,16 @@ int FileManager::createDirectory(const QString &file, bool gameDir)
         }
 }
 
-int FileManager::copyFile(const QString &gameFile, const QString &levelFile, bool fromGameDir)
+int FileManager::copyFile(
+    const QString &gameFile,
+    const QString &levelFile,
+    bool fromGameDir)
 {
-    const QString g = fromGameDir  ? gameDir_m.absolutePath() + gameFile : levelDir_m.absolutePath() + levelFile;
-    const QString l = !fromGameDir ? gameDir_m.absolutePath() + gameFile : levelDir_m.absolutePath() + levelFile;
+    const QString& gamePath = gameDir_m.absolutePath() + gameFile;
+    const QString& levelPath = levelDir_m.absolutePath() + levelFile;
+
+    const QString& g = fromGameDir ? gamePath : levelPath;
+    const QString& l = fromGameDir ? levelPath : gamePath;
 
     // Ensure the destination directory exists
     const QFileInfo destinationFileInfo(l);
@@ -364,14 +406,15 @@ int FileManager::copyFile(const QString &gameFile, const QString &levelFile, boo
     }
     else
     {
-        if(QFile::exists(l))
+        if (QFile::exists(l))
         {
             qDebug() << "File exist";
             return 2;
         }
         else
         {
-            qDebug() << "Failed to copy file and dose not  exist " << l << Qt::endl;
+            qDebug() << "Failed to copy file and dose not exist "
+                << l << Qt::endl;
             return 3;
         }
     }
@@ -379,7 +422,9 @@ int FileManager::copyFile(const QString &gameFile, const QString &levelFile, boo
 
 int FileManager::cleanWorkingDir(const QString &levelDir)
 {
-    const QString& directoryPath = levelDir_m.absolutePath() + QDir::separator() + levelDir;
+    const QString sep = QDir::separator();
+    const QString& directoryPath =
+        levelDir_m.absolutePath() + sep + levelDir;
     QDir directory(directoryPath);
     if (directory.exists())
     {
@@ -415,21 +460,32 @@ bool FileManager::backupGameDir(const QString &gameDir)
     }
 }
 
-bool FileManager::moveFilesToDirectory(const QString& fromLevelDirectory, const QString& toLevelDirectory)
+bool FileManager::moveFilesToDirectory(
+    const QString& fromLevelDirectory,
+    const QString& toLevelDirectory)
 {
-    const QString& directoryFromPath = levelDir_m.absolutePath() + QDir::separator() + fromLevelDirectory;
-    const QString& directoryToPath = levelDir_m.absolutePath() + QDir::separator() + toLevelDirectory;
+    const QString& sep = QDir::separator();
+
+    const QString& directoryFromPath =
+        levelDir_m.absolutePath() + sep + fromLevelDirectory;
+
+    const QString& directoryToPath =
+        levelDir_m.absolutePath() + sep + toLevelDirectory;
+
     QDir dir(directoryFromPath);
 
     // Get list of all entries (files and directories) excluding '.' and '..'
-    QStringList entryFileList = dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+    QStringList entryFileList =
+        dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
 
     // Move files and recursively move directories
     for (const QString& entry : entryFileList)
     {
-        QString entryPath = directoryFromPath + QDir::separator() + entry;
+        QString entryPath = directoryFromPath + sep + entry;
 
-        if (!QFile::rename(entryPath, directoryToPath + QDir::separator() + entry))
+        if (!QFile::rename(
+            entryPath,
+            directoryToPath + sep + entry))
         {
             qWarning() << "Failed to move file:" << entryPath;
             return false;
@@ -440,39 +496,50 @@ bool FileManager::moveFilesToDirectory(const QString& fromLevelDirectory, const 
 
 bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory)
 {
-    QDir dir(levelDir_m.absolutePath() + QDir::separator() + levelDirectory);
+    const QString& sep = QDir::separator();
+    QDir dir(levelDir_m.absolutePath() + sep + levelDirectory);
 
     // Kontrollera om katalogen finns
-    if (!dir.exists()) {
+    if (!dir.exists())
+    {
         qWarning() << "Directory does not exist:" << dir.absolutePath();
         return false;
     }
 
     // Hämta föräldrakatalogen
     QDir parentDir = dir;
-    if (!parentDir.cdUp()) {
-        qWarning() << "Failed to access parent directory of:" << dir.absolutePath();
+    if (!parentDir.cdUp())
+    {
+        qWarning() << "Failed to access parent directory of:"
+            << dir.absolutePath();
         return false;
     }
 
     // Lista alla filer och kataloger (exklusive '.' och '..')
-    QFileInfoList fileList = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    QFlags listFlags(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    QFileInfoList fileList = dir.entryInfoList(listFlags);
 
     // Flytta alla filer och kataloger till föräldrakatalogen
-    for (const QFileInfo& fileInfo : fileList) {
+    for (const QFileInfo& fileInfo : fileList)
+    {
         QString srcPath = fileInfo.absoluteFilePath();
-        QString destPath = parentDir.absolutePath() + QDir::separator() + fileInfo.fileName();
+        QString destPath = parentDir.absolutePath() + sep + fileInfo.fileName();
 
-        if (fileInfo.isDir()) {
+        if (fileInfo.isDir())
+        {
             // Flytta katalogen rekursivt
             QDir srcDir(srcPath);
-            if (!srcDir.rename(srcPath, destPath)) {
+            if (!srcDir.rename(srcPath, destPath))
+            {
                 qWarning() << "Failed to move directory:" << srcPath;
                 return false;
             }
-        } else {
+        }
+        else
+        {
             // Flytta filen
-            if (!QFile::rename(srcPath, destPath)) {
+            if (!QFile::rename(srcPath, destPath))
+            {
                 qWarning() << "Failed to move file:" << srcPath;
                 return false;
             }
@@ -480,7 +547,8 @@ bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory)
     }
 
     // Ta bort den ursprungliga (nu tomma) katalogen
-    if (!dir.rmdir(".")) {
+    if (!dir.rmdir("."))
+    {
         qWarning() << "Failed to remove directory:" << dir.absolutePath();
         return false;
     }

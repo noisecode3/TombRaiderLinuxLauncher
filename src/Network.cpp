@@ -1,3 +1,19 @@
+/* TombRaiderLinuxLauncher
+ * Martin Bångens Copyright (C) 2024
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Network.h"
 
 struct WriteData
@@ -9,7 +25,6 @@ struct WriteData
 bool Downloader::setUpCamp(const QString& levelDir)
 {
     QFileInfo levelPathInfo(levelDir);
-
     if (levelPathInfo.isDir())
     {
         levelDir_m.setPath(levelDir);
@@ -19,14 +34,19 @@ bool Downloader::setUpCamp(const QString& levelDir)
     return false;
 }
 
-size_t Downloader::write_callback(void* contents, size_t size, size_t nmemb, void* userData)
+size_t Downloader::write_callback(
+    void* contents,
+    size_t size,
+    size_t nmemb,
+    void* userData)
 {
     WriteData* data = static_cast<WriteData*>(userData);
     Downloader* instance = data->downloader;
     FILE* file = data->file;
 
     qint64 bars = (nmemb + instance->remainderTick) / instance->oneTick;
-    instance->remainderTick = (nmemb + instance->remainderTick) % instance->oneTick;
+    instance->remainderTick =
+            (nmemb + instance->remainderTick) % instance->oneTick;
 
     while (bars > 0)
     {
@@ -69,7 +89,7 @@ void Downloader::run()
     if (url_m.isEmpty() || file_m.isEmpty() || levelDir_m.isEmpty())
         return;
 
-    size_t zipFileSize = 0; // I need to read filesize of the download link into this variable
+    int zipFileSize = 0;
 
     QString urlString = url_m.toString();
     QByteArray byteArray = urlString.toUtf8();
@@ -82,15 +102,18 @@ void Downloader::run()
     {
         // Set options to retrieve header only
         curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
-        curl_easy_setopt(curl, CURLOPT_NOBODY, 1L); // Header only
-        curl_easy_setopt(curl, CURLOPT_HEADER, 1L); // Include header in the output
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+        curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
         // Perform the request to get header information
         CURLcode res = curl_easy_perform(curl);
 
         if (res == CURLE_OK)
         {
-            res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &zipFileSize);
+            res = curl_easy_getinfo(
+                curl,
+                CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                &zipFileSize);
             if (res == CURLE_OK && zipFileSize != -1)
             {
                 // Use zipFileSize as needed before downloading
@@ -105,7 +128,8 @@ void Downloader::run()
         }
         else
         {
-            qDebug() << "curl_easy_perform() failed:" << curl_easy_strerror(res);
+            qDebug() << "curl_easy_perform() failed:"
+                << curl_easy_strerror(res);
             return;
         }
     }
@@ -126,7 +150,10 @@ void Downloader::run()
     curl = curl_easy_init();
     if (curl)
     {
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Downloader::write_callback);
+        curl_easy_setopt(
+            curl,
+            CURLOPT_WRITEFUNCTION,
+            Downloader::write_callback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeData);
         curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
 
@@ -135,7 +162,8 @@ void Downloader::run()
 
         if (res != CURLE_OK)
         {
-            qDebug() << "curl_easy_perform() failed:" << curl_easy_strerror(res);
+            qDebug() << "curl_easy_perform() failed:"
+                << curl_easy_strerror(res);
         }
         else
         {

@@ -2,13 +2,6 @@ import sys
 import logging
 import sqlite3
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        logging.error("Usage: python3 updateDB_1.0.0.py path/to/tombll.db")
-        sys.exit(1)
-    else:
-        arg_path = sys.argv[1]
-
 def update_table_schema_and_data(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -66,6 +59,10 @@ def update_table_schema_and_data(db_path):
         # Close the connection
         conn.close()
 
-# Usage
-update_table_schema_and_data(arg_path)
-
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        logging.error("Usage: python3 updateDB_1.0.0.py path/to/tombll.db")
+        sys.exit(1)
+    else:
+        arg_path = sys.argv[1]
+        update_table_schema_and_data(arg_path)

@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
 # don't forget that you need to build it one time
 # and look at .neovim how to use debuger
 mkdir -p .gdb/qt5prettyprinters/

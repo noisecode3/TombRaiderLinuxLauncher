@@ -1,3 +1,19 @@
+/* TombRaiderLinuxLauncher
+ * Martin Bångens Copyright (C) 2024
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <QMessageBox>
 #include <QScrollArea>
 #include <QVBoxLayout>
@@ -20,20 +36,29 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->pushButtonLink, SIGNAL (clicked()), this, SLOT (linkClicked()));
-    connect(ui->pushButtonDownload, SIGNAL (clicked()), this, SLOT (downloadClicked()));
-    connect(ui->pushButtonInfo, SIGNAL (clicked()), this, SLOT (infoClicked()));
-    connect(ui->pushButtonWalkthrough, SIGNAL (clicked()), this, SLOT (walkthroughClicked()));
-    connect(ui->infoBackButton, SIGNAL (clicked()), this, SLOT (backClicked()));
-    connect(ui->walkthroughBackButton, SIGNAL (clicked()), this, SLOT (backClicked()));
-    connect(ui->setOptions, SIGNAL (clicked()), this, SLOT (setOptionsClicked()));
-    connect(ui->listWidgetModds, SIGNAL(itemSelectionChanged()), this, SLOT(onListItemSelected()));
+    // Button signal connections
+    connect(ui->pushButtonLink, SIGNAL(clicked()), this, SLOT(linkClicked()));
+    connect(ui->pushButtonDownload, SIGNAL(clicked()),
+        this, SLOT(downloadClicked()));
+    connect(ui->pushButtonInfo, SIGNAL(clicked()), this, SLOT(infoClicked()));
+    connect(ui->pushButtonWalkthrough, SIGNAL(clicked()),
+        this, SLOT(walkthroughClicked()));
+    connect(ui->infoBackButton, SIGNAL(clicked()), this, SLOT(backClicked()));
+    connect(ui->walkthroughBackButton, SIGNAL(clicked()),
+        this, SLOT(backClicked()));
+    connect(ui->setOptions, SIGNAL(clicked()), this, SLOT(setOptionsClicked()));
+    connect(ui->listWidgetModds, SIGNAL(itemSelectionChanged()),
+        this, SLOT(onListItemSelected()));
 
-    connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()), this, SLOT(workTick()));
+    // Progress bar signal connection
+    connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()),
+        this, SLOT(workTick()));
 
-    // Thread work done
-    connect(&Controller::getInstance(), SIGNAL(setupCampDone(bool)), this, SLOT(checkCommonFiles(bool)));
+    // Thread work done signal connections
+    connect(&Controller::getInstance(), SIGNAL(setupCampDone(bool)),
+        this, SLOT(checkCommonFiles(bool)));
 
+    // Set init state
     ui->pushButtonLink->setEnabled(false);
     ui->pushButtonInfo->setEnabled(false);
     ui->pushButtonDownload->setEnabled(false);
@@ -52,18 +77,22 @@ int TombRaiderLinuxLauncher::testallGames(int id){
     int dirStaus = controller.checkGameDirectory(id);
     if (dirStaus)
     {
-        if(dirStaus == 1)// The path is a symbolic link.
+        if (dirStaus == 1)  // The path is a symbolic link.
         {
-            //its in use
+            // its in use
             // pass for now
         }
-        else if(dirStaus == 2)// The path is not a symbolic link.
+        else if (dirStaus == 2)  // The path is not a symbolic link.
         {
-            //this means we backup the game to levelPath IF that is whats inside
+            // this means we backup the game to levelPath
+            // IF that is whats inside
 
             QMessageBox msgBox;
             msgBox.setWindowTitle("Confirmation");
-            msgBox.setText("TombRaider "+QString::number(id)+" found, you want to proceed?");
+            msgBox.setText(
+                "TombRaider " +
+                QString::number(id) +
+                " found, you want to proceed?");
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::No);
             int result = msgBox.exec();
@@ -76,9 +105,9 @@ int TombRaiderLinuxLauncher::testallGames(int id){
                 qDebug() << "User clicked No or closed the dialog.";
             }
         }
-        else if(dirStaus == 3)// The path is not a directory.
+        else if (dirStaus == 3)  // The path is not a directory.
         {
-            //it has been replaced by a file from somewhere else or the user
+            // it has been replaced by a file from somewhere else or the user
             // or is missing
         }
     }
@@ -111,7 +140,7 @@ void TombRaiderLinuxLauncher::generateList()
         {".TR5", {"Tomb_Raider_IIIII.jpg", -5}}
     };
 
-    foreach (const QFileInfo &file, entryInfoList)
+    foreach(const QFileInfo &file, entryInfoList)
     {
         QString extension = file.suffix().prepend(".");
         if (fileMap.contains(extension))
@@ -119,10 +148,12 @@ void TombRaiderLinuxLauncher::generateList()
             if (file.fileName() == "Original" + extension)
             {
                 QString iconPath = pictures + fileMap[extension].first;
-                QString itemName = QString("Tomb Raider %1 Original").arg(extension.mid(3));
+                QString itemName =
+                    QString("Tomb Raider %1 Original").arg(extension.mid(3));
                 int userRole = fileMap[extension].second;
 
-                QListWidgetItem *wi = new QListWidgetItem(QIcon(iconPath), itemName);
+                QListWidgetItem *wi =
+                    new QListWidgetItem(QIcon(iconPath), itemName);
                 wi->setData(Qt::UserRole, QVariant(userRole));
                 ui->listWidgetModds->addItem(wi);
             }
@@ -137,10 +168,11 @@ void TombRaiderLinuxLauncher::generateList()
     QVector<ListItemData> list;
     controller.getList(list);
     const size_t s = list.size();
-    for (int i = 0; i<s;i++)
+    for (int i = 0; i < s; i++)
     {
         QString tag = list[i].title +" by "+ list[i].author;
-        QListWidgetItem *wi = new QListWidgetItem(list[i].picture,tag);
+        QListWidgetItem *wi =
+            new QListWidgetItem(list[i].picture, tag);
         wi->setData(Qt::UserRole, QVariant(i+1));
         ui->listWidgetModds->addItem(wi);
     }
@@ -157,13 +189,18 @@ void TombRaiderLinuxLauncher::readSavedSettings()
 
 void TombRaiderLinuxLauncher::setup()
 {
-    ui->Tabs->setCurrentIndex(ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Setup")));
-    ui->setupStackedWidget->setCurrentWidget(ui->setupStackedWidget->findChild<QWidget*>("firstTime"));
-    ui->Tabs->setTabEnabled(ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Levels")), false);
-    ui->Tabs->setTabEnabled(ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Modding")), false);
+    ui->Tabs->setCurrentIndex(
+        ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Setup")));
+    ui->setupStackedWidget->setCurrentWidget(
+        ui->setupStackedWidget->findChild<QWidget*>("firstTime"));
+    ui->Tabs->setTabEnabled(
+        ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Levels")), false);
+    ui->Tabs->setTabEnabled(
+        ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Modding")), false);
 
     qDebug() << "Entering setup" << Qt::endl;
-    const QString& homeDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    const QString& homeDir =
+        QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     qDebug() << "Home Directory:" << homeDir;
     const QString& s = "/.steam/root/steamapps/common/";
     const QString& l = "/.local/share/TombRaiderLinuxLauncher";
@@ -220,13 +257,17 @@ void TombRaiderLinuxLauncher::setOptionsClicked()
     settings.setValue("levelPath" , levelPath);
     settings.setValue("setup" , "yes");
 
-    ui->tableWidgetSetup->item(0,0)->setText(gamePath);
-    ui->tableWidgetSetup->item(1,0)->setText(levelPath);
-    ui->Tabs->setTabEnabled(ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Levels")), true);
-    ui->Tabs->setTabEnabled(ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Modding")), true);
+    ui->tableWidgetSetup->item(0, 0)->setText(gamePath);
+    ui->tableWidgetSetup->item(1, 0)->setText(levelPath);
+    ui->Tabs->setTabEnabled(
+        ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Levels")), true);
+    ui->Tabs->setTabEnabled(
+        ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Modding")), true);
     ui->Tabs->show();
-    ui->Tabs->setCurrentIndex(ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Levels")));
-    ui->setupStackedWidget->setCurrentWidget(ui->setupStackedWidget->findChild<QWidget*>("settings"));
+    ui->Tabs->setCurrentIndex(
+        ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Levels")));
+    ui->setupStackedWidget->setCurrentWidget(
+        ui->setupStackedWidget->findChild<QWidget*>("settings"));
 
     readSavedSettings();
 }
@@ -238,7 +279,7 @@ void TombRaiderLinuxLauncher::linkClicked()
     QString s = selectedItem->text();
     if (id)
     {
-        if(!controller.link(id))
+        if (!controller.link(id))
         {
             qDebug() << "Sumo linko el la compleeteo";
         }
@@ -261,7 +302,8 @@ void TombRaiderLinuxLauncher::downloadClicked()
     if (id)
     {
         ui->progressBar->setValue(0);
-        ui->stackedWidgetBar->setCurrentWidget(ui->stackedWidgetBar->findChild<QWidget*>("progress"));
+        ui->stackedWidgetBar->setCurrentWidget(
+            ui->stackedWidgetBar->findChild<QWidget*>("progress"));
         controller.setupLevel(id);
     }
 }
@@ -287,8 +329,9 @@ void TombRaiderLinuxLauncher::infoClicked()
             ui->infoListWidget->addItem(item);
         }
         ui->infoWebEngineView->show();
-        ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("info"));
-        if(controller.getWalkthrough(id) != "")
+        ui->stackedWidget->setCurrentWidget(
+                ui->stackedWidget->findChild<QWidget*>("info"));
+        if (controller.getWalkthrough(id) != "")
         {
             ui->pushButtonWalkthrough->setEnabled(true);
         }
@@ -307,19 +350,24 @@ void TombRaiderLinuxLauncher::walkthroughClicked()
     {
         ui->walkthroughWebEngineView->setHtml(controller.getWalkthrough(id));
         ui->walkthroughWebEngineView->show();
-        ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("walkthrough"));
+        ui->stackedWidget->setCurrentWidget(
+                ui->stackedWidget->findChild<QWidget*>("walkthrough"));
     }
 }
 
 void TombRaiderLinuxLauncher::backClicked()
 {
-    if(ui->stackedWidget->currentWidget() == ui->stackedWidget->findChild<QWidget*>("info"))
+    if (ui->stackedWidget->currentWidget() ==
+        ui->stackedWidget->findChild<QWidget*>("info"))
     {
-        ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("select"));
+        ui->stackedWidget->setCurrentWidget(
+            ui->stackedWidget->findChild<QWidget*>("select"));
     }
-    else if (ui->stackedWidget->currentWidget() == ui->stackedWidget->findChild<QWidget*>("walkthrough"))
+    else if (ui->stackedWidget->currentWidget() ==
+        ui->stackedWidget->findChild<QWidget*>("walkthrough"))
     {
-        ui->stackedWidget->setCurrentWidget(ui->stackedWidget->findChild<QWidget*>("select"));
+        ui->stackedWidget->setCurrentWidget(
+            ui->stackedWidget->findChild<QWidget*>("select"));
     }
 }
 
@@ -328,12 +376,13 @@ void TombRaiderLinuxLauncher::workTick()
     int value = ui->progressBar->value();
     ui->progressBar->setValue(value + 1);
     qDebug() << ui->progressBar->value() << "%";
-    if(ui->progressBar->value() >= 100)
+    if (ui->progressBar->value() >= 100)
     {
         ui->pushButtonLink->setEnabled(true);
         ui->pushButtonDownload->setEnabled(false);
         ui->pushButtonInfo->setEnabled(true);
-        ui->stackedWidgetBar->setCurrentWidget(ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
+        ui->stackedWidgetBar->setCurrentWidget(
+                ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
     }
 }
 

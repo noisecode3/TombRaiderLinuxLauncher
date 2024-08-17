@@ -1,9 +1,24 @@
-#ifndef TESTSIMPLEZIPPER_H
-#define TESTSIMPLEZIPPER_H
+/* TombRaiderLinuxLauncher
+ * Martin Bångens Copyright (C) 2024
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef TEST_TEST_H_
+#define TEST_TEST_H_
 
 // This is some test for another application that can work as an example
 // it more nice to test individual parts of the application without the GUI
-
 
 #include <QtCore>
 #include <QtTest/QtTest>
@@ -15,14 +30,16 @@
  *
  * @brief   Unit tests for SimpleZipper class.
  *
- * @details The TestSimpleZipper class implements unit tests for the static methods in the SimpleZipper class.
- *          It creates three text files and a subdirectory with two text files, and zips and unzips these by file and folder,
+ * @details The TestSimpleZipper class implements unit tests for the static
+ *          methods in the SimpleZipper class.
+ *          It creates three text files and a subdirectory with two text files,
+ *          and zips and unzips these by file and folder,
  *          and checks the file contents survive the zip-unzip.
  */
 class TestSimpleZipper : public QObject {
     Q_OBJECT
 
-private:
+ private:
     QDir mTempDir;
     QFile mFile1;
     QFile mFile2;
@@ -31,7 +48,7 @@ private:
     QFile mSubFile1;
     QFile mSubFile2;
 
-private slots:
+ private slots:
     /**
      * @brief Creates a temporary directory with three text files and a subdirectory with two text files.
      */
@@ -93,7 +110,8 @@ private slots:
         // Unzip the zip file to the temporary directory
         QVERIFY(SimpleZipper::unzipFile(zipPath, tempUnzipDir));
 
-        // Check the contents of the unzipped files are the same as the original files
+        // Check the contents of the unzipped files are the same
+        // as the original files
         QFile unzippedFile1(tempUnzipDir + "/mFile1.txt");
         QFile unzippedFile2(tempUnzipDir + "/mFile2.txt");
         QFile unzippedFile3(tempUnzipDir + "/mFile3.txt");
@@ -132,8 +150,11 @@ private slots:
     void testZipFiles()
     {
         QFileInfo fileInfo(mFile1.fileName());
-        QString zipFileName = fileInfo.absoluteDir().path() + "/" + fileInfo.baseName() + ".zip";
-        QString unzipFileName = fileInfo.absoluteDir().path() + "/" + fileInfo.baseName() + "/" + fileInfo.fileName();
+        QString zipFileName = fileInfo.absoluteDir().path() + "/" +
+            fileInfo.baseName() + ".zip";
+
+        QString unzipFileName = fileInfo.absoluteDir().path() + "/" +
+            fileInfo.baseName() + "/" + fileInfo.fileName();
 
         // Zip the file
         QVERIFY(SimpleZipper::zipFile(mFile1.fileName()));
@@ -142,7 +163,9 @@ private slots:
         QVERIFY(QFile::exists(zipFileName));
 
         // Unzip the file
-        QVERIFY(SimpleZipper::unzipFile(zipFileName, fileInfo.absoluteDir().path() + "/" + fileInfo.baseName()));
+        QVERIFY(SimpleZipper::unzipFile(
+            zipFileName,
+            fileInfo.absoluteDir().path() + "/" + fileInfo.baseName()));
 
         // Check the unzipped file exists
         QVERIFY(QFile::exists(unzipFileName));
@@ -163,9 +186,8 @@ private slots:
     void cleanupTestCase() {
         QVERIFY(mTempDir.removeRecursively());
     }
-
 };
 
 QTEST_MAIN(TestSimpleZipper)
 
-#endif // TESTSIMPLEZIPPER_H
+#endif  // TEST_TEST_H_

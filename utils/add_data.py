@@ -5,13 +5,13 @@ import os
 import sys
 import shutil
 import hashlib
-import requests
 import sqlite3
 import zipfile
 import fcntl
 import time
 import json
 import logging
+import requests
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
@@ -34,14 +34,15 @@ def download_file(url, cert, file_name):
     if total_size != 0 and wrote != total_size:
         logging.error("ERROR, something went wrong with the download")
     else:
-        logging.info(f"Downloaded {file_name} successfully")
+        logging.info("Downloaded %s successfully", file_name)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         logging.error("Usage: python3 addData.py FILE.json")
         sys.exit(1)
-    else:
-        file = sys.argv[1]
+    file = sys.argv[1]
+else:
+    sys.exit(1)
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
@@ -134,11 +135,11 @@ try:
     c.execute("INSERT INTO Level (body, walkthrough, zipID, infoID) VALUES (?, ?, ?, ?)",
     (level_body, level_walkthrough, zip_id, info_id))
 except sqlite3.Error as e:
-    logging.error(f"SQLite error: {e}")
+    logging.error("SQLite error: %s", e)
 
 c.execute("SELECT MAX(LevelID) FROM Level")
 level_id = c.fetchone()[0]
-logging.info(f"Current level_id: {level_id}")
+logging.info("Current level_id: %s", level_id)
 
 screen_url = file_info.get('screen')
 screen_response = requests.get(screen_url, verify=cert, timeout=5)
@@ -172,29 +173,42 @@ for root, dirs, files in os.walk('extracted_files'):
             file_content = f.read()
             file_md5 = hashlib.md5(file_content).hexdigest()
 
-            c.execute("SELECT FileID FROM Files WHERE md5sum = ? AND path = ?", (file_md5, relative_path))
+            c.execute("SELECT FileID FROM Files WHERE md5sum = ? AND path = ?", \
+            (file_md5, relative_path))
             existing_file = c.fetchone()
 
             if existing_file:
                 file_id = existing_file[0]
-                logging.info(f"File with md5sum {file_md5} and path {relative_path} already exists. Using existing FileID: {file_id}")
+                logging.info("File with md5sum %s and path %s"
+                             " already exists. Using existing FileID: %s",
+                file_md5,
+                relative_path,
+                file_id
+                )
             else:
-                c.execute("INSERT INTO Files (md5sum, path) VALUES (?, ?)", (file_md5, relative_path))
+                c.execute("INSERT INTO Files (md5sum, path) VALUES (?, ?)", \
+                (file_md5, relative_path))
                 file_id = c.lastrowid
-                logging.info(f"Inserted new file with md5sum {file_md5}. New FileID: {file_id}")
+                logging.info("Inserted new file with md5sum %s. New FileID: %s", file_md5, file_id)
 
         try:
-            c.execute("SELECT 1 FROM LevelFileList WHERE fileID = ? AND levelID = ?", (file_id, level_id))
+            c.execute("SELECT 1 FROM LevelFileList WHERE fileID = ? AND levelID = ?", \
+            (file_id, level_id))
             existing_combination = c.fetchone()
 
             if not existing_combination:
-                c.execute("INSERT INTO LevelFileList (fileID, levelID) VALUES (?, ?)", (file_id, level_id))
+                c.execute("INSERT INTO LevelFileList (fileID, levelID) VALUES (?, ?)", \
+                (file_id, level_id))
             else:
-                logging.info(f"Combination of FileID {file_id} and LevelID {level_id} already exists in LevelFileList. Skipping insertion.")
+                logging.info("Combination of FileID %s and LevelID %s"
+                             " already exists in LevelFileList. Skipping insertion.",
+                file_id,
+                level_id
+                )
 
         except sqlite3.IntegrityError as e:
-            logging.error(f"Uniqueness violation in LevelFileList: {e}")
-            logging.error(f"FileID: {file_id}, LevelID: {level_id}")
+            logging.error("Uniqueness violation in LevelFileList: %s", e)
+            logging.error("FileID: %s, LevelID: %s", file_id, level_id)
 
 conn.commit()
 conn.close()

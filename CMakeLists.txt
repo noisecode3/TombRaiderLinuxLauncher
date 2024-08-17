@@ -79,7 +79,11 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 #    ${CURL_LIBRARY}
 #)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CURL_INCLUDE_DIR} libs/miniz src )
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CURL_INCLUDE_DIR}
+    libs/miniz
+    src
+)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17

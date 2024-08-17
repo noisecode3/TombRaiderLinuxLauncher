@@ -1,13 +1,30 @@
-#ifndef DATA_H
-#define DATA_H
+/* TombRaiderLinuxLauncher
+ * Martin Bångens Copyright (C) 2024
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef SRC_DATA_H_
+#define SRC_DATA_H_
 
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QDebug>
 #include <QSqlError>
-#include "qicon.h"
-#include "qpixmap.h"
+#include <QIcon>
+#include <QPixmap>
+
 /**
  * @struct FolderNames
  * @brief Folder names game used on windows
@@ -31,12 +48,12 @@ struct ZipData
      * @param
      * @details
      */
-    ZipData() {};
-    ZipData( QString zipName, float zipSize, QString md5sum, QString url ):
+    ZipData() {}
+    ZipData(QString zipName, float zipSize, QString md5sum, QString url):
         name(zipName),
         megabyteSize(zipSize),
         md5sum(md5sum),
-        url(url) {};
+        url(url) {}
     QString name;
     float megabyteSize;
     QString md5sum;
@@ -51,14 +68,20 @@ struct ListItemData
      * @param
      * @details
      */
-    ListItemData() {};
-    ListItemData( QString title, QString author, QString type,
-              QString class_, QString releaseDate, QString difficulty,
-              QString duration, QByteArray imageData ):
+    ListItemData() {}
+    ListItemData(
+        QString title,
+        QString author,
+        QString type,
+        QString classIn,
+        QString releaseDate,
+        QString difficulty,
+        QString duration,
+        QByteArray imageData):
         title(title),
         author(author),
         type(type),
-        class_(class_),
+        class_(classIn),
         releaseDate(releaseDate),
         difficulty(difficulty),
         duration(duration)
@@ -66,16 +89,19 @@ struct ListItemData
         QPixmap pixmap;
         pixmap.loadFromData(imageData, "JPG");
         picture.addPixmap(pixmap);
-        // Scale the pixmap to fit within a 640x480 rectangle while maintaining aspect ratio
+        // Scale the pixmap while maintaining aspect ratio
         QSize newSize = pixmap.size().scaled(640, 480, Qt::KeepAspectRatio);
         // Resize the pixmap to the scaled size
-        pixmap = pixmap.scaled(newSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        pixmap = pixmap.scaled(
+            newSize,
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation);
         // Create QIcon and add the scaled pixmap
         picture.addPixmap(pixmap);
     };
     QString title;
     QString author;
-    QString type; // like TR4
+    QString type;
     QString class_;
     QString releaseDate;
     QString difficulty;
@@ -91,8 +117,8 @@ struct InfoData
      * @param
      * @details
      */
-    InfoData() {};
-    InfoData( QString body, QVector<QByteArray> imageList ) : body(body)
+    InfoData() {}
+    InfoData(QString body, QVector<QByteArray> imageList) : body(body)
     {
         for (const QByteArray &image : imageList)
         {
@@ -110,7 +136,7 @@ struct InfoData
 class Data : public QObject
 {
     Q_OBJECT
-public:
+ public:
     static Data& getInstance()
     {
         static Data instance;
@@ -147,8 +173,8 @@ public:
     std::array<QVector<QString>, 2> getFileList(const int id, bool trleList);
     ZipData getDownload(int id);
 
-private:
-    Data(QObject *parent = nullptr) : QObject(parent)
+ private:
+    explicit Data(QObject *parent = nullptr) : QObject(parent)
     {
     }
     ~Data()
@@ -156,8 +182,8 @@ private:
         db.close();
     }
 
-    Q_DISABLE_COPY(Data)
     QSqlDatabase db;
+    Q_DISABLE_COPY(Data)
 };
 
-#endif // DATA_H
+#endif  // SRC_DATA_H_

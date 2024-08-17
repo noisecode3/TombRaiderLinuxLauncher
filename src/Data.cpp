@@ -1,3 +1,19 @@
+/* TombRaiderLinuxLauncher
+ * Martin Bångens Copyright (C) 2024
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Data.h"
 
 QVector<ListItemData> Data::getListItems()
@@ -27,7 +43,7 @@ QVector<ListItemData> Data::getListItems()
         // Handle the case where no rows are returned
         qDebug() << "No rows returned from the query";
     }
-    for(int i=0; i<rowCount;i++)
+    for (int i=0; i < rowCount; i++)
     {
         QSqlQuery query(db);
         query.prepare("SELECT Level.*, Info.*, Picture.* "
@@ -38,7 +54,7 @@ QVector<ListItemData> Data::getListItems()
                       "WHERE Level.LevelID = :id "
                       "GROUP BY Level.LevelID "
                       "ORDER BY MIN(Picture.PictureID) ASC");
-        query.bindValue(":id", i+1); // Set the ID autoincrament starts at 1
+        query.bindValue(":id", i+1);  // Set the ID autoincrament starts at 1
 
         if (query.exec())
         {
@@ -54,7 +70,7 @@ QVector<ListItemData> Data::getListItems()
                     query.value("Info.class").toString(),
                     query.value("Picture.data").toByteArray()));
             }
-        } 
+        }
         else
         {
             qDebug() << "Error executing query:" << query.lastError().text();

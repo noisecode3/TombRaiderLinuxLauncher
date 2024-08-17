@@ -43,16 +43,19 @@ def calculate_md5(url_input, cert_path_input):
         zip_response.raise_for_status()
         total_length = int(zip_response.headers.get('content-length', 0))
 
+        # Create an MD5 hash object once
+        md5_hash = hashlib.md5()
+
         # Initialize the progress bar
         with tqdm(total=total_length, unit='B', unit_scale=True, desc="Calculating MD5") \
                 as progress_bar:
             for chunk in zip_response.iter_content(chunk_size=4096):
                 if chunk:  # filter out keep-alive new chunks
-                    hashlib.md5().update(chunk)
+                    md5_hash.update(chunk)  # Update the existing MD5 object
                     progress_bar.update(len(chunk))
 
         # Return the hex digest of the MD5 hash
-        return hashlib.md5().hexdigest()
+        return md5_hash.hexdigest()
     except requests.exceptions.RequestException as zip_response_error:
         logging.error("Failed to download %s: %s", url_input, zip_response_error)
         return None
@@ -92,36 +95,35 @@ if level_response.status_code == 200:
 
     title_span = soup.find('span', class_='subHeader')
     if title_span:
-        title = title_span.get_text(strip=True)
+        TITLE = title_span.get_text(strip=True)
         br_tag = title_span.find('br')
         if br_tag:
-            title = title_span.contents[0].strip()
+            TITLE = title_span.contents[0].strip()
     else:
-        title = "missing"
+        TITLE = "missing"
 
-    author = soup.find('a', class_='linkl').get_text(strip=True) or "missing"
+    author = soup.find('a', class_='linkl').get_text(strip=True) or ""
     type_ = soup.find('td', string='file type:').find_next('td').get_text(strip=True) or "missing"
     class_ = soup.find('td', string='class:').find_next('td').get_text(strip=True) or "missing"
-    releaseDate = soup.find('td', string='release date:').find_next('td').get_text(strip=True) \
-            or "missing"
+    releaseDate = soup.find('td', string='release date:').find_next('td').get_text(strip=True) or ""
     difficulty_td = soup.find('td', string='difficulty:')
     if difficulty_td:
         next_td = difficulty_td.find_next('td')
         if next_td:
-            difficulty = next_td.get_text(strip=True)
+            DIFFICULTY = next_td.get_text(strip=True)
         else:
-            difficulty = "missing"
+            DIFFICULTY = "missing"
     else:
-        difficulty = "missing"
+        DIFFICULTY = "missing"
     duration_td = soup.find('td', string='duration:')
     if duration_td:
         next_td = duration_td.find_next('td')
         if next_td:
-            duration = next_td.get_text(strip=True)
+            DURATION = next_td.get_text(strip=True)
         else:
-            duration = "missing"
+            DURATION = "missing"
     else:
-        duration = "missing"
+        DURATION = "missing"
 
     specific_tags = soup.find_all('td', class_='medGText', align='left', valign='top')
     body = specific_tags[1] if len(specific_tags) >= 2 else "missing"
@@ -136,15 +138,16 @@ if level_response.status_code == 200:
 
     download_link = soup.find('a', string='Download')
     if download_link:
-        url = download_link['href']
+        URL = download_link['href']
         time.sleep(2)
         try:
-            response2 = requests.head(url, verify=CERT, timeout=5, allow_redirects=True)
-            response2.raise_for_status()
+            head_response = requests.head(URL, verify=CERT, timeout=5, allow_redirects=True)
+            head_response.raise_for_status()
 
             # Check if the content type is a zip file
-            if 'Content-Type' in response2.headers and response2.headers['Content-Type'] == 'application/zip':
-                download_url = response2.url
+            if 'Content-Type' in head_response.headers and \
+            head_response.headers['Content-Type'] == 'application/zip':
+                download_url = head_response.url
                 zipFileName = download_url.split('/')[-1]
 
                 # Calculate the MD5 checksum without saving the file to disk
@@ -157,33 +160,37 @@ if level_response.status_code == 200:
                 else:
                     logging.error("Failed to calculate MD5 checksum.")
             else:
-                logging.error(f"The file at {url} is not a ZIP file. Content-Type: {response2.headers.get('Content-Type')}")
-                download_url = ''
-                zipFileName = ''
-                zipFileMd5 = ''
+                logging.error("The file at {URL} is not a ZIP file. Content-Type: %s", \
+                head_response.headers.get('Content-Type'))
+                DOWNLOAD_URL = ''
+                ZIPFILE_NAME = ''
+                ZIPFILE_MD5 = ''
 
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to retrieve file information from {url}: {e}")
+        except requests.exceptions.RequestException as head_response_error:
+            logging.error("Failed to retrieve file information from %s: %s", \
+            URL, head_response_error)
 
-    walkthrough = ""
+    WALKTHROUGH = ""
     walkthrough_link = soup.find('a', string='Walkthrough')
     if walkthrough_link:
-        url = 'https://www.trle.net/sc/' + walkthrough_link['href']
+        URL = 'https://www.trle.net/sc/' + walkthrough_link['href']
         time.sleep(2)
         try:
-            response3 = requests.get(url, verify=CERT, timeout=5)
-            response3.raise_for_status()
-            soup2 = BeautifulSoup(response3.text, 'html.parser')
+            walkthrough_response = requests.get(URL, verify=CERT, timeout=5)
+            walkthrough_response.raise_for_status()
+            soup2 = BeautifulSoup(walkthrough_response.text, 'html.parser')
             iframe_tag = soup2.find('iframe')
             iframe_src = iframe_tag['src']
-            url = "https://www.trle.net" + iframe_src
-            response4 = requests.get(url, verify=CERT, timeout=5)
+            URL = "https://www.trle.net" + iframe_src
+            response4 = requests.get(URL, verify=CERT, timeout=5)
             if response4.status_code == 200:
-                walkthrough = response4.text
+                WALKTHROUGH = response4.text
             else:
-                logging.error(f'Failed to retrieve iframe content. Status code: {response4.status_code}')
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to retrieve Walkthrough from {url}: {e}")
+                logging.error('Failed to retrieve iframe content. Status code: %s', \
+                response4.status_code)
+        except requests.exceptions.RequestException as walkthrough_response_error:
+            logging.error("Failed to retrieve Walkthrough from %s: %s", \
+            URL, walkthrough_response_error)
 
     onmouseover_links = soup.find_all(lambda tag: tag.name == 'a' and 'onmouseover' in tag.attrs)
     hrefs = [link['href'] for link in onmouseover_links]
@@ -193,35 +200,27 @@ if level_response.status_code == 200:
     screen = 'https://www.trle.net' + image_tag['src']
 
     data = {
-        "title": title,
+        "title": TITLE,
         "author": author,
         "type": type_,
         "class_": class_,
         "releaseDate": releaseDate,
-        "difficulty": difficulty,
-        "duration": duration,
+        "difficulty": DIFFICULTY,
+        "duration": DURATION,
         "screen": screen,
         "screensLarge": screensLarge,
         "zipFileSize": zipFileSize,
         "zipFileName": zipFileName,
         "zipFileMd5": zipFileMd5,
-        "body": body,
-        "walkthrough": walkthrough,
+        "body": str(body),
+        "walkthrough": WALKTHROUGH,
         "download_url": download_url,
     }
-    if body:
-        data["body"] = str(body)
-    try:
-        if walkthrough:
-            data["walkthrough"] = str(walkthrough)
-    except NameError:
-        data["walkthrough"] = ""
 
     with open('data.json', 'w') as json_file:
         json.dump(data, json_file)
 else:
-    logging.error(f'Failed to retrieve content. Status code: {level_response.status_code}')
+    logging.error('Failed to retrieve content. Status code: %s', level_response.status_code)
 
 lock_fd.close()
 os.remove(LOCK_FILE)
-

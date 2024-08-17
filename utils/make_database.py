@@ -177,7 +177,7 @@ for i in range(1, 6):
     file = f'fileList-TR{i}.json'
 
     # Load data from JSON file
-    with open(file, 'r') as json_file:
+    with open(file, 'r', encoding='utf-8') as json_file:
         file_info = json.load(json_file)
 
     name = file_info.get("name")
@@ -193,30 +193,36 @@ for i in range(1, 6):
 
         if relative_path and file_md5:
             # Check if the file with the same md5sum already exists in Files table
-            c.execute("SELECT FileID FROM Files WHERE md5sum = ? AND path = ?", (file_md5, relative_path))
+            c.execute("SELECT FileID FROM Files WHERE md5sum = ? AND path = ?", \
+            (file_md5, relative_path))
             existing_file = c.fetchone()
 
             if existing_file:
                 # File already exists, use the existing FileID
                 file_id = existing_file[0]
-                print(f"File with md5sum {file_md5} and path {relative_path} already exists. Using existing FileID: {file_id}")
+                print("File with md5sum %s and path %s already exists. Using existing FileID: %s", \
+                file_md5, relative_path, file_id)
             else:
                 # File doesn't exist, insert it into Files table
-                c.execute("INSERT INTO Files (md5sum, path) VALUES (?, ?)", (file_md5, relative_path))
+                c.execute("INSERT INTO Files (md5sum, path) VALUES (?, ?)", \
+                (file_md5, relative_path))
                 file_id = c.lastrowid
                 print(f"Inserted new file with md5sum {file_md5}. New FileID: {file_id}")
 
         try:
             # Check if the combination of fileID and gameID already exists in GameFileList
-            c.execute("SELECT 1 FROM GameFileList WHERE fileID = ? AND gameID = ?", (file_id, game_id))
+            c.execute("SELECT 1 FROM GameFileList WHERE fileID = ? AND gameID = ?", \
+            (file_id, game_id))
             existing_combination = c.fetchone()
 
             if not existing_combination:
                 # Combination doesn't exist, insert it into GameFileList
-                c.execute("INSERT INTO GameFileList (fileID, gameID) VALUES (?, ?)", (file_id, game_id))
+                c.execute("INSERT INTO GameFileList (fileID, gameID) VALUES (?, ?)", \
+                (file_id, game_id))
             else:
                 # Combination already exists, print a message or handle it as needed
-                print(f"Combination of FileID {file_id} and LevelID {game_id} already exists in GameFileList. Skipping insertion.")
+                print(f"Combination of FileID {file_id} and LevelID {game_id} " \
+                "already exists in GameFileList. Skipping insertion.")
 
         except sqlite3.IntegrityError as e:
             # Print more details about the uniqueness violation
@@ -225,4 +231,3 @@ for i in range(1, 6):
 
 conn.commit()
 conn.close()
-

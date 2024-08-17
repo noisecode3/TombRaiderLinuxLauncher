@@ -1,3 +1,19 @@
+/* TombRaiderLinuxLauncher
+ * Martin Bångens Copyright (C) 2024
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <QDebug>
 #include "Model.h"
 
@@ -7,31 +23,27 @@ Model::Model(QObject *parent) : QObject(parent)
     instructionManager.addInstruction(4, [this](int id) {
         qDebug() << "Perform Operation A";
         const QString s = "/"+QString::number(id) + ".TRLE";
-        fileManager.makeRelativeLink(s,"/The Rescue.exe","/tomb4.exe");
+        fileManager.makeRelativeLink(s, "/The Rescue.exe", "/tomb4.exe");
     });
     instructionManager.addInstruction(5, [this](int id) {
         qDebug() << "Perform Operation B";
         const QString s = "/"+QString::number(id) + ".TRLE";
-        fileManager.makeRelativeLink(s,"/War of the Worlds.exe","/tomb4.exe");
+        fileManager.makeRelativeLink(s, "/War of the Worlds.exe", "/tomb4.exe");
     });
-    /*
-    instructionManager.addInstruction(5, [this](int id) {
-        qDebug() << "Perform Operation B";
-        const QString s = QString::number(id) + ".TRLE/Titak-MistsOfAvalon-final";
+    instructionManager.addInstruction(11, [this](int id) {
+        qDebug() << "Perform Operation C";
+        const QString s = QString::number(id) + ".TRLE/TRBiohazard";
         fileManager.moveFilesToParentDirectory(s);
     });
-    */
-
 }
 
 Model::~Model()
 {
-
 }
 
 bool Model::setDirectory(const QString& level, const QString& game)
 {
-    if (fileManager.setUpCamp(level,game) &&
+    if (fileManager.setUpCamp(level, game) &&
         downloader.setUpCamp(level) &&
         data.initializeDatabase(level))
         return true;
@@ -64,7 +76,7 @@ int Model::checkGameDirectory(int id)
 {
     const QString s = getGameDirectory(id);
     if (s != "")
-        return fileManager.checkFileInfo(s,true);
+        return fileManager.checkFileInfo(s, true);
     return -1;
 }
 
@@ -75,12 +87,12 @@ void Model::getList(QVector<ListItemData>& list)
 
 int Model::getItemState(int id)
 {
-    if(id < 0)
+    if (id < 0)
         return 1;
     else if (id > 0)
     {
         QString map(QString::number(id) + ".TRLE");
-        if(fileManager.checkDir(map, false))
+        if (fileManager.checkDir(map, false))
             return 2;
         else
             return 0;
@@ -110,12 +122,14 @@ bool Model::setLink(int id)
 
 bool Model::setUpOg(int id)
 {
-    std::array<QVector<QString>,2> list = data.getFileList(id,false);
+    std::array<QVector<QString>, 2> list = data.getFileList(id, false);
     const size_t s = list[0].size();
     const size_t sm = list[1].size();
-    if (s!=sm)
+    if (s != sm)
     {
-        qDebug() << "Corrupt list, there seems to bee more or less checksums for the files\n";
+        qDebug()
+            << "Corrupt list, there seems to bee"
+            << " more or less checksums for the files\n";
         return false;
     }
     const QString& sd = "/Original.TR" + QString::number(id) +"/";
@@ -125,14 +139,15 @@ bool Model::setUpOg(int id)
         const QString& fFile = list[0][i];
         const QString& fMd5sum = list[1][i];
         const QString&  calculated = fileManager.calculateMD5(sg+fFile, true);
-        if(fMd5sum == calculated)
+        if (fMd5sum == calculated)
         {
             fileManager.copyFile(sg+fFile, sd+fFile,  true);
         }
         else
         {
             qDebug() << "Original file was modified, had" << fMd5sum
-                     << " got " << calculated << " for file " << fFile << Qt::endl;
+                     << " got " << calculated << " for file "
+                     << fFile << Qt::endl;
             fileManager.cleanWorkingDir(sd + fFile);
             break;
         }
@@ -141,7 +156,7 @@ bool Model::setUpOg(int id)
     {
         const QString&  src = sd.chopped(1);
         const QString&  des = sg.chopped(1);
-        if(!fileManager.linkGameDir(src,des))
+        if (!fileManager.linkGameDir(src, des))
         {
             return true;
         }
@@ -152,7 +167,7 @@ bool Model::setUpOg(int id)
 
 bool Model::getGame(int id)
 {
-    if (id<0)
+    if (id < 0)
         return setUpOg(-id);
     if (id)
     {
@@ -160,15 +175,15 @@ bool Model::getGame(int id)
         downloader.setUrl(zipData.url);
         downloader.setSaveFile(zipData.name);
 
-        if (fileManager.checkFile(zipData.name,false))
+        if (fileManager.checkFile(zipData.name, false))
         {
             qDebug() << "File exists:" << zipData.name;
-            //send 50% signal here
-            for (int i=0; i<50; i++)
+            // send 50% signal here
+            for (int i=0; i < 50; i++)
             {
                 emit this->modelTickSignal();
             }
-            if(fileManager.calculateMD5(zipData.name,false) != zipData.md5sum)
+            if (fileManager.calculateMD5(zipData.name, false) != zipData.md5sum)
             {
                 downloader.run();
             }
@@ -176,7 +191,6 @@ bool Model::getGame(int id)
             qWarning() << "File does not exist:" << zipData.name;
             downloader.run();
         }
-        //fileManager.createDirectory(QString::number(id)+".TRLE", false);
         fileManager.extractZip(zipData.name, QString::number(id)+".TRLE");
         instructionManager.executeInstruction(id);
         return true;

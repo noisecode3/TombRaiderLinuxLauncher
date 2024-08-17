@@ -1,5 +1,21 @@
-#ifndef MODEL_H
-#define MODEL_H
+/* TombRaiderLinuxLauncher
+ * Martin Bångens Copyright (C) 2024
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef SRC_MODEL_H_
+#define SRC_MODEL_H_
 
 #include <QObject>
 #include <QMap>
@@ -8,33 +24,39 @@
 #include "FileManager.h"
 #include "Network.h"
 
-class InstructionManager : public QObject {
+class InstructionManager : public QObject
+{
     Q_OBJECT
-public:
+ public:
     using Instruction = std::function<void(int id)>;
 
-    void addInstruction(int id, const Instruction& instruction) {
+    void addInstruction(int id, const Instruction& instruction)
+    {
         instructionsMap[id] = instruction;
     }
 
-public slots:
-    void executeInstruction(int id) {
+ public slots:
+    void executeInstruction(int id)
+    {
         auto it = instructionsMap.find(id);
-        if (it != instructionsMap.end()) {
+        if (it != instructionsMap.end())
+        {
             it.value()(id);
-        } else {
+        }
+        else
+        {
             qDebug() << "Invalid instruction ID";
         }
     }
 
-private:
+ private:
     QMap<int, Instruction> instructionsMap;
 };
 
 class Model : public QObject
 {
     Q_OBJECT
-public:
+ public:
     static Model& getInstance()
     {
         static Model instance;
@@ -52,19 +74,19 @@ public:
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
 
-signals:
+ signals:
     void modelTickSignal();
 
-private:
+ private:
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
     Downloader& downloader = Downloader::getInstance();
     InstructionManager instructionManager;
 
-    Model(QObject *parent = nullptr);
+    explicit Model(QObject *parent = nullptr);
     ~Model();
 
     Q_DISABLE_COPY(Model)
 };
 
-#endif // MODEL_H
+#endif  // SRC_MODEL_H_

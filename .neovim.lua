@@ -77,5 +77,6 @@ nvim_lsp.clangd.setup{}
 require("mason").setup()
 require("mason-lspconfig").setup()
 
-
 vim.g.current_shiftwidth = 4
+-- The style is meant to keep the code narrow, never let it over 80-100
+-- With cpplint --filter=-whitespace/braces,-whitespace/newline
