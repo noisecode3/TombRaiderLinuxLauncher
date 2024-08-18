@@ -58,6 +58,10 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(&Controller::getInstance(), SIGNAL(setupCampDone(bool)),
         this, SLOT(checkCommonFiles(bool)));
 
+    // Error signal connections
+    connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
+        this, SLOT(downloadError(int)));
+
     // Set init state
     ui->pushButtonLink->setEnabled(false);
     ui->pushButtonInfo->setEnabled(false);
@@ -96,7 +100,8 @@ int TombRaiderLinuxLauncher::testallGames(int id){
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::No);
             int result = msgBox.exec();
-            if (result == QMessageBox::Yes) {
+            if (result == QMessageBox::Yes)
+            {
                 qDebug() << "User clicked Yes.";
                 controller.setupOg(id);
             }
@@ -379,11 +384,38 @@ void TombRaiderLinuxLauncher::workTick()
     if (ui->progressBar->value() >= 100)
     {
         ui->pushButtonLink->setEnabled(true);
-        ui->pushButtonDownload->setEnabled(false);
         ui->pushButtonInfo->setEnabled(true);
+        ui->pushButtonDownload->setEnabled(false);
         ui->stackedWidgetBar->setCurrentWidget(
-                ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
+            ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
     }
+}
+
+void TombRaiderLinuxLauncher::downloadError(int status)
+{
+    ui->progressBar->setValue(0);
+    ui->pushButtonLink->setEnabled(true);
+    ui->pushButtonInfo->setEnabled(true);
+    ui->pushButtonDownload->setEnabled(true);
+    ui->stackedWidgetBar->setCurrentWidget(
+        ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Error");
+    if (status == 1)
+    {
+        msgBox.setText("No internet");
+    }
+    else if (status == 2)
+    {
+        msgBox.setText("You seem to be missing ssl keys");
+    }
+    else
+    {
+        msgBox.setText("Could not connect");
+    }
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.exec();
 }
 
 TombRaiderLinuxLauncher::~TombRaiderLinuxLauncher()

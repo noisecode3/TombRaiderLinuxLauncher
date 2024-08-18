@@ -43,6 +43,19 @@ class Controller : public QObject
     int getItemState(int id);
     int checkGameDirectory(int id);
 
+ public slots:
+    void passTickSignal();
+    void passDownloadError(int status);
+    void setupCampThread(const QString& level, const QString& game);
+    void setupLevelThread(int id);
+
+ signals:
+    void controllerTickSignal();
+    void controllerDownloadError(int status);
+    void setupCampThreadSignal(const QString& level, const QString& game);
+    void setupCampDone(bool status);
+    void setupLevelThreadSignal(int id);
+
  private:
     Model& model = Model::getInstance();
 
@@ -50,16 +63,6 @@ class Controller : public QObject
     ~Controller();
     QThread* ControllerThread;
     Q_DISABLE_COPY(Controller)
-
- public slots:
-    void passTickSignal();
-    void setupCampThread(const QString& level, const QString& game);
-    void setupLevelThread(int id);
- signals:
-    void controllerTickSignal();
-    void setupCampThreadSignal(const QString& level, const QString& game);
-    void setupCampDone(bool status);
-    void setupLevelThreadSignal(int id);
 };
 
 #endif  // SRC_CONTROLLER_H_

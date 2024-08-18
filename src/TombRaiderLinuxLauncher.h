@@ -75,6 +75,10 @@ class TombRaiderLinuxLauncher : public QMainWindow
      *
      */
     void checkCommonFiles(bool status);
+    /**
+     *
+     */
+    void downloadError(int status);
 
  private:
     /**

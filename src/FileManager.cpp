@@ -494,14 +494,18 @@ bool FileManager::moveFilesToDirectory(
     return true;
 }
 
-bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory, int levelsUp)
+bool FileManager::moveFilesToParentDirectory(
+    const QString& levelDirectory,
+    int levelsUp)
 {
     const QString& sep = QDir::separator();
-    QDir levelDirectoryFullPath(levelDir_m.absolutePath() + sep + levelDirectory);
+    QDir levelDirectoryFullPath(levelDir_m.absolutePath() + sep +
+        levelDirectory);
 
     if (!levelDirectoryFullPath.exists())
     {
-        qWarning() << "Directory does not exist:" << levelDirectoryFullPath.absolutePath();
+        qWarning() << "Directory does not exist:"
+            << levelDirectoryFullPath.absolutePath();
         return false;
     }
 
@@ -512,7 +516,7 @@ bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory, int 
         if (!levelDirectoryUpPath.cdUp())
         {
             qWarning() << "Failed to access parent directory at level "
-                       << i + 1 << " from:" << levelDirectoryFullPath.absolutePath();
+                << i + 1 << " from:" << levelDirectoryFullPath.absolutePath();
             return false;
         }
     }
@@ -524,7 +528,8 @@ bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory, int 
     for (const QFileInfo& fileInfo : fileList)
     {
         QString srcPath = fileInfo.absoluteFilePath();
-        QString destPath = levelDirectoryUpPath.absolutePath() + sep + fileInfo.fileName();
+        QString destPath = levelDirectoryUpPath.absolutePath() + sep +
+            fileInfo.fileName();
 
         if (fileInfo.isDir())
         {
@@ -547,9 +552,13 @@ bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory, int 
         }
     }
 
-    if (!levelDirectoryFullPath.rmdir("."))
+    QDir parentDir = levelDirectoryFullPath;  // Create a copy
+    parentDir.cdUp();  // Move to the parent directory
+
+    if (!parentDir.rmdir(levelDirectoryFullPath.dirName()))
     {
-        qWarning() << "Failed to remove directory:" << levelDirectoryFullPath.absolutePath();
+        qWarning() << "Failed to remove directory:"
+            << levelDirectoryFullPath.absolutePath();
         return false;
     }
 

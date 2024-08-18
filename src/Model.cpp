@@ -178,6 +178,7 @@ bool Model::getGame(int id)
         return setUpOg(-id);
     if (id)
     {
+        int status = 0;
         ZipData zipData = data.getDownload(id);
         downloader.setUrl(zipData.url);
         downloader.setSaveFile(zipData.name);
@@ -185,22 +186,33 @@ bool Model::getGame(int id)
         if (fileManager.checkFile(zipData.name, false))
         {
             qDebug() << "File exists:" << zipData.name;
-            // send 50% signal here
-            for (int i=0; i < 50; i++)
-            {
-                emit this->modelTickSignal();
-            }
-            if (fileManager.calculateMD5(zipData.name, false) != zipData.md5sum)
+            const QString& sum = fileManager.calculateMD5(zipData.name, false);
+            if (sum != zipData.md5sum)
             {
                 downloader.run();
+                status = downloader.getStatus();
             }
-        } else {
+            else
+            {
+                // send 50% signal here
+                for (int i=0; i < 50; i++)
+                {
+                    emit this->modelTickSignal();
+                }
+            }
+        }
+        else
+        {
             qWarning() << "File does not exist:" << zipData.name;
             downloader.run();
+            status = downloader.getStatus();
         }
-        fileManager.extractZip(zipData.name, QString::number(id)+".TRLE");
-        instructionManager.executeInstruction(id);
-        return true;
+        if (status == 0)
+        {
+            fileManager.extractZip(zipData.name, QString::number(id)+".TRLE");
+            instructionManager.executeInstruction(id);
+            return true;
+        }
     }
     return false;
 }

@@ -37,6 +37,7 @@ class Downloader : public QObject
     void run();
     bool setUpCamp(const QString& levelDir);
     void setUrl(QUrl url);
+    int getStatus();
     void setSaveFile(const QString& file);
     static size_t write_callback(
         void* contents,
@@ -52,14 +53,17 @@ class Downloader : public QObject
 
  signals:
     void networkWorkTickSignal();
+    void networkWorkErrorSignal(int status);
 
  private:
     void saveToFile(const QByteArray& data, const QString& filePath);
     QUrl url_m;
     QString file_m;
     QDir levelDir_m;
+    qint32 status_m = 0;
 
-    explicit Downloader(QObject* parent = nullptr) : QObject(parent)
+    explicit Downloader(QObject* parent = nullptr) : QObject(parent),
+        status_m(0)
     {
         curl_global_init(CURL_GLOBAL_DEFAULT);
     };

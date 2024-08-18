@@ -43,6 +43,7 @@ Controller::Controller(QObject *parent) : QObject(parent), ControllerThread(null
     connect(&Model::getInstance(), SIGNAL(modelTickSignal()), this, SLOT(passTickSignal()));
     connect(&FileManager::getInstance(), SIGNAL(fileWorkTickSignal()), this, SLOT(passTickSignal()));
     connect(&Downloader::getInstance(), SIGNAL(networkWorkTickSignal()), this, SLOT(passTickSignal()));
+    connect(&Downloader::getInstance(), SIGNAL(networkWorkErrorSignal(int)), this, SLOT(passDownloadError(int)));
 
     // The TombRaiderLinuxLauncher object have the connect and slot for last signal emit that displays
     // the result, we pass back what was return before like this
@@ -119,3 +120,7 @@ void Controller::passTickSignal()
     emit controllerTickSignal();
 }
 
+void Controller::passDownloadError(int status)
+{
+    emit controllerDownloadError(status);
+}

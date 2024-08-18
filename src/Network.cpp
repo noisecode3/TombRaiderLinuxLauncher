@@ -77,6 +77,11 @@ void Downloader::setSaveFile(const QString& file)
     file_m = file;
 }
 
+int Downloader::getStatus()
+{
+    return status_m;
+}
+
 void Downloader::saveToFile(const QByteArray& data, const QString& filePath)
 {
     QFile file(filePath);
@@ -132,13 +137,29 @@ void Downloader::run()
 
         if (res != CURLE_OK)
         {
+            status_m = 1;
             qDebug() << "curl_easy_perform() failed:" << curl_easy_strerror(res);
+            // we need to catch any of those that seem inportant here to the GUI
+            // and reset GUI state
+            // https://curl.se/libcurl/c/libcurl-errors.html
+            if(res == 6 || res == 7 || res == 28 || res == 35)
+            {
+                emit this->networkWorkErrorSignal(1);
+            }
+            else if(res == CURLE_PEER_FAILED_VERIFICATION)
+            {
+                emit this->networkWorkErrorSignal(2);
+            }
+            else
+            {
+                emit this->networkWorkErrorSignal(3);
+            }
         }
         else
         {
+            status_m = 0;
             qDebug() << "Downloaded successfully";
         }
-
         curl_easy_cleanup(curl);
     }
     fclose(file);
