@@ -494,36 +494,37 @@ bool FileManager::moveFilesToDirectory(
     return true;
 }
 
-bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory)
+bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory, int levelsUp)
 {
     const QString& sep = QDir::separator();
-    QDir dir(levelDir_m.absolutePath() + sep + levelDirectory);
+    QDir levelDirectoryFullPath(levelDir_m.absolutePath() + sep + levelDirectory);
 
-    // Kontrollera om katalogen finns
-    if (!dir.exists())
+    if (!levelDirectoryFullPath.exists())
     {
-        qWarning() << "Directory does not exist:" << dir.absolutePath();
+        qWarning() << "Directory does not exist:" << levelDirectoryFullPath.absolutePath();
         return false;
     }
 
-    // Hämta föräldrakatalogen
-    QDir parentDir = dir;
-    if (!parentDir.cdUp())
+    QDir levelDirectoryUpPath = levelDirectoryFullPath;
+
+    for (int i = 0; i < levelsUp; ++i)
     {
-        qWarning() << "Failed to access parent directory of:"
-            << dir.absolutePath();
-        return false;
+        if (!levelDirectoryUpPath.cdUp())
+        {
+            qWarning() << "Failed to access parent directory at level "
+                       << i + 1 << " from:" << levelDirectoryFullPath.absolutePath();
+            return false;
+        }
     }
 
-    // Lista alla filer och kataloger (exklusive '.' och '..')
     QFlags listFlags(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-    QFileInfoList fileList = dir.entryInfoList(listFlags);
+    QFileInfoList fileList = levelDirectoryFullPath.entryInfoList(listFlags);
 
     // Flytta alla filer och kataloger till föräldrakatalogen
     for (const QFileInfo& fileInfo : fileList)
     {
         QString srcPath = fileInfo.absoluteFilePath();
-        QString destPath = parentDir.absolutePath() + sep + fileInfo.fileName();
+        QString destPath = levelDirectoryUpPath.absolutePath() + sep + fileInfo.fileName();
 
         if (fileInfo.isDir())
         {
@@ -546,10 +547,9 @@ bool FileManager::moveFilesToParentDirectory(const QString& levelDirectory)
         }
     }
 
-    // Ta bort den ursprungliga (nu tomma) katalogen
-    if (!dir.rmdir("."))
+    if (!levelDirectoryFullPath.rmdir("."))
     {
-        qWarning() << "Failed to remove directory:" << dir.absolutePath();
+        qWarning() << "Failed to remove directory:" << levelDirectoryFullPath.absolutePath();
         return false;
     }
 

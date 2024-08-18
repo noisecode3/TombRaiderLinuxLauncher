@@ -102,10 +102,10 @@ if level_response.status_code == 200:
     else:
         TITLE = "missing"
 
-    author = soup.find('a', class_='linkl').get_text(strip=True) or ""
-    type_ = soup.find('td', string='file type:').find_next('td').get_text(strip=True) or "missing"
-    class_ = soup.find('td', string='class:').find_next('td').get_text(strip=True) or "missing"
-    releaseDate = soup.find('td', string='release date:').find_next('td').get_text(strip=True) or ""
+    AUTHOR = soup.find('a', class_='linkl').get_text(strip=True) or ""
+    TYPE = soup.find('td', string='file type:').find_next('td').get_text(strip=True) or "missing"
+    CLASS = soup.find('td', string='class:').find_next('td').get_text(strip=True) or "missing"
+    RELEASE_DATE = soup.find('td', string='release date:').find_next('td').get_text(strip=True) or ""
     difficulty_td = soup.find('td', string='difficulty:')
     if difficulty_td:
         next_td = difficulty_td.find_next('td')
@@ -126,9 +126,9 @@ if level_response.status_code == 200:
         DURATION = "missing"
 
     specific_tags = soup.find_all('td', class_='medGText', align='left', valign='top')
-    body = specific_tags[1] if len(specific_tags) >= 2 else "missing"
+    BODY = str(specific_tags[1]) if len(specific_tags) >= 2 else "missing"
 
-    zipFileSize = float(
+    ZIPFILE_SIZE = float(
         soup.find('td', string='file size:')
         .find_next('td')
         .get_text(strip=True)
@@ -147,16 +147,16 @@ if level_response.status_code == 200:
             # Check if the content type is a zip file
             if 'Content-Type' in head_response.headers and \
             head_response.headers['Content-Type'] == 'application/zip':
-                download_url = head_response.url
-                zipFileName = download_url.split('/')[-1]
+                DOWNLOAD_URL = head_response.url
+                ZIPFILE_NAME = DOWNLOAD_URL.split('/')[-1]
 
                 # Calculate the MD5 checksum without saving the file to disk
-                zipFileMd5 = calculate_md5(download_url, CERT)
+                ZIPFILE_MD5 = calculate_md5(DOWNLOAD_URL, CERT)
 
-                if zipFileMd5:
-                    print(f"Download URL: {download_url}")
-                    print(f"File Name: {zipFileName}")
-                    print(f"MD5 Checksum: {zipFileMd5}")
+                if ZIPFILE_MD5:
+                    print(f"Download URL: {DOWNLOAD_URL}")
+                    print(f"File Name: {ZIPFILE_NAME}")
+                    print(f"MD5 Checksum: {ZIPFILE_MD5}")
                 else:
                     logging.error("Failed to calculate MD5 checksum.")
             else:
@@ -194,27 +194,27 @@ if level_response.status_code == 200:
 
     onmouseover_links = soup.find_all(lambda tag: tag.name == 'a' and 'onmouseover' in tag.attrs)
     hrefs = [link['href'] for link in onmouseover_links]
-    screensLarge = hrefs
+    SCREENS_LARGE = hrefs
 
     image_tag = soup.find('img', class_='border')
-    screen = 'https://www.trle.net' + image_tag['src']
+    SCREEN = 'https://www.trle.net' + image_tag['src']
 
     data = {
         "title": TITLE,
-        "author": author,
-        "type": type_,
-        "class_": class_,
-        "releaseDate": releaseDate,
+        "author": AUTHOR,
+        "type": TYPE,
+        "class_": CLASS,
+        "releaseDate": RELEASE_DATE,
         "difficulty": DIFFICULTY,
         "duration": DURATION,
-        "screen": screen,
-        "screensLarge": screensLarge,
-        "zipFileSize": zipFileSize,
-        "zipFileName": zipFileName,
-        "zipFileMd5": zipFileMd5,
-        "body": str(body),
+        "screen": SCREEN,
+        "screensLarge": SCREENS_LARGE,
+        "zipFileSize": ZIPFILE_SIZE,
+        "zipFileName": ZIPFILE_NAME,
+        "zipFileMd5": ZIPFILE_MD5,
+        "body": BODY,
         "walkthrough": WALKTHROUGH,
-        "download_url": download_url,
+        "download_url": DOWNLOAD_URL,
     }
 
     with open('data.json', 'w') as json_file:

@@ -1,8 +1,12 @@
+"""
+Update database remove "NOT NULL" from difficulty, duration and fix a typo
+"""
 import sys
 import logging
 import sqlite3
 
 def update_table_schema_and_data(db_path):
+    """Update from old database to 1.0.0"""
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -50,14 +54,15 @@ def update_table_schema_and_data(db_path):
         # Commit the transaction
         conn.commit()
 
-    except Exception as e:
+    except Exception as query_error:
         # If there is any error, rollback the transaction
         conn.rollback()
-        print(f"An error occurred: {e}")
+        print(f"An error occurred: {query_error}")
 
     finally:
         # Close the connection
         conn.close()
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

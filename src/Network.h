@@ -33,6 +33,7 @@ class Downloader : public QObject
         static Downloader instance;
         return instance;
     };
+
     void run();
     bool setUpCamp(const QString& levelDir);
     void setUrl(QUrl url);
@@ -42,6 +43,12 @@ class Downloader : public QObject
         size_t size,
         size_t nmemb,
         void* userData);
+    static int progress_callback(
+        void* clientp,
+        curl_off_t dltotal,
+        curl_off_t dlnow,
+        curl_off_t ultotal,
+        curl_off_t ulnow);
 
  signals:
     void networkWorkTickSignal();
@@ -52,18 +59,11 @@ class Downloader : public QObject
     QString file_m;
     QDir levelDir_m;
 
-    qint64 oneTick = 0;
-    qint64 remainderTick = 0;
-    int timesSent = 0;
-
-    explicit Downloader(QObject *parent = nullptr):
-        QObject(parent),
-        oneTick(0),
-        remainderTick(0),
-        timesSent(0)
+    explicit Downloader(QObject* parent = nullptr) : QObject(parent)
     {
         curl_global_init(CURL_GLOBAL_DEFAULT);
     };
+
     ~Downloader()
     {
         curl_global_cleanup();

@@ -33,8 +33,15 @@ Model::Model(QObject *parent) : QObject(parent)
     instructionManager.addInstruction(11, [this](int id) {
         qDebug() << "Perform Operation C";
         const QString s = QString::number(id) + ".TRLE/TRBiohazard";
-        fileManager.moveFilesToParentDirectory(s);
+        fileManager.moveFilesToParentDirectory(s, 1);
     });
+    /*
+    instructionManager.addInstruction(12, [this](int id) {
+        qDebug() << "Perform Operation C";
+        const QString s = QString::number(id) + ".TRLE/Delca-KittenAdventureDemo/Engine";
+        fileManager.moveFilesToParentDirectory(s, 2);
+    });
+    */
 }
 
 Model::~Model()

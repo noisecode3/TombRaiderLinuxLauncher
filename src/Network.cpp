@@ -30,7 +30,6 @@ bool Downloader::setUpCamp(const QString& levelDir)
         levelDir_m.setPath(levelDir);
         return true;
     }
-
     return false;
 }
 
@@ -40,22 +39,32 @@ size_t Downloader::write_callback(
     size_t nmemb,
     void* userData)
 {
-    WriteData* data = static_cast<WriteData*>(userData);
-    Downloader* instance = data->downloader;
-    FILE* file = data->file;
+    WriteData* data = reinterpret_cast<WriteData*>(userData);
+    return fwrite(contents, size, nmemb, data->file);
+}
 
-    qint64 bars = (nmemb + instance->remainderTick) / instance->oneTick;
-    instance->remainderTick =
-            (nmemb + instance->remainderTick) % instance->oneTick;
-
-    while (bars > 0)
+int Downloader::progress_callback(
+    void* clientp,
+    curl_off_t dltotal,
+    curl_off_t dlnow,
+    curl_off_t ultotal,
+    curl_off_t ulnow)
+{
+    if (dltotal > 0)
     {
-        emit instance->networkWorkTickSignal();
-        instance->timesSent += 1;
-        bars -= 1;
-    }
+        double progress = static_cast<double>(dlnow)
+            / static_cast<double>(dltotal) * 50.0;
 
-    return fwrite(contents, size, nmemb, file);
+        // Emit signal only if progress has increased by at least 1%
+        static int lastEmittedProgress = 0;
+        if (static_cast<int>(progress) > lastEmittedProgress)
+        {
+            static Downloader& instance = Downloader::getInstance();
+            emit instance.networkWorkTickSignal();
+            lastEmittedProgress = static_cast<int>(progress);
+        }
+    }
+    return 0;
 }
 
 void Downloader::setUrl(QUrl url)
@@ -71,7 +80,6 @@ void Downloader::setSaveFile(const QString& file)
 void Downloader::saveToFile(const QByteArray& data, const QString& filePath)
 {
     QFile file(filePath);
-
     if (file.open(QIODevice::WriteOnly))
     {
         file.write(data);
@@ -89,54 +97,11 @@ void Downloader::run()
     if (url_m.isEmpty() || file_m.isEmpty() || levelDir_m.isEmpty())
         return;
 
-    int zipFileSize = 0;
-
     QString urlString = url_m.toString();
     QByteArray byteArray = urlString.toUtf8();
     const char* url_cstring = byteArray.constData();
 
     QString filePath = levelDir_m.absolutePath() + QDir::separator() + file_m;
-
-    CURL* curl = curl_easy_init();
-    if (curl)
-    {
-        // Set options to retrieve header only
-        curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
-        curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
-        curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
-
-        // Perform the request to get header information
-        CURLcode res = curl_easy_perform(curl);
-
-        if (res == CURLE_OK)
-        {
-            res = curl_easy_getinfo(
-                curl,
-                CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                &zipFileSize);
-            if (res == CURLE_OK && zipFileSize != -1)
-            {
-                // Use zipFileSize as needed before downloading
-            }
-            else
-            {
-                qDebug() << "Failed to retrieve file size from header";
-                // handle SSL error, no connection, restore to previous state
-                // with an error on the GUI
-                return;
-            }
-        }
-        else
-        {
-            qDebug() << "curl_easy_perform() failed:"
-                << curl_easy_strerror(res);
-            return;
-        }
-    }
-
-    oneTick = (zipFileSize / 100) * 2;
-    remainderTick = 0;
-    timesSent = 0;
 
     FILE* file = fopen(filePath.toUtf8().constData(), "wb");
     if (!file)
@@ -147,23 +112,27 @@ void Downloader::run()
 
     WriteData writeData = { this, file };
 
-    curl = curl_easy_init();
+    CURL* curl = curl_easy_init();
     if (curl)
     {
-        curl_easy_setopt(
-            curl,
-            CURLOPT_WRITEFUNCTION,
-            Downloader::write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeData);
         curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Downloader::write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeData);
+
+        // Follow redirects
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+        // Enable progress meter
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, Downloader::progress_callback);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, nullptr);
 
         // Perform the download
         CURLcode res = curl_easy_perform(curl);
 
         if (res != CURLE_OK)
         {
-            qDebug() << "curl_easy_perform() failed:"
-                << curl_easy_strerror(res);
+            qDebug() << "curl_easy_perform() failed:" << curl_easy_strerror(res);
         }
         else
         {
