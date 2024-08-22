@@ -74,11 +74,15 @@ class TombRaiderLinuxLauncher : public QMainWindow
     /**
      *
      */
-    void checkCommonFiles(bool status);
+    void downloadError(int status);
     /**
      *
      */
-    void downloadError(int status);
+    void askGame(int id);
+    /**
+     *
+     */
+    void generateList();
 
  private:
     /**
@@ -89,14 +93,6 @@ class TombRaiderLinuxLauncher : public QMainWindow
      * 
      */
     void readSavedSettings();
-    /**
-     * 
-     */
-    void generateList();
-    /**
-     *
-     */
-    int testallGames(int id);
 
     Controller& controller = Controller::getInstance();
     QSettings settings;

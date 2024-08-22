@@ -23,7 +23,6 @@
 #include <QtCore>
 #include <QByteArray>
 #include <QDataStream>
-#include <algorithm>
 
 bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir)
 {

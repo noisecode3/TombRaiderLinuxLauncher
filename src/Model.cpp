@@ -15,10 +15,11 @@
  */
 
 #include <QDebug>
+#include <assert.h>
 #include "Model.h"
 
 // Those lambda should be in another header file
-Model::Model(QObject *parent) : QObject(parent)
+Model::Model(QObject *parent) : QObject(parent), checkCommonFilesIndex_m(1)
 {
     instructionManager.addInstruction(4, [this](int id) {
         qDebug() << "Perform Operation A";
@@ -48,6 +49,12 @@ Model::~Model()
 {
 }
 
+void Model::setup(const QString& level, const QString& game)
+{
+    setDirectory(level, game);
+    checkCommonFiles();
+}
+
 bool Model::setDirectory(const QString& level, const QString& game)
 {
     if (fileManager.setUpCamp(level, game) &&
@@ -56,6 +63,22 @@ bool Model::setDirectory(const QString& level, const QString& game)
         return true;
     else
         return false;
+}
+
+void Model::checkCommonFiles()
+{
+    int index = checkCommonFilesIndex_m;
+    assert(index >= 1 && index <= 5);
+    for (int i = index; i <= 5; i++)
+    {
+        if (checkGameDirectory(i) == 2)
+        {
+            checkCommonFilesIndex_m = i+1;
+            emit askGameSignal(i);
+            return;
+        }
+    }
+    emit generateListSignal();
 }
 
 QString Model::getGameDirectory(int id)
@@ -127,7 +150,7 @@ bool Model::setLink(int id)
     return false;
 }
 
-bool Model::setUpOg(int id)
+void Model::setupGame(int id)
 {
     std::array<QVector<QString>, 2> list = data.getFileList(id, false);
     const size_t s = list[0].size();
@@ -137,7 +160,7 @@ bool Model::setUpOg(int id)
         qDebug()
             << "Corrupt list, there seems to bee"
             << " more or less checksums for the files\n";
-        return false;
+        assert(false);
     }
     const QString& sd = "/Original.TR" + QString::number(id) +"/";
     const QString& sg = getGameDirectory(id) + "/";
@@ -165,17 +188,16 @@ bool Model::setUpOg(int id)
         const QString&  des = sg.chopped(1);
         if (!fileManager.linkGameDir(src, des))
         {
-            return true;
+            checkCommonFiles();
+            return;
         }
     }
-    qWarning() << "Failed to rename directory:" << sg;
-    return false;
+    checkCommonFiles();
 }
 
 bool Model::getGame(int id)
 {
-    if (id < 0)
-        return setUpOg(-id);
+    assert(id > 0);
     if (id)
     {
         int status = 0;
@@ -226,4 +248,3 @@ const QString Model::getWalkthrough(int id)
 {
     return data.getWalkthrough(id);
 }
-

@@ -34,16 +34,20 @@ Controller::Controller(QObject *parent) : QObject(parent), ControllerThread(null
      */
 
     // Those start threaded work a signal hub
-    connect(this, SIGNAL(setupCampThreadSignal(const QString&, const QString&)),
-        this, SLOT(setupCampThread(const QString&, const QString&)));
+    connect(this, SIGNAL(checkCommonFilesThreadSignal()), this, SLOT(checkCommonFilesThread()));
+    connect(this, SIGNAL(setupThreadSignal(QString,QString)), this, SLOT(setupThread(QString,QString)));
     connect(this, SIGNAL(setupLevelThreadSignal(int)), this, SLOT(setupLevelThread(int)));
-
+    connect(this, SIGNAL(setupGameThreadSignal(int)), this, SLOT(setupGameThread(int)));
 
     // Those work like a signal hub for threaded work, like in between callback
     connect(&Model::getInstance(), SIGNAL(modelTickSignal()), this, SLOT(passTickSignal()));
     connect(&FileManager::getInstance(), SIGNAL(fileWorkTickSignal()), this, SLOT(passTickSignal()));
     connect(&Downloader::getInstance(), SIGNAL(networkWorkTickSignal()), this, SLOT(passTickSignal()));
+
     connect(&Downloader::getInstance(), SIGNAL(networkWorkErrorSignal(int)), this, SLOT(passDownloadError(int)));
+
+    connect(&Model::getInstance(), SIGNAL(askGameSignal(int)), this, SLOT(passAskGame(int)));
+    connect(&Model::getInstance(), SIGNAL(generateListSignal()), this, SLOT(passGenerateList()));
 
     // The TombRaiderLinuxLauncher object have the connect and slot for last signal emit that displays
     // the result, we pass back what was return before like this
@@ -63,21 +67,33 @@ int Controller::checkGameDirectory(int id)
     return model.checkGameDirectory(id);
 }
 
-
-void Controller::setupCamp(const QString& level, const QString& game)
+void Controller::checkCommonFiles()
 {
-    emit setupCampThreadSignal(level, game);
+    emit checkCommonFilesThreadSignal();
+}
+void Controller::checkCommonFilesThread()
+{
+    model.checkCommonFiles();
 }
 
-void Controller::setupCampThread(const QString& level, const QString& game)
+void Controller::setup(const QString& level, const QString& game)
 {
-    bool status = model.setDirectory(level, game);
-    emit setupCampDone(status);
+    emit setupThreadSignal(level, game);
 }
 
-bool Controller::setupOg(int id)
+void Controller::setupThread(const QString& level, const QString& game)
 {
-    return model.setUpOg(id);
+    model.setup(level, game);
+}
+
+void Controller::setupGame(int id)
+{
+    emit setupGameThreadSignal(id);
+}
+
+void Controller::setupGameThread(int id)
+{
+    model.setupGame(id);
 }
 
 void Controller::setupLevel(int id)
@@ -87,12 +103,12 @@ void Controller::setupLevel(int id)
 
 void Controller::setupLevelThread(int id)
 {
-    bool staus = model.getGame(id);
+    model.getGame(id);
 }
 
 void Controller::getList(QVector<ListItemData>& list)
 {
-    return model.getList(list);
+    model.getList(list);
 }
 
 const InfoData Controller::getInfo(int id)
@@ -123,4 +139,14 @@ void Controller::passTickSignal()
 void Controller::passDownloadError(int status)
 {
     emit controllerDownloadError(status);
+}
+
+void Controller::passAskGame(int id)
+{
+    emit controllerAskGame(id);
+}
+
+void Controller::passGenerateList()
+{
+    emit controllerGenerateList();
 }

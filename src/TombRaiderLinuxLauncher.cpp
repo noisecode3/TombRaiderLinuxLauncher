@@ -55,12 +55,16 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         this, SLOT(workTick()));
 
     // Thread work done signal connections
-    connect(&Controller::getInstance(), SIGNAL(setupCampDone(bool)),
-        this, SLOT(checkCommonFiles(bool)));
+    connect(&Controller::getInstance(), SIGNAL(controllerGenerateList()),
+        this, SLOT(generateList()));
 
     // Error signal connections
     connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
         this, SLOT(downloadError(int)));
+
+    // Ask if a game should be moved and get a symbolic link
+    connect(&Controller::getInstance(), SIGNAL(controllerAskGame(int)),
+        this, SLOT(askGame(int)));
 
     // Set init state
     ui->pushButtonLink->setEnabled(false);
@@ -75,58 +79,27 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         readSavedSettings();
 }
 
-
-int TombRaiderLinuxLauncher::testallGames(int id){
-    // this should be in model if it works
-    int dirStaus = controller.checkGameDirectory(id);
-    if (dirStaus)
-    {
-        if (dirStaus == 1)  // The path is a symbolic link.
-        {
-            // its in use
-            // pass for now
-        }
-        else if (dirStaus == 2)  // The path is not a symbolic link.
-        {
-            // this means we backup the game to levelPath
-            // IF that is whats inside
-
-            QMessageBox msgBox;
-            msgBox.setWindowTitle("Confirmation");
-            msgBox.setText(
-                "TombRaider " +
-                QString::number(id) +
-                " found, you want to proceed?");
-            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            msgBox.setDefaultButton(QMessageBox::No);
-            int result = msgBox.exec();
-            if (result == QMessageBox::Yes)
-            {
-                qDebug() << "User clicked Yes.";
-                controller.setupOg(id);
-            }
-            else
-            {
-                qDebug() << "User clicked No or closed the dialog.";
-            }
-        }
-        else if (dirStaus == 3)  // The path is not a directory.
-        {
-            // it has been replaced by a file from somewhere else or the user
-            // or is missing
-        }
-    }
-    return -1;
-}
-
-void TombRaiderLinuxLauncher::checkCommonFiles(bool status)
+void TombRaiderLinuxLauncher::askGame(int id)
 {
-    testallGames(1);
-    testallGames(2);
-    testallGames(3);
-    testallGames(4);
-    testallGames(5);
-    generateList();
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Confirmation");
+    msgBox.setText(
+        "TombRaider " +
+        QString::number(id) +
+        " found, you want to proceed?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    int result = msgBox.exec();
+    if (result == QMessageBox::Yes)
+    {
+        qDebug() << "User clicked Yes.";
+        controller.setupGame(id);
+    }
+    else
+    {
+        qDebug() << "User clicked No or closed the dialog.";
+        controller.checkCommonFiles();
+    }
 }
 
 void TombRaiderLinuxLauncher::generateList()
@@ -189,7 +162,7 @@ void TombRaiderLinuxLauncher::readSavedSettings()
     qDebug() << "Read game path value:" << gamePathValue;
     const QString& levelPathValue = settings.value("levelPath").toString();
     qDebug() << "Read level path value:" << levelPathValue;
-    controller.setupCamp(levelPathValue, gamePathValue);
+    controller.setup(levelPathValue, gamePathValue);
 }
 
 void TombRaiderLinuxLauncher::setup()
@@ -281,7 +254,6 @@ void TombRaiderLinuxLauncher::linkClicked()
 {
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
-    QString s = selectedItem->text();
     if (id)
     {
         if (!controller.link(id))
@@ -312,6 +284,7 @@ void TombRaiderLinuxLauncher::downloadClicked()
         controller.setupLevel(id);
     }
 }
+
 void TombRaiderLinuxLauncher::infoClicked()
 {
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
@@ -328,8 +301,9 @@ void TombRaiderLinuxLauncher::infoClicked()
         ui->infoListWidget->setDefaultDropAction(Qt::IgnoreAction);
         ui->infoListWidget->setSelectionMode(QAbstractItemView::NoSelection);
         ui->infoListWidget->clear();
-        for (const QIcon &icon : info.imageList)
+        for (int i = 0; i < info.imageList.size(); ++i)
         {
+            const QIcon &icon = info.imageList.at(i);
             QListWidgetItem *item = new QListWidgetItem(icon, "");
             ui->infoListWidget->addItem(item);
         }
@@ -422,4 +396,3 @@ TombRaiderLinuxLauncher::~TombRaiderLinuxLauncher()
 {
     delete ui;
 }
-
