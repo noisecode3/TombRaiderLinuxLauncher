@@ -20,6 +20,8 @@
 #include <QObject>
 #include <QMap>
 #include <QDebug>
+#include <QtCore>
+#include <assert.h>
 #include "Data.h"
 #include "FileManager.h"
 #include "Network.h"
@@ -62,11 +64,10 @@ class Model : public QObject
         static Model instance;
         return instance;
     };
-    //int checkAllGames(int id);
     void checkCommonFiles();
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
-    void getList(QVector<ListItemData>& list);
+    void getList(QVector<ListItemData>* list);
     int getItemState(int id);
     bool setLink(int id);
     QString getGameDirectory(int id);

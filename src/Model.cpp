@@ -14,8 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDebug>
-#include <assert.h>
 #include "Model.h"
 
 // Those lambda should be in another header file
@@ -75,10 +73,12 @@ void Model::checkCommonFiles()
         {
             checkCommonFilesIndex_m = i+1;
             emit askGameSignal(i);
+            QCoreApplication::processEvents();
             return;
         }
     }
     emit generateListSignal();
+    QCoreApplication::processEvents();
 }
 
 QString Model::getGameDirectory(int id)
@@ -110,9 +110,9 @@ int Model::checkGameDirectory(int id)
     return -1;
 }
 
-void Model::getList(QVector<ListItemData>& list)
+void Model::getList(QVector<ListItemData>* list)
 {
-    list = data.getListItems();
+    *list = data.getListItems();
 }
 
 int Model::getItemState(int id)
@@ -220,6 +220,7 @@ bool Model::getGame(int id)
                 for (int i=0; i < 50; i++)
                 {
                     emit this->modelTickSignal();
+                    QCoreApplication::processEvents();
                 }
             }
         }

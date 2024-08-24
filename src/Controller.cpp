@@ -17,63 +17,82 @@
 #include "Controller.h"
 #include <QDebug>
 
-Controller::Controller(QObject *parent) : QObject(parent), ControllerThread(nullptr)
+Controller::Controller(QObject *parent)
+    : QObject(parent), controllerThread(new QThread(this))
 {
-    ControllerThread = new QThread();
-    this->moveToThread(ControllerThread);
-    connect(ControllerThread, &QThread::finished, ControllerThread, &QThread::deleteLater);
-    ControllerThread->start();
-    /* this should make emits to signals from the controller and to the controller happen
-     * on another thread event loop so TombRaiderLinuxLauncher (view object) should have a slot for
-     * getting the results, update the GUI state, if the controller returns something it's just the
-     * state of some logic right before it calls the thread signal.
-     * Every method here should emit a signal to this object here again and use only quick logic
-     * in order to get back out again and never hold up the GUI thread, never. Even if someone have like
-     * the slowest hard drives in the world, so the game couldn't even run probably it will not wait for
-     * it and keep updating the GUI. This is the most safe and correct way to do this I think.
-     */
-
-    // Those start threaded work a signal hub
-    connect(this, SIGNAL(checkCommonFilesThreadSignal()), this, SLOT(checkCommonFilesThread()));
-    connect(this, SIGNAL(setupThreadSignal(QString,QString)), this, SLOT(setupThread(QString,QString)));
-    connect(this, SIGNAL(setupLevelThreadSignal(int)), this, SLOT(setupLevelThread(int)));
-    connect(this, SIGNAL(setupGameThreadSignal(int)), this, SLOT(setupGameThread(int)));
-
-    // Those work like a signal hub for threaded work, like in between callback
-    connect(&Model::getInstance(), SIGNAL(modelTickSignal()), this, SLOT(passTickSignal()));
-    connect(&FileManager::getInstance(), SIGNAL(fileWorkTickSignal()), this, SLOT(passTickSignal()));
-    connect(&Downloader::getInstance(), SIGNAL(networkWorkTickSignal()), this, SLOT(passTickSignal()));
-
-    connect(&Downloader::getInstance(), SIGNAL(networkWorkErrorSignal(int)), this, SLOT(passDownloadError(int)));
-
-    connect(&Model::getInstance(), SIGNAL(askGameSignal(int)), this, SLOT(passAskGame(int)));
-    connect(&Model::getInstance(), SIGNAL(generateListSignal()), this, SLOT(passGenerateList()));
-
-    // The TombRaiderLinuxLauncher object have the connect and slot for last signal emit that displays
-    // the result, we pass back what was return before like this
-    // connect(&Controller::getInstance(), SIGNAL(setupCampDone(bool)), this, SLOT(checkCommonFiles(bool)));
+    initializeThread();
 }
 
 Controller::~Controller()
 {
-    ControllerThread->quit();
-    ControllerThread->wait();
-    delete ControllerThread;
-    ControllerThread = nullptr;
+    controllerThread->quit();
+    controllerThread->wait();
 }
 
-int Controller::checkGameDirectory(int id)
+void Controller::initializeThread()
 {
-    return model.checkGameDirectory(id);
+    this->moveToThread(controllerThread.data());
+    connect(controllerThread.data(), &QThread::finished,
+            controllerThread.data(), &QThread::deleteLater);
+    controllerThread->start();
+
+    //  Using the controller thread to start model work
+    connect(this, &Controller::checkCommonFilesThreadSignal,
+            this, [this]()
+    {
+        model.checkCommonFiles();
+    });
+
+    connect(this, &Controller::setupThreadSignal,
+            this, [this](const QString& level, const QString& game)
+    {
+        model.setup(level, game);
+    });
+
+    connect(this, &Controller::setupLevelThreadSignal,
+            this, [this](int id) {
+        model.getGame(id);
+    });
+
+    connect(this, &Controller::setupGameThreadSignal,
+            this, [this](int id)
+    {
+        model.setupGame(id);
+    });
+
+    //  Comming back from model or other model objects
+    auto tickSignal = [this](){ emit controllerTickSignal(); };
+    connect(&model, &Model::modelTickSignal,
+            this, tickSignal, Qt::QueuedConnection);
+
+    connect(&fileManager, &FileManager::fileWorkTickSignal,
+            this, tickSignal, Qt::QueuedConnection);
+
+    connect(&downloader, &Downloader::networkWorkTickSignal,
+            this, tickSignal, Qt::QueuedConnection);
+
+    connect(&downloader, &Downloader::networkWorkErrorSignal,
+            this, [this](int status)
+    {
+        emit controllerDownloadError(status);
+    }, Qt::QueuedConnection);
+
+    connect(&model, &Model::askGameSignal,
+            this, [this](int id)
+    {
+        emit controllerAskGame(id);
+    }, Qt::QueuedConnection);
+
+    connect(&model, &Model::generateListSignal,
+            this, [this]()
+    {
+        emit controllerGenerateList();
+    }, Qt::QueuedConnection);
 }
 
 void Controller::checkCommonFiles()
 {
     emit checkCommonFilesThreadSignal();
-}
-void Controller::checkCommonFilesThread()
-{
-    model.checkCommonFiles();
 }
 
 void Controller::setup(const QString& level, const QString& game)
@@ -81,19 +100,9 @@ void Controller::setup(const QString& level, const QString& game)
     emit setupThreadSignal(level, game);
 }
 
-void Controller::setupThread(const QString& level, const QString& game)
-{
-    model.setup(level, game);
-}
-
 void Controller::setupGame(int id)
 {
     emit setupGameThreadSignal(id);
-}
-
-void Controller::setupGameThread(int id)
-{
-    model.setupGame(id);
 }
 
 void Controller::setupLevel(int id)
@@ -101,12 +110,13 @@ void Controller::setupLevel(int id)
     emit setupLevelThreadSignal(id);
 }
 
-void Controller::setupLevelThread(int id)
+int Controller::checkGameDirectory(int id)
 {
-    model.getGame(id);
+    return model.checkGameDirectory(id);
 }
 
-void Controller::getList(QVector<ListItemData>& list)
+// GUI Thread
+void Controller::getList(QVector<ListItemData>* list)
 {
     model.getList(list);
 }
@@ -129,24 +139,4 @@ bool Controller::link(int id)
 int Controller::getItemState(int id)
 {
     return model.getItemState(id);
-}
-
-void Controller::passTickSignal()
-{
-    emit controllerTickSignal();
-}
-
-void Controller::passDownloadError(int status)
-{
-    emit controllerDownloadError(status);
-}
-
-void Controller::passAskGame(int id)
-{
-    emit controllerAskGame(id);
-}
-
-void Controller::passGenerateList()
-{
-    emit controllerGenerateList();
 }

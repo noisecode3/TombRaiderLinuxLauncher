@@ -6,6 +6,7 @@ compile_commands.json
 TombRaiderLinuxLauncher
 TombRaiderLinuxLauncher_autogen
 cmake_install.cmake
+install_manifest.txt
 Makefile
 build-Debug
 build

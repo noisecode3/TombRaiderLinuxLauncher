@@ -21,6 +21,7 @@
 #include <QUrl>
 #include <QFile>
 #include <QDir>
+#include <QtCore>
 #include <QDebug>
 #include <curl/curl.h>
 

@@ -29,7 +29,6 @@
 
 #include "ui_TombRaiderLinuxLauncher.h"
 
-
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     :QMainWindow(parent),
     ui(new Ui::TombRaiderLinuxLauncher)
@@ -144,7 +143,7 @@ void TombRaiderLinuxLauncher::generateList()
     }
 
     QVector<ListItemData> list;
-    controller.getList(list);
+    controller.getList(&list);
     const size_t s = list.size();
     for (int i = 0; i < s; i++)
     {

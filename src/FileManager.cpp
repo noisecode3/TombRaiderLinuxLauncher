@@ -150,6 +150,7 @@ bool FileManager::extractZip(
                             j <= currentPercent; j++)
             {
                 emit this->fileWorkTickSignal();
+                QCoreApplication::processEvents();
             }
             lastPrintedPercent = currentPercent;
         }
@@ -159,6 +160,7 @@ bool FileManager::extractZip(
     for (unsigned int j = lastPrintedPercent + 1; j <= gotoPercent; j++)
     {
         emit this->fileWorkTickSignal();
+        QCoreApplication::processEvents();
     }
 
     // Clean up

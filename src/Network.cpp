@@ -61,6 +61,7 @@ int Downloader::progress_callback(
         {
             static Downloader& instance = Downloader::getInstance();
             emit instance.networkWorkTickSignal();
+            QCoreApplication::processEvents();
             lastEmittedProgress = static_cast<int>(progress);
         }
     }
@@ -145,14 +146,17 @@ void Downloader::run()
             if(res == 6 || res == 7 || res == 28 || res == 35)
             {
                 emit this->networkWorkErrorSignal(1);
+                QCoreApplication::processEvents();
             }
             else if(res == CURLE_PEER_FAILED_VERIFICATION)
             {
                 emit this->networkWorkErrorSignal(2);
+                QCoreApplication::processEvents();
             }
             else
             {
                 emit this->networkWorkErrorSignal(3);
+                QCoreApplication::processEvents();
             }
         }
         else

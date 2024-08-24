@@ -27,53 +27,48 @@
 class Controller : public QObject
 {
     Q_OBJECT
+
  public:
     static Controller& getInstance()
     {
         static Controller instance;
         return instance;
     }
+
+    int checkGameDirectory(int id);
+    void checkCommonFiles();
     void setup(const QString& level, const QString& game);
     void setupGame(int id);
     void setupLevel(int id);
-    void getList(QVector<ListItemData>& list);
-    bool link(int id);
+
+    void getList(QVector<ListItemData>* list);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
+    bool link(int id);
     int getItemState(int id);
-    int checkGameDirectory(int id);
-    void checkCommonFiles();
-
- public slots:
-    // Passed from Model to Controller between threaded work
-    void passAskGame(int id);
-    void passDownloadError(int status);
-    void passGenerateList();
-    void passTickSignal();
-    // Start thread work from GUI and pass it to Model
-    void checkCommonFilesThread();
-    void setupThread(const QString& level, const QString& game);
-    void setupGameThread(int id);
-    void setupLevelThread(int id);
 
  signals:
-    // Signals the GUI from in between thread workd
     void controllerAskGame(int id);
-    void controllerGenerateList(); // setup done
+    void controllerGenerateList();
     void controllerTickSignal();
     void controllerDownloadError(int status);
-    // Singals Thread start
+
     void checkCommonFilesThreadSignal();
     void setupThreadSignal(const QString& level, const QString& game);
     void setupGameThreadSignal(int id);
     void setupLevelThreadSignal(int id);
 
  private:
-    Model& model = Model::getInstance();
-
     explicit Controller(QObject *parent = nullptr);
+    void initializeThread();
     ~Controller();
-    QThread* ControllerThread;
+
+    Data& data = Data::getInstance();
+    FileManager& fileManager = FileManager::getInstance();
+    Model& model = Model::getInstance();
+    Downloader& downloader = Downloader::getInstance();
+    QScopedPointer<QThread> controllerThread;
+
     Q_DISABLE_COPY(Controller)
 };
 
