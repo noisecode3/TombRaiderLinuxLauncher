@@ -93,6 +93,10 @@ class TombRaiderLinuxLauncher : public QMainWindow
      * 
      */
     void readSavedSettings();
+    /**
+     * 
+     */
+    void sortListItemsByTitle(QVector<ListItemData>* list);
 
     Controller& controller = Controller::getInstance();
     QSettings settings;

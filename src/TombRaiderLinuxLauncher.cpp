@@ -14,19 +14,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+#include "TombRaiderLinuxLauncher.h"
 #include <QMessageBox>
 #include <QScrollArea>
 #include <QVBoxLayout>
-#include <QStandardPaths>
-#include <QDirIterator>
-#include <QDir>
-#include <QFileInfo>
-#include <QFile>
-#include <QCryptographicHash>
 #include <QStringList>
 #include <QDebug>
-#include "TombRaiderLinuxLauncher.h"
 
+#include <QVector>
+#include <QString>
+#include <algorithm>
 #include "ui_TombRaiderLinuxLauncher.h"
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
@@ -69,8 +67,67 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     ui->pushButtonLink->setEnabled(false);
     ui->pushButtonInfo->setEnabled(false);
     ui->pushButtonDownload->setEnabled(false);
+    QWidget* filter_p = ui->filter;
+    QPushButton* filterButton_p = ui->filterButton;
+    filter_p->setVisible(false);
 
+    connect(ui->filterButton, &QPushButton::clicked,
+        [filter_p, filterButton_p]()
+        {
+            bool isVisible = !filter_p->isVisible();
+            filter_p->setVisible(isVisible);
+
+            QIcon arrowDownIcon(":/icons/down-arrow.svg");
+            QIcon arrowUpIcon(":/icons/up-arrow.svg");
+
+            if (isVisible)
+            {
+                filterButton_p->setIcon(arrowUpIcon);
+            }
+            else
+            {
+                filterButton_p->setIcon(arrowDownIcon);
+            }
+            filterButton_p->setIconSize(QSize(16, 16));
+        });
+
+    // Get the system palette
+    QPalette systemPalette = ui->filterButton->palette();
+
+    // Get system colors for different roles
+    QColor normalColor = systemPalette.color(QPalette::Button);
+    QColor hoverColor = systemPalette.color(QPalette::Highlight);
+    QColor textColor = systemPalette.color(QPalette::ButtonText);
+    QColor borderColor = systemPalette.color(QPalette::Mid);
+
+    // Convert colors to strings
+    QString normalColorStr = normalColor.name();
+    QString hoverColorStr = hoverColor.name();
+    QString textColorStr = textColor.name();
+    QString borderColorStr = borderColor.name();
+
+    // Setup button style
+    ui->filterButton->setStyleSheet(
+        QString(
+            "QPushButton {"
+            "    background-color: %1;"
+            "    color: %2;"
+            "    border: 1px solid %4;"
+            "    padding: 10px;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: %3;"
+            "}")
+        .arg(normalColorStr, textColorStr, hoverColorStr, borderColorStr));
+
+
+    QIcon arrowDownIcon(":/icons/down-arrow.svg");
+    QIcon arrowUpIcon(":/icons/up-arrow.svg");
+
+    filterButton_p->setIcon(arrowDownIcon);
+    filterButton_p->setIconSize(QSize(16, 16));
     // Read settings
+
     QString value = settings.value("setup").toString();
     if (value != "yes")
         setup();
@@ -104,7 +161,7 @@ void TombRaiderLinuxLauncher::askGame(int id)
 void TombRaiderLinuxLauncher::generateList()
 {
     const QString& directoryPath = settings.value("levelPath").toString();
-    const QString& pictures = ":/pictures/pictures/";
+    const QString& pictures = ":/pictures/";
 
     QDir info(directoryPath);
     QFileInfoList entryInfoList = info.entryInfoList();
@@ -144,6 +201,7 @@ void TombRaiderLinuxLauncher::generateList()
 
     QVector<ListItemData> list;
     controller.getList(&list);
+    sortListItemsByTitle(&list);
     const size_t s = list.size();
     for (int i = 0; i < s; i++)
     {
@@ -153,6 +211,25 @@ void TombRaiderLinuxLauncher::generateList()
         wi->setData(Qt::UserRole, QVariant(i+1));
         ui->listWidgetModds->addItem(wi);
     }
+}
+/*
+struct ListItemData {
+    QString title;
+    QString author;
+    QString type;
+    QString classIn;
+    QString releaseDate;
+    QString difficulty;
+    QString duration;
+};
+*/
+void TombRaiderLinuxLauncher::sortListItemsByTitle(QVector<ListItemData>* list)
+{
+    std::sort(list->begin(), list->end(),
+        [](const ListItemData& a, const ListItemData& b)
+    {
+        return a.title.toLower() < b.title.toLower();
+    });
 }
 
 void TombRaiderLinuxLauncher::readSavedSettings()
@@ -335,6 +412,8 @@ void TombRaiderLinuxLauncher::walkthroughClicked()
 
 void TombRaiderLinuxLauncher::backClicked()
 {
+    ui->infoWebEngineView->setHtml("");
+    ui->walkthroughWebEngineView->setHtml("");
     if (ui->stackedWidget->currentWidget() ==
         ui->stackedWidget->findChild<QWidget*>("info"))
     {

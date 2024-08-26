@@ -1,14 +1,16 @@
 <RCC>
-    <qresource prefix="/pictures">
-        <file>pictures/Lara.jpg</file>
-        <file>pictures/Lara2.jpg</file>
-        <file>pictures/Lara3.jpg</file>
-        <file>pictures/Tomb_Raider_I.jpg</file>
-        <file>pictures/Tomb_Raider_II.jpg</file>
-        <file>pictures/Tomb_Raider_III.jpg</file>
-        <file>pictures/Tomb_Raider_IIII.jpg</file>
-        <file>pictures/Tomb_Raider_IIIII.jpg</file>
-        <file>pictures/Tomb_Raider_III_LA.jpg</file>
-        <file>pictures/Tomb_Raider_III_unkown.jpg</file>
-    </qresource>
+  <qresource>
+    <file>icons/down-arrow.svg</file>
+    <file>icons/up-arrow.svg</file>
+    <file>pictures/Lara.jpg</file>
+    <file>pictures/Lara2.jpg</file>
+    <file>pictures/Lara3.jpg</file>
+    <file>pictures/Tomb_Raider_I.jpg</file>
+    <file>pictures/Tomb_Raider_II.jpg</file>
+    <file>pictures/Tomb_Raider_III.jpg</file>
+    <file>pictures/Tomb_Raider_IIII.jpg</file>
+    <file>pictures/Tomb_Raider_IIIII.jpg</file>
+    <file>pictures/Tomb_Raider_III_LA.jpg</file>
+    <file>pictures/Tomb_Raider_III_unkown.jpg</file>
+  </qresource>
 </RCC>

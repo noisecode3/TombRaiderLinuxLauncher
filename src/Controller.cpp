@@ -110,12 +110,12 @@ void Controller::setupLevel(int id)
     emit setupLevelThreadSignal(id);
 }
 
+// GUI Threads
 int Controller::checkGameDirectory(int id)
 {
     return model.checkGameDirectory(id);
 }
 
-// GUI Thread
 void Controller::getList(QVector<ListItemData>* list)
 {
     model.getList(list);
