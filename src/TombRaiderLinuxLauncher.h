@@ -19,6 +19,17 @@
 
 #include <QMainWindow>
 #include <QSettings>
+#include <QMessageBox>
+#include <QScrollArea>
+#include <QVBoxLayout>
+#include <QStringList>
+#include <QListWidgetItem>
+#include <QSet>
+#include <QDebug>
+#include <QVector>
+#include <QString>
+#include <algorithm>
+
 #include "Controller.h"
 
 QT_BEGIN_NAMESPACE
@@ -83,6 +94,13 @@ class TombRaiderLinuxLauncher : public QMainWindow
      *
      */
     void generateList();
+    void sortByAuthor();
+    void sortByTitle();
+    void sortByDifficulty();
+    void sortByDuration();
+    void sortByClass();
+    void sortByType();
+    void sortByReleaseDate();
 
  private:
     /**
@@ -96,8 +114,11 @@ class TombRaiderLinuxLauncher : public QMainWindow
     /**
      * 
      */
-    void sortListItemsByTitle(QVector<ListItemData>* list);
+    void sortItems(std::function<bool(QListWidgetItem*, QListWidgetItem*)> compare);
 
+    
+    QSet<QListWidgetItem*> originalGamesSet_m;
+    QList<QListWidgetItem*> originalGamesList_m;
     Controller& controller = Controller::getInstance();
     QSettings settings;
     Ui::TombRaiderLinuxLauncher *ui;

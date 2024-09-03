@@ -72,11 +72,11 @@ struct ListItemData
     ListItemData(
         QString title,
         QString author,
-        QString type,
-        QString classIn,
+        qint64 type,
+        qint64 classIn,
         QString releaseDate,
-        QString difficulty,
-        QString duration,
+        qint64 difficulty,
+        qint64 duration,
         QByteArray imageData):
         title(title),
         author(author),
@@ -101,11 +101,11 @@ struct ListItemData
     };
     QString title;
     QString author;
-    QString type;
-    QString class_;
+    qint64  type;
+    qint64  class_;
     QString releaseDate;
-    QString difficulty;
-    QString duration;
+    qint64  difficulty;
+    qint64  duration;
     QIcon   picture;
 };
 

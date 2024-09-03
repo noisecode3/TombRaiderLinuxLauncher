@@ -63,11 +63,11 @@ QVector<ListItemData> Data::getListItems()
                 items.append(ListItemData(
                     query.value("Info.title").toString(),
                     query.value("Info.author").toString(),
+                    query.value("Info.type").toInt(),
+                    query.value("Info.class").toInt(),
                     query.value("Info.release").toString(),
-                    query.value("Info.difficulty").toString(),
-                    query.value("Info.duration").toString(),
-                    query.value("Info.type").toString(),
-                    query.value("Info.class").toString(),
+                    query.value("Info.difficulty").toInt(),
+                    query.value("Info.duration").toInt(),
                     query.value("Picture.data").toByteArray()));
             }
         }

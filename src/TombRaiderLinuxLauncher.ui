@@ -547,7 +547,7 @@
                       <number>0</number>
                      </property>
                      <item>
-                      <widget class="QCheckBox" name="OriginalFirstCheckBox">
+                      <widget class="QCheckBox" name="checkBoxOriginalFirst">
                        <property name="font">
                         <font>
                          <pointsize>12</pointsize>
@@ -562,31 +562,19 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QRadioButton" name="DurationRadioButton">
+                      <widget class="QRadioButton" name="radioButtonAuthor">
                        <property name="font">
                         <font>
                          <pointsize>12</pointsize>
                         </font>
                        </property>
                        <property name="text">
-                        <string>Duration</string>
+                        <string>Author</string>
                        </property>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QRadioButton" name="ClassCheckBox">
-                       <property name="font">
-                        <font>
-                         <pointsize>12</pointsize>
-                        </font>
-                       </property>
-                       <property name="text">
-                        <string>Class</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QRadioButton" name="LevelNameRadioButton">
+                      <widget class="QRadioButton" name="radioButtonLevelName">
                        <property name="font">
                         <font>
                          <pointsize>12</pointsize>
@@ -601,7 +589,7 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QRadioButton" name="DifficultyRadioButton">
+                      <widget class="QRadioButton" name="radioButtonDifficulty">
                        <property name="font">
                         <font>
                          <pointsize>12</pointsize>
@@ -613,19 +601,31 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QRadioButton" name="AuthorRadioButton">
+                      <widget class="QRadioButton" name="radioButtonDuration">
                        <property name="font">
                         <font>
                          <pointsize>12</pointsize>
                         </font>
                        </property>
                        <property name="text">
-                        <string>Author</string>
+                        <string>Duration</string>
                        </property>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QRadioButton" name="TypeRadioButton">
+                      <widget class="QRadioButton" name="radioButtonClass">
+                       <property name="font">
+                        <font>
+                         <pointsize>12</pointsize>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Class</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QRadioButton" name="radioButtonType">
                        <property name="font">
                         <font>
                          <pointsize>12</pointsize>
@@ -633,6 +633,18 @@
                        </property>
                        <property name="text">
                         <string>Type</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QRadioButton" name="radioButtonReleaseDate">
+                       <property name="font">
+                        <font>
+                         <pointsize>12</pointsize>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Release Date</string>
                        </property>
                       </widget>
                      </item>
