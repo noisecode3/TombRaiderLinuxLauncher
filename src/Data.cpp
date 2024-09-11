@@ -46,11 +46,13 @@ QVector<ListItemData> Data::getListItems()
     for (int i=0; i < rowCount; i++)
     {
         QSqlQuery query(db);
-        query.prepare("SELECT Level.*, Info.*, Picture.* "
+        query.prepare("SELECT Level.*, Info.*, Picture.*, Author.* "
                       "FROM Level "
                       "JOIN Info ON Level.infoID = Info.InfoID "
                       "JOIN Screens ON Level.LevelID = Screens.levelID "
                       "JOIN Picture ON Screens.pictureID = Picture.PictureID "
+                      "JOIN AuthorList ON Level.LevelID = AuthorList.levelID "
+                      "JOIN Author ON AuthorList.authorID = Author.AuthorID "
                       "WHERE Level.LevelID = :id "
                       "GROUP BY Level.LevelID "
                       "ORDER BY MIN(Picture.PictureID) ASC");
@@ -62,7 +64,7 @@ QVector<ListItemData> Data::getListItems()
             {
                 items.append(ListItemData(
                     query.value("Info.title").toString(),
-                    query.value("Info.author").toString(),
+                    query.value("Author.value").toString(),
                     query.value("Info.type").toInt(),
                     query.value("Info.class").toInt(),
                     query.value("Info.release").toString(),
@@ -156,9 +158,10 @@ int Data::getType(const int id)
 ZipData Data::getDownload(const int id)
 {
     QSqlQuery query(db);
-    query.prepare("SELECT Zip.name, Zip.size, Zip.md5sum, Zip.url "
+    query.prepare("SELECT Zip.* "
             "FROM Level "
-            "JOIN Zip ON Level.zipID = Zip.ZipID "
+            "JOIN ZipList ON Level.LevelID = ZipList.levelID "
+            "JOIN Zip ON ZipList.zipID = Zip.ZipID "
             "WHERE Level.LevelID = :id");
     query.bindValue(":id", id);
 
@@ -170,7 +173,9 @@ ZipData Data::getDownload(const int id)
                     query.value("Zip.name").toString(),
                     query.value("Zip.size").toFloat(),
                     query.value("Zip.md5sum").toString(),
-                    query.value("Zip.url").toString());
+                    query.value("Zip.url").toString(),
+                    query.value("Zip.version").toInt(),
+                    query.value("Zip.release").toString());
         }
     }
     else

@@ -49,15 +49,25 @@ struct ZipData
      * @details
      */
     ZipData() {}
-    ZipData(QString zipName, float zipSize, QString md5sum, QString url):
+    ZipData(
+        QString zipName,
+        float zipSize,
+        QString md5sum,
+        QString url,
+        int version,
+        QString release) :
         name(zipName),
         megabyteSize(zipSize),
         md5sum(md5sum),
-        url(url) {}
+        url(url),
+        version(version),
+        release(release) {}
     QString name;
     float megabyteSize;
     QString md5sum;
     QString url;
+    int version;
+    QString release;
 };
 
 struct ListItemData
@@ -87,7 +97,7 @@ struct ListItemData
         duration(duration)
     {
         QPixmap pixmap;
-        pixmap.loadFromData(imageData, "JPG");
+        pixmap.loadFromData(imageData, "WEBP");
         picture.addPixmap(pixmap);
         // Scale the pixmap while maintaining aspect ratio
         QSize newSize = pixmap.size().scaled(640, 480, Qt::KeepAspectRatio);
@@ -124,7 +134,7 @@ struct InfoData
         {
             QPixmap pixmap;
             QIcon final;
-            pixmap.loadFromData(image, "JPG");
+            pixmap.loadFromData(image, "WEBP");
             final.addPixmap(pixmap);
             this->imageList.push_back(final);
         }
