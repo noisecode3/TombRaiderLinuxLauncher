@@ -4,9 +4,9 @@ I will list the games in the database here by id number.
 You can access the game files here ~/.local/share/TombRaiderLinuxLauncher/ID.TRLE
 where ID is the number listed here.
 If you use you own database you can update it
-with updateDB_1.0.0.py then updateDB_1.1.0.py.
-I can implement in app json scraping from trcustoms.org to get new levels
-It has a nice json api with minimal compact data for info and nice
+with updateDB_1.0.0.py then updateDB_1.1.0.py then to updateDB_1.1.1.py.
+But make backup before. I can implement in app json scraping from trcustoms.org
+to get new levels. It has a nice json api with minimal compact data for info and nice
 picture urls with md5sums. There can be and index database that
 get new level id numbers from trcustoms.org or trle.net with very minimal traffic.
 
