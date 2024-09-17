@@ -302,11 +302,18 @@ def print_trle_page(soup, offset):
                     # Extract lid number with title
                     lid_number = link['href'].split('lid=')[-1]
                     text = cell.get_text(strip=True)
-                    cell_data.append(f'{lid_number} {text}'.ljust(column_widths[len(cell_data)]))
+                    combined_text = f'{lid_number} {text}'
+                    # Get the appropriate column width
+                    width = column_widths[len(cell_data)]
+                    # Truncate if the combined text exceeds the width
+                    truncated_text = combined_text[:width].ljust(width)
+                    cell_data.append(truncated_text)
                 else:
                     # Extract the cell text and append it with even spacing
                     text = cell.get_text(strip=True)
-                    cell_data.append(text.ljust(column_widths[len(cell_data)]))
+                    width = column_widths[len(cell_data)]
+                    truncated_text = text[:width].ljust(width)
+                    cell_data.append(truncated_text)
 
         print("".join(cell_data))
 
@@ -335,8 +342,42 @@ def get_trle_page(offset):
     return response.text
 
 
-def print_trcustoms_page(json):
-    print(json)# ye I know I was lazy but it looks good as it is, somewhere in there is a joke...
+def print_trcustoms_page(data):
+    page = data['current_page']
+    print(f"page number:{page}")
+
+    #items = data['items_on_page']
+    results = data['results']
+
+    for item in results:
+
+        cell_genres = []
+        for genre in item['genres']:
+            cell_genres.append(genre['name'])
+
+        cell_tags = []
+        for tag in item['tags']:
+            cell_tags.append(tag['name'])
+
+        cell_authors = []
+        for author in item['authors']:
+            cell_authors.append(author['username'])
+
+        last_update = item['last_updated']
+        created = item['created']
+        picture_url = item['cover']['url']
+        picture_md5sum = item['cover']['md5sum']
+        print(f"id: {item['id']} tile: {item['name']}")
+        print(f"duration: {item['duration']['name']} difficulty: {item['difficulty']['name']}")
+        print(f"type: {item['engine']['name']}")
+        print(f"genres: {cell_genres}")
+        print(f"tags: {cell_tags}")
+        print(f"authors: {cell_authors}")
+        print(f"last_update: {last_update}")
+        print(f"created: {created}")
+        print(f"picture_url: {picture_url}")
+        print(f"picture_md5sum: {picture_md5sum}")
+
 
 
 def get_trcustoms_page(page):
@@ -350,7 +391,10 @@ def get_trcustoms_page(page):
     if response.status_code != 200:
         logging.error('Failed to retrieve iframe content. Status code: %s', response.status_code)
         sys.exit(1)
-    return response.text
+    if response.headers.get('Content-Type') == 'application/json':
+        return response.json()
+    logging.error("Response is not in JSON format")
+    sys.exit(1)
 
 
 def test_trle():
