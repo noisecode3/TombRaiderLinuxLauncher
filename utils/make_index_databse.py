@@ -14,18 +14,18 @@ have a local synced list of trles.
 It should be a 400MB database with all levels
 """
 
-#import re
+import re
 import sys
 import os
-#import json
-#import hashlib
 import sqlite3
 import logging
 import socket
-from urllib.parse import urlencode
+from urllib.parse import urlparse, urlencode, parse_qs
 import requests
 from bs4 import BeautifulSoup
 #from tqdm import tqdm
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -100,6 +100,23 @@ def make_index_database():
     cursor = connection.cursor()
 
     cursor.execute('''
+    CREATE TABLE Version (
+        id INTEGER PRIMARY KEY CHECK (id = 1), -- The primary key must always be 1
+        value TEXT -- Your desired columns
+    )''')
+
+    cursor.execute('''INSERT INTO Version (id, value) VALUES (1, '0.0.1')''')
+
+    cursor.execute('''
+    CREATE TRIGGER limit_singleton
+    BEFORE INSERT ON Version
+    WHEN (SELECT COUNT(*) FROM Version) >= 1
+    BEGIN
+        SELECT RAISE(FAIL, 'Only one record is allowed.');
+    END;''')
+
+
+    cursor.execute('''
     CREATE TABLE Type (
         InfoTypeID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         value TEXT NOT NULL UNIQUE
@@ -128,13 +145,15 @@ def make_index_database():
     cursor.execute('''
     CREATE TABLE TrcustomsKey (
         InfoTypeID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        value TEXT NOT NULL UNIQUE
+        serial TEXT NOT NULL UNIQUE,
+        cert TEXT NOT NULL UNIQUE
     )''')
 
     cursor.execute('''
     CREATE TABLE TrleKey (
         InfoTypeID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        value TEXT NOT NULL UNIQUE
+        serial TEXT NOT NULL UNIQUE,
+        cert TEXT NOT NULL UNIQUE
     )''')
 
     cursor.execute('''
@@ -425,12 +444,142 @@ def test_trcustoms():
         print_trcustoms_page(page)
 
 
+def get_response(url, content_type):
+    valid_content_types = [
+        'text/html',
+        'application/json',
+        'application/pkix-cert',
+        'image/jpeg',
+        'image/png'
+    ]
+
+    if content_type not in valid_content_types:
+        logging.error("Invalid content type: %s", content_type)
+        sys.exit(1)
+
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx/5xx)
+    except requests.exceptions.Timeout:
+        logging.error("Request to %s timed out", url)
+        sys.exit(1)
+    except requests.exceptions.RequestException as response_error:
+        logging.error("Failed to retrieve content: %s", response_error)
+        sys.exit(1)
+
+    # Get the Content-Type header once and reuse
+    response_content_type = response.headers.get('Content-Type', '').split(';')[0].strip()
+
+    if response_content_type == 'text/html':
+        return response.text
+    if response_content_type == 'application/json':
+        return response.json()
+    if response_content_type in ['image/jpeg', 'image/png']:
+        return response.content
+    if response_content_type == 'application/pkix-cert':
+        validate_pem(response.text)
+        return response.content
+    logging.error("Unexpected content type: %s, expected %s",
+        response_content_type,
+        content_type
+    )
+    sys.exit(1)
+
+
+def validate_pem(pem):
+    # Check if the response contains a PEM key
+    pem_pattern = r'-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----'
+    pem_match = re.search(pem_pattern, pem, re.DOTALL)
+        #pem_key = pem_match.group(0)
+        #print("PEM Key found:\n", pem_key)
+    if not pem_match:
+        print("PEM Key not found.")
+        sys.exit(1)
+
+
+def print_key_list(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    # Find the table containing the keys
+    table = soup.find_all('table')[2]  # Adjust index if necessary
+
+    # Iterate over the rows (skipping the header row)
+    ids = []
+    for row in table.find_all('tr')[1:]:
+        key_column = row.find_all('td')[0]  # Get the first column
+        key = key_column.text.strip()  # Extract the key text
+        print(f"Key: {key}")
+        ids.append(key)
+
+    return ids
+
+def validate_downloaded_key(id_number, expected_serial):
+    # Input validation
+    if not isinstance(id_number, str) or not id_number.isdigit():
+        print("Invalid ID number.")
+        sys.exit(1)
+    pem_key = get_response(f"https://crt.sh/?d={id_number}", 'application/pkix-cert')
+
+    # Load the certificate
+    certificate = x509.load_pem_x509_certificate(pem_key, default_backend())
+
+    # Extract the serial number and convert it to hex (without leading '0x')
+    hex_serial = f'{certificate.serial_number:x}'
+
+    # Add leading zero if the length is odd to ensure full byte representation
+    if len(hex_serial) % 2 != 0:
+        hex_serial = '0' + hex_serial
+
+    # Compare the serial numbers
+    if hex_serial == expected_serial:
+        print("The downloaded PEM key matches the expected serial number.")
+    else:
+        # Log error with both serials in the same format
+        logging.error("Serial mismatch! Expected: %s, but got: %s", expected_serial, hex_serial)
+        sys.exit(1)
+
+
+
+def get_key(id_number):
+    # Input validation
+    if not isinstance(id_number, str) or not id_number.isdigit():
+        print("Invalid ID number.")
+        sys.exit(1)
+    html = get_response(f"https://crt.sh/?id={id_number}", 'text/html')
+
+    # Create a BeautifulSoup object
+    soup = BeautifulSoup(html, 'html.parser')
+    body_tag = soup.find("body")
+    td_text_tag = body_tag.find("td", "text")
+    a_tag = td_text_tag.find('a', string=lambda text: text and 'Serial' in text)
+    href = a_tag['href']
+
+    # Parse the query string to get the 'serial' parameter
+    query_params = parse_qs(urlparse(href).query)
+    serial_number = query_params.get('serial', [None])[0]
+
+    if not serial_number:
+        print("Serial Number tag not found.")
+        sys.exit(1)
+
+    print("Serial Number:", serial_number)
+
+    validate_downloaded_key(id_number, serial_number)
+
+
+# def get_trle():
+# scrape keys and key status here
+# we cant depend on local keys from package manger
+# that might be incomplete
+# https://crt.sh/?q=trcustoms.org&exclude=expired
+#
+
+
 if __name__ == '__main__':
     lock_sock = acquire_lock()
     try:
         if len(sys.argv) != 2:
             logging.info("Usage: python3 make_index_database.py COMMAND")
-            logging.info("COMMAND = new, testTrle, testTrcustoms")
+            logging.info("COMMAND = new, testTrle, testTrcustoms, trle_key")
             sys.exit(1)
         else:
             COMMAND = sys.argv[1]
@@ -441,5 +590,10 @@ if __name__ == '__main__':
                 test_trle()
             if COMMAND == "trcustoms":
                 test_trcustoms()
+            if COMMAND == "trle_key":
+                resp = get_response("https://crt.sh/?q=www.trle.net&exclude=expired", 'text/html')
+                key_list = print_key_list(resp)
+                for key in key_list:
+                    get_key(key)
     finally:
         release_lock(lock_sock)
