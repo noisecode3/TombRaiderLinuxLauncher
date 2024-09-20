@@ -15,6 +15,7 @@ It should be a 400MB database with all levels
 """
 
 import re
+import time
 import sys
 import os
 import sqlite3
@@ -457,6 +458,8 @@ def get_response(url, content_type):
         logging.error("Invalid content type: %s", content_type)
         sys.exit(1)
 
+    # It seem to freak out crt.sh if there is no sleep here
+    time.sleep(5)
     try:
         response = requests.get(url, timeout=5)
         response.raise_for_status()  # Raises an HTTPError for bad responses (4xx/5xx)
@@ -498,6 +501,8 @@ def validate_pem(pem):
 
 
 def print_key_list(html):
+    """scrape keys and key status here
+       we cant depend on local keys from package manger that might be incomplete"""
     soup = BeautifulSoup(html, 'html.parser')
     # Find the table containing the keys
     table = soup.find_all('table')[2]  # Adjust index if necessary
@@ -506,17 +511,14 @@ def print_key_list(html):
     ids = []
     for row in table.find_all('tr')[1:]:
         key_column = row.find_all('td')[0]  # Get the first column
-        key = key_column.text.strip()  # Extract the key text
-        print(f"Key: {key}")
-        ids.append(key)
+        key_striped = key_column.text.strip()  # Extract the key text
+        print(f"Key: {key_striped}")
+        ids.append(key_striped)
 
     return ids
 
+
 def validate_downloaded_key(id_number, expected_serial):
-    # Input validation
-    if not isinstance(id_number, str) or not id_number.isdigit():
-        print("Invalid ID number.")
-        sys.exit(1)
     pem_key = get_response(f"https://crt.sh/?d={id_number}", 'application/pkix-cert')
 
     # Load the certificate
@@ -525,18 +527,12 @@ def validate_downloaded_key(id_number, expected_serial):
     # Extract the serial number and convert it to hex (without leading '0x')
     hex_serial = f'{certificate.serial_number:x}'
 
-    # Add leading zero if the length is odd to ensure full byte representation
-    if len(hex_serial) % 2 != 0:
-        hex_serial = '0' + hex_serial
-
     # Compare the serial numbers
     if hex_serial == expected_serial:
         print("The downloaded PEM key matches the expected serial number.")
     else:
-        # Log error with both serials in the same format
         logging.error("Serial mismatch! Expected: %s, but got: %s", expected_serial, hex_serial)
         sys.exit(1)
-
 
 
 def get_key(id_number):
@@ -557,6 +553,9 @@ def get_key(id_number):
     query_params = parse_qs(urlparse(href).query)
     serial_number = query_params.get('serial', [None])[0]
 
+    # Normalize serial by stripping leading zeros
+    serial_number = serial_number.lstrip('0')
+
     if not serial_number:
         print("Serial Number tag not found.")
         sys.exit(1)
@@ -566,20 +565,12 @@ def get_key(id_number):
     validate_downloaded_key(id_number, serial_number)
 
 
-# def get_trle():
-# scrape keys and key status here
-# we cant depend on local keys from package manger
-# that might be incomplete
-# https://crt.sh/?q=trcustoms.org&exclude=expired
-#
-
-
 if __name__ == '__main__':
     lock_sock = acquire_lock()
     try:
         if len(sys.argv) != 2:
             logging.info("Usage: python3 make_index_database.py COMMAND")
-            logging.info("COMMAND = new, testTrle, testTrcustoms, trle_key")
+            logging.info("COMMAND = new, trle, trcustoms, trle_key")
             sys.exit(1)
         else:
             COMMAND = sys.argv[1]
@@ -590,6 +581,11 @@ if __name__ == '__main__':
                 test_trle()
             if COMMAND == "trcustoms":
                 test_trcustoms()
+            if COMMAND == "trcustoms_key":
+                resp = get_response("https://crt.sh/?q=trcustoms.org&exclude=expired", 'text/html')
+                key_list = print_key_list(resp)
+                for key in key_list:
+                    get_key(key)
             if COMMAND == "trle_key":
                 resp = get_response("https://crt.sh/?q=www.trle.net&exclude=expired", 'text/html')
                 key_list = print_key_list(resp)
