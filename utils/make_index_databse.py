@@ -13,23 +13,32 @@ and trcustoms 1 page traffic per day and the user can
 have a local synced list of trles.
 It should be a 200MB database with all levels
 """
-
 import re
+import shutil
 import time
 import sys
 import os
 import sqlite3
 import logging
+import hashlib
 import socket
+import uuid
 import random
+import tempfile
 from urllib.parse import urlparse, urlencode, parse_qs
 from datetime import datetime
+from io import BytesIO
+import gc
 import requests
 from bs4 import BeautifulSoup
 #from tqdm import tqdm
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
+from PIL import Image
+import ueberzug as ueberzug_root
+import ueberzug.lib.v0 as ueberzug
 
+gc.collect()
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 CERT = '/etc/ssl/certs/ca-certificates.crt'
@@ -470,22 +479,24 @@ def get_trle_level_local_by_id(trle_id):
         LEFT JOIN Class ON (Class.ClassID = tr.class)
         INNER JOIN Type ON (Type.TypeID = tr.type)
         WHERE tr.trleExternId = ?
-        ORDER BY tr.release DESC, tr.trleExternId DESC
-        LIMIT 1;
+        ORDER BY tr.release DESC, tr.trleExternId DESC;
         """, (trle_id, ), cursor
     )
 
-    level = make_trle_level_data()
-    level['trle_id'] = result[0][0]
-    level['author'] = result[0][1]
-    level['title'] = result[0][2]
-    level['difficulty'] = result[0][3]
-    level['duration'] = result[0][4]
-    level['class'] = result[0][5]
-    level['type'] = result[0][6]
-    level['release'] = result[0][7]
+    records = []
+    for record in result:
+        level = make_trle_level_data()
+        level['trle_id'] = record[0]
+        level['author'] = record[1]
+        level['title'] = record[2]
+        level['difficulty'] = record[3]
+        level['duration'] = record[4]
+        level['class'] = record[5]
+        level['type'] = record[6]
+        level['release'] = record[7]
+        records.append(level)
     connection.close()
-    return level
+    return records
 
 
 def get_trcustoms_level_local_by_id(trcustoms_id):
@@ -911,6 +922,303 @@ def get_response(url, content_type):
     sys.exit(1)
 
 
+def check_ueberzug():
+    try:
+        version_str = ueberzug_root.__version__
+        version_parts = [int(v) for v in version_str.split('.')]  # Split and convert to integers
+        # Check if version is at least 18.2.3
+        if version_parts < [18, 2, 3]:
+            print("Your version of ueberzug is too old.")
+            print("Please upgrade by running the following:")
+            print("pip install git+https://github.com/ueber-devel/ueberzug.git")
+            print("")
+            print("ueberzug is packaged on most popular distros debian, arch, fedora, gentoo")
+            print("and void, please request the package maintainer of your favourite distro to")
+            print("package the latest release of ueberzug.")
+            return False
+        return True
+    except AttributeError:
+        print("Could not determine the version of ueberzug.")
+        return False
+
+
+def cover_resize_to_webp(input_img):
+    img = Image.open(BytesIO(input_img))
+    # Resize the image to 320x240
+    img_width = 80
+    img_height = 60
+    # Convert to terminal character size
+    #width_in_chars, height_in_chars = convert_pixels_to_chars(img_width, img_height)
+    #img = img.resize((img_width, img_height))
+    img = img.resize((320, 240))
+    webp_image = BytesIO()
+
+    # Convert the image to .webp format
+    img.save(webp_image, format='WEBP')
+
+    # Get the image data as bytes
+    return webp_image.getvalue()
+
+
+def get_trle_cover(trle_id):
+    if not trle_id.isdigit():
+        print("Invalid ID number.")
+        sys.exit(1)
+    url = f"https://www.trle.net/screens/{trle_id}.jpg"
+
+    response = get_response(url, 'image/jpeg')
+    return cover_resize_to_webp(response)
+
+
+def is_valid_uuid(value):
+    try:
+        uuid_obj = uuid.UUID(value, version=4)
+        return str(uuid_obj) == value
+    except ValueError:
+        return False
+
+def calculate_md5(data):
+    """Calculate the MD5 checksum of the given data."""
+    md5_hash = hashlib.md5(usedforsecurity=False)
+    md5_hash.update(data)
+    return md5_hash.hexdigest()
+
+def get_trcustoms_cover(image_uuid, md5sum, image_format):
+    """ A test for getting pictures from internet and displaying on the terminal"""
+    if not is_valid_uuid(image_uuid):
+        print("Invalid image UUID.")
+        sys.exit(1)
+    if image_format not in ["jpg", "png"]:
+        print("Invalid image format.")
+        sys.exit(1)
+
+    url = f"https://data.trcustoms.org/media/level_images/{image_uuid}.{image_format}"
+    if image_format == "jpg":
+        image_format = "jpeg"
+    response = get_response(url, f"image/{image_format}")
+
+    # Check if the MD5 sum matches
+    downloaded_md5sum = calculate_md5(response)
+    if downloaded_md5sum != md5sum:
+        print(f"MD5 mismatch: Expected {md5sum}, got {downloaded_md5sum}")
+        sys.exit(1)
+
+    # Save the image to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webp") as temp_image_file:
+        temp_image_file.write(cover_resize_to_webp(response))
+        temp_image_path = temp_image_file.name
+
+    # Example menu items, later database
+    menu_items = []
+    #for _ in range(item_rows * item_columns):
+    #for _ in range(14): # some search result example
+    for _ in range(20): # page example
+        menu_items.append(
+        {
+            'title': "Time Goes By",
+            'duration': "Short (<1 hour)",
+            'difficulty': "Easy",
+            'type': "TR1",
+            'authors': ['Drobridski'],
+            'genres': ['Fantasy', 'Humor'],
+            'tags': [],
+            'created': "2024-05-13"
+        })
+    # Display the menu
+    if check_ueberzug():
+        display_menu(menu_items, temp_image_path)
+
+
+# Function to display the menu for multiple items, with pictures in the terminal
+# This works with Xterm/UXterm and Alacritty
+# Tested with xfce4-terminal, Terminator and other with fancy tabs and menus wont work
+# Developed with on x11 and python3 ueberzug with pip from
+# https://github.com/ueber-devel/ueberzug/
+# xterm is supported 100% with TrueType
+# uxterm -fa 'TrueType' -fs 12
+# will calculate "space" correctly for all font sizes -fs N
+# Alacritty is 100% working with fonts that have the same spacing as
+
+# [font]
+# size = 15.0
+
+# [font.bold]
+# family = "Hack"
+# style = "Bold"
+
+# [font.bold_italic]
+# family = "Hack"
+# style = "Bold Italic"
+
+# [font.italic]
+# family = "Hack"
+# style = "Italic"
+
+# [font.normal]
+# family = "Hack"
+# style = "Regular"
+
+
+def display_menu(items, image_path):
+    """Display a list of items with images next to them."""
+    supported_terminals = ['alacritty', 'xterm']
+    term = os.getenv('TERM', '').lower()
+    print(term)
+    if term not in supported_terminals:
+        print("Terminal not supported.")
+        sys.exit(1)
+    if not shutil.which('ueberzug'):
+        print("ueberzug not found in $PATH.")
+        sys.exit(1)
+    print("\033c", end="")
+    print("")
+
+    terminal_size = shutil.get_terminal_size()
+    max_rows = (terminal_size.lines - 2) // 7
+    max_columns = terminal_size.columns // 79
+
+    if max_columns < 1:
+        print("Screen width too small")
+        sys.exit(1)
+
+    with ueberzug.Canvas() as canvas:
+        full_board = max_rows * max_columns
+        display_items = items[:full_board]
+        remaining_items = items[full_board:]
+        for i in range(len(display_items)):
+            if i == len(display_menu.identifiers):
+                cover = canvas.create_placement(
+                    f'cover_{i}',
+                    x=(i % max_columns) * 79 + 2,
+                    y=(i // max_columns) * 7 + 1,
+                    scaler=ueberzug.ScalerOption.COVER.value,
+                    width=16, height=6
+                )
+                cover.path = image_path
+                cover.visibility = ueberzug.Visibility.VISIBLE
+                display_menu.identifiers.append(cover)
+            elif i < len(display_menu.identifiers):
+                cover = display_menu.identifiers[i]
+                with canvas.lazy_drawing:
+                    cover.x=(i % max_columns) * 79 + 2
+                    cover.y=(i // max_columns) * 7 + 1
+                    cover.path = image_path
+                    cover.visibility = ueberzug.Visibility.VISIBLE
+            else:
+                print(f"Index {i} is out of bounds.")
+
+        # Calculate full rows and handle the last row separately
+        full_rows = len(display_items) // max_columns
+        last_row_items = len(display_items) % max_columns
+
+        # Display full rows
+        for row in range(full_rows):
+            row_offset = row * max_columns
+            print_row(display_items, row_offset, max_columns)
+
+        # Display last row if there are any remaining items
+        if last_row_items > 0:
+            row_offset = full_rows * max_columns
+            print_row(display_items, row_offset, last_row_items)
+
+        awn = input(f"  {len(display_items)} of {len(items)} results, " +\
+                "Press 'q' and Enter to exit, else press Enter for next page...")
+
+        print("\033c", end="")
+        if awn == 'q':
+            sys.exit(0)
+
+        # Remove all previous images
+        for identifier in display_menu.identifiers:
+            # Create the remove command
+            identifier.visibility = ueberzug.Visibility.INVISIBLE
+
+        if len(remaining_items) > 0:
+            display_menu(remaining_items, image_path)  # Recursive call with remaining items
+
+display_menu.identifiers = [] # never delete me baby
+
+def print_row(items, row_offset, columns):
+    """Helper function to print a single row."""
+    # Title row
+    for column in range(columns):
+        print(f"{' '*19}{items[row_offset + column]['title'][:60]:<60}", end="")
+    print("")
+
+    # Duration and difficulty row
+    for column in range(columns):
+        field = (
+            f"{' '*19}Duration: {items[row_offset + column]['duration']}"
+            f" Difficulty: {items[row_offset + column]['difficulty']}"
+        )
+        print(field[:79].ljust(79), end="")
+    print("")
+
+    # Release date and type row
+    for column in range(columns):
+        field = (
+            f"{' '*19}Release Date: {items[row_offset + column]['created']}"
+            f" Type: {items[row_offset + column]['type']}"
+        )
+        print(field[:79].ljust(79), end="")
+    print("")
+
+    for column in range(columns):
+        print( \
+            f"{' '*19}Author: " +\
+            f"{', '.join(map(str, items[row_offset + column]['authors']))[:52]:<52}",
+            end=""
+        )
+        print("")
+
+    for column in range(columns):
+        print( \
+            f"{' '*19}Genre: " +\
+            f"{', '.join(map(str, items[row_offset + column]['genres']))[:53]:<53}",
+            end=""
+        )
+    print("")
+
+    for column in range(columns):
+        print(
+            f"{' '*19}Tag: " +\
+            f"{', '.join(map(str, items[row_offset + column]['tags']))[:55]:<55}",
+            end=""
+        )
+    print("\n")
+
+
+def check_trle_doubles():
+    connection = sqlite3.connect('index.db')
+    cursor = connection.cursor()
+    result = query_return_fetchall("""
+        SELECT 
+        tr.trleExternId,
+        tr.author,
+        tr.title,
+        tr.difficulty,
+        tr.duration,
+        tr.class,
+        tr.type,
+        tr.release,
+        COUNT(*) as record_count
+    FROM Trle AS tr
+    GROUP BY 
+        tr.trleExternId,
+        tr.author,
+        tr.title,
+        tr.difficulty,
+        tr.duration,
+        tr.class,
+        tr.type,
+        tr.release
+    HAVING COUNT(*) > 1
+    ORDER BY record_count DESC;""", None, cursor)
+    print(result)
+    connection.close()
+
+
+
 def validate_pem(pem):
     # Check if the response contains a PEM key
     pem_pattern = r'-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----'
@@ -959,7 +1267,7 @@ def validate_downloaded_key(id_number, expected_serial):
 
 def get_key(id_number):
     # Input validation
-    if not isinstance(id_number, str) or not id_number.isdigit():
+    if not id_number.isdigit():
         print("Invalid ID number.")
         sys.exit(1)
     html = get_response(f"https://crt.sh/?id={id_number}", 'text/html')
@@ -1420,6 +1728,8 @@ if __name__ == '__main__':
             if COMMAND == "new":
                 make_index_database()
                 add_static_data()
+            if COMMAND == "check_trle_doubles":
+                check_trle_doubles()
             if COMMAND == "insert_trle_book":
                 test_insert_trle_book()
             if COMMAND == "insert_trcustoms_book":
@@ -1427,9 +1737,17 @@ if __name__ == '__main__':
             if COMMAND == "trle":
                 test_trle()
             if COMMAND == "trle_id":
-                print(get_trle_level_local_by_id(38))
+                print(len(get_trle_level_local_by_id(3528)))
             if COMMAND == "trcustoms_id":
                 print(get_trcustoms_level_local_by_id(23))
+
+            if COMMAND == "trcustoms_pic":
+                get_trcustoms_cover("6e3df3e0-9e29-4195-b531-3c0b4e9e1719", "1f2280d16fb96328953e7d099acbe19d", "png")
+
+
+            if COMMAND == "test_font_size":
+                print(estimate_font_size())
+
             if COMMAND == "trle_local":
                 test_trle_local()
             if COMMAND == "trcustoms":
