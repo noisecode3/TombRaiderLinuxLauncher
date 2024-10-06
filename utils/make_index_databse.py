@@ -853,6 +853,23 @@ def test_trcustoms_local():
         print_trcustoms_page(page)
 
 
+def test_trcustoms_pic_local():
+    if not check_ueberzug():
+        sys.exit(1)
+    offset = 1
+    while True:
+        page = get_trcustoms_page_local(offset, True)
+        levels = page['levels']
+        covers = get_cover_list(levels)
+        display_menu(levels, covers)
+        for file in covers:
+            try:
+                os.remove(file)
+            except FileNotFoundError:
+                print(f"{file} not found, skipping.")
+        offset += 1
+
+
 def test_trle_local():
     offset = 0
     print_trle_page(get_trle_page_local(offset, True))
@@ -944,12 +961,8 @@ def check_ueberzug():
 
 def cover_resize_to_webp(input_img):
     img = Image.open(BytesIO(input_img))
-    # Resize the image to 320x240
-    img_width = 80
-    img_height = 60
+
     # Convert to terminal character size
-    #width_in_chars, height_in_chars = convert_pixels_to_chars(img_width, img_height)
-    #img = img.resize((img_width, img_height))
     img = img.resize((320, 240))
     webp_image = BytesIO()
 
@@ -983,17 +996,18 @@ def calculate_md5(data):
     md5_hash.update(data)
     return md5_hash.hexdigest()
 
+
 def get_trcustoms_cover(image_uuid, md5sum, image_format):
     """ A test for getting pictures from internet and displaying on the terminal"""
     if not is_valid_uuid(image_uuid):
         print("Invalid image UUID.")
         sys.exit(1)
-    if image_format not in ["jpg", "png"]:
+    if image_format.lower() not in ["jpg", "jpeg", "png"]:
         print("Invalid image format.")
         sys.exit(1)
 
     url = f"https://data.trcustoms.org/media/level_images/{image_uuid}.{image_format}"
-    if image_format == "jpg":
+    if image_format.lower() == "jpg":
         image_format = "jpeg"
     response = get_response(url, f"image/{image_format}")
 
@@ -1006,27 +1020,25 @@ def get_trcustoms_cover(image_uuid, md5sum, image_format):
     # Save the image to a temporary file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webp") as temp_image_file:
         temp_image_file.write(cover_resize_to_webp(response))
-        temp_image_path = temp_image_file.name
+        return temp_image_file.name
 
-    # Example menu items, later database
-    menu_items = []
-    #for _ in range(item_rows * item_columns):
-    #for _ in range(14): # some search result example
-    for _ in range(20): # page example
-        menu_items.append(
-        {
-            'title': "Time Goes By",
-            'duration': "Short (<1 hour)",
-            'difficulty': "Easy",
-            'type': "TR1",
-            'authors': ['Drobridski'],
-            'genres': ['Fantasy', 'Humor'],
-            'tags': [],
-            'created': "2024-05-13"
-        })
-    # Display the menu
-    if check_ueberzug():
-        display_menu(menu_items, temp_image_path)
+
+def get_cover_list(levels):
+    base_url = "https://data.trcustoms.org/media/level_images/"
+    level_list = []
+
+    for level in levels:
+        file = level['cover'].replace(base_url, "")
+
+        filename, ext = os.path.splitext(file)
+
+        if ext.lower() in ('.jpg', '.jpeg', '.png'):
+            level_list.append(get_trcustoms_cover(filename, level['cover_md5sum'], ext[1:]))
+        else:
+            print(f"Skipping level {level['title']}, invalid file format: {ext}")
+            sys.exit(1)
+
+    return level_list
 
 
 # Function to display the menu for multiple items, with pictures in the terminal
@@ -1058,12 +1070,14 @@ def get_trcustoms_cover(image_uuid, md5sum, image_format):
 # family = "Hack"
 # style = "Regular"
 
-
-def display_menu(items, image_path):
+def display_menu(items, image_paths):
     """Display a list of items with images next to them."""
     supported_terminals = ['alacritty', 'xterm']
     term = os.getenv('TERM', '').lower()
-    print(term)
+    identifiers = []
+    if len(items) != len(image_paths):
+        print("Fucked up in previous functions.")
+        sys.exit(1)
     if term not in supported_terminals:
         print("Terminal not supported.")
         sys.exit(1)
@@ -1082,30 +1096,24 @@ def display_menu(items, image_path):
         sys.exit(1)
 
     with ueberzug.Canvas() as canvas:
-        full_board = max_rows * max_columns
+        full_board = min(len(items), max_rows * max_columns)
         display_items = items[:full_board]
         remaining_items = items[full_board:]
+        display_image_paths = image_paths[:full_board]
+        remaining_image_paths = image_paths[full_board:]
+
         for i in range(len(display_items)):
-            if i == len(display_menu.identifiers):
-                cover = canvas.create_placement(
+            if i == len(identifiers):
+                cover_canvas = canvas.create_placement(
                     f'cover_{i}',
                     x=(i % max_columns) * 79 + 2,
                     y=(i // max_columns) * 7 + 1,
                     scaler=ueberzug.ScalerOption.COVER.value,
                     width=16, height=6
                 )
-                cover.path = image_path
-                cover.visibility = ueberzug.Visibility.VISIBLE
-                display_menu.identifiers.append(cover)
-            elif i < len(display_menu.identifiers):
-                cover = display_menu.identifiers[i]
-                with canvas.lazy_drawing:
-                    cover.x=(i % max_columns) * 79 + 2
-                    cover.y=(i // max_columns) * 7 + 1
-                    cover.path = image_path
-                    cover.visibility = ueberzug.Visibility.VISIBLE
-            else:
-                print(f"Index {i} is out of bounds.")
+                cover_canvas.path = display_image_paths[i]
+                cover_canvas.visibility = ueberzug.Visibility.VISIBLE
+                identifiers.append(cover_canvas)
 
         # Calculate full rows and handle the last row separately
         full_rows = len(display_items) // max_columns
@@ -1126,17 +1134,18 @@ def display_menu(items, image_path):
 
         print("\033c", end="")
         if awn == 'q':
+            #TODO clean upp files in tmp
             sys.exit(0)
 
         # Remove all previous images
-        for identifier in display_menu.identifiers:
+        for identifier in identifiers:
             # Create the remove command
             identifier.visibility = ueberzug.Visibility.INVISIBLE
 
-        if len(remaining_items) > 0:
-            display_menu(remaining_items, image_path)  # Recursive call with remaining items
+        # Recursive call with remaining items
+        if remaining_items:
+            display_menu(remaining_items, remaining_image_paths)
 
-display_menu.identifiers = [] # never delete me baby
 
 def print_row(items, row_offset, columns):
     """Helper function to print a single row."""
@@ -1157,7 +1166,7 @@ def print_row(items, row_offset, columns):
     # Release date and type row
     for column in range(columns):
         field = (
-            f"{' '*19}Release Date: {items[row_offset + column]['created']}"
+            f"{' '*19}Release Date: {items[row_offset + column]['release']}"
             f" Type: {items[row_offset + column]['type']}"
         )
         print(field[:79].ljust(79), end="")
@@ -1169,7 +1178,7 @@ def print_row(items, row_offset, columns):
             f"{', '.join(map(str, items[row_offset + column]['authors']))[:52]:<52}",
             end=""
         )
-        print("")
+    print("")
 
     for column in range(columns):
         print( \
@@ -1186,6 +1195,7 @@ def print_row(items, row_offset, columns):
             end=""
         )
     print("\n")
+
 
 
 def check_trle_doubles():
@@ -1722,6 +1732,7 @@ if __name__ == '__main__':
         if len(sys.argv) != 2:
             logging.info("Usage: python3 make_index_database.py COMMAND")
             logging.info("COMMAND = new, trcustoms, trle, trcustoms_local, trle_local, insert_trcustoms_book, insert_trle_book, trcustoms_key, trle_key")
+            logging.info("trcustoms_local_pic")
             sys.exit(1)
         else:
             COMMAND = sys.argv[1]
@@ -1741,12 +1752,8 @@ if __name__ == '__main__':
             if COMMAND == "trcustoms_id":
                 print(get_trcustoms_level_local_by_id(23))
 
-            if COMMAND == "trcustoms_pic":
-                get_trcustoms_cover("6e3df3e0-9e29-4195-b531-3c0b4e9e1719", "1f2280d16fb96328953e7d099acbe19d", "png")
-
-
-            if COMMAND == "test_font_size":
-                print(estimate_font_size())
+            if COMMAND == "trcustoms_local_pic":
+                test_trcustoms_pic_local()
 
             if COMMAND == "trle_local":
                 test_trle_local()
