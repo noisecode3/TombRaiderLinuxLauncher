@@ -94,7 +94,7 @@ install(TARGETS ${PROJECT_NAME}
     DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
 )
 
-install(FILES ${CMAKE_SOURCE_DIR}/utils/tombll.db
+install(FILES ${CMAKE_SOURCE_DIR}/database/tombll.db
     DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
 )
 

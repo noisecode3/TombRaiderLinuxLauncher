@@ -1,0 +1,126 @@
+how to check for host main certificate
+#### Bash ####
+echo | openssl s_client -connect www.trle.net:443 -servername www.trle.net 2>/dev/null\
+        | openssl x509 -fingerprint -noout -serial -text
+
+#### Python ####
+"""xxx"""
+import ssl
+import socket
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
+
+def get_certificate(hostname, port=443):
+    """xxx"""
+    context = ssl.create_default_context()
+    # Disable certificate verification for the first connection
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+
+    with socket.create_connection((hostname, port)) as sock:
+        with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+            # Get certificate info
+            cert_der = ssock.getpeercert(True)
+            if cert_der:
+                return x509.load_der_x509_certificate(cert_der, default_backend())
+    return None
+
+def get_sha256_fingerprint(cert):
+    """xxx"""
+    cert_der = cert.public_bytes(serialization.Encoding.DER)
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    digest.update(cert_der)
+    return digest.finalize()
+
+def get_serial_number_hex(cert):
+    """xxx"""
+    # Get the serial number in a byte format
+    serial_number_bytes = cert.serial_number \
+        .to_bytes((cert.serial_number.bit_length() + 7) // 8, 'big')
+    # Format it as a hex string
+    return ':'.join(f'{b:02X}' for b in serial_number_bytes)
+
+def print_certificate_details(cert):
+    """xxx"""
+    fingerprint = get_sha256_fingerprint(cert)
+    fingerprint_hex = ':'.join(f'{b:02X}' for b in fingerprint)
+    serial_number_hex = get_serial_number_hex(cert)
+
+    print(f"SHA-256 fingerprint: {fingerprint_hex}")
+    print(f"Serial number: {serial_number_hex}")
+    print(f"Subject: {cert.subject}")
+    print(f"Issuer: {cert.issuer}")
+    print()
+
+certificate = get_certificate('trle.net')
+print_certificate_details(certificate)
+
+#### C++ ####
+And this is how we can ask the server to just give the certificate right there in c++
+This is how we should have done this from the start, this is the normal way...
+
+#include <iostream>
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/bio.h>
+
+namespace ssl = boost::asio::ssl;
+using boost::asio::ip::tcp;
+
+void get_ssl_certificate(const std::string& host) {
+    boost::asio::io_context io_context;
+
+    // Create SSL context
+    ssl::context ssl_context(ssl::context::sslv23);
+
+    // Create a TCP socket
+    tcp::resolver resolver(io_context);
+    tcp::resolver::results_type endpoints = resolver.resolve(host, "https");
+
+    // Create SSL stream using the socket and the SSL context
+    ssl::stream<tcp::socket> stream(io_context, ssl_context);
+
+    // Set SNI (Server Name Indication)
+    SSL_set_tlsext_host_name(stream.native_handle(), host.c_str());
+
+    // Connect the socket to the resolved endpoint
+    boost::asio::connect(stream.lowest_layer(), endpoints);
+
+    // Perform SSL handshake
+    stream.handshake(ssl::stream_base::client);
+
+    // Retrieve and display the SSL certificate
+    X509* cert = SSL_get_peer_certificate(stream.native_handle());
+    if (cert) {
+        std::cout << "SSL Certificate retrieved successfully!" << std::endl;
+
+        // Convert X509* certificate to string using BIO
+        BIO* bio = BIO_new(BIO_s_mem());
+        PEM_write_bio_X509(bio, cert);
+
+        char* cert_str = nullptr;
+        long cert_len = BIO_get_mem_data(bio, &cert_str);
+
+        // Print the certificate as a string
+        std::cout << std::string(cert_str, cert_len) << std::endl;
+
+        // Clean up
+        BIO_free(bio);
+        X509_free(cert);
+    } else {
+        std::cout << "No certificate found." << std::endl;
+    }
+}
+
+int main() {
+    std::string host = "www.trle.net";
+    get_ssl_certificate(host);
+    return 0;
+}
+
+Never forget how we can test one function in python:
+python3 -c "from index_scrape import get_trle_page; print(get_trle_page(0, True))"
+

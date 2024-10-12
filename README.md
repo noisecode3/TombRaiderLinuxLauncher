@@ -86,14 +86,14 @@ make install
 
 ## Use database
 
-You can add maps to the database if you cd into utils.
+You can add maps to the database if you cd into database.
 This should add Kitten Adventure Demo.
 
 If it don't work try installing the
 python3 module from the error, with pip, you'll need, beautifulsoup4 and tqdm
 
 ```shell
-python3 get_data.py https://www.trle.net/sc/levelfeatures.php?lid=3379
+python3 tombll_get_data.py https://www.trle.net/sc/levelfeatures.php?lid=3379
 
 ```
 
@@ -112,7 +112,7 @@ This means that you have to open the data.json file and add those values
 ```
 
 ```shell
-python3 add_data.py data.json
+python3 tombll_add_data.py data.json
 
 ```
 
