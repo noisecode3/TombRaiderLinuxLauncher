@@ -265,6 +265,25 @@ def calculate_md5(data):
     return md5_hash.hexdigest()
 
 
+def get_cover_list(levels):
+    """Get a list picture data ready to use"""
+    base_url = "https://data.trcustoms.org/media/level_images/"
+    level_list = []
+
+    for level in levels:
+        file = level['cover'].replace(base_url, "")
+
+        filename, ext = os.path.splitext(file)
+
+        if ext.lower() in ('.jpg', '.jpeg', '.png'):
+            level_list.append(get_trcustoms_cover(filename, level['cover_md5sum'], ext[1:]))
+        else:
+            print(f"Skipping level {level['title']}, invalid file format: {ext}")
+            sys.exit(1)
+
+    return level_list
+
+
 def get_trcustoms_cover(image_uuid, md5sum, image_format):
     """Getting pictures from internet and displaying on the terminal"""
     if not is_valid_uuid(image_uuid):

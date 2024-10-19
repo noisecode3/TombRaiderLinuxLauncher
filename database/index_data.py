@@ -1,4 +1,7 @@
 """Index dictionary data definitions"""
+import os
+import sys
+
 def make_trle_page_data():
     """trle.net page, represents the same data as a page on the site"""
     return {
@@ -47,3 +50,4 @@ def make_trcustoms_level_data():
         "cover": "",
         "cover_md5sum": "",
     }
+

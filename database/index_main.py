@@ -1,10 +1,15 @@
-
-
-
-
+"""Main loop for CLI menu like interfaces"""
+import sys
+import os
+import time
+import index_view
+import index_scrape
+import index_query
+import make_index_database
 
 def test_trle():
-    print_trle_page(get_trle_page(0, True))
+    """Browse TRLE data"""
+    index_view.print_trle_page(index_scrape.get_trle_page(0, True))
     offset = 0
     while True:
         user_input = input("Press Enter for the next page (or type 'q' to quit: ")
@@ -12,12 +17,13 @@ def test_trle():
             print("Exiting...")
             break
         offset += 20
-        print_trle_page(get_trle_page(offset, True))
+        index_view.print_trle_page(index_scrape.get_trle_page(offset, True))
 
 
 def test_trcustoms():
-    page = get_trcustoms_page(1, True)
-    print_trcustoms_page(page)
+    """Browse Trcustom data"""
+    page = index_scrape.get_trcustoms_page(1, True)
+    index_view.print_trcustoms_page(page)
     offset = 1
     while True:
         user_input = input("Press Enter for the next page (or type 'q' to quit: ")
@@ -25,13 +31,14 @@ def test_trcustoms():
             print("Exiting...")
             break
         offset += 1
-        page = get_trcustoms_page(offset, True)
-        print_trcustoms_page(page)
+        page = index_scrape.get_trcustoms_page(offset, True)
+        index_view.print_trcustoms_page(page)
 
 
 def test_trcustoms_local():
-    page = get_trcustoms_page_local(1, True)
-    print_trcustoms_page(page)
+    """Browse local Trcustom data"""
+    page = index_query.get_trcustoms_page_local(1, True)
+    index_view.print_trcustoms_page(page)
     offset = 1
     while True:
         user_input = input("Press Enter for the next page (or type 'q' to quit: ")
@@ -39,19 +46,20 @@ def test_trcustoms_local():
             print("Exiting...")
             break
         offset += 1
-        page = get_trcustoms_page_local(offset, True)
-        print_trcustoms_page(page)
+        page = index_query.get_trcustoms_page_local(offset, True)
+        index_view.print_trcustoms_page(page)
 
 
 def test_trcustoms_pic_local():
-    if not check_ueberzug():
+    """Browse local Trcustom data"""
+    if not index_view.check_ueberzug():
         sys.exit(1)
     offset = 1
     while True:
-        page = get_trcustoms_page_local(offset, True)
+        page = index_query.get_trcustoms_page_local(offset, True)
         levels = page['levels']
-        covers = get_cover_list(levels)
-        display_menu(levels, covers)
+        covers = index_scrape.get_cover_list(levels)
+        index_view.display_menu(levels, covers)
         for file in covers:
             try:
                 os.remove(file)
@@ -61,41 +69,40 @@ def test_trcustoms_pic_local():
 
 
 def test_trle_local():
+    """Browse local data"""
     offset = 0
-    print_trle_page(get_trle_page_local(offset, True))
+    index_view.print_trle_page(index_query.get_trle_page_local(offset, True))
     while True:
         user_input = input("Press Enter for the next page (or type 'q' to quit: ")
         if user_input.lower() == 'q':
             print("Exiting...")
             break
         offset += 20
-        print_trle_page(get_trle_page_local(offset, True))
+        index_view.print_trle_page(index_query.get_trle_page_local(offset, True))
 
 
 def test_insert_trle_book():
     """This must not bother the server but at the same time its not
-       meant for normal users but the database admin to run this. Not
-       bother here means to not be "detected" as a robot and limit request rate.
-       Not detected in behavior imply that there is some random delay about
-       0-5 + 10 seconds just like someone would browser thru the levels and click
-       the ">" arrow for 30-45 min. We get all the records for indexing them here."""
+       meant for normal users but the database admin to run this,
+       it could take 30-45 min. there is a problem about how TRLE sort result
+       so this method might not work, cus it will miss results, there is another
+       method that is much slower but will work and accurate"""
 
     # Get the first page to determine the total number of records
-    page = get_trle_page(0)
+    page = index_scrape.get_trle_page(0)
     total_records = page['records_total']
 
     # Insert the first page of data
-    insert_trle_page(page)
+    index_query.insert_trle_page(page)
     print(f"Records number:20 of {total_records}")
-    delay = random.uniform(10, 15)
-    time.sleep(delay)
+    time.sleep(15)
 
     # Start offset at 20 and loop through all records in steps of 20
     offset = 20
     while offset < total_records:
         # Fetch the next page of data
-        page = get_trle_page(offset)
-        insert_trle_page(page)
+        page = index_scrape.get_trle_page(offset)
+        index_query.insert_trle_page(page)
 
         # Increment offset by 20 for the next batch
         if offset + 20 > total_records:
@@ -104,105 +111,79 @@ def test_insert_trle_book():
             offset += 20
         print(f"Records number:{offset} of {total_records}")
 
-        # Introduce a random delay between 10 and 15 seconds
-        delay = random.uniform(10, 15)
-        time.sleep(delay)
+        # Introduce a random delay of 15 seconds
+        time.sleep(15)
 
 
 def test_insert_trcustoms_book():
+    """Get index data"""
     # Get the first page to determine the total number of records
-    page = get_trcustoms_page(1)
+    page = index_scrape.get_trcustoms_page(1)
     total_pages = page['total_pages']
 
     # Insert the first page of data
-    insert_trcustoms_page(page)
+    index_query.insert_trcustoms_page(page)
     print(f"Page number:1 of {total_pages}")
-    delay = random.uniform(10, 15)
-    time.sleep(delay)
+    time.sleep(15)
 
     # Start at page 2 and loop through all records in steps of 20
     page_number = 2
     while page_number <= total_pages:
         # Fetch the next page of data
-        page = get_trcustoms_page(page_number)
-        insert_trcustoms_page(page)
+        page = index_scrape.get_trcustoms_page(page_number)
+        index_query.insert_trcustoms_page(page)
         print(f"Page number:{page_number} of {total_pages}")
 
         # Increment page number by 1 for the next batch
         page_number += 1
 
-        # Introduce a random delay between 10 and 15 seconds
-        delay = random.uniform(10, 15)
-        time.sleep(delay)
+        # Introduce a random delay of 15 seconds
+        time.sleep(15)
 
 
-def update_keys_trle(certList):
-    """Check if identical certificate"""
-    connection = sqlite3.connect('index.db')
-    cursor = connection.cursor()
-    cursor.execute("")
-    """ 
-    CREATE TABLE TrcustomsKey (
-        TrcustomsKeyID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        serial TEXT NOT NULL UNIQUE,
-        cert TEXT NOT NULL UNIQUE
-    )
-    CREATE TABLE TrleKey (
-        TrleKeyID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        serial TEXT NOT NULL UNIQUE,
-        cert TEXT NOT NULL UNIQUE
-    """
+def show_menu():
+    """Main menu"""
+    print("\nPlease select a command:")
+    print("1. new - Create a new index database and add static data")
+    print("2. check_trle_doubles - Check for duplicate entries in TRLE")
+    print("3. insert_trle_book - Insert TRLE book")
+    print("4. insert_trcustoms_book - Insert TRCustoms book")
+    print("5. trle - Run TRLE test")
+    print("6. trcustoms_local_pic - Run TRCustoms local picture test")
+    print("7. trle_local - Run TRLE local test")
+    print("8. trcustoms - Run TRCustoms test")
+    print("9. trcustoms_local - Run TRCustoms local test")
+    print("0. Exit")
 
-    db_keys = query_return_fetchall("SELECT * FROM TrleKey", None, cursor)
+def main_menu():
+    while True:
+        show_menu()
+        choice = input("Enter your choice: ").strip()
 
-    connection.commit()
-    connection.close()
-
+        if choice == "1":
+            make_index_database.make_index_database()
+            make_index_database.add_static_data()
+        elif choice == "2":
+            index_query.check_trle_doubles()
+        elif choice == "3":
+            test_insert_trle_book()
+        elif choice == "4":
+            test_insert_trcustoms_book()
+        elif choice == "5":
+            test_trle()
+        elif choice == "6":
+            test_trcustoms_pic_local()
+        elif choice == "7":
+            test_trle_local()
+        elif choice == "8":
+            test_trcustoms()
+        elif choice == "9":
+            test_trcustoms_local()
+        elif choice == "0":
+            print("Exiting...")
+            sys.exit(0)
+        else:
+            print("Invalid choice, please try again.")
 
 if __name__ == '__main__':
-    lock_sock = acquire_lock()
-    try:
-        if len(sys.argv) != 2:
-            logging.info("Usage: python3 make_index_database.py COMMAND")
-            logging.info("COMMAND = new, trcustoms, trle, trcustoms_local, trle_local, insert_trcustoms_book, insert_trle_book, trcustoms_key, trle_key")
-            logging.info("trcustoms_local_pic")
-            sys.exit(1)
-        else:
-            COMMAND = sys.argv[1]
-            if COMMAND == "new":
-                make_index_database()
-                add_static_data()
-            if COMMAND == "check_trle_doubles":
-                check_trle_doubles()
-            if COMMAND == "insert_trle_book":
-                test_insert_trle_book()
-            if COMMAND == "insert_trcustoms_book":
-                test_insert_trcustoms_book()
-            if COMMAND == "trle":
-                test_trle()
-            if COMMAND == "trle_id":
-                print(len(get_trle_level_local_by_id(3528)))
-            if COMMAND == "trcustoms_id":
-                print(get_trcustoms_level_local_by_id(23))
-
-            if COMMAND == "trcustoms_local_pic":
-                test_trcustoms_pic_local()
-
-            if COMMAND == "trle_local":
-                test_trle_local()
-            if COMMAND == "trcustoms":
-                test_trcustoms()
-            if COMMAND == "trcustoms_local":
-                test_trcustoms_local()
-            if COMMAND == "trcustoms_key":
-                resp = get_response("https://crt.sh/?q=trcustoms.org&exclude=expired", 'text/html')
-                key_list = print_key_list(resp)
-                for key in key_list:
-                    get_key(key)
-            if COMMAND == "trle_key":
-                resp = get_response("https://crt.sh/?q=www.trle.net&exclude=expired", 'text/html')
-                key_list = print_key_list(resp)
-                for key in key_list:
-                    get_key(key)
-    finally:
-        release_lock(lock_sock)
+    main_menu()
