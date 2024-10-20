@@ -330,12 +330,12 @@ def add_static_data():
     cursor = connection.cursor()
 
     class_values = [
-        'Alien/Space', 'Atlantis', 'Base/Lab', 'Cambodia', 'Castle', 
-        'Cave/Cat', 'City', 'Coastal', 'Cold/Snowy', 'Desert', 'Easter', 
-        'Egypt', 'Fantasy/Surreal', 'Home', 'Ireland', 'Joke', 'Jungle', 
+        'Alien/Space', 'Atlantis', 'Base/Lab', 'Cambodia', 'Castle',
+        'Cave/Cat', 'City', 'Coastal', 'Cold/Snowy', 'Desert', 'Easter',
+        'Egypt', 'Fantasy/Surreal', 'Home', 'Ireland', 'Joke', 'Jungle',
         'Kids', 'Library', 'Mystery/Horror', 'nc', 'Nordic/Celtic', 
-        'Oriental', 'Persia', 'Pirates', 'Remake', 'Rome/Greece', 'Ship', 
-        'Shooter', 'South America', 'South Pacific', 'Steampunk', 'Train', 
+        'Oriental', 'Persia', 'Pirates', 'Remake', 'Rome/Greece', 'Ship',
+        'Shooter', 'South America', 'South Pacific', 'Steampunk', 'Train',
         'Venice', 'Wild West', 'Xmas', 'Young Lara'
     ]
     cursor.executemany("INSERT INTO Class (value) VALUES (?)",
@@ -361,8 +361,3 @@ def add_static_data():
 
     connection.commit()
     connection.close()
-
-
-if __name__ == '__main__':
-    make_index_database()
-    add_static_data()
