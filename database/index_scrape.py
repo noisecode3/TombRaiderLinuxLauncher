@@ -6,14 +6,15 @@ import hashlib
 import socket
 import uuid
 import time
+import json
 import logging
 import tempfile
 from io import BytesIO
 from urllib.parse import urlparse, urlencode, parse_qs
 from datetime import datetime
+import pycurl
 from bs4 import BeautifulSoup, Tag
 from PIL import Image
-import requests
 from cryptography import x509
 from cryptography.x509.oid import ExtensionOID
 from cryptography.hazmat.backends import default_backend
@@ -21,7 +22,7 @@ from cryptography.hazmat.primitives import serialization
 
 import index_data
 
-CERT = '/etc/ssl/certs/ca-certificates.crt'
+MISCONFIGURED_SERVER = False
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
@@ -59,49 +60,97 @@ def get_response(url, content_type):
         sys.exit(1)
 
     max_retries = 3
-    delay = 20
     retries = 0
-    response = None
+    curl = None
+    headers = None
+    response_buffer = None
 
     while retries < max_retries:
         try:
-            response = requests.get(url, verify=CERT, timeout=5)
-            response.raise_for_status()  # Raises an HTTPError for bad responses (4xx/5xx)
-            break  # Exit loop on success
-        except requests.exceptions.Timeout:
+            response_buffer = BytesIO()
+            headers_buffer = BytesIO()
+            curl = pycurl.Curl()
+            curl.setopt(pycurl.URL, url)
+            curl.setopt(pycurl.WRITEDATA, response_buffer)
+            curl.setopt(pycurl.WRITEHEADER, headers_buffer)
+
+            # Set the path to the certificate for SSL/TLS verification
+            curl.setopt(pycurl.CAINFO, 'trle_cert.pem')  # Use your certificate file
+            headers_list = [
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept: */*',
+                'Referer: https://trcustoms.org/'  # Change this to the appropriate referrer if needed
+            ]
+            curl.setopt(pycurl.HTTPHEADER, headers_list)
+            # Perform the request
+            curl.perform()
+
+            # Get the response code
+            response_code = curl.getinfo(pycurl.RESPONSE_CODE)
+
+            # If the response is not 200 OK, retry
+            if response_code != 200:
+                retries += 1
+                time.sleep(3)
+                logging.warning(f"Retrying... Response code: {response_code}")
+                curl.close()
+                continue
+
+            # Get the headers
+            headers = headers_buffer.getvalue().decode('utf-8')
+
+
+            # Break the loop on success
+            break
+
+        except Exception as e:
             retries += 1
-            logging.error("Request to %s timed out, retrying (%d/%d)...", url, retries, max_retries)
-            if retries < max_retries:
-                time.sleep(delay)
-            else:
+            logging.error(f"Request failed: {e}")
+            if retries >= max_retries:
                 logging.error("Max retries reached. Exiting.")
                 sys.exit(1)
-        except requests.exceptions.RequestException as response_error:
-            logging.error("Failed to retrieve content: %s", response_error)
-            sys.exit(1)
 
-    if response is None:
-        print("")
+    if curl is None:
+        logging.error("No curl instance")
         sys.exit(1)
 
-    # Get the Content-Type header once and reuse
-    response_content_type = response.headers.get('Content-Type', '').split(';')[0].strip()
+    if headers is None:
+        logging.error("No headers received")
+        sys.exit(1)
 
-    if response_content_type == 'text/html':
-        return response.text
-    if response_content_type == 'application/json':
-        return response.json()
-    if response_content_type in ['image/jpeg', 'image/png']:
-        return response.content
-    if response_content_type == 'application/pkix-cert':
-        validate_pem(response.text)
-        return response.content
+    if response_buffer is None:
+        logging.error("No response received")
+        sys.exit(1)
 
-    logging.error("Unexpected content type: %s, expected %s",
-        response_content_type,
-        content_type
-    )
-    sys.exit(1)
+    # Extract Content-Type from the headers
+    response_content_type = None
+    for header in headers.splitlines():
+        if header.lower().startswith('content-type:'):
+            response_content_type = header.split(':', 1)[1].split(';')[0].strip()
+            break
+
+    # Validate and return the response based on content type
+    if response_content_type == 'text/html' and content_type == 'text/html':
+        response = response_buffer.getvalue().decode('utf-8')  # Plain text
+        curl.close()
+        return response
+    elif response_content_type == 'application/json' and content_type == 'application/json':
+        response = response_buffer.getvalue().decode('utf-8')
+        curl.close()
+        return json.loads(response)  # Parse and return JSON
+    elif response_content_type in ['image/jpeg', 'image/png'] and content_type in ['image/jpeg', 'image/png']:
+        response = response_buffer.getvalue()
+        curl.close()
+        return response  # Return raw image data
+    elif response_content_type == 'application/pkix-cert' and content_type == 'application/pkix-cert':
+        response = response_buffer.getvalue()
+        curl.close()
+        # Add custom validation for certificates here if needed
+        return response  # Return raw certificate data
+    else:
+        logging.error("Unexpected content type: %s, expected %s",
+                      response_content_type, content_type)
+        sys.exit(1)
 
 
 def validate_pem(pem):
