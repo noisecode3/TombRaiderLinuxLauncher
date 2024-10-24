@@ -21,8 +21,10 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
 import index_data
+import get_leaf_cert
 
 MISCONFIGURED_SERVER = False
+LEAF_CERT = None
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
@@ -64,6 +66,7 @@ def get_response(url, content_type):
     curl = None
     headers = None
     response_buffer = None
+    temp_cert_path = None
 
     while retries < max_retries:
         try:
@@ -74,21 +77,31 @@ def get_response(url, content_type):
             curl.setopt(pycurl.WRITEDATA, response_buffer)
             curl.setopt(pycurl.WRITEHEADER, headers_buffer)
 
-            # Set the path to the certificate for SSL/TLS verification
-            curl.setopt(pycurl.CAINFO, 'trle_cert.pem')  # Use your certificate file
+            global MISCONFIGURED_SERVER
+            if MISCONFIGURED_SERVER:
+                global LEAF_CERT
+                if not LEAF_CERT:
+                    sys.exit(1)
+
+                # Write the certificate to a temporary file manually
+                temp_cert_file = tempfile.NamedTemporaryFile(delete=False)  # `delete=False` prevents auto-deletion
+                temp_cert_file.write(LEAF_CERT)
+                temp_cert_file.flush()
+                temp_cert_path = temp_cert_file.name
+                temp_cert_file.close()  # Close the file so it can be accessed by pycurl
+
+                # Set CAINFO to use the temporary certificate file
+                curl.setopt(pycurl.CAINFO, temp_cert_path)
+
             headers_list = [
                 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                 'Accept: */*',
-                'Referer: https://trcustoms.org/'  # Change this to the appropriate referrer if needed
             ]
             curl.setopt(pycurl.HTTPHEADER, headers_list)
-            # Perform the request
             curl.perform()
 
-            # Get the response code
             response_code = curl.getinfo(pycurl.RESPONSE_CODE)
 
-            # If the response is not 200 OK, retry
             if response_code != 200:
                 retries += 1
                 time.sleep(3)
@@ -96,19 +109,35 @@ def get_response(url, content_type):
                 curl.close()
                 continue
 
-            # Get the headers
             headers = headers_buffer.getvalue().decode('utf-8')
-
-
-            # Break the loop on success
             break
 
-        except Exception as e:
+        except pycurl.error as curl_error:
+            if curl_error.args[0] == 60:  # SSL certificate error
+                LEAF_CERT = get_leaf_cert.run(url)
+
+                if LEAF_CERT:
+                    try:
+                        LEAF_CERT = LEAF_CERT.public_bytes(encoding=serialization.Encoding.PEM)
+                        MISCONFIGURED_SERVER = True
+                        logging.info("Leaf certificate retrieved and applied.")
+                    except Exception as e:
+                        logging.error("Failed to convert leaf certificate to PEM: %s", e)
+                        sys.exit(1)
+                else:
+                    logging.error("Failed to retrieve leaf certificate. Exiting.")
+                    sys.exit(1)
+                continue
+
+            logging.error("Request failed: %s", curl_error)
             retries += 1
-            logging.error(f"Request failed: {e}")
             if retries >= max_retries:
                 logging.error("Max retries reached. Exiting.")
                 sys.exit(1)
+
+        finally:
+            if temp_cert_path and os.path.exists(temp_cert_path):
+                os.remove(temp_cert_path)  # Ensure the temp cert file is deleted after the request
 
     if curl is None:
         logging.error("No curl instance")
@@ -130,29 +159,18 @@ def get_response(url, content_type):
             break
 
     # Validate and return the response based on content type
-    if response_content_type == 'text/html' and content_type == 'text/html':
-        response = response_buffer.getvalue().decode('utf-8')  # Plain text
-        curl.close()
-        return response
-    elif response_content_type == 'application/json' and content_type == 'application/json':
-        response = response_buffer.getvalue().decode('utf-8')
-        curl.close()
-        return json.loads(response)  # Parse and return JSON
-    elif response_content_type in ['image/jpeg', 'image/png'] and content_type in ['image/jpeg', 'image/png']:
-        response = response_buffer.getvalue()
-        curl.close()
-        return response  # Return raw image data
-    elif response_content_type == 'application/pkix-cert' and content_type == 'application/pkix-cert':
-        response = response_buffer.getvalue()
-        curl.close()
-        # Add custom validation for certificates here if needed
-        return response  # Return raw certificate data
+    if response_content_type == content_type:
+        if content_type == 'text/html':
+            return response_buffer.getvalue().decode('utf-8')
+        elif content_type == 'application/json':
+            return json.loads(response_buffer.getvalue().decode('utf-8'))
+        elif content_type in ['image/jpeg', 'image/png']:
+            return response_buffer.getvalue()
+        elif content_type == 'application/pkix-cert':
+            return response_buffer.getvalue()
     else:
-        logging.error("Unexpected content type: %s, expected %s",
-                      response_content_type, content_type)
+        logging.error("Unexpected content type: %s, expected %s", response_content_type, content_type)
         sys.exit(1)
-
-
 def validate_pem(pem):
     """Validate the certificate as a text"""
     # Check if the response contains a PEM key
