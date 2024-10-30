@@ -2,7 +2,7 @@ import os
 import sys
 import sqlite3
 
-import index_data
+import data_factorie
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -373,7 +373,7 @@ def get_trle_level_local_by_id(trle_id):
 
     records = []
     for record in result:
-        level = index_data.make_trle_level_data()
+        level = data_factorie.make_trle_level_data()
         level['trle_id'] = record[0]
         level['author'] = record[1]
         level['title'] = record[2]
@@ -423,7 +423,7 @@ def get_trcustoms_level_local_by_id(trcustoms_id):
         """, (trcustoms_id, ), cursor
     )
 
-    level = index_data.make_trcustoms_level_data()
+    level = data_factorie.make_trcustoms_level_data()
     level['trcustoms_id'] = result[0][0]
     level['authors'] = result[0][1].split(',') if result[0][1] else []
     level['title'] = result[0][2]
@@ -454,7 +454,7 @@ def get_trle_page_local(offset, sortCreatedFirst=False):
     if offset > rec:
         sys.exit(1)
 
-    page = index_data.make_trle_page_data()
+    page = data_factorie.make_trle_page_data()
     page['offset'] = offset
     page['records_total'] = rec
 
@@ -482,7 +482,7 @@ def get_trle_page_local(offset, sortCreatedFirst=False):
     )
     # Process result to format the output as needed
     for row in result:
-        level = index_data.make_trle_level_data()
+        level = data_factorie.make_trle_level_data()
         level['trle_id'] = row[0]
         level['author'] = row[1]
         level['title'] = row[2]
@@ -511,7 +511,7 @@ def get_trcustoms_page_local(page_number, sortCreatedFirst=False):
         cursor
     )[0][0]
 
-    page = index_data.make_trcustoms_page_data()
+    page = data_factorie.make_trcustoms_page_data()
     total = (rec + 19) // 20
     if page_number > total:
         sys.exit(1)
@@ -550,7 +550,7 @@ def get_trcustoms_page_local(page_number, sortCreatedFirst=False):
     )
     # Process result to format the output as needed
     for row in result:
-        level = index_data.make_trcustoms_level_data()
+        level = data_factorie.make_trcustoms_level_data()
         level['trcustoms_id'] = row[0]
         level['authors'] = row[1].split(',') if row[1] else []
         level['title'] = row[2]

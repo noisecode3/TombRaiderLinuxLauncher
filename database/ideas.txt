@@ -167,6 +167,67 @@ int main() {
     outFile.close();
     return 0;
 }
+### Python ###
+this could help downloadin it to a file instead of using memory with nested functions
+not sure I have understod this, kind of.
+
+write_callback
+ ├── Takes: file_obj
+ └── Returns: _write (which has access to file_obj due to closure)
+       └── Uses file_obj.write(data) within the PycURL callback context
+
+
+class Downloader:
+    def __init__(self):
+        self.progress_bar = None
+
+    def write_callback(self, file_obj):
+        """Callback function to write data directly to a file."""
+        def _write(data):
+            file_obj.write(data)
+            return len(data)
+        return _write
+
+    def download_file(self, url, save_path):
+        curl = pycurl.Curl()
+        curl.setopt(pycurl.URL, url)
+
+        try:
+            # Get file size for the progress bar
+            curl.setopt(pycurl.NOBODY, True)
+            curl.perform()
+            total_size = curl.getinfo(pycurl.CONTENT_LENGTH_DOWNLOAD)
+            curl.setopt(pycurl.NOBODY, False)
+
+            # Open file for writing
+            with open(save_path, 'wb') as f:
+                # Set up the progress bar
+                self.progress_bar = tqdm(total=total_size, unit='B', unit_scale=True)
+
+                # Use write callback to stream directly to file
+                curl.setopt(pycurl.WRITEFUNCTION, self.write_callback(f))
+                curl.setopt(pycurl.FOLLOWLOCATION, True)
+                curl.setopt(pycurl.NOPROGRESS, False)
+                curl.setopt(pycurl.XFERINFOFUNCTION, self.progress_callback)
+
+                # Perform the download
+                curl.perform()
+
+                # Retrieve the final URL after redirects
+                final_url = curl.getinfo(pycurl.EFFECTIVE_URL)
+                print(f"Final URL: {final_url}")
+
+                # Extract the filename from the URL if present
+                filename = final_url.split('/')[-1]
+                print(f"Extracted Filename: {filename}")
+
+        except pycurl.error as e:
+            print(f"Download failed: {e}")
+
+        finally:
+            if self.progress_bar:
+                self.progress_bar.close()
+            curl.close()
 
 
 Never forget how we can test one function in python:

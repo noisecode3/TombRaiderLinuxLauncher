@@ -8,6 +8,7 @@ import sys
 import ssl
 import socket
 from cryptography import x509
+from cryptography.x509 import Certificate
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 
@@ -62,5 +63,71 @@ def run(url):
     else:
         sys.exit(1)
     certificate = get_certificate(host)
+    if not certificate:
+        sys.exit(1)
+
     print_certificate_details(certificate)
-    return certificate # this is bytes data type
+    if not isinstance(certificate, Certificate):
+        sys.exit(1)
+
+    return certificate.public_bytes(encoding=serialization.Encoding.PEM)
+
+'''
+def validate_downloaded_key(id_number, expected_serial):
+    """Validate the certificate in binary form with the cryptography module"""
+    pem_key = get_response(f"https://crt.sh/?d={id_number}", 'application/pkix-cert')
+
+    if not isinstance(pem_key, bytes):
+        logging.error("Data type error, expected bytes got %s", type(pem_key))
+        sys.exit(1)
+
+    # Load the certificate
+    certificate = x509.load_pem_x509_certificate(pem_key, default_backend())
+
+    # Extract the serial number and convert it to hex (without leading '0x')
+    hex_serial = f'{certificate.serial_number:x}'
+
+    # Compare the serial numbers
+    if hex_serial == expected_serial:
+        print("The downloaded PEM key matches the expected serial number.")
+    else:
+        logging.error("Serial mismatch! Expected: %s, but got: %s", expected_serial, hex_serial)
+        sys.exit(1)
+
+    # Extract and validate the domain (Common Name)
+    valid_domains = ["trle.net", "trcustoms.org", "data.trcustoms.org", "staging.trcustoms.org"]
+
+    # Check the Common Name (CN) in the certificate subject
+    comon_name = certificate.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)[0].value
+    if comon_name in valid_domains:
+        print(f"Valid domain found in CN: {comon_name}")
+    else:
+        logging.error("Invalid domain in CN: %s", comon_name)
+        sys.exit(1)
+
+    # Extract the Subject Alternative Name (SAN) extension
+    try:
+        san_extension = certificate.extensions \
+            .get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
+
+        # Extract all DNS names listed in the SAN extension
+        dns_names = san_extension.value.get_values_for_type(x509.DNSName) # type: ignore
+
+        print(f"DNS Names in SAN: {dns_names}")
+
+        # Check if any of the DNS names match the valid domain list
+        valid_domains = ["trle.net", "www.trle.net", "trcustoms.org", "*.trcustoms.org",
+                         "data.trcustoms.org", 'staging.trcustoms.org']
+
+        if all(domain in valid_domains for domain in dns_names):
+            print(f"Valid domain found in SAN: {dns_names}")
+        else:
+            print(f"Invalid domain in SAN: {dns_names}")
+            sys.exit(1)
+
+    except x509.ExtensionNotFound:
+        print("No Subject Alternative Name (SAN) extension found in the certificate.")
+
+    pem_data = certificate.public_bytes(encoding=serialization.Encoding.PEM)
+    return pem_data.decode('utf-8')
+'''
