@@ -23,6 +23,27 @@ def make_trle_level_data():
     }
 
 
+def make_trle_tombll_data():
+    return {
+        "title": "",
+        "authors": [],
+        "tags": [],
+        "genres": [],
+        "type": "",
+        "class": "",
+        "release": "",
+        "difficulty": "",
+        "duration": "",
+        "screen": "",
+        "large_screens": [],
+        "zip_files": [],
+        "trle_id": 0,
+        "trcustoms_id": 0,
+        "body": "",
+        "walkthrough": ""
+    }
+
+
 def make_trcustoms_page_data():
     """trcustoms.org page, represents the same data as a page on the site"""
     return {
@@ -53,12 +74,12 @@ def make_trcustoms_level_data():
 def make_zip_file():
     """trcustoms.org or TRLE zipfile"""
     return {
-        "name" :"",
-        "size" :"",
-        "md5" :"",
-        "url" :"",
-        "release" : "",
-        "version" : ""
+        "name": "",
+        "size": 0.0,
+        "md5": "",
+        "url": "",
+        "release": "",
+        "version": ""
     }
 
 

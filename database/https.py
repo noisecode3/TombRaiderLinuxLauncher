@@ -113,6 +113,7 @@ class RequestHandler:
 
 
     def get_leaf(self, url):
+        """Check if we need to grab the first certificate"""
         if not self.misconfigured_server:
             self.leaf_cert = get_leaf_cert.run(url)
         if not isinstance(self.leaf_cert, bytes):
@@ -236,6 +237,7 @@ class RequestHandler:
         return None
 
 class Downloader:
+    """Zip file downloader to be used in RequestHandler"""
     def __init__(self):
         self.buffer = BytesIO()
         self.status = 0
@@ -326,7 +328,7 @@ class Downloader:
 
             # Get header info
             total_size = curl.getinfo(pycurl.CONTENT_LENGTH_DOWNLOAD)
-            zip_file['size'] = total_size / (1024 * 1024)  # Size in MiB
+            zip_file['size'] = round(total_size / (1024 * 1024), 2)  # Size in MiB
             zip_file['url'] = curl.getinfo(pycurl.EFFECTIVE_URL)
             zip_file['name'] = os.path.basename(urlparse(zip_file['url']).path)
 
@@ -379,8 +381,8 @@ class Downloader:
         return zip_file  # Always return the zip_file dictionary
 
 
-REQUEST_HANDLER = RequestHandler()
 ACQUIRE_LOCK = AcquireLock()
+REQUEST_HANDLER = RequestHandler()
 DOWNLOADER = Downloader()
 
 def get(url, content_type):

@@ -41,18 +41,18 @@ You need those, should be installed on a desktop linux
 * Qt5
 
 To ensure that our application works properly right now, you need to download the
-required certificates from Firefox and add them to your system’s certificate store.
-Unfortunately, I cannot share these certificates directly.
+required certificate from Firefox and add them to your system’s certificate store.
+Unfortunately, I cannot share thecertificate directly.
 
 Open Firefox go to trle.net and click the lock icon in the URL bar.
 Click more info, click View Certificate then in the new window
 there is a Miscellaneous section and 2 download links.
+Use the first one.
 
 Change the name from
 trle-net".pem" to trle-net".crt" so you'll have to
 
 ```text
-/usr/share/ca-certificates/mozilla/trle-net-chain.crt
 /usr/share/ca-certificates/mozilla/trle-net.crt
 ```
 
@@ -60,7 +60,6 @@ then add to /etc/ca-certificates.conf
 
 ```text
 mozilla/trle-net.crt
-mozilla/trle-net-chain.crt
 ```
 
 you'll run:
@@ -69,11 +68,10 @@ you'll run:
 update-ca-certificates
 ```
 
-and you should see that you have those files as symbolic links.
+and you should see that you have this file as a symbolic link.
 Then it should work with curl.
 
 ```shell
-/etc/ssl/certs/trle-net-chain.pem
 /etc/ssl/certs/trle-net.pem
 ```
 

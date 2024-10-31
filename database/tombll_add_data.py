@@ -3,16 +3,13 @@ Take tombll json file and add it to the database
 """
 import os
 import sys
-#import shutil
-#import hashlib
 import sqlite3
-#import zipfile
 import json
 import logging
-import requests
-#from tqdm import tqdm
 from PIL import Image
 from io import BytesIO
+
+import https
 
 
 # Set up logging
@@ -20,7 +17,6 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(mes
 logging.getLogger("requests").setLevel(logging.DEBUG)
 logging.getLogger("urllib3").setLevel(logging.DEBUG)
 
-CERT = '/etc/ssl/certs/ca-certificates.crt'
 
 def get_tombll_json(path):
     try:
@@ -141,10 +137,10 @@ def add_zip_files_to_database(zip_files_array, level_id):
 
 def add_screen_to_database(screen, level_id):
     if screen.startswith("https://www.trle.net/screens/"):
-        response = requests.get(screen, verify=CERT, timeout=5)
+        response = https.get(screen, 'image/jpeg')
 
         # Open the image and convert it to .webp format
-        img = Image.open(BytesIO(response.content))
+        img = Image.open(BytesIO(response))
         webp_image = BytesIO()
 
         # Convert the image to .webp
