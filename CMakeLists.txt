@@ -10,8 +10,13 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_package(Qt5 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
 
-set(CURL_LIBRARY "-lcurl")
 find_package(CURL REQUIRED)
+# Set policy for Boost to ensure compatibility with newer CMake versions
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
+find_package(Boost REQUIRED COMPONENTS system filesystem)
+find_package(OpenSSL REQUIRED)
 
 add_subdirectory(libs/miniz)
 
@@ -66,6 +71,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     Qt5::Sql
     miniz
     ${CURL_LIBRARY}
+    OpenSSL::SSL
+    Boost::system
+    Boost::filesystem
 )
 # link to Qt5::Test
 # the test will be a console qt application
@@ -81,6 +89,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CURL_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
     libs/miniz
     src
 )

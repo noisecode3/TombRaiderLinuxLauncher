@@ -15,6 +15,42 @@
  */
 
 #include "Network.h"
+#include <iostream>
+#include <string>
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <curl/curl.h>
+
+namespace ssl = boost::asio::ssl;
+using tcp = boost::asio::ip::tcp;
+
+std::string get_ssl_certificate(const std::string& host) {
+    boost::asio::io_context io_context;
+    ssl::context ssl_context(ssl::context::sslv23);
+
+    tcp::resolver resolver(io_context);
+    tcp::resolver::results_type endpoints = resolver.resolve(host, "https");
+    ssl::stream<tcp::socket> stream(io_context, ssl_context);
+    SSL_set_tlsext_host_name(stream.native_handle(), host.c_str());
+    boost::asio::connect(stream.lowest_layer(), endpoints);
+    stream.handshake(ssl::stream_base::client);
+
+    X509* cert = SSL_get_peer_certificate(stream.native_handle());
+    if (!cert) {
+        std::cerr << "No certificate found." << std::endl;
+        return "";
+    }
+
+    BIO* bio = BIO_new(BIO_s_mem());
+    PEM_write_bio_X509(bio, cert);
+    char* cert_str = nullptr;
+    long cert_len = BIO_get_mem_data(bio, &cert_str);
+    std::string cert_buffer(cert_str, cert_len);
+
+    BIO_free(bio);
+    X509_free(cert);
+    return cert_buffer;
+}
 
 struct WriteData
 {
@@ -57,6 +93,7 @@ int Downloader::progress_callback(
 
         // Emit signal only if progress has increased by at least 1%
         static int lastEmittedProgress = 0;
+        if ((int)progress == 0) lastEmittedProgress = 0;
         if (static_cast<int>(progress) > lastEmittedProgress)
         {
             static Downloader& instance = Downloader::getInstance();
@@ -121,7 +158,17 @@ void Downloader::run()
     CURL* curl = curl_easy_init();
     if (curl)
     {
+        std::string cert_buffer = get_ssl_certificate("www.trle.net");
+
+        // Set up the in-memory blob for curl to use
+        curl_blob blob;
+        blob.data = const_cast<void*>(static_cast<const void*>(cert_buffer.data()));
+        //blob.data = cert_buffer.data();
+        blob.len = cert_buffer.size();
+        blob.flags = CURL_BLOB_COPY;
+
         curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
+        curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Downloader::write_callback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeData);
 

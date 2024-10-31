@@ -37,43 +37,10 @@ manipulation configuration files. Bash for launching with Steam or Lutris or jus
 This install the program in you're ".local" home directory
 You need those, should be installed on a desktop linux
 
-* curl
+* curl 7.71.0 or newer
+* Boost
+* OpenSSL
 * Qt5
-
-To ensure that our application works properly right now, you need to download the
-required certificate from Firefox and add them to your system’s certificate store.
-Unfortunately, I cannot share thecertificate directly.
-
-Open Firefox go to trle.net and click the lock icon in the URL bar.
-Click more info, click View Certificate then in the new window
-there is a Miscellaneous section and 2 download links.
-Use the first one.
-
-Change the name from
-trle-net".pem" to trle-net".crt" so you'll have to
-
-```text
-/usr/share/ca-certificates/mozilla/trle-net.crt
-```
-
-then add to /etc/ca-certificates.conf
-
-```text
-mozilla/trle-net.crt
-```
-
-you'll run:
-
-```shell
-update-ca-certificates
-```
-
-and you should see that you have this file as a symbolic link.
-Then it should work with curl.
-
-```shell
-/etc/ssl/certs/trle-net.pem
-```
 
 ## Build
 
