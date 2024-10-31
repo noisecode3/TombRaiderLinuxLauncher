@@ -216,7 +216,7 @@ class RequestHandler:
     def pack_response_buffer(self, content_type, response_buffer):
         """Validate and return the response based on content type"""
         if content_type == 'text/html':
-            return response_buffer.getvalue().decode('utf-8')
+            return response_buffer.getvalue().decode('utf-8', errors='ignore')
         if content_type == 'application/json':
             return json.loads(response_buffer.getvalue().decode('utf-8'))
         if content_type in ['image/jpeg', 'image/png']:
