@@ -233,3 +233,22 @@ class Downloader:
 Never forget how we can test one function in python:
 python3 -c "from index_scrape import get_trle_page; print(get_trle_page(0, True))"
 
+
+Tracking TRLE Records Efficiently
+
+For TRCustoms, tracking and indexing records is streamlined and fast through JSON.
+
+However, tracking records on TRLE is more complex. One approach could involve scanning
+the latest pages and identifying any gaps in ID numbers. These gaps may indicate
+deleted records, though it’s likely not necessary to handle them differently. However,
+if a new record’s ID deviates significantly from the last known increment—for instance,
+going from IDs 666, 667, and 668 to a much lower number like 345—then records
+with these IDs should be checked for updates if they already exist in our database.
+
+A full resync of TRLE data will be infrequent, as it would require around 3,700 requests,
+potentially taking 1-2 days—something not feasible for regular users. To keep our
+index database relevant and manageable, a yearly refresh should suffice. This approach
+will focus on creating an index database of around 500 MB, rather than replicating
+the entire TRLE database, which could exceed 20 GB. Additional data, such as levels
+of specific interest to users, can be cached or downloaded manually, within a reasonable
+limit of around 2 GB.

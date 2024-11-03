@@ -216,7 +216,14 @@ class RequestHandler:
     def pack_response_buffer(self, content_type, response_buffer):
         """Validate and return the response based on content type"""
         if content_type == 'text/html':
-            return response_buffer.getvalue().decode('utf-8', errors='ignore')
+            raw_data = response_buffer.getvalue()
+            for encoding in ['utf-8', 'windows-1252', 'utf-16', 'utf-32']:
+                try:
+                    return raw_data.decode(encoding)
+                except UnicodeDecodeError:
+                    continue
+            logging.error("No known encoding")
+            sys.exit(1)
         if content_type == 'application/json':
             return json.loads(response_buffer.getvalue().decode('utf-8'))
         if content_type in ['image/jpeg', 'image/png']:
@@ -357,7 +364,6 @@ class Downloader:
                 return {}  # Return an empty dict on error
 
             self.status = 0
-            print("Downloaded successfully.")
 
             # Finalize MD5 checksum
             md5_hash = hashlib.md5(usedforsecurity=False)
@@ -413,7 +419,3 @@ def release_lock():
 def is_locked():
     """Lock this instance"""
     ACQUIRE_LOCK.is_locked()
-
-
-#if __name__ == '__main__':
-#    print(get("https://www.trle.net/scadm/trle_dl.php?lid=3667", 'application/zip'))

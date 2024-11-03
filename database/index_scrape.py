@@ -353,26 +353,3 @@ def get_key(id_number):
 
     print("Serial Number:", serial_number)
 
-    #return validate_downloaded_key(id_number, serial_number)
-
-
-'''
-# Create a temporary file to hold the combined certificate
-with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_cert_file:
-    # Write all certificates into the temporary file
-    for cert in cert_list:
-        temp_cert_file.write(cert)
-    
-    # Store the name of the temporary file
-    temp_cert_filename = temp_cert_file.name
-
-# Now use this temporary file with requests for SSL verification
-response = requests.get(url, verify=temp_cert_filename, timeout=5)
-
-# Once done, you can clean up the temporary file
-import os
-os.remove(temp_cert_filename)
-'''
-
-#ab:a9:b5:e7:a4:8c:f3:fc:5a:73:da:16:04:36:03:20
-#https://crt.sh/?serial=ab%3Aa9%3Ab5%3Ae7%3Aa4%3A8c%3Af3%3Afc%3A5a%3A73%3Ada%3A16%3A04%3A36%3A03%3A20
