@@ -16,7 +16,16 @@ if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif()
 find_package(Boost REQUIRED COMPONENTS system filesystem)
+
 find_package(OpenSSL REQUIRED)
+
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
+    message(STATUS "Submodule 'libs/miniz' not found. Initializing submodules...")
+    execute_process(
+        COMMAND git submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endif()
 
 add_subdirectory(libs/miniz)
 

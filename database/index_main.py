@@ -3,13 +3,13 @@ import sys
 import os
 import time
 import index_view
-import index_scrape
+import scrape
 import index_query
 import make_index_database
 
 def test_trle():
     """Browse TRLE data"""
-    index_view.print_trle_page(index_scrape.get_trle_page(0, True))
+    index_view.print_trle_page(scrape.get_trle_page(0, True))
     offset = 0
     while True:
         user_input = input("Press Enter for the next page (or type 'q' to quit: ")
@@ -17,12 +17,12 @@ def test_trle():
             print("Exiting...")
             break
         offset += 20
-        index_view.print_trle_page(index_scrape.get_trle_page(offset, True))
+        index_view.print_trle_page(scrape.get_trle_page(offset, True))
 
 
 def test_trcustoms():
     """Browse Trcustom data"""
-    page = index_scrape.get_trcustoms_page(1, True)
+    page = scrape.get_trcustoms_page(1, True)
     index_view.print_trcustoms_page(page)
     offset = 1
     while True:
@@ -31,7 +31,7 @@ def test_trcustoms():
             print("Exiting...")
             break
         offset += 1
-        page = index_scrape.get_trcustoms_page(offset, True)
+        page = scrape.get_trcustoms_page(offset, True)
         index_view.print_trcustoms_page(page)
 
 
@@ -58,7 +58,7 @@ def test_trcustoms_pic_local():
     while True:
         page = index_query.get_trcustoms_page_local(offset, True)
         levels = page['levels']
-        covers = index_scrape.get_cover_list(levels)
+        covers = scrape.get_trcustoms_cover_list(levels, True)
         index_view.display_menu(levels, covers)
         for file in covers:
             try:
@@ -89,7 +89,7 @@ def test_insert_trle_book():
        method that is much slower but will work and accurate"""
 
     # Get the first page to determine the total number of records
-    page = index_scrape.get_trle_page(0)
+    page = scrape.get_trle_page(0)
     total_records = page['records_total']
 
     # Insert the first page of data
@@ -101,7 +101,7 @@ def test_insert_trle_book():
     offset = 20
     while offset < total_records:
         # Fetch the next page of data
-        page = index_scrape.get_trle_page(offset)
+        page = scrape.get_trle_page(offset)
         index_query.insert_trle_page(page)
 
         # Increment offset by 20 for the next batch
@@ -118,7 +118,7 @@ def test_insert_trle_book():
 def test_insert_trcustoms_book():
     """Get index data"""
     # Get the first page to determine the total number of records
-    page = index_scrape.get_trcustoms_page(1)
+    page = scrape.get_trcustoms_page(1)
     total_pages = page['total_pages']
 
     # Insert the first page of data
@@ -130,7 +130,7 @@ def test_insert_trcustoms_book():
     page_number = 2
     while page_number <= total_pages:
         # Fetch the next page of data
-        page = index_scrape.get_trcustoms_page(page_number)
+        page = scrape.get_trcustoms_page(page_number)
         index_query.insert_trcustoms_page(page)
         print(f"Page number:{page_number} of {total_pages}")
 

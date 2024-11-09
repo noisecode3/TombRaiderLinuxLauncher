@@ -252,3 +252,6 @@ will focus on creating an index database of around 500 MB, rather than replicati
 the entire TRLE database, which could exceed 20 GB. Additional data, such as levels
 of specific interest to users, can be cached or downloaded manually, within a reasonable
 limit of around 2 GB.
+
+This was a special walkthrough the script cant handle
+https://www.trle.net/sc/Levelwalk.php?lid=864

@@ -1,310 +1,32 @@
 """
 Grab raw data from trle.net/TRCustoms.org and put it in a data.json file
 """
-import re
 import sys
 import json
 import logging
-from urllib.parse import urlparse, parse_qs
-from bs4 import BeautifulSoup, Tag
 
-import https
-import data_factorie
+import scrape
+import data_factory
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 logging.getLogger("requests").setLevel(logging.DEBUG)
 
-
-def validate_url(url_input):
-    """Set some constraints to the URL"""
-    parsed_url = urlparse(url_input)
-
-    if not all([parsed_url.scheme, parsed_url.netloc]):
-        logging.error("Invalid URL format.")
-        sys.exit(1)
-
-    if parsed_url.scheme != "https":
-        logging.error("Only HTTPS URLs are allowed.")
-        sys.exit(1)
-
-    if parsed_url.netloc.endswith("trle.net"):
-        return "trle.net"
-
-    if parsed_url.netloc.endswith("trcustoms.org"):
-        return "trcustoms.org"
-
-    logging.error("URL must belong to the domain 'trle.net' or 'trcustoms.org'.")
-    sys.exit(1)
-
-
-def get_soup(url):
-    response = https.get(url, 'text/html')
-    if response:
-        return BeautifulSoup(response, 'html.parser')
-    return ""
-
-
-def get_trle_walkthrough(level_soup):
-    walkthrough_link = level_soup.find('a', string='Walkthrough')
-    if walkthrough_link:
-        url = 'https://www.trle.net/sc/' + walkthrough_link['href']
-    else:
-        logging.info("Walkthrough not found" )
-        return ""
-
-    soup = get_soup(url)
-    iframe_tag = soup.find('iframe')
-    if not iframe_tag or not isinstance(iframe_tag, Tag):
-        sys.exit(1)
-
-    iframe_src = iframe_tag['src']
-    if not iframe_src or not isinstance(iframe_src, str):
-        sys.exit(1)
-
-    url = "https://www.trle.net" + iframe_src
-    response = https.get(url, 'text/html')
-    if response:
-        return response
-    return None
-
-
-def get_trle_zip_file(soup):
-    download_link = soup.find('a', string='Download')
-    if download_link:
-        return https.get(download_link['href'], 'application/zip')
-    logging.error("Error fetching download url")
-    sys.exit(1)
-
-
-def get_trle_authors(soup):
-    # Find the first <td> with class "medGText"
-    first_td = soup.find('td', class_='medGText')
-
-    # Find all anchor tags within the first <td>
-    author_links = first_td.find_all('a')
-
-    # Filter the anchor tags manually based on href attribute
-    author_names = []
-    for link in author_links:
-        href = link.get('href')
-        if href and href.startswith('/sc/authorfeatures.php?aid='):
-            author_names.append(link.text)
-    return author_names
-
-
-def get_trle_type(soup):
-    return soup.find('td', string='file type:').find_next('td').get_text(strip=True) or ""
-
-
-def get_trle_class(soup):
-    return soup.find('td', string='class:').find_next('td').get_text(strip=True) or ""
-
-
-def get_trle_release(soup):
-    return soup.find('td', string='release date:').find_next('td').get_text(strip=True) or ""
-
-
-def get_trle_difficulty(soup):
-    difficulty_td = soup.find('td', string='difficulty:')
-    if difficulty_td:
-        next_td = difficulty_td.find_next('td')
-        if next_td:
-            return next_td.get_text(strip=True)
-    return ""
-
-
-def get_trle_duration(soup):
-    duration_td = soup.find('td', string='duration:')
-    if duration_td:
-        next_td = duration_td.find_next('td')
-        if next_td:
-            return next_td.get_text(strip=True)
-    return ""
-
-
-def get_trle_body(soup):
-    specific_tags = soup.find_all('td', class_='medGText', align='left', valign='top')
-    return str(specific_tags[1]) if len(specific_tags) >= 2 else ""
-
-
-def get_trle_large_screens(soup):
-    onmouseover_links = soup.find_all(lambda tag: tag.name == 'a' and 'onmouseover' in tag.attrs)
-    return [link['href'] for link in onmouseover_links]
-
-
-def get_trle_screen(soup):
-    image_tag = soup.find('img', class_='border')
-    return 'https://www.trle.net' + image_tag['src']
-
-
-def get_trle_title(soup):
-    title_span = soup.find('span', class_='subHeader')
-    if title_span:
-        title = title_span.get_text(strip=True)
-        br_tag = title_span.find('br')
-        if br_tag:
-            return title_span.contents[0].strip()
-        return title
-    logging.error("Failed to retrieve trle title")
-    sys.exit(1)
-
-
-def get_trle_level(soup, data):
-    data['title'] = get_trle_title(soup)
-    data['authors'] = get_trle_authors(soup)
-    data['type'] = get_trle_type(soup)
-    data['class'] = get_trle_class(soup)
-    data['release'] = get_trle_release(soup)
-    data['difficulty'] = get_trle_difficulty(soup)
-    data['duration'] = get_trle_duration(soup)
-    data['screen'] = get_trle_screen(soup)
-    data['large_screens'] = get_trle_large_screens(soup)
-    data['zip_files'] = [get_trle_zip_file(soup)]
-    data['body'] = get_trle_body(soup)
-    data['walkthrough'] = get_trle_walkthrough(soup)
-
-
-def trle_search_post_parser(url):
-    return url.replace(" ", r"+").replace(":", r"%3A") \
-            .replace("!", r"%21").replace("#", r"%21") \
-            .replace("/", r"%2F").replace("&", r"%26")
-
-
-def trle_url_to_int(url):
-    try:
-        lid_value = int(parse_qs(urlparse(url).query).get('lid', [None])[0])
-        return lid_value
-    except (TypeError, ValueError):
-        return None
-
-
-def get_trcustoms_level(url, data):
-    if "api" not in url:
-        parts = url.split("/")
-        url = f"{parts[0]}//{parts[2]}/api/{'/'.join(parts[3:])}"
-        trcustom_level = https.get(url, 'application/json')
-
-        title = trcustom_level['name']
-        title = trle_search_post_parser(title)
-        # Look out for + ' & !
-        trle_url = get_trle_index(title)
-        trle_soup = get_soup(trle_url)
-        data['title'] = get_trle_title(trle_soup)
-        data['authors'] = get_trle_authors(trle_soup)
-        data['type'] = get_trle_type(trle_soup)
-        data['class'] = get_trle_class(trle_soup)
-        data['release'] = get_trle_release(trle_soup)
-        data['difficulty'] = get_trle_difficulty(trle_soup)
-        data['duration'] = get_trle_duration(trle_soup)
-        data['screen'] = get_trle_screen(trle_soup)
-        data['large_screens'] = get_trle_large_screens(trle_soup)
-        data['zip_files'] = [get_trle_zip_file(trle_soup)]
-        data['body'] = get_trle_body(trle_soup)
-        data['walkthrough'] = get_trle_walkthrough(trle_soup)
-        data['tags'] = [genre['name'] for genre in trcustom_level['tags']]
-        data['genres'] = [genre['name'] for genre in trcustom_level['genres']]
-
-        for file_data in trcustom_level['files']:
-            zip_file = https.get(file_data['url'], 'application/zip')
-
-            name = trcustom_level['name'].replace(" ", r"") \
-                    .replace("'", r"").replace("-", r"") \
-                    .replace(":", r"").replace("!", r"") \
-                    .replace("#", r"").replace("/", r"").replace("&", r"")
-            authors = ""
-            for author in trcustom_level['authors']:
-                if authors != "":
-                    authors = authors +"-"
-                authors = authors + author['username']
-
-            if file_data['version'] == 1:
-                version = ""
-            else:
-                version = f"-V{file_data['version']}"
-            zip_file['name'] = f"{file_data['id']}-{name}{version}-{authors}.zip"
-
-            zip_file['url'] = file_data['url']
-            zip_file['release'] = file_data['created']
-            zip_file['version'] = file_data['version']
-            data['zip_files'].append(zip_file)
-            data['trle_id'] =  trle_url_to_int(trle_url)
-            data['trcustoms_id'] = trcustom_level['id']
-    return ""
-
-def get_trle_index(title):
-    url = "https://www.trle.net/pFind.php?atype=1&author=&level=" + title
-    print(url)
-    response = https.get(url, 'application/zip')
-
-    soup = BeautifulSoup(response, 'html.parser')
-    # Find all <a> tags where href contains '/sc/levelfeatures.php?lid='
-    anchor_tags = soup.find_all('a', href=re.compile(r'/sc/levelfeatures\.php\?lid='))
-    # Loop through each anchor tag and print the href and text
-    i = 0
-    for tag in anchor_tags:
-        i = i+1
-        print(f"{i}) {tag.text}, Href: {tag['href']}")
-    anchor_tags_len = len(anchor_tags)
-    if anchor_tags_len > 1:
-        number_input = int(input("Pick A Number From The List: "))
-        if 1  <= number_input <= anchor_tags_len:
-            return "https://www.trle.net" + anchor_tags[number_input-1]['href']
-    if anchor_tags_len == 1:
-        return "https://www.trle.net" + anchor_tags[0]['href']
-    logging.error("trcustoms.org only not implemented")
-    sys.exit(1)
-
-#"https://trcustoms.org/levels/"#num
-# with json api
-#"https://trcustoms.org/api/levels/"#num
-#search trle url
-
-
-
-
-
-# Replace custom tags with HTML spans and apply classes
-# https://raw.githubusercontent.com/rr-/TRCustoms/develop/frontend/src/components/markdown-composer/MarkdownButtons/index.tsx
-def custom_markdown_parser(text):
-    text = re.sub(r'\[o\](.*?)\[/o\]', r'<span class="object">\1</span>', text)  # blue text for objects
-    text = re.sub(r'\[s\](.*?)\[/s\]', r'<span class="secret">\1</span>', text)   # secret styling
-    text = re.sub(r'\[p\](.*?)\[/p\]', r'<span class="pickup">\1</span>', text)   # pickup styling
-    text = re.sub(r'\[e\](.*?)\[/e\]', r'<span class="enemy">\1</span>', text)    # enemy styling
-    text = re.sub(r'\[t\](.*?)\[/t\]', r'<span class="trap">\1</span>', text)     # trap styling
-    text = re.sub(r'\[center\](.*?)\[/center\]', r'<div style="text-align: center;">\1</div>', text)  # center align
-
-    return text
-
-# Example usage
-#description = """[center]**Tomb Raider: Pandora's Box**[/center]
-#[s]Secret text[/s] [o]Object text[/o] [p]Pickup text[/p]"""
-
-#parsed_description = custom_markdown_parser(description)
-#print(parsed_description)
-
-
-
-
 if __name__ == '__main__':
-    try:
-        if len(sys.argv) != 2:
-            logging.error("Usage: python3 getData.py URL")
-            sys.exit(1)
-        else:
-            URL = sys.argv[1]
-            HOST = validate_url(URL)
-            DATA = data_factorie.make_trle_tombll_data()
-            if HOST == "trle.net":
-                SOUP = get_soup(URL)
-                get_trle_level(SOUP, DATA)
-                with open('data.json', mode='w', encoding='utf-8') as json_file:
-                    json.dump(DATA, json_file)
-            if HOST == "trcustoms.org":
-                get_trcustoms_level(URL, DATA)
-                with open('data.json', mode='w', encoding='utf-8') as json_file:
-                    json.dump(DATA, json_file)
-    finally:
-        # OS should release the port immediately when the program closes "normally"
-        # like with sys.exit(1) but doing it here is better
-        https.release_lock()  # https locks automatically
+    if len(sys.argv) != 2:
+        logging.error("Usage: python3 getData.py URL")
+        sys.exit(1)
+    else:
+        URL = sys.argv[1]
+        HOST = scrape.url_domain(URL)
+        DATA = data_factory.make_trle_tombll_data()
+        if HOST == "trle.net":
+            DATA = data_factory.make_trle_tombll_data()
+            SOUP = scrape.get_soup(URL)
+            scrape.get_trle_level(SOUP, DATA)
+            with open('data.json', mode='w', encoding='utf-8') as json_file:
+                json.dump(DATA, json_file)
+        if HOST == "trcustoms.org":
+            scrape.get_trcustoms_level(URL, DATA)
+            with open('data.json', mode='w', encoding='utf-8') as json_file:
+                json.dump(DATA, json_file)

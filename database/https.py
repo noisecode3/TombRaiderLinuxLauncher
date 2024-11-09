@@ -13,7 +13,8 @@ import pycurl
 from tqdm import tqdm
 
 import get_leaf_cert
-import data_factorie
+import data_factory
+
 class AcquireLock:
     """
     Create a TCP socket to ensure a single instance.
@@ -318,7 +319,7 @@ class Downloader:
         """
         curl = pycurl.Curl()
         temp_cert_path = None
-        zip_file = data_factorie.make_zip_file()  # Initialize the zip_file dictionary
+        zip_file = data_factory.make_zip_file()  # Initialize the zip_file dictionary
 
         try:
             # Get file size for the progress bar
