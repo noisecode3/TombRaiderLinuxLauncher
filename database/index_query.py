@@ -1,80 +1,165 @@
+"""Insert or update all index data"""
 import os
 import sys
 import sqlite3
-
 import data_factory
+
+# Set the working directory to the script's location to ensure relative paths work correctly
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-
 def check_trle_doubles():
+    """
+    Checks for duplicate entries in the Trle table.
+    
+    This function connects to the 'index.db' SQLite database and queries the Trle table 
+    to identify any duplicate records based on certain fields (trleExternId, author, 
+    title, difficulty, duration, class, type, and release). It groups the results by 
+    these fields and counts occurrences. If any grouped records appear more than once, 
+    they are considered duplicates, and those entries are returned and printed.
+    """
+    # Connect to the SQLite database
     connection = sqlite3.connect('index.db')
     cursor = connection.cursor()
+
+    # Execute query to find duplicates
     result = query_return_fetchall("""
         SELECT 
-        tr.trleExternId,
-        tr.author,
-        tr.title,
-        tr.difficulty,
-        tr.duration,
-        tr.class,
-        tr.type,
-        tr.release,
-        COUNT(*) as record_count
-    FROM Trle AS tr
-    GROUP BY 
-        tr.trleExternId,
-        tr.author,
-        tr.title,
-        tr.difficulty,
-        tr.duration,
-        tr.class,
-        tr.type,
-        tr.release
-    HAVING COUNT(*) > 1
-    ORDER BY record_count DESC;""", None, cursor)
+            tr.trleExternId,
+            tr.author,
+            tr.title,
+            tr.difficulty,
+            tr.duration,
+            tr.class,
+            tr.type,
+            tr.release,
+            COUNT(*) AS record_count
+        FROM Trle AS tr
+        GROUP BY
+            tr.trleExternId,
+            tr.author,
+            tr.title,
+            tr.difficulty,
+            tr.duration,
+            tr.class,
+            tr.type,
+            tr.release
+        HAVING COUNT(*) > 1  -- Only include groups with more than one record
+        ORDER BY record_count DESC;
+    """, None, cursor)
+
+    # Print the results, which includes any duplicate records found
     print(result)
+
+    # Close the database connection
     connection.close()
 
 
 def query_return_fetchall(query, params, cursor):
+    """
+    Executes a SELECT query and fetches all results from the database.
+    
+    Parameters:
+    - query (str): The SQL query string to execute. Must be a SELECT query.
+    - params (tuple or None): Parameters to bind to the query, or None if there are no parameters.
+    - cursor (sqlite3.Cursor): The database cursor used to execute the query.
+    
+    Returns:
+    - list: The result set from the query as a list of tuples.
+
+    Raises:
+    - Exits the program if the query is not a SELECT statement or if a database error occurs.
+    """
     try:
+        # Check if the query is a SELECT statement
         if not query.strip().upper().startswith("SELECT"):
             print("You need to use SELECT with this function")
             sys.exit(1)
+
+        # Execute the query with or without parameters
         if not params:
             cursor.execute(query)
         else:
             cursor.execute(query, params)
+
+        # Fetch and return all rows from the executed query
         return cursor.fetchall()
+
     except sqlite3.DatabaseError as db_error:
+        # Handle database errors by printing an error message and exiting
         print(f"Database error occurred: {db_error}")
         sys.exit(1)
 
 
 def query_return_id(query, params, cursor):
+    """
+    Executes a query and returns an ID if available.
+
+    Parameters:
+    - query (str): The SQL query to execute.
+    - params (tuple): Parameters to bind to the query.
+    - cursor (sqlite3.Cursor): The database cursor used to execute the query.
+
+    Returns:
+    - int or None: The last inserted row ID if an INSERT query was run, 
+                   or the first integer result from a SELECT query, if available.
+                   Returns None if no valid result is found.
+
+    Raises:
+    - Exits the program if an integrity or other database error occurs.
+    """
     try:
+        # Execute the query with parameters
         cursor.execute(query, params)
+
+        # If the query is an INSERT statement, return the last inserted row ID
         if query.strip().upper().startswith("INSERT"):
             return cursor.lastrowid
+
+        # Fetch one result for non-INSERT queries
         result = cursor.fetchone()
+
+        # Return the first element of the result if it's a non-negative integer
         if result and isinstance(result[0], int) and result[0] >= 0:
             return result[0]
+
+        # Return None if no valid result is found
         return None
+
     except sqlite3.IntegrityError as integrity_error:
+        # Handle integrity errors (e.g., unique constraint violations)
         print(f"Integrity error occurred with parameters: {params}\n{integrity_error}")
         sys.exit(1)
+
     except sqlite3.DatabaseError as db_error:
+        # Handle general database errors
         print(f"Database error occurred: {db_error}")
         sys.exit(1)
 
 
 def query_run(query, params, cursor):
+    """
+    Executes a query that does not return results (e.g., UPDATE, DELETE, or non-returning INSERT).
+    
+    Parameters:
+    - query (str): The SQL query to execute.
+    - params (tuple): Parameters to bind to the query.
+    - cursor (sqlite3.Cursor): The database cursor used to execute the query.
+
+    Raises:
+    - Exits the program if an integrity or other database error occurs.
+    """
     try:
+        # Execute the query with parameters
         cursor.execute(query, params)
+
+    # Handle specific database errors
     except sqlite3.IntegrityError as integrity_error:
+        # Catch integrity-related issues, such as unique constraint violations
         print(f"Integrity error occurred with parameters: {params}\n{integrity_error}")
         sys.exit(1)
+
     except sqlite3.DatabaseError as db_error:
+        # Catch any other database errors
         print(f"Database error occurred: {db_error}")
         sys.exit(1)
 
@@ -197,6 +282,7 @@ def insert_trle_page(page):
 
 
 def insert_trcustoms_page(page):
+    """Take the defined trcustom page data and insert every record in the database."""
     if not page.get('levels'):
         print("Empty page!")
         return
@@ -343,6 +429,7 @@ def insert_trcustoms_page(page):
 
 
 def get_trle_level_local_by_id(trle_id):
+    """Return trle level by id."""
     connection = sqlite3.connect('index.db')
     cursor = connection.cursor()
     if not isinstance(trle_id, int) and trle_id > 0:
@@ -388,6 +475,7 @@ def get_trle_level_local_by_id(trle_id):
 
 
 def get_trcustoms_level_local_by_id(trcustoms_id):
+    """Return trcustoms level by id."""
     connection = sqlite3.connect('index.db')
     cursor = connection.cursor()
     if not isinstance(trcustoms_id, int) and trcustoms_id > 0:
@@ -439,7 +527,8 @@ def get_trcustoms_level_local_by_id(trcustoms_id):
     return level
 
 
-def get_trle_page_local(offset, sortCreatedFirst=False):
+def get_trle_page_local(offset, sort_latest_first=False):
+    """Get a trle page."""
     connection = sqlite3.connect('index.db')
     cursor = connection.cursor()
 
@@ -457,6 +546,8 @@ def get_trle_page_local(offset, sortCreatedFirst=False):
     page = data_factory.make_trle_page_data()
     page['offset'] = offset
     page['records_total'] = rec
+
+    order_direction = 1 if sort_latest_first else 0
 
     result = query_return_fetchall("""
         SELECT
@@ -476,11 +567,15 @@ def get_trle_page_local(offset, sortCreatedFirst=False):
         LEFT JOIN Class ON (Class.ClassID = tr.class)
         INNER JOIN Type ON (Type.TypeID = tr.type)
         GROUP BY tr.TrleID  -- Group by the TrleID to get unique records
-        ORDER BY tr.release DESC, tr.trleExternId DESC
+        ORDER BY
+            CASE WHEN ? = 0 THEN tr.release END ASC,
+            CASE WHEN ? = 0 THEN tr.trleExternId END ASC,
+            CASE WHEN ? = 1 THEN tr.release END DESC,
+            CASE WHEN ? = 1 THEN tr.trleExternId END DESC
         LIMIT ? OFFSET ?;
-        """, (limit, offset), cursor
-    )
-    # Process result to format the output as needed
+        """, (order_direction, order_direction, order_direction, order_direction, limit, offset),
+                cursor)
+
     for row in result:
         level = data_factory.make_trle_level_data()
         level['trle_id'] = row[0]
@@ -498,7 +593,8 @@ def get_trle_page_local(offset, sortCreatedFirst=False):
     return page
 
 
-def get_trcustoms_page_local(page_number, sortCreatedFirst=False):
+def get_trcustoms_page_local(page_number, sort_latest_first=False):
+    """Get a trcustoms page."""
     connection = sqlite3.connect('index.db')
     cursor = connection.cursor()
 
@@ -519,10 +615,12 @@ def get_trcustoms_page_local(page_number, sortCreatedFirst=False):
     page['total_pages'] = total
     page['records_total'] = rec
 
+    order_direction = 1 if sort_latest_first else 0
+
     result = query_return_fetchall("""
         SELECT
-            tc.TrcustomsID,
-            GROUP_CONCAT(DISTINCT Author.value) AS authors,  -- Concatenate
+            tc.trcustomsExternId,
+            GROUP_CONCAT(DISTINCT Author.value) AS authors,
             Title.value,
             GROUP_CONCAT(DISTINCT Tag.value) AS tags,
             GROUP_CONCAT(DISTINCT Genre.value) AS genres,
@@ -543,12 +641,16 @@ def get_trcustoms_page_local(page_number, sortCreatedFirst=False):
         LEFT JOIN Genre ON tgl.genreID = Genre.GenreID
         LEFT JOIN TrcustomsTagsList AS ttl ON ttl.trcustomsID = tc.TrcustomsID
         LEFT JOIN Tag ON ttl.tagID = Tag.TagID
-        GROUP BY tc.TrcustomsID  -- Group by the TrcustomsID to get unique records
-        ORDER BY tc.release DESC, tc.TrcustomsID DESC
+        GROUP BY tc.TrcustomsID
+        ORDER BY
+            CASE WHEN ? = 0 THEN tc.release END ASC,
+            CASE WHEN ? = 0 THEN tc.trcustomsExternId END ASC,
+            CASE WHEN ? = 1 THEN tc.release END DESC,
+            CASE WHEN ? = 1 THEN tc.trcustomsExternId END DESC
         LIMIT ? OFFSET ?;
-        """, (limit, offset), cursor
-    )
-    # Process result to format the output as needed
+    """, (order_direction, order_direction, order_direction, order_direction, limit, offset),
+            cursor)
+
     for row in result:
         level = data_factory.make_trcustoms_level_data()
         level['trcustoms_id'] = row[0]
