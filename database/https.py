@@ -15,15 +15,16 @@ from tqdm import tqdm
 import get_leaf_cert
 import data_factory
 
+
 class AcquireLock:
     """
     Create a TCP socket to ensure a single instance.
-    
-    This class creates a TCP socket that binds to a specific port. If an instance 
-    of this class is already running, it will log an error and exit. 
+
+    This class creates a TCP socket that binds to a specific port. If an instance
+    of this class is already running, it will log an error and exit.
 
     Example usage:
-    
+
     ```python
     lock = AcquireLock()
     try:
@@ -65,7 +66,6 @@ class RequestHandler:
         self.misconfigured_server = False
         self.leaf_cert = None
 
-
     def validate_url(self, url):
         """Limit to used domains."""
         allowed_domains = (
@@ -79,7 +79,6 @@ class RequestHandler:
 
         logging.error("Invalid URL domain: %s", url)
         sys.exit(1)
-
 
     def head(self, curl):
         """Take the curl object to head state, with redirect."""
@@ -108,7 +107,6 @@ class RequestHandler:
             return buffer.getvalue().decode('utf-8')
         return ""
 
-
     def validate_data_type(self, content_type):
         """Limit to used data types."""
         valid_content_types = {
@@ -118,13 +116,12 @@ class RequestHandler:
             'image/jpeg',
             'image/png',
             'text/html',
-            'head' # this is not MIME
+            'head'  # this is not MIME
         }
 
         if content_type not in valid_content_types:
             logging.error("Invalid content type: %s", content_type)
             sys.exit(1)
-
 
     def set_leaf(self, curl):
         """Write the certificate to a temporary file manually"""
@@ -140,7 +137,6 @@ class RequestHandler:
         # Set CAINFO to use the temporary certificate file
         curl.setopt(pycurl.CAINFO, temp_cert_path)
         return temp_cert_path
-
 
     def get_leaf(self, url):
         """Check if we need to grab the first certificate"""
@@ -163,7 +159,6 @@ class RequestHandler:
 
         if url.startswith("https://www.trle.net/") and not self.misconfigured_server:
             self.get_leaf(url)
-
 
     def get_response(self, url, content_type):
         """Handle all https requests"""
@@ -217,7 +212,7 @@ class RequestHandler:
                 break
 
             except pycurl.error as curl_error:
-                #if curl_error.args[0] == 60:  # SSL certificate error
+                # if curl_error.args[0] == 60:  # SSL certificate error
                 logging.error("Request failed: %s", curl_error)
                 retries += 1
                 if retries >= max_retries:
@@ -229,7 +224,6 @@ class RequestHandler:
                     os.remove(temp_cert_path)
 
         return self.close_response(curl, headers, response_buffer, content_type)
-
 
     def close_response(self, curl, headers, response_buffer, content_type):
         """Pack response and close curl"""
@@ -251,10 +245,9 @@ class RequestHandler:
             response = self.pack_response_buffer(content_type, response_buffer)
             curl.close()
             return response
-        logging.error("Unexpected content type: %s, expected %s", \
-                response_content_type, content_type)
+        logging.error("Unexpected content type: %s, expected %s",
+                      response_content_type, content_type)
         sys.exit(1)
-
 
     def pack_response_buffer(self, content_type, response_buffer):
         """Validate and return the response based on content type"""
@@ -275,7 +268,6 @@ class RequestHandler:
             return response_buffer.getvalue()
         logging.error("Unsupported content type: %s", content_type)
         return None
-
 
     def extract_content_type(self, headers):
         """Read the header lines to look for content-type"""
@@ -313,11 +305,12 @@ class Downloader:
         if total_to_download > 0:
             if self.progress_bar is None:
                 # Initialize the progress bar if it's not set
-                self.progress_bar= tqdm(total=total_to_download,
-                        unit='B',
-                        unit_scale=True,
-                        unit_divisor=1024,
-                        desc="Downloading")
+                self.progress_bar = tqdm(total=total_to_download,
+                                         unit='B',
+                                         unit_scale=True,
+                                         unit_divisor=1024,
+                                         desc="Downloading")
+
             self.progress_bar.update(downloaded - self.progress_bar.n)  # Update the progress bar
             self.progress_bar.total = total_to_download
         return 0  # Returning 0 means to continue
@@ -389,11 +382,12 @@ class Downloader:
             curl.setopt(pycurl.WRITEDATA, self.buffer)
 
             # Enable progress meter
-            self.progress_bar= tqdm(total=total_size,
-                    unit='B',
-                    unit_scale=True,
-                    unit_divisor=1024,
-                    desc="Downloading")
+            self.progress_bar = tqdm(total=total_size,
+                                     unit='B',
+                                     unit_scale=True,
+                                     unit_divisor=1024,
+                                     desc="Downloading")
+
             curl.setopt(pycurl.NOPROGRESS, False)
             curl.setopt(pycurl.XFERINFOFUNCTION, self.progress_callback)
 
@@ -434,6 +428,7 @@ class Downloader:
 ACQUIRE_LOCK = AcquireLock()
 REQUEST_HANDLER = RequestHandler()
 DOWNLOADER = Downloader()
+
 
 def get(url, content_type):
     """

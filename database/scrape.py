@@ -23,16 +23,17 @@ logging.getLogger("requests").setLevel(logging.DEBUG)
 # Some basic URL converters
 ###############################################################################
 
+
 def trle_search_parser(url):
     """
     Prepares a URL for level title searches on TRLE by encoding special characters.
-    
-    Note: This function should generally be avoided in favor of searching the local 
+
+    Note: This function should generally be avoided in favor of searching the local
     database, as it may not fully cover all cases or include recent updates.
-    
+
     Args:
         url (str): The original URL string to be formatted for TRLE search compatibility.
-        
+
     Returns:
         str: The formatted URL with specific characters
         replaced to match TRLE encoding requirements.
@@ -46,10 +47,10 @@ def trle_search_parser(url):
 def url_postfix(url):
     """
     Extracts the file extension from a URL without the leading dot.
-    
+
     Args:
         url (str): The URL to extract the file extension from.
-    
+
     Returns:
         str: The file extension without the leading dot,
         or an empty string if no extension is present.

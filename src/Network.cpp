@@ -15,11 +15,11 @@
  */
 
 #include "Network.h"
+#include <curl/curl.h>
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <curl/curl.h>
 
 namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
@@ -44,7 +44,7 @@ std::string get_ssl_certificate(const std::string& host) {
     BIO* bio = BIO_new(BIO_s_mem());
     PEM_write_bio_X509(bio, cert);
     char* cert_str = nullptr;
-    long cert_len = BIO_get_mem_data(bio, &cert_str);
+    qint64 cert_len = BIO_get_mem_data(bio, &cert_str);
     std::string cert_buffer(cert_str, cert_len);
 
     BIO_free(bio);
@@ -93,7 +93,7 @@ int Downloader::progress_callback(
 
         // Emit signal only if progress has increased by at least 1%
         static int lastEmittedProgress = 0;
-        if ((int)progress == 0) lastEmittedProgress = 0;
+        if (static_cast<int>(progress) == 0) lastEmittedProgress = 0;
         if (static_cast<int>(progress) > lastEmittedProgress)
         {
             static Downloader& instance = Downloader::getInstance();
@@ -122,8 +122,16 @@ int Downloader::getStatus()
 
 void Downloader::saveToFile(const QByteArray& data, const QString& filePath)
 {
+    QFileInfo fileInfo(filePath);
+
+    if (fileInfo.exists() && !fileInfo.isFile()) {
+        qDebug() << "Error: The zip path is not a regular file." << filePath;
+        return;
+    }
+
     QFile file(filePath);
-    if (file.open(QIODevice::WriteOnly))
+
+    if (file.open(QIODevice::WriteOnly))  // flawfinder: ignore
     {
         file.write(data);
         file.close();
@@ -144,9 +152,17 @@ void Downloader::run()
     QByteArray byteArray = urlString.toUtf8();
     const char* url_cstring = byteArray.constData();
 
-    QString filePath = levelDir_m.absolutePath() + QDir::separator() + file_m;
+    const QString filePath = levelDir_m.absolutePath() +
+            QDir::separator() + file_m;
 
-    FILE* file = fopen(filePath.toUtf8().constData(), "wb");
+    QFileInfo fileInfo(filePath);
+
+    if (fileInfo.exists() && !fileInfo.isFile()) {
+        qDebug() << "Error: The zip path is not a regular file." << filePath;
+        return;
+    }
+
+    FILE* file = fopen(filePath.toUtf8(), "wb");  // flawfinder: ignore
     if (!file)
     {
         qDebug() << "Error opening file for writing:" << filePath;
@@ -162,14 +178,15 @@ void Downloader::run()
 
         // Set up the in-memory blob for curl to use
         curl_blob blob;
-        blob.data = const_cast<void*>(static_cast<const void*>(cert_buffer.data()));
-        //blob.data = cert_buffer.data();
+        blob.data = cert_buffer.data();
         blob.len = cert_buffer.size();
         blob.flags = CURL_BLOB_COPY;
 
         curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
         curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Downloader::write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                Downloader::write_callback);
+
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeData);
 
         // Follow redirects
@@ -177,7 +194,9 @@ void Downloader::run()
 
         // Enable progress meter
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, Downloader::progress_callback);
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
+                Downloader::progress_callback);
+
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, nullptr);
 
         // Perform the download
@@ -186,16 +205,16 @@ void Downloader::run()
         if (res != CURLE_OK)
         {
             status_m = 1;
-            qDebug() << "curl_easy_perform() failed:" << curl_easy_strerror(res);
+            qDebug() << "CURL failed:" << curl_easy_strerror(res);
             // we need to catch any of those that seem inportant here to the GUI
             // and reset GUI state
             // https://curl.se/libcurl/c/libcurl-errors.html
-            if(res == 6 || res == 7 || res == 28 || res == 35)
+            if (res == 6 || res == 7 || res == 28 || res == 35)
             {
                 emit this->networkWorkErrorSignal(1);
                 QCoreApplication::processEvents();
             }
-            else if(res == CURLE_PEER_FAILED_VERIFICATION)
+            else if (res == CURLE_PEER_FAILED_VERIFICATION)
             {
                 emit this->networkWorkErrorSignal(2);
                 QCoreApplication::processEvents();
