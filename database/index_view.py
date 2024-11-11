@@ -15,7 +15,7 @@ def print_trle_page(page):
     levels = page['levels']
 
     # Column widths for even spacing
-    column_widths = [20, 20, 70, 20, 15, 15, 10, 20]
+    column_widths = [6, 20, 70, 17, 11, 16, 6, 10]
 
     headers = ["ID", "Author", "Level Name", "Difficulty",
                "Duration", "Class", "Type", "Released"]
@@ -30,8 +30,8 @@ def print_trle_page(page):
         for idx, k in enumerate(row.keys()):
             cell = str(row[k])  # Convert each cell value to string
             width = column_widths[idx]  # Get the correct column width
-            truncated_text = cell[:width].ljust(width)  # Truncate and pad the text
-            cell_data.append(truncated_text)
+            truncated_text = cell[:width-1].ljust(width-1)  # Truncate and pad the text
+            cell_data.append(truncated_text + ' ')
         print("".join(cell_data))  # Print the row in one line
 
 

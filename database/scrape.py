@@ -272,7 +272,7 @@ def get_soup(url):
     Returns:
         BeautifulSoup: A BeautifulSoup object representing the parsed HTML content.
     """
-    if  validate_url(url) == None:
+    if  validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return BeautifulSoup(https.get(validate_url(url), 'text/html'), 'html.parser')
@@ -291,7 +291,7 @@ def get_image(url):
     Raises:
         SystemExit: If the file format is unsupported.
     """
-    if  validate_url(url) == None:
+    if  validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     ext = url_postfix(url).lower()
@@ -313,7 +313,7 @@ def get_jpg(url):
     Returns:
         bytes: The JPEG image content in bytes.
     """
-    if  validate_url(url) == None:
+    if  validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return https.get(validate_url(url), 'image/jpeg')
@@ -329,7 +329,7 @@ def get_png(url):
     Returns:
         bytes: The PNG image content in bytes.
     """
-    if  validate_url(url) == None:
+    if  validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return https.get(validate_url(url), 'image/png')
@@ -345,7 +345,7 @@ def get_json(url):
     Returns:
         dict: The JSON data parsed into a Python dictionary.
     """
-    if  validate_url(url) == None:
+    if  validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return https.get(validate_url(url), 'application/json')
@@ -361,7 +361,7 @@ def get_zip(url):
     Returns:
         dict: The ZIP file content in a dictionary format, if applicable.
     """
-    if  validate_url(url) == None:
+    if  validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return https.get(validate_url(url), 'application/zip')
@@ -714,7 +714,19 @@ def get_trle_walkthrough(level_soup):
 
     # Fetches the walkthrough content from the extracted URL
     url = "https://www.trle.net" + iframe_src
-    response = https.get(url, 'text/html')
+
+    # Check the type of "document"
+    typ = url_postfix(url)
+    if typ == 'jpg':
+        # we should handle all images here but right now
+        # we return "" this is a bit more complex
+        # want cant just give binary image as text to
+        # qt, we need to implement out own html "document" thu a filter
+        response = ""
+        # response = https.get(url, 'image/jpeg')
+    else:
+        response = https.get(url, 'text/html')
+
     if response:
         return response
     return None

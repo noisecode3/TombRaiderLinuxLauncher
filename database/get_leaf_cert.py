@@ -12,14 +12,14 @@ from cryptography.x509 import Certificate
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 
-def get_certificate(hostname, port=443):
+def get_certificate(hostname):
     """OpenSSL with TCP get the certificate"""
     context = ssl.create_default_context()
     # Disable certificate verification for the first connection
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
 
-    with socket.create_connection((hostname, port)) as sock:
+    with socket.create_connection((hostname, 443)) as sock:
         with context.wrap_socket(sock, server_hostname=hostname) as ssock:
             # Get certificate info
             cert_der = ssock.getpeercert(True)

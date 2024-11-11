@@ -81,6 +81,34 @@ class RequestHandler:
         sys.exit(1)
 
 
+    def head(self, curl):
+        """Take the curl object to head state, with redirect."""
+        if isinstance(curl, pycurl.Curl):
+            buffer = BytesIO()
+            curl.setopt(pycurl.NOBODY, True)
+            curl.setopt(pycurl.HEADERFUNCTION, buffer.write)
+            curl.setopt(pycurl.FOLLOWLOCATION, True)
+            temp_cert_path = None
+
+            if self.misconfigured_server:
+                if not self.leaf_cert:
+                    sys.exit(1)
+                temp_cert_path = REQUEST_HANDLER.set_leaf(curl)
+
+            try:
+                curl.perform()
+            except pycurl.error:
+                print("Error performing request:", pycurl.error)
+            finally:
+                curl.close()
+
+                if temp_cert_path and os.path.exists(temp_cert_path):
+                    os.remove(temp_cert_path)
+
+            return buffer.getvalue().decode('utf-8')
+        return ""
+
+
     def validate_data_type(self, content_type):
         """Limit to used data types."""
         valid_content_types = {
@@ -89,7 +117,8 @@ class RequestHandler:
             'application/zip',
             'image/jpeg',
             'image/png',
-            'text/html'
+            'text/html',
+            'head' # this is not MIME
         }
 
         if content_type not in valid_content_types:
@@ -127,14 +156,18 @@ class RequestHandler:
             logging.error("Failed to retrieve leaf certificate. Exiting.")
             sys.exit(1)
 
-
-    def get_response(self, url, content_type):
-        """Handle all https requests"""
+    def setup_before_get_response(self, url, content_type):
+        """validate known url and content type"""
         self.validate_url(url)
         self.validate_data_type(content_type)
 
         if url.startswith("https://www.trle.net/") and not self.misconfigured_server:
             self.get_leaf(url)
+
+
+    def get_response(self, url, content_type):
+        """Handle all https requests"""
+        self.setup_before_get_response(url, content_type)
 
         if content_type == 'application/zip':
             return DOWNLOADER.download_file(url)
@@ -152,8 +185,12 @@ class RequestHandler:
                 headers_buffer = BytesIO()
                 curl = pycurl.Curl()  # pylint: disable=no-member
                 curl.setopt(pycurl.URL, url)
-                curl.setopt(pycurl.WRITEDATA, response_buffer)
+
+                if content_type == 'application/zip':
+                    return self.head(curl)
+
                 curl.setopt(pycurl.WRITEHEADER, headers_buffer)
+                curl.setopt(pycurl.WRITEDATA, response_buffer)
 
                 if self.misconfigured_server:
                     if not self.leaf_cert:
@@ -191,6 +228,11 @@ class RequestHandler:
                 if temp_cert_path and os.path.exists(temp_cert_path):
                     os.remove(temp_cert_path)
 
+        return self.close_response(curl, headers, response_buffer, content_type)
+
+
+    def close_response(self, curl, headers, response_buffer, content_type):
+        """Pack response and close curl"""
         if curl is None:
             logging.error("No curl instance")
             sys.exit(1)
@@ -243,6 +285,7 @@ class RequestHandler:
                 return header.split(':', 1)[1].split(';')[0].strip()
         logging.error("Could not extract content type from header: %s", headers)
         return None
+
 
 class Downloader:
     """Zip file downloader to be used in RequestHandler"""
@@ -403,6 +446,7 @@ def get(url, content_type):
         'image/jpeg'
         'image/png'
         'text/html'
+        'head'
 
     url must start with:
         "https://www.trle.net/"

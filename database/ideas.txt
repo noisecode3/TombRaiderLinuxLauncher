@@ -255,3 +255,26 @@ limit of around 2 GB.
 
 This was a special walkthrough the script cant handle
 https://www.trle.net/sc/Levelwalk.php?lid=864
+
+We should probaly just look at the link fist
+https://www.trle.net/walk/864.jpg
+https://www.trle.net/walk/666.htm
+
+Security
+I have realized that we can validate the certificate carefully
+and have curl use certificate pinning
+
+   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+   curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, "sha256//base64_encoded_hash_here"); // Pin the public key
+
+and make sure the index database can't every change the host name,
+unless someone use a quantum computer or specialized illegal hardware, it could
+be difficult to tampered with the download of files. We must make sure we install
+in /usr/bin/ or in /opt/appname/bin or /usr/local/bin together with read only database
+we put in /usr/share /usr/local/share or /opt/appname/share as a base index or other data.
+
+We cant control what happens in home, we can protect against obvious treats
+like another user on the computer trying to prank another user :)
+You're home is a dirty place and no one can help what happens there
+but we validate before we open any database there that is has sane
+permissions sanitized data in there.
