@@ -2,7 +2,6 @@
 This script retrieves all TRLE levels by a specified ID range and saves the data as JSON files.
 Usage: python3 get_trle_by_id_range.py FROM_ID TO_ID
 """
-
 import sys
 import time
 import json
@@ -10,15 +9,16 @@ import json
 import scrape
 import data_factory
 
+
 def safe_string_to_int(id_str):
     """Converts a string to an integer with error checking.
-    
+
     Args:
         s (str): The string to convert.
 
     Returns:
         int: The converted integer if valid.
-        
+
     Exits:
         Exits with status code 1 if the input string is not a valid integer.
     """
@@ -31,7 +31,7 @@ def safe_string_to_int(id_str):
 
 def trle_by_id(trle_id):
     """Fetches TRLE level data by ID and saves it as a JSON file.
-    
+
     Args:
         trle_id (int): The ID of the TRLE level to fetch.
     """

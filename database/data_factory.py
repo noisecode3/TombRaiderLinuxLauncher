@@ -1,5 +1,6 @@
 """Index dictionary data definitions"""
 
+
 def make_trle_page_data():
     """trle.net page, represents the same data as a page on the site"""
     return {
@@ -24,6 +25,7 @@ def make_trle_level_data():
 
 
 def make_trle_tombll_data():
+    """This is the app data at the moment"""
     return {
         "title": "",
         "authors": [],
@@ -81,5 +83,3 @@ def make_zip_file():
         "release": "",
         "version": ""
     }
-
-

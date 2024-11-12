@@ -7,6 +7,7 @@ import sys
 import json
 import re
 
+
 def new_input(data, file_path):
     """Take new input"""
     zip_file = data['zip_files'][0]
@@ -27,71 +28,57 @@ def new_input(data, file_path):
 def sanitize(data, file_path):
     """
     Validates the 'zip_file' data from the given dictionary.
-    
+
     This function checks:
     1. That the 'name' attribute exists and ends with ".zip".
     2. That the 'size' attribute is a float, greater than 2, and has exactly two decimal places.
     3. That the 'md5' attribute is a valid 32-character hexadecimal MD5 hash.
     4. That the 'url' attribute matches one of the allowed URL patterns.
-    
+
     Args:
         data (dict): The input dictionary containing 'zip_files' data.
-    
+
     Exits:
         Exits the program with status 1 if any validation fails.
     """
-
-    # Extract the first zip file data
     zip_file = data['zip_files'][0]
+    errors = []
 
-    # Validate attributes
-    if not zip_file.get('name'):
-        print("The 'name' attribute is missing.")
-        new_input(data, file_path)
-        return
+    # Validate name
+    name = zip_file.get('name')
+    if not name:
+        errors.append("The 'name' attribute is missing.")
+    elif not name.endswith(".zip") or "$" in name:
+        errors.append(f"The file '{name}' is not a valid .zip file.")
 
-    if not isinstance(zip_file.get('size'), float):
-        print("The 'size' attribute is missing.")
-        new_input(data, file_path)
-        return
+    # Validate size
+    size = zip_file.get('size')
+    if not isinstance(size, float):
+        errors.append("The 'size' attribute is missing or not a float.")
+    elif size <= 2:
+        errors.append("The 'size' attribute is smaller than 2 MiB.")
 
-    if not zip_file.get('md5'):
-        print("The 'md5' attribute is missing.")
-        new_input(data, file_path)
-        return
+    # Validate md5
+    md5 = zip_file.get('md5')
+    if not md5:
+        errors.append("The 'md5' attribute is missing.")
+    elif not re.fullmatch(r"^[a-fA-F0-9]{32}$", md5):
+        errors.append("The 'md5' attribute is not a valid 32-character hexadecimal MD5 hash.")
 
-    if not zip_file.get('url'):
-        print("The 'url' attribute is missing.")
-        new_input(data, file_path)
-        return
-
-    # Validate name end with ".zip"
-    if not zip_file['name'].endswith(".zip") or "$" in zip_file['name']:
-        print(f"The file {zip_file['name']} is not a .zip file.")
-        new_input(data, file_path)
-        return
-
-    # Validate 'size' attribute - must be a float, >2, and have exactly two decimal places
-    if zip_file['size'] <= 2:
-        print("The 'size' attribute is smaller then 2 MiB")
-        new_input(data, file_path)
-        return
-
-    # Validate 'md5' attribute - must be a valid MD5 hash (32 hexadecimal characters)
-    if not re.fullmatch(r"^[a-fA-F0-9]{32}$", zip_file.get('md5', '')):
-        print("The 'md5' attribute is not a valid 32-character hexadecimal MD5 hash.")
-        new_input(data, file_path)
-        return
-
-    # Validate 'url' attribute - must match one of the expected patterns
+    # Validate url
+    url = zip_file.get('url')
     pattern1 = r"^https://trcustoms\.org/api/level_files/\d+/download$"
     pattern2 = r"^https://www\.trle\.net/levels/levels/\d{4}/\d{4}/[a-zA-Z0-9%-_\.$]+\.zip$"
+    if not url:
+        errors.append("The 'url' attribute is missing.")
+    elif not re.match(pattern1, url) and not re.match(pattern2, url):
+        errors.append("The 'url' attribute does not match any of the expected patterns.")
 
-    if not re.match(pattern1, zip_file.get('url', '')) \
-            and not re.match(pattern2, zip_file.get('url', '')):
-        print("The 'url' attribute does not match any of the expected patterns.")
+    # Handle errors
+    if errors:
+        for error in errors:
+            print(error)
         new_input(data, file_path)
-        return
 
 
 def safe_string_to_int(id_str):

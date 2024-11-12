@@ -1,8 +1,12 @@
-"""This module get the certificate for "broken" servers that don't follow
-   the standard handshake procedure, that is not sending the chain,
-   curl can still connect to this server by specifying the leaf and curl will
-   by default look for the chain in /etc/ssl/certs but requests module
-   require a bundle so that one would have to compile this bundle into the chain"""
+"""
+This module retrieves only the leaf certificate from servers that don't
+follow the standard TLS handshake procedure and fail to provide the complete
+certificate chain. While `curl` can still connect to these servers by
+specifying only the leaf certificate (and defaults to finding the chain in
+/etc/ssl/certs), the `requests` module requires a full certificate bundle.
+This module is intended for use cases where only the leaf certificate
+is needed.
+"""
 
 import sys
 import ssl
@@ -11,6 +15,7 @@ from cryptography import x509
 from cryptography.x509 import Certificate
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
+
 
 def get_certificate(hostname):
     """OpenSSL with TCP get the certificate"""
@@ -27,12 +32,14 @@ def get_certificate(hostname):
                 return x509.load_der_x509_certificate(cert_der, default_backend())
     return None
 
+
 def get_sha256_fingerprint(cert):
     """Identify the sum, we might want verify the certificate"""
     cert_der = cert.public_bytes(serialization.Encoding.DER)
     digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
     digest.update(cert_der)
     return digest.finalize()
+
 
 def get_serial_number_hex(cert):
     """Identify the serial, this can be use to look for the certificate"""
@@ -41,6 +48,7 @@ def get_serial_number_hex(cert):
         .to_bytes((cert.serial_number.bit_length() + 7) // 8, 'big')
     # Format it as a hex string
     return ':'.join(f'{b:02X}' for b in serial_number_bytes)
+
 
 def print_certificate_details(cert):
     """Log basic certificate information"""
@@ -56,6 +64,7 @@ def print_certificate_details(cert):
 
 
 def run(url):
+    """Retrieve and return the certificate's public key in PEM byte format."""
     if url.startswith("https://www.trle.net"):
         host = 'trle.net'
     elif url.startswith("https://trcustoms.org"):
@@ -71,6 +80,7 @@ def run(url):
         sys.exit(1)
 
     return certificate.public_bytes(encoding=serialization.Encoding.PEM)
+
 
 '''
 def validate_downloaded_key(id_number, expected_serial):

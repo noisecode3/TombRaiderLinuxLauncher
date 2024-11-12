@@ -7,14 +7,15 @@ import data_factory
 # Set the working directory to the script's location to ensure relative paths work correctly
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+
 def check_trle_doubles():
     """
     Checks for duplicate entries in the Trle table.
-    
-    This function connects to the 'index.db' SQLite database and queries the Trle table 
-    to identify any duplicate records based on certain fields (trleExternId, author, 
-    title, difficulty, duration, class, type, and release). It groups the results by 
-    these fields and counts occurrences. If any grouped records appear more than once, 
+
+    This function connects to the 'index.db' SQLite database and queries the Trle table
+    to identify any duplicate records based on certain fields (trleExternId, author,
+    title, difficulty, duration, class, type, and release). It groups the results by
+    these fields and counts occurrences. If any grouped records appear more than once,
     they are considered duplicates, and those entries are returned and printed.
     """
     # Connect to the SQLite database
@@ -23,7 +24,7 @@ def check_trle_doubles():
 
     # Execute query to find duplicates
     result = query_return_fetchall("""
-        SELECT 
+        SELECT
             tr.trleExternId,
             tr.author,
             tr.title,
@@ -57,12 +58,12 @@ def check_trle_doubles():
 def query_return_fetchall(query, params, cursor):
     """
     Executes a SELECT query and fetches all results from the database.
-    
+
     Parameters:
     - query (str): The SQL query string to execute. Must be a SELECT query.
     - params (tuple or None): Parameters to bind to the query, or None if there are no parameters.
     - cursor (sqlite3.Cursor): The database cursor used to execute the query.
-    
+
     Returns:
     - list: The result set from the query as a list of tuples.
 
@@ -100,7 +101,7 @@ def query_return_id(query, params, cursor):
     - cursor (sqlite3.Cursor): The database cursor used to execute the query.
 
     Returns:
-    - int or None: The last inserted row ID if an INSERT query was run, 
+    - int or None: The last inserted row ID if an INSERT query was run,
                    or the first integer result from a SELECT query, if available.
                    Returns None if no valid result is found.
 
@@ -139,7 +140,7 @@ def query_return_id(query, params, cursor):
 def query_run(query, params, cursor):
     """
     Executes a query that does not return results (e.g., UPDATE, DELETE, or non-returning INSERT).
-    
+
     Parameters:
     - query (str): The SQL query to execute.
     - params (tuple): Parameters to bind to the query.

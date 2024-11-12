@@ -71,6 +71,7 @@ def validate_url(url):
         return url
     return None
 
+
 def url_domain(url):
     """Parse and validate a URL, ensuring it is HTTPS and from specific domains.
 
@@ -112,24 +113,24 @@ def url_domain(url):
 def trle_url_to_int(url):
     """
     Converts a TRLE level URL into its corresponding integer level ID.
-    
+
     This function processes URLs from the TRLE website that contain a level ID
     as a query parameter (lid). The following URL formats are usually used:
-    
-    1. Level features page: 
+
+    1. Level features page:
        https://www.trle.net/sc/levelfeatures.php?lid=
-       
-    2. Level download page: 
+
+    2. Level download page:
        https://www.trle.net/scadm/trle_dl.php?lid=
-       
-    3. Level walkthrough page: 
+
+    3. Level walkthrough page:
        https://www.trle.net/sc/Levelwalk.php?lid=
 
     Args:
         url (str): The URL string to be processed.
-        
+
     Returns:
-        int or None: The level ID as an integer if extraction is successful, 
+        int or None: The level ID as an integer if extraction is successful,
                      otherwise None.
     """
     try:
@@ -168,17 +169,17 @@ def cover_to_tempfile(data):
         return temp_image_file.name
 
 
-def cover_resize_or_convert_to_webp(input_img, x=None, y=None):
+def cover_resize_or_convert_to_webp(input_img, width=None, height=None):
     """Resize and/or convert image to .webp format."""
     img = Image.open(BytesIO(input_img))
 
-    if x is None and y is None:
-        original_x, original_y = img.size
-        if x is None:
-            x = original_x
-        if y is None:
-            y = original_y
-        img = img.resize((x, y))
+    if width is None and height is None:
+        original_width, original_height = img.size
+        if width is None:
+            width = original_width
+        if height is None:
+            height = original_height
+        img = img.resize((width, height))
 
     webp_image = BytesIO()
 
@@ -219,14 +220,14 @@ def normalize_level_name(name):
     """
     Normalizes a level name string for creating consistent
     zip file names and enabling lenient searches.
-    
-    This function removes spaces and special characters to create a simplified version 
-    of the level name suitable for use in file naming conventions, particularly for 
+
+    This function removes spaces and special characters to create a simplified version
+    of the level name suitable for use in file naming conventions, particularly for
     zip files, and to standardize level names in searches.
-    
+
     Args:
         name (str): The level name to be processed.
-        
+
     Returns:
         str: A normalized level name with spaces and special characters removed.
     """
@@ -266,14 +267,14 @@ def convert_to_iso(date_str):
 def get_soup(url):
     """
     Retrieves and parses the HTML content from a URL using BeautifulSoup.
-    
+
     Args:
         url (str): The URL of the webpage to fetch and parse.
-        
+
     Returns:
         BeautifulSoup: A BeautifulSoup object representing the parsed HTML content.
     """
-    if  validate_url(url) is None:
+    if validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return BeautifulSoup(https.get(validate_url(url), 'text/html'), 'html.parser')
@@ -282,17 +283,17 @@ def get_soup(url):
 def get_image(url):
     """
     Fetches an image from a URL, handling both JPEG and PNG formats.
-    
+
     Args:
         url (str): The URL of the image file.
-        
+
     Returns:
         bytes: The image content in bytes, based on the file format.
-        
+
     Raises:
         SystemExit: If the file format is unsupported.
     """
-    if  validate_url(url) is None:
+    if validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     ext = url_postfix(url).lower()
@@ -307,14 +308,14 @@ def get_image(url):
 def get_jpg(url):
     """
     Fetches a JPEG image from a URL.
-    
+
     Args:
         url (str): The URL of the JPEG image file.
-        
+
     Returns:
         bytes: The JPEG image content in bytes.
     """
-    if  validate_url(url) is None:
+    if validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return https.get(validate_url(url), 'image/jpeg')
@@ -323,14 +324,14 @@ def get_jpg(url):
 def get_png(url):
     """
     Fetches a PNG image from a URL.
-    
+
     Args:
         url (str): The URL of the PNG image file.
-        
+
     Returns:
         bytes: The PNG image content in bytes.
     """
-    if  validate_url(url) is None:
+    if validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return https.get(validate_url(url), 'image/png')
@@ -339,14 +340,14 @@ def get_png(url):
 def get_json(url):
     """
     Fetches JSON data from a URL.
-    
+
     Args:
         url (str): The URL of the JSON resource.
-        
+
     Returns:
         dict: The JSON data parsed into a Python dictionary.
     """
-    if  validate_url(url) is None:
+    if validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return https.get(validate_url(url), 'application/json')
@@ -355,17 +356,18 @@ def get_json(url):
 def get_zip(url):
     """
     Fetches a ZIP file from a URL and returns it in dictionary format.
-    
+
     Args:
         url (str): The URL of the ZIP file.
-        
+
     Returns:
         dict: The ZIP file content in a dictionary format, if applicable.
     """
-    if  validate_url(url) is None:
+    if validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
     return https.get(validate_url(url), 'application/zip')
+
 
 ###############################################################################
 # This section handles page scraping for level data from TRCustoms and TRLE.
@@ -436,8 +438,8 @@ def trle_page_table(table):
     field_mapping = {
         0: ('author', lambda cell: cell.get_text(strip=True)),
         5: ('trle_id', 'title', lambda cell: (
-                cell.find('a', href=True)['href'].split('lid=')[-1] \
-                if cell.find('a', href=True) else None, cell.get_text(strip=True)
+                    cell.find('a', href=True)['href'].split('lid=')[-1]
+                    if cell.find('a', href=True) else None, cell.get_text(strip=True)
                 )
             ),
         6: ('difficulty', lambda cell: cell.get_text(strip=True)),
@@ -468,9 +470,9 @@ def get_trcustoms_page(page_number, sort_created_first=False):
     """Scrape one trcustoms page where the offset starts from the earliest date."""
     host = "https://trcustoms.org/api/levels/"
     if sort_created_first:
-        sort="-created"
+        sort = "-created"
     else:
-        sort="created"
+        sort = "created"
     params = {
         "sort": sort,
         "is_approved": 1,
@@ -639,7 +641,7 @@ def get_trcustoms_cover(image, md5sum, want_tempfile=False):
         image (str): The image filename, including the format (e.g., 'uuid.png').
         md5sum (str): The expected MD5 checksum of the image to ensure data integrity.
         want_tempfile (bool): If True, saves the image to a temporary file.
-        
+
     Returns:
         The downloaded image data if want_tempfile is False,
         or the path to a temporary file containing the image if True.
@@ -699,7 +701,7 @@ def get_trle_walkthrough(level_soup):
         url = 'https://www.trle.net/sc/' + walkthrough_link['href']
         print(url)
     else:
-        logging.info("Walkthrough not found" )
+        logging.info("Walkthrough not found")
         return ""
 
     # Retrieves the walkthrough content by loading the walkthrough URL
@@ -854,7 +856,7 @@ def get_trcustoms_level(url, data):
         title = trcustom_level['name']
         title = trle_search_parser(title)
         # Look out for + ' & !
-        trle_url = get_trle_index(title) # need to match this with simple words, no &#!...etc
+        trle_url = get_trle_index(title)  # need to match this with simple words, no &#!...etc
         trle_soup = get_soup(trle_url)
         data['title'] = get_trle_title(trle_soup)
         data['authors'] = get_trle_authors(trle_soup)
@@ -878,7 +880,7 @@ def get_trcustoms_level(url, data):
             authors = ""
             for author in trcustom_level['authors']:
                 if authors != "":
-                    authors = authors +"-"
+                    authors = authors + "-"
                 authors = authors + author['username']
 
             if file_data['version'] == 1:
@@ -892,7 +894,7 @@ def get_trcustoms_level(url, data):
             zip_file['version'] = file_data['version']
             data['zip_files'].append(zip_file)
 
-        data['trle_id'] =  trle_url_to_int(trle_url)
+        data['trle_id'] = trle_url_to_int(trle_url)
         data['trcustoms_id'] = trcustom_level['id']
     return ""
 
@@ -914,7 +916,6 @@ def get_trcustoms_level(url, data):
 # Implementing exact word matching locally would allow us to find titles
 # like "some - name" by searching simply for "some+-" without relying on TRLE's
 # search constraints.
-
 
 def get_trle_index(title):
     """
