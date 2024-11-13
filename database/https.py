@@ -80,32 +80,35 @@ class RequestHandler:
         logging.error("Invalid URL domain: %s", url)
         sys.exit(1)
 
-    def head(self, curl):
+    def head(self, url):
         """Take the curl object to head state, with redirect."""
-        if isinstance(curl, pycurl.Curl):
+        curl = pycurl.Curl()
+        response = ""
+        temp_cert_path = None
+        try:
             buffer = BytesIO()
-            curl.setopt(pycurl.NOBODY, True)
             curl.setopt(pycurl.HEADERFUNCTION, buffer.write)
+            curl.setopt(pycurl.NOBODY, True)
+            curl.setopt(pycurl.URL, url)
             curl.setopt(pycurl.FOLLOWLOCATION, True)
-            temp_cert_path = None
 
             if self.misconfigured_server:
                 if not self.leaf_cert:
                     sys.exit(1)
                 temp_cert_path = REQUEST_HANDLER.set_leaf(curl)
 
-            try:
-                curl.perform()
-            except pycurl.error:
-                print("Error performing request:", pycurl.error)
-            finally:
-                curl.close()
+            curl.perform()
+            response = buffer.getvalue().decode('utf-8')
 
-                if temp_cert_path and os.path.exists(temp_cert_path):
-                    os.remove(temp_cert_path)
+        except pycurl.error:
+            print("Error performing request:", pycurl.error)
+        finally:
+            curl.close()
 
-            return buffer.getvalue().decode('utf-8')
-        return ""
+            if temp_cert_path and os.path.exists(temp_cert_path):
+                os.remove(temp_cert_path)
+
+        return response
 
     def validate_data_type(self, content_type):
         """Limit to used data types."""
@@ -167,6 +170,9 @@ class RequestHandler:
         if content_type == 'application/zip':
             return DOWNLOADER.download_file(url)
 
+        if content_type == 'head':
+            return self.head(url)
+
         max_retries = 3
         retries = 0
         curl = None
@@ -180,10 +186,6 @@ class RequestHandler:
                 headers_buffer = BytesIO()
                 curl = pycurl.Curl()  # pylint: disable=no-member
                 curl.setopt(pycurl.URL, url)
-
-                if content_type == 'application/zip':
-                    return self.head(curl)
-
                 curl.setopt(pycurl.WRITEHEADER, headers_buffer)
                 curl.setopt(pycurl.WRITEDATA, response_buffer)
 

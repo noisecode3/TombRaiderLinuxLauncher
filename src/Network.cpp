@@ -24,20 +24,48 @@
 namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
 
-std::string get_ssl_certificate(const std::string& host) {
+std::string get_ssl_certificate(const std::string& host)
+{
     boost::asio::io_context io_context;
+
+    // Use SSLv23 context (it's compatible with all versions of SSL/TLS)
     ssl::context ssl_context(ssl::context::sslv23);
 
+    // Restrict supported protocols to TLSv1.3 and TLSv1.2, these are no no
+    ssl_context.set_options(ssl::context::no_sslv2 | ssl::context::no_sslv3);
+    ssl_context.set_options(ssl::context::no_tlsv1 | ssl::context::no_tlsv1_1);
+
+    // Resolver for HTTPS (default port 443)
     tcp::resolver resolver(io_context);
-    tcp::resolver::results_type endpoints = resolver.resolve(host, "https");
+    tcp::resolver::results_type endpoints = resolver.resolve(host, "443");
+
     ssl::stream<tcp::socket> stream(io_context, ssl_context);
     SSL_set_tlsext_host_name(stream.native_handle(), host.c_str());
-    boost::asio::connect(stream.lowest_layer(), endpoints);
-    stream.handshake(ssl::stream_base::client);
 
+    try
+    {
+        boost::asio::connect(stream.lowest_layer(), endpoints);
+        stream.handshake(ssl::stream_base::client);
+    }
+    catch (const boost::system::system_error& e)
+    {
+        std::cerr << "SSL handshake failed: " << e.what() << std::endl;
+        return "";
+    }
+
+    // Get certificate
     X509* cert = SSL_get_peer_certificate(stream.native_handle());
-    if (!cert) {
+    if (!cert)
+    {
         std::cerr << "No certificate found." << std::endl;
+        return "";
+    }
+
+    // Verify the certificate matches the host
+    if (X509_check_host(cert, host.c_str(), host.length(), 0, nullptr) != 1)
+    {
+        std::cerr << "Hostname verification failed." << std::endl;
+        X509_free(cert);
         return "";
     }
 
@@ -47,8 +75,10 @@ std::string get_ssl_certificate(const std::string& host) {
     qint64 cert_len = BIO_get_mem_data(bio, &cert_str);
     std::string cert_buffer(cert_str, cert_len);
 
+    // Clean up
     BIO_free(bio);
     X509_free(cert);
+
     return cert_buffer;
 }
 

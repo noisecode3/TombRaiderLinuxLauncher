@@ -8,19 +8,37 @@ import json
 import re
 
 
+def check_file_list(data):
+    """Check if there is zip data to prevent crash."""
+    zip_file_list = data.get('zip_files', [])
+    if not isinstance(zip_file_list, list) or not zip_file_list:
+        return False
+    return True
+
+
 def new_input(data, file_path):
     """Take new input"""
+
+    if not check_file_list(data):
+        print(f"{file_path} has no zip file.")
+        return
+
     zip_file = data['zip_files'][0]
     print(zip_file)
-    if input("Do you want to remove the file? y/n: ") == 'y':
+    if input("Do you want to remove the json file? y/n: ").lower() == 'y':
         os.remove(file_path)
         print(f"{file_path} has been removed.")
         return
 
-    zip_file['name'] = input("New name: ")
-    zip_file['size'] = float(input("New size: "))
-    zip_file['md5'] = input("New md5: ")
-    zip_file['url'] = input("New url: ")
+    if input("Do you want to remove the file object? y/n: ").lower() == 'y':
+        del data['zip_files'][0]
+        print("Object has been removed.")
+    else:
+        zip_file['name'] = input("New name: ")
+        zip_file['size'] = float(input("New size: "))
+        zip_file['md5'] = input("New md5: ")
+        zip_file['url'] = input("New url: ")
+
     with open(file_path, mode='w', encoding='utf-8') as json_file:
         json.dump(data, json_file)
 
@@ -41,6 +59,10 @@ def sanitize(data, file_path):
     Exits:
         Exits the program with status 1 if any validation fails.
     """
+    if not check_file_list(data):
+        print(f"{file_path} has no zip file.")
+        return
+
     zip_file = data['zip_files'][0]
     errors = []
 
@@ -65,10 +87,18 @@ def sanitize(data, file_path):
     elif not re.fullmatch(r"^[a-fA-F0-9]{32}$", md5):
         errors.append("The 'md5' attribute is not a valid 32-character hexadecimal MD5 hash.")
 
-    # Validate url
+    # Force save if not https
     url = zip_file.get('url')
+    if 'http://' in url:
+        url = url.replace('http://', 'https://')
+        data['zip_files'][0]['url'] = url
+        with open(file_path, mode='w', encoding='utf-8') as json_file:
+            json.dump(data, json_file)
+
+    # Validate url
     pattern1 = r"^https://trcustoms\.org/api/level_files/\d+/download$"
-    pattern2 = r"^https://www\.trle\.net/levels/levels/\d{4}/\d{4}/[a-zA-Z0-9%-_\.$]+\.zip$"
+    pattern2 = r"^https://www\.trle\.net/levels/levels/\d{4}(/(\d{4})?)?/[a-zA-Z0-9%-_\.$]+\.zip$"
+
     if not url:
         errors.append("The 'url' attribute is missing.")
     elif not re.match(pattern1, url) and not re.match(pattern2, url):

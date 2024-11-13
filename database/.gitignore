@@ -1,5 +1,8 @@
 data.json
 file_info.json
-trle
 __pycache__
+.mypy_cache
 trle.tar.gz
+trle
+trle.sanitized.tar.gz
+trle.sanitized

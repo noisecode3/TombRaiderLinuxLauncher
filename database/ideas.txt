@@ -278,3 +278,10 @@ like another user on the computer trying to prank another user :)
 You're home is a dirty place and no one can help what happens there
 but we validate before we open any database there that is has sane
 permissions sanitized data in there.
+
+https://www.trlevel.de/index.php?file-download/1/
+we can get those also so there will be 3 hosts but they use rar
+still the app should support rar also at some point
+
+we need to support this kind of download link also
+https://www.trle.net/levels/levels/2020/0620/BtB
