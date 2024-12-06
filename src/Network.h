@@ -25,15 +25,14 @@
 #include <QDebug>
 #include <curl/curl.h>
 
-class Downloader : public QObject
-{
+class Downloader : public QObject {
     Q_OBJECT
+
  public:
-    static Downloader& getInstance()
-    {
+    static Downloader& getInstance() {
         static Downloader instance;
         return instance;
-    };
+    }
 
     void run();
     bool setUpCamp(const QString& levelDir);
@@ -64,15 +63,13 @@ class Downloader : public QObject
     qint32 status_m = 0;
 
     explicit Downloader(QObject* parent = nullptr) : QObject(parent),
-        status_m(0)
-    {
+        status_m(0) {
         curl_global_init(CURL_GLOBAL_DEFAULT);
-    };
+    }
 
-    ~Downloader()
-    {
+    ~Downloader() {
         curl_global_cleanup();
-    };
+    }
 
     Q_DISABLE_COPY(Downloader)
 };

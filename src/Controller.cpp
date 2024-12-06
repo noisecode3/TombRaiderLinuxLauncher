@@ -18,19 +18,16 @@
 #include <QDebug>
 
 Controller::Controller(QObject *parent)
-    : QObject(parent), controllerThread(new QThread(this))
-{
+    : QObject(parent), controllerThread(new QThread(this)) {
     initializeThread();
 }
 
-Controller::~Controller()
-{
+Controller::~Controller() {
     controllerThread->quit();
     controllerThread->wait();
 }
 
-void Controller::initializeThread()
-{
+void Controller::initializeThread() {
     this->moveToThread(controllerThread.data());
     connect(controllerThread.data(), &QThread::finished,
             controllerThread.data(), &QThread::deleteLater);
@@ -38,14 +35,12 @@ void Controller::initializeThread()
 
     //  Using the controller thread to start model work
     connect(this, &Controller::checkCommonFilesThreadSignal,
-            this, [this]()
-    {
+            this, [this]() {
         model.checkCommonFiles();
     });
 
     connect(this, &Controller::setupThreadSignal,
-            this, [this](const QString& level, const QString& game)
-    {
+            this, [this](const QString& level, const QString& game) {
         model.setup(level, game);
     });
 
@@ -55,8 +50,7 @@ void Controller::initializeThread()
     });
 
     connect(this, &Controller::setupGameThreadSignal,
-            this, [this](int id)
-    {
+            this, [this](int id) {
         model.setupGame(id);
     });
 
@@ -72,71 +66,59 @@ void Controller::initializeThread()
             this, tickSignal, Qt::QueuedConnection);
 
     connect(&downloader, &Downloader::networkWorkErrorSignal,
-            this, [this](int status)
-    {
+            this, [this](int status) {
         emit controllerDownloadError(status);
     }, Qt::QueuedConnection);
 
     connect(&model, &Model::askGameSignal,
-            this, [this](int id)
-    {
+            this, [this](int id) {
         emit controllerAskGame(id);
     }, Qt::QueuedConnection);
 
     connect(&model, &Model::generateListSignal,
-            this, [this]()
-    {
+            this, [this]() {
         emit controllerGenerateList();
     }, Qt::QueuedConnection);
 }
 
-void Controller::checkCommonFiles()
-{
+void Controller::checkCommonFiles() {
     emit checkCommonFilesThreadSignal();
 }
 
-void Controller::setup(const QString& level, const QString& game)
-{
+void Controller::setup(const QString& level, const QString& game) {
     emit setupThreadSignal(level, game);
 }
 
-void Controller::setupGame(int id)
-{
+void Controller::setupGame(int id) {
     emit setupGameThreadSignal(id);
 }
 
-void Controller::setupLevel(int id)
-{
+void Controller::setupLevel(int id) {
     emit setupLevelThreadSignal(id);
 }
 
 // GUI Threads
-int Controller::checkGameDirectory(int id)
-{
+int Controller::checkGameDirectory(int id) {
     return model.checkGameDirectory(id);
 }
 
-void Controller::getList(QVector<ListItemData>* list)
-{
+void Controller::getList(QVector<ListItemData>* list) {
     model.getList(list);
 }
 
-const InfoData Controller::getInfo(int id)
-{
+const InfoData Controller::getInfo(int id) {
     return model.getInfo(id);
 }
 
-const QString Controller::getWalkthrough(int id)
-{
+const QString Controller::getWalkthrough(int id) {
     return model.getWalkthrough(id);
 }
 
-bool Controller::link(int id)
-{
+bool Controller::link(int id) {
     return model.setLink(id);
 }
 
-int Controller::getItemState(int id)
-{
+int Controller::getItemState(int id) {
     return model.getItemState(id);
 }
+

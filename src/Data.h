@@ -30,8 +30,7 @@
  * @brief Folder names game used on windows
  * @details These names are used by steam and installed in the common folder on linux.
  */
-struct FolderNames
-{
+struct FolderNames {
     const QString TR1 = "/Tomb Raider (I)";
     const QString TR2 = "/Tomb Raider (II)";
     const QString TR3 = "/TombRaider (III)";
@@ -40,8 +39,7 @@ struct FolderNames
 };
 
 
-struct ZipData
-{
+struct ZipData {
     /**
      * @struct ZipData
      * @brief
@@ -70,8 +68,7 @@ struct ZipData
     QString release;
 };
 
-struct ListItemData
-{
+struct ListItemData {
     /**
      * @struct InfoData
      * @brief
@@ -94,8 +91,7 @@ struct ListItemData
         class_(classIn),
         releaseDate(releaseDate),
         difficulty(difficulty),
-        duration(duration)
-    {
+        duration(duration) {
         QPixmap pixmap;
         pixmap.loadFromData(imageData, "WEBP");
         picture.addPixmap(pixmap);
@@ -108,7 +104,7 @@ struct ListItemData
             Qt::SmoothTransformation);
         // Create QIcon and add the scaled pixmap
         picture.addPixmap(pixmap);
-    };
+    }
     QString title;
     QString author;
     qint64  type;
@@ -119,8 +115,7 @@ struct ListItemData
     QIcon   picture;
 };
 
-struct InfoData
-{
+struct InfoData {
     /**
      * @struct InfoData
      * @brief
@@ -128,50 +123,42 @@ struct InfoData
      * @details
      */
     InfoData() {}
-    InfoData(QString body, QVector<QByteArray> imageList) : body(body)
-    {
-        for (const QByteArray &image : imageList)
-        {
+    InfoData(QString body, QVector<QByteArray> imageList) : body(body) {
+        for (const QByteArray &image : imageList) {
             QPixmap pixmap;
             QIcon final;
             pixmap.loadFromData(image, "WEBP");
             final.addPixmap(pixmap);
             this->imageList.push_back(final);
         }
-    };
+    }
     QString body;
     QVector<QIcon> imageList;
 };
 
-class Data : public QObject
-{
+class Data : public QObject {
     Q_OBJECT
+
  public:
-    static Data& getInstance()
-    {
+    static Data& getInstance() {
         static Data instance;
         return instance;
     }
 
-    bool initializeDatabase(QString path)
-    {
+    bool initializeDatabase(QString path) {
         db = QSqlDatabase::addDatabase("QSQLITE");
         db.setDatabaseName(path + "/tombll.db");
         db.setConnectOptions("QSQLITE_OPEN_READONLY");
 
-        if (db.open())
-        {
+        if (db.open()) {
             return true;
-        }
-        else
-        {
+        } else {
             qDebug() << "Error opening database:" << db.lastError().text();
             return false;
         }
     }
 
-    void releaseDatabase()
-    {
+    void releaseDatabase() {
         db.close();
     }
 
@@ -184,11 +171,9 @@ class Data : public QObject
     ZipData getDownload(int id);
 
  private:
-    explicit Data(QObject *parent = nullptr) : QObject(parent)
-    {
+    explicit Data(QObject *parent = nullptr) : QObject(parent) {
     }
-    ~Data()
-    {
+    ~Data() {
         db.close();
     }
 

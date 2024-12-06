@@ -28,7 +28,6 @@
 #include <QDebug>
 #include <QVector>
 #include <QString>
-#include <algorithm>
 
 #include "Controller.h"
 
@@ -39,9 +38,9 @@ QT_END_NAMESPACE
 /**
  * 
  */
-class TombRaiderLinuxLauncher : public QMainWindow
-{
+class TombRaiderLinuxLauncher : public QMainWindow {
     Q_OBJECT
+
  public:
     /**
      * Create Main Window
@@ -114,13 +113,17 @@ class TombRaiderLinuxLauncher : public QMainWindow
     /**
      * 
      */
-    void sortItems(std::function<bool(QListWidgetItem*, QListWidgetItem*)> compare);
+    void sortItems(std::function<bool(
+        QListWidgetItem*,
+        QListWidgetItem*)> compare);
 
-    
+    // cppcheck-suppress unusedStructMember
     QSet<QListWidgetItem*> originalGamesSet_m;
+    // cppcheck-suppress unusedStructMember
     QList<QListWidgetItem*> originalGamesList_m;
     Controller& controller = Controller::getInstance();
     QSettings settings;
+    // cppcheck-suppress unusedStructMember
     Ui::TombRaiderLinuxLauncher *ui;
 };
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_H_

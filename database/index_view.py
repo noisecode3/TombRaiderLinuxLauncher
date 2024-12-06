@@ -3,8 +3,8 @@ import os
 import sys
 import shutil
 import gc
-import ueberzug as ueberzug_root
-import ueberzug.lib.v0 as ueberzug
+import ueberzug as ueberzug_root  # type: ignore
+import ueberzug.lib.v0 as ueberzug  # type: ignore
 
 gc.collect()
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -159,12 +159,12 @@ def display_menu(items, image_paths):
             row_offset = full_rows * max_columns
             print_row(display_items, row_offset, last_row_items)
 
-        awn = input(f"  {len(display_items)} of {len(items)} results, " +\
-                "Press 'q' and Enter to exit, else press Enter for next page...")
+        awn = input(f"  {len(display_items)} of {len(items)} results, " +
+                    "Press 'q' and Enter to exit, else press Enter for next page...")
 
         print("\033c", end="")
         if awn == 'q':
-            #TODO clean upp files in tmp
+            # TODO clean upp files in tmp
             sys.exit(0)
 
         # Remove all previous images
@@ -203,16 +203,16 @@ def print_row(items, row_offset, columns):
     print("")
 
     for column in range(columns):
-        print( \
-            f"{' '*19}Author: " +\
+        print(
+            f"{' '*19}Author: " +
             f"{', '.join(map(str, items[row_offset + column]['authors']))[:52]:<52}",
             end=""
         )
     print("")
 
     for column in range(columns):
-        print( \
-            f"{' '*19}Genre: " +\
+        print(
+            f"{' '*19}Genre: " +
             f"{', '.join(map(str, items[row_offset + column]['genres']))[:53]:<53}",
             end=""
         )
@@ -220,10 +220,8 @@ def print_row(items, row_offset, columns):
 
     for column in range(columns):
         print(
-            f"{' '*19}Tag: " +\
+            f"{' '*19}Tag: " +
             f"{', '.join(map(str, items[row_offset + column]['tags']))[:55]:<55}",
             end=""
         )
     print("\n")
-
-

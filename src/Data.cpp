@@ -16,35 +16,29 @@
 
 #include "Data.h"
 
-QVector<ListItemData> Data::getListItems()
-{
+QVector<ListItemData> Data::getListItems() {
     QVector<ListItemData> items;
     QSqlQuery index(db);
     int rowCount = 0;
     index.prepare("SELECT COUNT(*) FROM Level");
 
-    if (!index.exec())
-    {
+    if (!index.exec()) {
         qDebug() << "Error executing query:" << index.lastError().text();
         return items;
     }
 
     // Move to the first (and only) result row
-    if (index.next())
-    {
+    if (index.next()) {
         // Retrieve the count value (assuming it's in the first column, index 0)
         rowCount = index.value(0).toInt();
 
         // Now, 'rowCount' contains the count of rows in the 'Level' table
         qDebug() << "Number of rows in 'Level' table:" << rowCount;
-    }
-    else
-    {
+    } else {
         // Handle the case where no rows are returned
         qDebug() << "No rows returned from the query";
     }
-    for (int i=0; i < rowCount; i++)
-    {
+    for (int i=0; i < rowCount; i++) {
         QSqlQuery query(db);
         query.prepare("SELECT Level.*, Info.*, Picture.*, Author.* "
                       "FROM Level "
@@ -58,10 +52,8 @@ QVector<ListItemData> Data::getListItems()
                       "ORDER BY MIN(Picture.PictureID) ASC");
         query.bindValue(":id", i+1);  // Set the ID autoincrament starts at 1
 
-        if (query.exec())
-        {
-            while (query.next())
-            {
+        if (query.exec()) {
+            while (query.next()) {
                 items.append(ListItemData(
                     query.value("Info.title").toString(),
                     query.value("Author.value").toString(),
@@ -72,17 +64,14 @@ QVector<ListItemData> Data::getListItems()
                     query.value("Info.duration").toInt(),
                     query.value("Picture.data").toByteArray()));
             }
-        }
-        else
-        {
+        } else {
             qDebug() << "Error executing query:" << query.lastError().text();
         }
     }
     return items;
 }
 
-InfoData Data::getInfo(const int id)
-{
+InfoData Data::getInfo(const int id) {
     QVector<QByteArray> imageList;
     QSqlQuery query(db);
     query.prepare("SELECT Level.body, Picture.data "
@@ -92,71 +81,55 @@ InfoData Data::getInfo(const int id)
                   "WHERE Level.LevelID = :id");
     query.bindValue(":id", id);
 
-    if (query.exec())
-    {
-        if (query.next())
-        {
+    if (query.exec()) {
+        if (query.next()) {
             QString body = query.value("body").toString();
-            while (query.next())
-            {
+            while (query.next()) {
                 imageList.push_back(query.value("Picture.data").toByteArray());
             }
             return InfoData(body, imageList);
         }
-    }
-    else
-    {
+    } else {
         qDebug() << "Error executing query:" << query.lastError().text();
     }
     return InfoData();
 }
 
-QString Data::getWalkthrough(const int id)
-{
+QString Data::getWalkthrough(const int id) {
     QSqlQuery query(db);
     query.prepare("SELECT Level.walkthrough "
                   "FROM Level "
                   "WHERE Level.LevelID = :id");
     query.bindValue(":id", id);
-    if (query.exec())
-    {
-        if (query.next())
-        {
+    if (query.exec()) {
+        if (query.next()) {
             QString body = query.value("Level.walkthrough").toString();
             return body;
         }
-    }
-    else
-    {
+    } else {
         qDebug() << "Error executing query:" << query.lastError().text();
     }
     return "";
 }
 
-int Data::getType(const int id)
-{
+int Data::getType(const int id) {
     QSqlQuery query(db);
     query.prepare("SELECT Info.type "
                   "FROM Level "
                   "JOIN Info ON Level.infoID = Info.InfoID "
                   "WHERE Level.LevelID = :id");
     query.bindValue(":id", id);
-    if (query.exec())
-    {
-        if (query.next())
-        {
+    if (query.exec()) {
+        if (query.next()) {
             return query.value("Info.type").toInt();
         }
-    }
-    else
-    {
+    } else {
         qDebug() << "Error executing query:" << query.lastError().text();
     }
     return 0;
 }
 
-ZipData Data::getDownload(const int id)
-{
+ZipData Data::getDownload(const int id) {
     QSqlQuery query(db);
     query.prepare("SELECT Zip.* "
             "FROM Level "
@@ -165,10 +138,8 @@ ZipData Data::getDownload(const int id)
             "WHERE Level.LevelID = :id");
     query.bindValue(":id", id);
 
-    if (query.exec())
-    {
-        if (query.next())
-        {
+    if (query.exec()) {
+        if (query.next()) {
             return ZipData(
                     query.value("Zip.name").toString(),
                     query.value("Zip.size").toFloat(),
@@ -177,28 +148,22 @@ ZipData Data::getDownload(const int id)
                     query.value("Zip.version").toInt(),
                     query.value("Zip.release").toString());
         }
-    }
-    else
-    {
+    } else {
         qDebug() << "Error executing query:" << query.lastError().text();
     }
     return ZipData();
 }
 
-std::array<QVector<QString>, 2> Data::getFileList(const int id, bool trleList)
-{
+std::array<QVector<QString>, 2> Data::getFileList(const int id, bool trleList) {
     std::array<QVector<QString>, 2> list;
     QSqlQuery query(db);
-    if (trleList)
-    {
+    if (trleList) {
         query.prepare("SELECT Files.path, Files.md5sum "
                 "FROM Files "
                 "JOIN LevelFileList ON Files.FileID = LevelFileList.fileID "
                 "JOIN Level ON LevelFileList.levelID = Level.LevelID "
                 "WHERE Level.LevelID = :id");
-    }
-    else
-    {
+    } else {
         query.prepare("SELECT Files.path, Files.md5sum "
                 "FROM Files "
                 "JOIN GameFileList ON Files.FileID = GameFileList.fileID "
@@ -206,16 +171,12 @@ std::array<QVector<QString>, 2> Data::getFileList(const int id, bool trleList)
                 "WHERE Game.GameID = :id");
     }
     query.bindValue(":id", id);
-    if (query.exec())
-    {
-        while (query.next())
-        {
+    if (query.exec()) {
+        while (query.next()) {
             list[0] << query.value("Files.path").toString();
             list[1] << query.value("Files.md5sum").toString();
         }
-    }
-    else
-    {
+    } else {
         qDebug() << "Error executing query:" << query.lastError().text();
     }
     return list;

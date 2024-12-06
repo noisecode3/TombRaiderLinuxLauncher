@@ -24,13 +24,11 @@
  * The controller activate UI thread work or light instant work on the model
  * 
  */
-class Controller : public QObject
-{
+class Controller : public QObject {
     Q_OBJECT
 
  public:
-    static Controller& getInstance()
-    {
+    static Controller& getInstance() {
         static Controller instance;
         return instance;
     }

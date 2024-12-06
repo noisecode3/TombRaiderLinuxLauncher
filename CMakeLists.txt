@@ -34,6 +34,7 @@ add_subdirectory(libs/miniz)
 
 set(SOURCES
     src/main.cpp
+    src/staticData.h
     src/Network.h
     src/Network.cpp
     src/Controller.h
@@ -64,7 +65,7 @@ set(TEST_SOURCES
     src/Data.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} )
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 # create the test executable
 #enable_testing(false)

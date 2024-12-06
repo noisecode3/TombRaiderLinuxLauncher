@@ -26,27 +26,21 @@
 #include "FileManager.h"
 #include "Network.h"
 
-class InstructionManager : public QObject
-{
+class InstructionManager : public QObject {
     Q_OBJECT
  public:
     using Instruction = std::function<void(int id)>;
 
-    void addInstruction(int id, const Instruction& instruction)
-    {
+    void addInstruction(int id, const Instruction& instruction) {
         instructionsMap[id] = instruction;
     }
 
  public slots:
-    void executeInstruction(int id)
-    {
+    void executeInstruction(int id) {
         auto it = instructionsMap.find(id);
-        if (it != instructionsMap.end())
-        {
+        if (it != instructionsMap.end()) {
             it.value()(id);
-        }
-        else
-        {
+        } else {
             qDebug() << "Invalid instruction ID";
         }
     }
@@ -55,9 +49,9 @@ class InstructionManager : public QObject
     QMap<int, Instruction> instructionsMap;
 };
 
-class Model : public QObject
-{
+class Model : public QObject {
     Q_OBJECT
+
  public:
     static Model& getInstance()
     {

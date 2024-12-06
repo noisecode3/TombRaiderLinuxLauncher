@@ -14,3 +14,4 @@ build
 .gdb
 .gdbinit
 .vscode
+.mypy_cache

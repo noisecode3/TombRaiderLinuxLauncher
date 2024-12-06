@@ -24,4 +24,10 @@ wget -O .gdb/qt5prettyprinters/helper.py \
 wget -O .gdb/qt5prettyprinters/qt.py \
     https://invent.kde.org/kdevelop/kdevelop/-/raw/master/plugins/gdb/printers/qt.py
 
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug .
+rm -fr build
+mkdir build
+cd build || exit 1
+
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug ..
+cd ..
+ln -s build/compile_commands.json compile_commands.json

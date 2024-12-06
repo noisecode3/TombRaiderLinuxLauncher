@@ -17,8 +17,7 @@
 #include "Model.h"
 
 // Those lambda should be in another header file
-Model::Model(QObject *parent) : QObject(parent), checkCommonFilesIndex_m(1)
-{
+Model::Model(QObject *parent) : QObject(parent), checkCommonFilesIndex_m(1) {
     instructionManager.addInstruction(4, [this](int id) {
         qDebug() << "Perform Operation A";
         const QString s = "/"+QString::number(id) + ".TRLE";
@@ -43,21 +42,18 @@ Model::Model(QObject *parent) : QObject(parent), checkCommonFilesIndex_m(1)
     */
 }
 
-Model::~Model()
-{
-}
+Model::~Model() {}
 
-void Model::setup(const QString& level, const QString& game)
-{
+void Model::setup(const QString& level, const QString& game) {
     setDirectory(level, game);
     checkCommonFiles();
 }
 
-bool Model::setDirectory(const QString& level, const QString& game)
-{
+bool Model::setDirectory(const QString& level, const QString& game) {
     if (fileManager.setUpCamp(level, game) &&
         downloader.setUpCamp(level) &&
-        data.initializeDatabase(level))
+        data.initializeDatabase(level)
+    )
         return true;
     else
         return false;

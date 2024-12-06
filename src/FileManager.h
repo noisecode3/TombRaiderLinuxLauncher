@@ -26,12 +26,11 @@
 #include "miniz.h"
 #include "miniz_zip.h"
 
-class FileManager : public QObject
-{
+class FileManager : public QObject {
     Q_OBJECT
+
  public:
-    static FileManager& getInstance()
-    {
+    static FileManager& getInstance() {
         static FileManager instance;
         return instance;
     }
@@ -44,19 +43,23 @@ class FileManager : public QObject
     bool moveFilesToDirectory(
         const QString& fromLevelDirectory,
         const QString& toLevelDirectory);
+
     bool moveFilesToParentDirectory(const QString& directoryPath, int levelsUp);
     int createDirectory(const QString &file, bool gameDir);
     int copyFile(
         const QString &gameFile,
         const QString &levelFile,
         bool fromGameDir);
+
     bool makeRelativeLink(
         const QString& levelDir,
         const QString& from,
         const QString& to);
+
     int cleanWorkingDir(const QString &levelDir);
     bool backupGameDir(const QString &gameDir);
     bool linkGameDir(const QString& levelDir, const QString& gameDir);
+    bool ensureDirectoryExists(const QString& dirPath, const QDir& dir);
     bool setUpCamp(const QString& levelDir, const QString& gameDir);
 
  signals:
