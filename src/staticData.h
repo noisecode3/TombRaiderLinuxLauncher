@@ -16,8 +16,8 @@
 
 #ifndef SRC_STATICDATA_H_
 #define SRC_STATICDATA_H_
+#include <QString>
 #include <unordered_map>
-#include <string>
 
 class StaticClass {
  public:

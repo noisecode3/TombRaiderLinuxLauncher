@@ -14,23 +14,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEST_TEST_H_
-#define TEST_TEST_H_
-
-#include <QtCore>
 #include <QtTest/QtTest>
+#include "test.h"
 
-class TestTombRaiderLinuxLauncher : public QObject {
-    Q_OBJECT
-
- private slots:
-    void test1() {
-        QVERIFY(true);
-    }
-
-    void test2() {
-        QVERIFY(1 + 1 == 2);
-    }
-};
-
-#endif  // TEST_TEST_H_
+int main(int argc, char *argv[]) {
+    TestTombRaiderLinuxLauncher test;
+    return QTest::qExec(&test, argc, argv);
+}

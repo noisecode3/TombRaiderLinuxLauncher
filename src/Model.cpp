@@ -59,14 +59,11 @@ bool Model::setDirectory(const QString& level, const QString& game) {
         return false;
 }
 
-void Model::checkCommonFiles()
-{
+void Model::checkCommonFiles() {
     int index = checkCommonFilesIndex_m;
     assert(index >= 1 && index <= 5);
-    for (int i = index; i <= 5; i++)
-    {
-        if (checkGameDirectory(i) == 2)
-        {
+    for (int i = index; i <= 5; i++) {
+        if (checkGameDirectory(i) == 2) {
             checkCommonFilesIndex_m = i+1;
             emit askGameSignal(i);
             QCoreApplication::processEvents();
@@ -77,11 +74,9 @@ void Model::checkCommonFiles()
     QCoreApplication::processEvents();
 }
 
-QString Model::getGameDirectory(int id)
-{
+QString Model::getGameDirectory(int id) {
     struct FolderNames folder;
-    switch (id)
-    {
+    switch (id) {
     case 1:
         return folder.TR1;
     case 2:
@@ -98,25 +93,21 @@ QString Model::getGameDirectory(int id)
     }
 }
 
-int Model::checkGameDirectory(int id)
-{
+int Model::checkGameDirectory(int id) {
     const QString s = getGameDirectory(id);
     if (s != "")
         return fileManager.checkFileInfo(s, true);
     return -1;
 }
 
-void Model::getList(QVector<ListItemData>* list)
-{
+void Model::getList(QVector<ListItemData>* list) {
     *list = data.getListItems();
 }
 
-int Model::getItemState(int id)
-{
-    if (id < 0)
+int Model::getItemState(int id) {
+    if (id < 0) {
         return 1;
-    else if (id > 0)
-    {
+    } else if (id > 0) {
         QString map(QString::number(id) + ".TRLE");
         if (fileManager.checkDir(map, false))
             return 2;
@@ -126,17 +117,13 @@ int Model::getItemState(int id)
     return -1;
 }
 
-bool Model::setLink(int id)
-{
-    if (id < 0)
-    {
+bool Model::setLink(int id) {
+    if (id < 0) {
         id = -id;
         const QString s = "/Original.TR" + QString::number(id);
         if (fileManager.checkDir(s, false ))
             return fileManager.linkGameDir(s, getGameDirectory(id));
-    }
-    else if (id > 0)
-    {
+    } else if (id > 0) {
         const QString s = "/"+QString::number(id) + ".TRLE";
         const int t = data.getType(id);
 
@@ -146,13 +133,11 @@ bool Model::setLink(int id)
     return false;
 }
 
-void Model::setupGame(int id)
-{
+void Model::setupGame(int id) {
     std::array<QVector<QString>, 2> list = data.getFileList(id, false);
     const size_t s = list[0].size();
     const size_t sm = list[1].size();
-    if (s != sm)
-    {
+    if (s != sm) {
         qDebug()
             << "Corrupt list, there seems to bee"
             << " more or less checksums for the files\n";
@@ -160,17 +145,13 @@ void Model::setupGame(int id)
     }
     const QString& sd = "/Original.TR" + QString::number(id) +"/";
     const QString& sg = getGameDirectory(id) + "/";
-    for (size_t i = 0; i < s; i++)
-    {
+    for (size_t i = 0; i < s; i++) {
         const QString& fFile = list[0][i];
         const QString& fMd5sum = list[1][i];
         const QString&  calculated = fileManager.calculateMD5(sg+fFile, true);
-        if (fMd5sum == calculated)
-        {
+        if (fMd5sum == calculated) {
             fileManager.copyFile(sg+fFile, sd+fFile,  true);
-        }
-        else
-        {
+        } else {
             qDebug() << "Original file was modified, had" << fMd5sum
                      << " got " << calculated << " for file "
                      << fFile << Qt::endl;
@@ -178,12 +159,10 @@ void Model::setupGame(int id)
             break;
         }
     }
-    if (fileManager.backupGameDir(sg))
-    {
+    if (fileManager.backupGameDir(sg)) {
         const QString&  src = sd.chopped(1);
         const QString&  des = sg.chopped(1);
-        if (!fileManager.linkGameDir(src, des))
-        {
+        if (!fileManager.linkGameDir(src, des)) {
             checkCommonFiles();
             return;
         }
@@ -191,43 +170,33 @@ void Model::setupGame(int id)
     checkCommonFiles();
 }
 
-bool Model::getGame(int id)
-{
+bool Model::getGame(int id) {
     assert(id > 0);
-    if (id)
-    {
+    if (id) {
         int status = 0;
         ZipData zipData = data.getDownload(id);
         downloader.setUrl(zipData.url);
         downloader.setSaveFile(zipData.name);
 
-        if (fileManager.checkFile(zipData.name, false))
-        {
+        if (fileManager.checkFile(zipData.name, false)) {
             qDebug() << "File exists:" << zipData.name;
             const QString& sum = fileManager.calculateMD5(zipData.name, false);
-            if (sum != zipData.md5sum)
-            {
+            if (sum != zipData.md5sum) {
                 downloader.run();
                 status = downloader.getStatus();
-            }
-            else
-            {
+            } else {
                 // send 50% signal here
-                for (int i=0; i < 50; i++)
-                {
+                for (int i=0; i < 50; i++) {
                     emit this->modelTickSignal();
                     QCoreApplication::processEvents();
                 }
             }
-        }
-        else
-        {
+        } else {
             qWarning() << "File does not exist:" << zipData.name;
             downloader.run();
             status = downloader.getStatus();
         }
-        if (status == 0)
-        {
+        if (status == 0) {
             fileManager.extractZip(zipData.name, QString::number(id)+".TRLE");
             instructionManager.executeInstruction(id);
             return true;
@@ -236,12 +205,10 @@ bool Model::getGame(int id)
     return false;
 }
 
-const InfoData Model::getInfo(int id)
-{
+const InfoData Model::getInfo(int id) {
     return data.getInfo(id);
 }
 
-const QString Model::getWalkthrough(int id)
-{
+const QString Model::getWalkthrough(int id) {
     return data.getWalkthrough(id);
 }

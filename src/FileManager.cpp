@@ -23,6 +23,7 @@
 #include <QtCore>
 #include <QByteArray>
 #include <QDataStream>
+#include "gameTree.h"
 
 bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir) {
     QDir levelDirPath(levelDir);
@@ -212,6 +213,9 @@ int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
 bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
     const QString& l = levelDir_m.absolutePath() + levelDir;
     const QString& g = gameDir_m.absolutePath() + gameDir;
+
+    test(l);
+
     if (QFile::link(l, g)) {
         qDebug() << "Symbolic link created successfully.";
         return 0;
