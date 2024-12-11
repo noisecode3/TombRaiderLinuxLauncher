@@ -15,9 +15,14 @@
  */
 
 #include <QtTest/QtTest>
+#include "binary.h"
 #include "test.h"
 
 int main(int argc, char *argv[]) {
-    TestTombRaiderLinuxLauncher test;
-    return QTest::qExec(&test, argc, argv);
+    if (argc == 3 && strcmp(argv[1], "-w") == 0) {
+        widescreen_set(argv[2]);
+    } else {
+        TestTombRaiderLinuxLauncher test;
+        return QTest::qExec(&test, argc, argv);
+    }
 }

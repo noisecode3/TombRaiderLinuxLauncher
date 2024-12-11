@@ -78,7 +78,7 @@ std::string get_ssl_certificate(const std::string& host) {
 }
 
 struct WriteData {
-    Downloader* downloader;
+    Downloader* downloader;  // cppcheck-suppress unusedStructMember
     FILE* file;
 };
 

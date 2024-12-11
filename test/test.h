@@ -25,6 +25,7 @@ class TestTombRaiderLinuxLauncher : public QObject {
 
  private slots:
     void test1() {
+
         QVERIFY(true);
     }
 

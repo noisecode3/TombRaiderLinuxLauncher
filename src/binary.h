@@ -17,401 +17,59 @@
 #ifndef SRC_BINARY_H_
 #define SRC_BINARY_H_
 
+#include <QString>
 #include <QFile>
 #include <QByteArray>
-#include <QCryptographicHash>
-
 #include <QDebug>
 
-
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <algorithm>
-
-
-/**
- * Widescreen patch
- * reimplement widescreen patch
- * https://tombraiders.net/stella/downloads/widescreen.html
- */
-
-/**
- * Detect binary type
- * among TR1 TR2 TR3 TR4 TR5
- * In some situations when exe was renamed
- * when we unpack we will create a symbolic link
- * so that another launcher still work
- */
-
-
-/*
- * Lets collect all of them we can find
- * data at 0x80–0xFF is a mix of default and linker/compiler-specific data
- * This can be used to identify a set of exe we run from
- *
- * xxd -l 256 tomb4.exe | diff - <(xxd -l 256 tomb4.exe)
- *
- * offset at 0x3C, read 4 bytes to get header size
- * if needed but can just read 1024 bytes
- * but not for TOMB.EXE cus it totally different
- *
-
-    PCTOMB5.EXE
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 0100 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 860c 3473 e748 671d e748 671d e748 671d
-0000090 fbcb 6713 e750 671d c7b7 6719 e743 671d
-00000a0 c7b7 6717 e740 671d c411 670e e743 671d
-00000b0 e748 671d e74b 671d f82a 670e e743 671d
-00000c0 e748 671c e7e8 671d f8a0 6717 e79c 671d
-00000d0 f8a0 6716 e756 671d e1f0 671b e749 671d
-00000e0 6952 6863 e748 671d 0000 0000 0000 0000
-00000f0 0000 0000 0000 0000 0000 0000 0000 0000
-0000100 4550 0000 014c 0006 c8d2 3a2c 0000 0000
-0000110 0000 0000 00e0 010e 010b 0006 0000 0010
-
-    TR-BOD.EXE
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 0100 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 860c 3473 e748 671d e748 671d e748 671d
-0000090 fbcb 6713 e750 671d c7b7 6719 e743 671d
-00000a0 c7b7 6717 e740 671d c411 670e e743 671d
-00000b0 e748 671d e74b 671d f82a 670e e743 671d
-00000c0 e748 671c e7e8 671d f8a0 6717 e79c 671d
-00000d0 f8a0 6716 e756 671d e1f0 671b e749 671d
-00000e0 6952 6863 e748 671d 0000 0000 0000 0000
-00000f0 0000 0000 0000 0000 0000 0000 0000 0000
-0000100 4550 0000 014c 0006 6aed 3a0f 0000 0000
-0000110 0000 0000 00e0 010e 010b 0006 0000 0010
-
-Widescreen patch 16:9
-< 00101060: cdcc cc3a efee 6e3d 8988 883b abaa aa3f  ...:..n=...;...?
----
-> 00101060: cdcc cc3a efee 6e3d 8988 883b 398e e33f  ...:..n=...;9..?
-
-xxd -s 1052672 -l 160 PCTOMB5.EXE
-00101000: 0000 0000 ed6a 0f3a 0000 0000 0200 0000  .....j.:........
-00101010: 3000 0000 0000 0000 0090 1300 0000 003f  0..............?
-00101020: 0000 803e 0000 803f 0000 0000 0000 8043  ...>...?.......C
-00101030: 0000 803b 8988 083c 0000 4040 0000 803d  ...;...<..@@...=
-00101040: 0000 8042 0000 3e43 0000 a041 0000 7c3e  ...B..>C...A..|>
-00101050: 0000 7043 0000 0044 0000 003b 0000 0041  ..pC...D...;...A
-00101060: cdcc cc3a efee 6e3d 8988 883b 398e e33f  ...:..n=...;9..?
-00101070: 0ad7 a33b a470 7d3f db0f c938 0000 8038  ...;.p}?...8...8
-00101080: cdcc 4c3c 0000 10c3 ffff ffff 0000 0000  ..L<............
-00101090: c733 4900 0000 0000 ffff ffff 0000 0000  .3I.............
-
-
-    tomb4.exe
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 0100 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 cf3f d27c ae7b 8112 ae7b 8112 ae7b 8112
-0000090 8c26 8119 ae7a 8112 b2f8 811c ae67 8112
-00000a0 8c26 8118 ae0d 8112 8e84 8116 ae70 8112
-00000b0 ae7b 8112 ae7e 8112 8e84 8118 ae73 8112
-00000c0 b193 8119 ae7a 8112 b119 8101 ae6e 8112
-00000d0 ae7b 8113 aee5 8112 8c94 8122 ae2e 8112
-00000e0 8c94 8123 ae61 8112 a8bc 8114 ae7a 8112
-00000f0 6952 6863 ae7b 8112 0000 0000 0000 0000
-0000100 4550 0000 014c 0004 63dc 3a0d 0000 0000
-0000110 0000 0000 00e0 010f 010b 0006 6000 000a
-
-42814c42814
-< 000a73d0: abaa aa3f 0ad7 a33b 0000 8038 0000 ffff  ...?...;...8....
----
-> 000a73d0: 398e e33f 0ad7 a33b 0000 8038 0000 ffff  9..?...;...8....
-
-
-    tomb3.exe (Trxyebeep-tomb3)
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 0110 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 7d55 7347 1c11 2029 1c11 2029 1c11 2029
-0000090 6418 20ba 1c05 2029 6304 212d 1c1d 2029
-00000a0 6304 212a 1c1b 2029 6304 212c 1c0c 2029
-00000b0 6304 2128 1c15 2029 69aa 212c 1c14 2029
-00000c0 645a 212f 1c10 2029 645a 2128 1c02 2029
-00000d0 1c11 2028 1cac 2029 645a 212c 1c10 2029
-00000e0 9c27 2120 1c9b 2029 9c27 20d6 1c10 2029
-00000f0 9c27 212b 1c10 2029 6952 6863 1c11 2029
-0000100 0000 0000 0000 0000 0000 0000 0000 0000
-0000110 4550 0000 014c 0005 8c16 654a 0000 0000
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 0120 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 7a45 c7c5 1b01 94ab 1b01 94ab 1b01 94ab
-0000090 6308 9438 1b15 94ab 6e53 95af 1b0d 94ab
-00000a0 6e53 95a8 1b0b 94ab 6e53 95ae 1b1c 94ab
-00000b0 6e53 95aa 1b05 94ab 6eba 95ae 1b04 94ab
-00000c0 69d2 95ad 1b00 94ab 69d2 95aa 1b12 94ab
-00000d0 1b01 94aa 1bc0 94ab 69d2 95ae 1b00 94ab
-00000e0 6ec5 95a2 1b8b 94ab 6ec5 9454 1b00 94ab
-00000f0 1b01 943c 1b00 94ab 6ec5 95a9 1b00 94ab
-0000100 6952 6863 1b01 94ab 0000 0000 0000 0000
-0000110 0000 0000 0000 0000 0000 0000 0000 0000
-
-
-    tomb3.exe (old trle exe)
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 00b0 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 6ccc 5362 0d88 000c 0d88 000c 0d88 000c
-0000090 0b0c 000a 0d89 000c 0d88 000c 0c64 000c
-00000a0 6952 6863 0d88 000c 0000 0000 0000 0000
-00000b0 4550 0000 014c 0004 1379 3665 0000 0000
-00000c0 0000 0000 00e0 010f 010b 0a05 1800 000c
-00000d0 ba00 0023 0000 0000 71e0 000b 1000 0000
-00000e0 3000 000c 0000 0040 1000 0000 0200 0000
-00000f0 0004 0000 0000 0000 0004 0000 0000 0000
-0000100 0000 0030 0400 0000 9b97 000f 0002 0000
-0000110 0000 0010 1000 0000 0000 0010 1000 0000
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 00b0 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 6ccc 5362 0d88 000c 0d88 000c 0d88 000c
-0000090 0b0c 000a 0d89 000c 0d88 000c 0c64 000c
-00000a0 6952 6863 0d88 000c 0000 0000 0000 0000
-00000b0 4550 0000 014c 0004 1379 3665 0000 0000
-00000c0 0000 0000 00e0 010f 010b 0a05 1800 000c
-00000d0 b600 0023 0000 0000 71e0 000b 1000 0000 <-- different
-00000e0 3000 000c 0000 0040 1000 0000 0200 0000
-00000f0 0004 0000 0000 0000 0004 0000 0000 0000
-0000100 f000 002f 0400 0000 0000 0000 0002 0000
-0000110 0000 0010 1000 0000 0000 0010 1000 0000
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 00b0 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 6ccc 5362 0d88 000c 0d88 000c 0d88 000c
-0000090 0b0c 000a 0d89 000c 0d88 000c 0c64 000c
-00000a0 6952 6863 0d88 000c 0000 0000 0000 0000
-00000b0 4550 0000 014c 0004 1379 3665 0000 0000
-00000c0 0000 0000 00e0 010f 010b 0a05 1800 000c
-00000d0 ba00 0023 0000 0000 71e0 000b 1000 0000
-00000e0 3000 000c 0000 0040 1000 0000 0200 0000
-00000f0 0004 0000 0000 0000 0004 0000 0000 0000
-0000100 0000 0030 0400 0000 9b97 000f 0002 0000
-0000110 0000 0010 1000 0000 0000 0010 1000 0000
-
-
-
-    Tomb2.exe (TR2Main)
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 0080 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 4550 0000 014c 0005 a8e3 348e 0000 0000
-0000090 0000 0000 00e0 010f 010b 0205 1e00 0006
-00000a0 8400 0013 0000 0000 9ff0 0005 1000 0000
-00000b0 3000 0006 0000 0040 1000 0000 0200 0000
-00000c0 0004 0000 0000 0000 0004 0000 0000 0000
-00000d0 d000 0019 0400 0000 80f2 000e 0002 0000
-00000e0 0000 0010 1000 0000 0000 0010 1000 0000
-00000f0 0000 0000 0010 0000 0000 0000 0000 0000
-0000100 8000 0012 00dc 0000 a000 0012 2cf8 0007
-0000110 0000 0000 0000 0000 0000 0000 0000 0000
-
-    TOMB2.EXE
-
-0000000 5a4d 0090 0003 0000 0004 0000 ffff 0000
-0000010 00b8 0000 0000 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 00c8 0000
-0000040 1f0e 0eba b400 cd09 b821 4c01 21cd 6854
-0000050 7369 7020 6f72 7267 6d61 6320 6e61 6f6e
-0000060 2074 6562 7220 6e75 6920 206e 4f44 2053
-0000070 6f6d 6564 0d2e 0a0d 0024 0000 0000 0000
-0000080 0ecc 4045 6f88 132b 6f88 132b 6f88 132b
-0000090 70ea 1338 6f80 132b 690c 132d 6f89 132b
-00000a0 6f88 132b 6e06 132b 6952 6863 6f88 132b
-00000b0 0000 0000 0000 0000 0000 0000 0000 0000
-00000c0 0000 0000 0000 0000 4550 0000 014c 0004
-00000d0 c840 3709 0000 0000 0000 0000 00e0 010f
-00000e0 010b 0a05 4a00 0006 ee00 0013 0000 0000
-00000f0 cb30 0005 1000 0000 6000 0006 0000 0040
-0000100 1000 0000 0200 0000 0004 0000 0000 0000
-0000110 0004 0000 0000 0000 6000 001a 0400 0000
-
-    TOMB.EXE and TOMB-V.EXE
-
-0000000 5a4d 008c 0017 0006 0006 0087 ffff 02c9
-0000010 0800 0000 038c 0000 0040 0000 0000 0000
-0000020 0000 0000 0000 0000 0000 0000 0000 0000
-0000030 0000 0000 0000 0000 0000 0000 2c90 0000
-0000040 05e4 0000 05b1 0000 058c 0000 053a 0000
-0000050 04c4 0000 0437 0000 0000 0000 0000 0000
-0000060 ebcc 90fd 9090 0090 5253 5756 22b8 e800
-0000070 00aa c085 2474 ecbf 8903 57c6 88ac 4705
-0000080 003c f875 895f baf8 0031 ece8 8900 e8f8
-0000090 0105 c085 0474 f889 27eb f631 1beb ecbb
-00000a0 b803 0036 948b 01ee 9be8 8001 ec3e 0003
-00000b0 0574 ecb8 eb03 460a 8346 04fe e07c 36b8
-00000c0 5f00 5a5e c35b 5553 e589 ec81 0088 ed81
-00000d0 0080 d389 91e8 89ff 7846 078b 4689 8d7a
-00000e0 f846 568d e878 0284 4689 8b7c 7846 46c7
-00000f0 007e e800 0285 41b8 e800 0289 468b e878
-0000100 0283 a3e8 8902 8bc3 e807 02a4 76e8 b802
-0000110 0001 b5e8 8d02 80a6 5d00 c35b 5153 5652
-
-
-*/
-
-QString getFileSha256(const QString &filePath, int numBytes = 1024) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "Unable to open file for reading";
-        return "";
-    }
-
-    QByteArray data = file.read(numBytes);  // Read the first 'numBytes' bytes
-    QCryptographicHash hash(QCryptographicHash::Sha256);
-    hash.addData(data);
-    QByteArray hashBytes = hash.result();
-
-    return hashBytes.toHex();  // Convert hash to hexadecimal string
-}
-
-int main() {
-    QString filePath = "yourfile.exe";
-    QString sha256Hash = getFileSha256(filePath);
-
-    qDebug() << "SHA256 hash of the first 1024 bytes:" << sha256Hash;
-    return 0;
-}
-
-
-
-bool isTombRaiderExe(const QString &filePath) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        std::cerr << "Failed to open file!" << std::endl;
-        return false;
-    }
-
-    // Read the DOS header and PE signature range
-    QByteArray header = file.read(0x110); // Read first 0x110 bytes
-    if (header.size() < 0x110) {
-        std::cerr << "File too small to be valid!" << std::endl;
-        return false;
-    }
-
-    // Check for "MZ" magic number
-    if (header.mid(0, 2) != QByteArray::fromHex("5A4D")) {
-        std::cerr << "Not a valid DOS executable!" << std::endl;
-        return false;
-    }
-
-    // Extract 0x80–0x110 and hash it
-    QByteArray uniqueRange = header.mid(0x80, 0x110 - 0x80);
-    QByteArray hash = QCryptographicHash::hash(uniqueRange, QCryptographicHash::Md5);
-
-    // Compare hash with known hashes for Tomb Raider executables
-    QByteArray tomb4Hash = QByteArray::fromHex("1234567890abcdef..."); // Add known hash
-    if (hash == tomb4Hash) {
-        return true; // This is Tomb4.exe
-    }
-
-    return false;
-}
-
-
-
-int file(const QString& input) {
-    // Open the file in binary mode
-    std::ifstream file(input, std::ios::binary);
-    if (!file.is_open()) {
-        std::cerr << "Error opening file!" << std::endl;
+int widescreen_set(const QString& path) {
+    // Open the file for reading in binary mode
+    QFileInfo fileInfo(path);
+    if (fileInfo.exists() && !fileInfo.isFile()) {
+        qDebug() << "Error: The exe path is not a regular file. " << path;
         return 1;
     }
 
-    // Read the entire file into a vector
-    std::vector<unsigned char> fileContent((std::istreambuf_iterator<char>(file)),
-                                            std::istreambuf_iterator<char>());
+    QFile file(path);
 
+    if (!file.open(QIODevice::ReadOnly)) {  // flawfinder: ignore
+        qCritical() << "Error opening file for reading!";
+        return 1;
+    }
+
+    // Read the entire file into a QByteArray
+    QByteArray fileContent = file.readAll();
     file.close();
 
     // Pattern to find and replace
-    std::vector<unsigned char> pattern = {0xab, 0xaa, 0xaa, 0x3f, 0x0a, 0xd7, 0xa3, 0x3b};
-    std::vector<unsigned char> replacement = {0x39, 0x8e, 0xe3, 0x3f, 0x0a, 0xd7, 0xa3, 0x3b};
+    QByteArray pattern = QByteArray::fromHex("abaaaa3f0ad7a33b");
+    QByteArray replacement = QByteArray::fromHex("398ee33f0ad7a33b");
 
-    // Search for the pattern in the file content and replace it
-    for (size_t i = 0; i <= fileContent.size() - pattern.size(); ++i) {
-        if (std::equal(pattern.begin(), pattern.end(), fileContent.begin() + i)) {
-            std::copy(replacement.begin(), replacement.end(), fileContent.begin() + i);
-            break;  // Only replace the first occurrence
+    // Find the pattern in the file content
+    int index = fileContent.indexOf(pattern);
+    if (index != -1) {
+        // Replace the pattern with the replacement
+        fileContent.replace(index, pattern.size(), replacement);
+
+        // Open the file for writing in binary mode
+        if (!file.open(QIODevice::WriteOnly)) {  // flawfinder: ignore
+            qCritical() << "Error opening file for writing!";
+            return 1;
         }
-    }
 
-    // Open the file again in binary mode to write back the modified content
-    std::ofstream outFile("tomb4.exe", std::ios::binary);
-    if (!outFile.is_open()) {
-        std::cerr << "Error opening file to write!" << std::endl;
+        // Write the modified content back to the file
+        if (file.write(fileContent) == -1) {
+            qCritical() << "Error writing to file!";
+            return 1;
+        }
+
+        file.close();
+        qDebug() << "Widescreen patch applied successfully!";
+        return 0;
+    } else {
+        qDebug() << "Pattern not found in the file.";
         return 1;
     }
-
-    // Write the modified content back to the file
-    outFile.write(reinterpret_cast<char*>(fileContent.data()), fileContent.size());
-
-    outFile.close();
-
-    std::cout << "Widescreen patch applied successfully!" << std::endl;
-    return 0;
 }
 
 #endif  // SRC_BINARY_H_

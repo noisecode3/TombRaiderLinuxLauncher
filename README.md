@@ -81,6 +81,13 @@ python3 tombll_add_data.py data.json
 
 ```
 
+For testing widescreen patch
+it could work with only tr4 and tr5
+compile with cmake -DTEST=on
+```shell
+./TombRaiderLinuxLauncherTest -w tomb4.exe
+```
+
 ## Screenshots
 
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot1.jpg)
