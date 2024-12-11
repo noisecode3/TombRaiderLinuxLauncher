@@ -22,7 +22,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 find_package(OpenSSL REQUIRED)
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
-    message(STATUS "Submodule 'libs/miniz' not found. Initializing submodules...")
+    message(STATUS "Submodule 'libs/miniz' not found. Updating submodules...")
     execute_process(
         COMMAND git submodule update --init --recursive
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -32,6 +32,7 @@ endif()
 add_subdirectory(libs/miniz)
 
 set(SOURCES
+    test/test.h
     src/main.cpp
     src/binary.h
     src/gameTree.h
@@ -46,62 +47,35 @@ set(SOURCES
     src/Model.cpp
     src/Data.h
     src/Data.cpp
-)
-
-set(TEST_SOURCES
-    test/main.cpp
-    test/test.h
-    src/binary.h
-    src/gameTree.h
-    src/staticData.h
-    src/Network.h
-    src/Network.cpp
-    src/Controller.h
-    src/Controller.cpp
-    src/FileManager.h
-    src/FileManager.cpp
-    src/Model.h
-    src/Model.cpp
-    src/Data.h
-    src/Data.cpp
-)
+    src/TombRaiderLinuxLauncher.h
+    src/TombRaiderLinuxLauncher.cpp
+    src/TombRaiderLinuxLauncher.ui
+    src/resources.qrc)
 
 if(TEST)
-    enable_testing()
-    set(PROJECT_NAME_POST "${PROJECT_NAME}Test")
-    add_executable(${PROJECT_NAME_POST} ${TEST_SOURCES})
-    target_link_libraries(${PROJECT_NAME_POST} PUBLIC
-        Qt5::Core
-        Qt5::Gui
-        Qt5::Test
-        Qt5::Widgets
-        Qt5::WebEngineWidgets
-        Qt5::Sql
-        miniz
-        ${CURL_LIBRARY}
-        OpenSSL::SSL
-        Boost::system
-        Boost::filesystem
-    )
-    add_test(NAME ${PROJECT_NAME_POST} COMMAND ${PROJECT_NAME_POST})
+    enable_testing(ON)
+    add_executable(${PROJECT_NAME}Test ${SOURCES})
+    add_test(NAME ${PROJECT_NAME}Test COMMAND ${PROJECT_NAME}Test)
 else()
-    set(PROJECT_NAME_POST "${PROJECT_NAME}")
-    add_executable(${PROJECT_NAME_POST} ${SOURCES})
-    target_link_libraries(${PROJECT_NAME_POST} PUBLIC
-        Qt5::Core
-        Qt5::Gui
-        Qt5::Widgets
-        Qt5::WebEngineWidgets
-        Qt5::Sql
-        miniz
-        ${CURL_LIBRARY}
-        OpenSSL::SSL
-        Boost::system
-        Boost::filesystem
-    )
+    enable_testing(OFF)
+    add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
 
-target_include_directories(${PROJECT_NAME_POST} PRIVATE
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    Qt5::Core
+    Qt5::Test
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::WebEngineWidgets
+    Qt5::Sql
+    miniz
+    ${CURL_LIBRARY}
+    OpenSSL::SSL
+    Boost::system
+    Boost::filesystem
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
     ${CURL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     libs/miniz
@@ -109,13 +83,13 @@ target_include_directories(${PROJECT_NAME_POST} PRIVATE
     test
 )
 
-set_target_properties(${PROJECT_NAME_POST} PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
 
 if(NOT TEST)
-    install(TARGETS ${PROJECT_NAME_POST}
+    install(TARGETS ${PROJECT_NAME}
         DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
     )
 

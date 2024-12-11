@@ -14,16 +14,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "TombRaiderLinuxLauncher.h"
+#ifdef TEST
+#include <QtTest/QtTest>
+#include "binary.h"
+#include "test.h"
 
+/**
+ * 
+ */
+int main(int argc, char *argv[]) {
+    if (argc == 3 && strcmp(argv[1], "-w") == 0) {
+        widescreen_set(argv[2]);
+    } else {
+        TestTombRaiderLinuxLauncher test;
+        return QTest::qExec(&test, argc, argv);
+    }
+}
+#else
+#include "TombRaiderLinuxLauncher.h"
 #include <QApplication>
 
 
 /**
  * 
  */
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     QApplication::setOrganizationName("TombRaiderLinuxLauncher");
     QApplication::setApplicationName("TombRaiderLinuxLauncher");
@@ -32,14 +47,11 @@ int main(int argc, char *argv[])
     TombRaiderLinuxLauncher w;
 
     QStringList arguments = a.arguments();
-    if (arguments.contains("--fullscreen"))
-    {
+    if (arguments.contains("--fullscreen")) {
         w.showFullScreen();
-    }
-    else
-    {
+    } else {
         w.show();
     }
-
     return a.exec();
 }
+#endif
