@@ -31,8 +31,11 @@ endif()
 
 add_subdirectory(libs/miniz)
 
-set(SOURCES
+set(SOURCES_TESTS
     test/test.h
+)
+
+set(SOURCES_MC
     src/main.cpp
     src/binary.h
     src/gameTree.h
@@ -47,24 +50,17 @@ set(SOURCES
     src/Model.cpp
     src/Data.h
     src/Data.cpp
+)
+
+set(SOURCES_VIEW
     src/TombRaiderLinuxLauncher.h
     src/TombRaiderLinuxLauncher.cpp
     src/TombRaiderLinuxLauncher.ui
-    src/resources.qrc)
+    src/resources.qrc
+)
 
-if(TEST)
-    enable_testing(ON)
-    add_executable(${PROJECT_NAME}Test ${SOURCES})
-    add_test(NAME ${PROJECT_NAME}Test COMMAND ${PROJECT_NAME}Test)
-else()
-    enable_testing(OFF)
-    add_executable(${PROJECT_NAME} ${SOURCES})
-endif()
-
-target_link_libraries(${PROJECT_NAME} PUBLIC
+set(LINK_COMMON
     Qt5::Core
-    Qt5::Test
-    Qt5::Gui
     Qt5::Widgets
     Qt5::WebEngineWidgets
     Qt5::Sql
@@ -75,18 +71,38 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     Boost::filesystem
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE
+set(LINK_GUI
+    Qt5::Gui
+)
+
+set(INCLUDE_DIR
     ${CURL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     libs/miniz
     src
-    test
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
+set(COMPILE_OPT
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
+
+if(TEST)
+    enable_testing()
+    set(SOURCES ${SOURCES_MC} ${SOURCES_TESTS})
+    add_executable(${PROJECT_NAME}Test ${SOURCES})
+    add_test(NAME ${PROJECT_NAME}Test COMMAND ${PROJECT_NAME}Test)
+    target_link_libraries(${PROJECT_NAME}Test PUBLIC ${LINK_COMMON} Qt5::Test)
+    target_include_directories(${PROJECT_NAME}Test PRIVATE ${INCLUDE_DIR} test)
+    set_target_properties(${PROJECT_NAME}Test PROPERTIES ${COMPILE_OPT})
+    target_compile_definitions(${PROJECT_NAME}Test PRIVATE TEST)
+else()
+    set(SOURCES ${SOURCES_MC} ${SOURCES_VIEW})
+    add_executable(${PROJECT_NAME} ${SOURCES})
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${LINK_COMMON} ${LINK_GUI})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
+    set_target_properties(${PROJECT_NAME} PROPERTIES ${COMPILE_OPT})
+endif()
 
 if(NOT TEST)
     install(TARGETS ${PROJECT_NAME}
