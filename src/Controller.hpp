@@ -9,16 +9,13 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_CONTROLLER_H_
-#define SRC_CONTROLLER_H_
+#ifndef SRC_CONTROLLER_HPP_
+#define SRC_CONTROLLER_HPP_
 #include <QObject>
 #include <QThread>
-#include "Model.h"
+#include "Model.hpp"
 
 /**
  * The controller activate UI thread work or light instant work on the model
@@ -70,4 +67,4 @@ class Controller : public QObject {
     Q_DISABLE_COPY(Controller)
 };
 
-#endif  // SRC_CONTROLLER_H_
+#endif  // SRC_CONTROLLER_HPP_

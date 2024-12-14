@@ -9,22 +9,19 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_MODEL_H_
-#define SRC_MODEL_H_
+#ifndef SRC_MODEL_HPP_
+#define SRC_MODEL_HPP_
 
 #include <QObject>
 #include <QMap>
 #include <QDebug>
 #include <QtCore>
-#include <assert.h>
-#include "Data.h"
-#include "FileManager.h"
-#include "Network.h"
+#include <cassert>
+#include "Data.hpp"
+#include "FileManager.hpp"
+#include "Network.hpp"
 
 class InstructionManager : public QObject {
     Q_OBJECT
@@ -53,11 +50,10 @@ class Model : public QObject {
     Q_OBJECT
 
  public:
-    static Model& getInstance()
-    {
+    static Model& getInstance() {
         static Model instance;
         return instance;
-    };
+    }
     void checkCommonFiles();
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
@@ -90,4 +86,4 @@ class Model : public QObject {
     Q_DISABLE_COPY(Model)
 };
 
-#endif  // SRC_MODEL_H_
+#endif  // SRC_MODEL_HPP_

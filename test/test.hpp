@@ -9,13 +9,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEST_TEST_H_
-#define TEST_TEST_H_
+#ifndef TEST_TEST_HPP_
+#define TEST_TEST_HPP_
 
 #include <QtCore>
 #include <QtTest/QtTest>
@@ -25,7 +22,6 @@ class TestTombRaiderLinuxLauncher : public QObject {
 
  private slots:
     void test1() {
-
         QVERIFY(true);
     }
 
@@ -34,4 +30,4 @@ class TestTombRaiderLinuxLauncher : public QObject {
     }
 };
 
-#endif  // TEST_TEST_H_
+#endif  // TEST_TEST_HPP_

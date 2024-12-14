@@ -9,13 +9,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_DATA_H_
-#define SRC_DATA_H_
+#ifndef SRC_DATA_HPP_
+#define SRC_DATA_HPP_
 
 #include <QObject>
 #include <QSqlDatabase>
@@ -181,4 +178,4 @@ class Data : public QObject {
     Q_DISABLE_COPY(Data)
 };
 
-#endif  // SRC_DATA_H_
+#endif  // SRC_DATA_HPP_

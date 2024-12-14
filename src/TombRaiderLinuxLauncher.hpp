@@ -9,13 +9,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_TOMBRAIDERLINUXLAUNCHER_H_
-#define SRC_TOMBRAIDERLINUXLAUNCHER_H_
+#ifndef SRC_TOMBRAIDERLINUXLAUNCHER_HPP_
+#define SRC_TOMBRAIDERLINUXLAUNCHER_HPP_
 
 #include <QMainWindow>
 #include <QSettings>
@@ -29,7 +26,7 @@
 #include <QVector>
 #include <QString>
 
-#include "Controller.h"
+#include "Controller.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
@@ -126,4 +123,4 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     // cppcheck-suppress unusedStructMember
     Ui::TombRaiderLinuxLauncher *ui;
 };
-#endif  // SRC_TOMBRAIDERLINUXLAUNCHER_H_
+#endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_

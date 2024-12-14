@@ -32,28 +32,28 @@ endif()
 add_subdirectory(libs/miniz)
 
 set(SOURCES_TESTS
-    test/test.h
+    test/test.hpp
 )
 
 set(SOURCES_MC
     src/main.cpp
-    src/binary.h
-    src/gameTree.h
-    src/staticData.h
-    src/Network.h
+    src/binary.hpp
+    src/gameTree.hpp
+    src/staticData.hpp
+    src/Network.hpp
     src/Network.cpp
-    src/Controller.h
+    src/Controller.hpp
     src/Controller.cpp
-    src/FileManager.h
+    src/FileManager.hpp
     src/FileManager.cpp
-    src/Model.h
+    src/Model.hpp
     src/Model.cpp
-    src/Data.h
+    src/Data.hpp
     src/Data.cpp
 )
 
 set(SOURCES_VIEW
-    src/TombRaiderLinuxLauncher.h
+    src/TombRaiderLinuxLauncher.hpp
     src/TombRaiderLinuxLauncher.cpp
     src/TombRaiderLinuxLauncher.ui
     src/resources.qrc

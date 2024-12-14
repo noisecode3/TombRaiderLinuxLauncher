@@ -9,31 +9,52 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifdef TEST
-#include <QtTest/QtTest>
-#include "binary.h"
-#include "test.h"
+#include <QCommandLineParser>
+#include <QCoreApplication>
+#include <QTest>
+#include "binary.hpp"
+#include "test.hpp"
+#else
+#include "TombRaiderLinuxLauncher.hpp"
+#include <QApplication>
+#endif
 
+#ifdef TEST
 /**
  * 
  */
 int main(int argc, char *argv[]) {
-    if (argc == 3 && strcmp(argv[1], "-w") == 0) {
-        widescreen_set(argv[2]);
-    } else {
-        TestTombRaiderLinuxLauncher test;
-        return QTest::qExec(&test, argc, argv);
+    QCoreApplication app(argc, argv);
+
+    // Access the existing QTest command-line parser
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Tomb Raider Linux Launcher Test Suite");
+    parser.addHelpOption();
+
+    // Add custom -w option for widescreen
+    parser.addOption(QCommandLineOption(
+        QStringList {"w", "widescreen"}
+        "Set widescreen bit on original games, probably not useful for TRLE"
+        "PATH"));
+
+    // Process arguments
+    parser.process(app);
+
+    // Handle custom -w flag
+    if (parser.isSet("widescreen")  == true) {
+        widescreen_set(parser.value("widescreen"));
+        return 0;  // Exit after handling the custom flag
     }
+
+    // Pass remaining arguments to QTest
+    TestTombRaiderLinuxLauncher test;
+    QStringList testArgs = app.arguments();
+    return QTest::qExec(&test, testArgs);
 }
 #else
-#include "TombRaiderLinuxLauncher.h"
-#include <QApplication>
-
 /**
  * 
  */
@@ -46,7 +67,7 @@ int main(int argc, char *argv[]) {
     TombRaiderLinuxLauncher w;
 
     QStringList arguments = a.arguments();
-    if (arguments.contains("--fullscreen")) {
+    if (arguments.contains("--fullscreen") == true) {
         w.showFullScreen();
     } else {
         w.show();

@@ -9,12 +9,9 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FileManager.h"
+#include "FileManager.hpp"
 #include <QFile>
 #include <QIODevice>
 #include <QDir>
@@ -23,7 +20,7 @@
 #include <QtCore>
 #include <QByteArray>
 #include <QDataStream>
-#include "gameTree.h"
+#include "gameTree.hpp"
 
 bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir) {
     QDir levelDirPath(levelDir);
@@ -52,19 +49,26 @@ const QString FileManager::calculateMD5(const QString& file, bool lookGameDir) {
         gameDir_m.absolutePath() + QDir::separator()+file :
         levelDir_m.absolutePath() + QDir::separator()+file;
 
+    QFileInfo fileInfo(path);
+
+    if (fileInfo.exists() && !fileInfo.isFile()) {
+        qDebug() << "Error: The path is not a regular file." << path;
+        return"";
+    }
+
     QFile f(path);
-    if (!f.open(QIODevice::ReadOnly)) {
+    if (!f.open(QIODevice::ReadOnly)) {  // flawfinder: ignore
         qDebug() << "Error opening file for reading: " << f.errorString();
         return "";
     }
 
     QCryptographicHash md5(QCryptographicHash::Md5);
 
-    char buffer[1024];
+    std::array<char, 1024> buffer;
     qint64 bytesRead;
 
-    while ((bytesRead = f.read(buffer, sizeof(buffer))) > 0) {
-        md5.addData(buffer, static_cast<int>(bytesRead));
+    while ((bytesRead = f.read(buffer.data(), buffer.size())) > 0) {
+        md5.addData(buffer.data(), static_cast<int>(bytesRead));
     }
 
     f.close();
