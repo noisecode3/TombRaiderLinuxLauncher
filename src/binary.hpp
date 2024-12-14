@@ -19,7 +19,6 @@
 #include <QByteArray>
 #include <QDebug>
 
-
 /**
  * @brief Look for a bit pattern that set 16:9 aspect ratio for Tomb Raider 4.
  *
@@ -32,8 +31,8 @@
  */
 qint64 findReplacePattern(QFile* const file) {
     qint64 status = 0;  // Initialize the status variable
-    QByteArray fileContent = file.readAll();
-    file.close();
+    QByteArray fileContent = file->readAll();
+    file->close();
 
     // Define the pattern to find and replace
     QByteArray pattern = QByteArray::fromHex("abaaaa3f0ad7a33b");
@@ -50,17 +49,17 @@ qint64 findReplacePattern(QFile* const file) {
     fileContent.replace(index, pattern.size(), replacement);
 
     // Reopen the file for writing
-    if (!file.open(QIODevice::WriteOnly)) {  // flawfinder: ignore
+    if (!file->open(QIODevice::WriteOnly)) {  // flawfinder: ignore
         qCritical() << "Error opening file for writing!";
         status = 2;
-    } else if (file.write(fileContent) == -1) {
+    } else if (file->write(fileContent) == -1) {
         qCritical() << "Error writing to file!";
         status = 3;
     } else {
         qDebug() << "Widescreen patch applied successfully!";
     }
 
-    file.close();
+    file->close();
     return status;
 }
 
@@ -91,7 +90,7 @@ qint64 widescreen_set(const QString& path) {
     }
 
     // Perform the pattern replacement and propagate the status
-    status = findReplacePattern(file);
+    status = findReplacePattern(&file);
 
     return status;  // Single return point
 }

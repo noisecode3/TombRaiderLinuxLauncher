@@ -36,8 +36,8 @@ int main(int argc, char *argv[]) {
 
     // Add custom -w option for widescreen
     parser.addOption(QCommandLineOption(
-        QStringList {"w", "widescreen"}
-        "Set widescreen bit on original games, probably not useful for TRLE"
+        QStringList {"w", "widescreen"},
+        "Set widescreen bit on original games, probably not useful for TRLE",
         "PATH"));
 
     // Process arguments
