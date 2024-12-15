@@ -14,13 +14,14 @@
 #ifndef SRC_DATA_HPP_
 #define SRC_DATA_HPP_
 
-#include <QObject>
-#include <QSqlDatabase>
-#include <QSqlQuery>
 #include <QDebug>
-#include <QSqlError>
+#include <QFileInfo>
 #include <QIcon>
+#include <QObject>
 #include <QPixmap>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
 
 /**
  * @struct FolderNames
@@ -112,25 +113,48 @@ struct ListItemData {
     QIcon   picture;
 };
 
+/**
+ * @struct InfoData
+ * @brief Store HTML data and a list of icons generated from image WEBP data.
+ *
+ * This struct is designed to store a body of HTML and convert a list of image data 
+ * (provided as `QByteArray`) into `QIcon` objects. The `QIcon` objects can then 
+ * be used in Qt-based applications with QtWebEngine and QIcons in a split view manner.
+ */
 struct InfoData {
     /**
-     * @struct InfoData
-     * @brief
-     * @param
-     * @details
+     * @brief Default constructor for `InfoData`.
+     *
+     * Initializes an empty body and an empty list of icons.
      */
     InfoData() {}
-    InfoData(QString body, QVector<QByteArray> imageList) : body(body) {
-        for (const QByteArray &image : imageList) {
+
+    /**
+     * @brief Constructs an `InfoData` object with the given body and image list.
+     *
+     * Converts each image in the provided `QVector<QByteArray>` to a `QIcon` object
+     * using the "WEBP" format and stores them in the icon list.
+     *
+     * @param body A string representing the main textual content.
+     * @param imageList A vector of image data in `QByteArray` format.
+     */
+    InfoData(const QString& body, const QVector<QByteArray>& imageList)
+        : m_body(body) {
+        for (const QByteArray& image : imageList) {
             QPixmap pixmap;
-            QIcon final;
-            pixmap.loadFromData(image, "WEBP");
-            final.addPixmap(pixmap);
-            this->imageList.push_back(final);
+            QIcon finalIcon;
+
+            // Load image data into a QPixmap and convert it to a QIcon
+            if (pixmap.loadFromData(image, "WEBP")) {
+                finalIcon.addPixmap(pixmap);
+            }
+
+            m_imageList.push_back(finalIcon);
         }
     }
-    QString body;
-    QVector<QIcon> imageList;
+
+    QString m_body;  ///< The textual content associated with this object.
+    QVector<QIcon> m_imageList;  ///< A list of icons generated from image data.
 };
 
 class Data : public QObject {
@@ -142,17 +166,28 @@ class Data : public QObject {
         return instance;
     }
 
-    bool initializeDatabase(QString path) {
-        db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName(path + "/tombll.db");
-        db.setConnectOptions("QSQLITE_OPEN_READONLY");
+    bool initializeDatabase(const QString& path) {
+        bool status = false;
+        const QString filePath = path + "/tombll.db";
+        QFileInfo fileInfo(filePath);
 
-        if (db.open()) {
-            return true;
+        // Open the file
+        if (!fileInfo.exists() || !fileInfo.isFile()) {
+            qCritical()
+                << "Error: The database path is not a regular file: " << path;
+            status = false;
         } else {
-            qDebug() << "Error opening database:" << db.lastError().text();
-            return false;
+            db = QSqlDatabase::addDatabase("QSQLITE");
+            db.setDatabaseName(path + "/tombll.db");
+            db.setConnectOptions("QSQLITE_OPEN_READONLY");
+            if (db.open()) {  // flawfinder: ignore
+                status = true;
+            } else {
+                qDebug() << "Error opening database:" << db.lastError().text();
+                status = false;
+            }
         }
+        return status;
     }
 
     void releaseDatabase() {

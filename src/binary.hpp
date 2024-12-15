@@ -70,17 +70,17 @@ qint64 findReplacePattern(QFile* const file) {
  * @return error qint64.
  */
 qint64 widescreen_set(const QString& path) {
-    qint64 status = 0;  // Initialize the status variable
+    qint64 status = 0;
     QFileInfo fileInfo(path);
     QFile file(path);
 
     // Open the file
     if (!fileInfo.exists() || !fileInfo.isFile()) {
         qCritical() << "Error: The exe path is not a regular file: " << path;
-        return 1;  // Invalid file path
+        status = 1;  // Invalid file path
     } else if (!file.open(QIODevice::ReadOnly)) {  // flawfinder: ignore
         qCritical() << "Error opening file for reading!";
-        return 2;  // File open error
+        status = 2;  // File open error
     } else {
         // Perform the pattern replacement and propagate the status
         status = findReplacePattern(&file);

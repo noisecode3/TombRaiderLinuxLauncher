@@ -24,7 +24,7 @@
 
 #ifdef TEST
 /**
- * 
+ * The main function used for console tests
  */
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
@@ -56,7 +56,8 @@ int main(int argc, char *argv[]) {
 }
 #else
 /**
- * 
+ * The main function used for the regular qt app.
+ * Takes care of command line arguments and create the window.
  */
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);

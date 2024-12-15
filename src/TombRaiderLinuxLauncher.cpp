@@ -449,7 +449,7 @@ void TombRaiderLinuxLauncher::infoClicked() {
     int id = selectedItem->data(Qt::UserRole).toInt();
     if (id) {
         InfoData info = controller.getInfo(id);
-        ui->infoWebEngineView->setHtml(info.body);
+        ui->infoWebEngineView->setHtml(info.m_body);
         ui->infoListWidget->setViewMode(QListView::IconMode);
         ui->infoListWidget->setIconSize(QSize(502, 377));
         ui->infoListWidget->setDragEnabled(false);
@@ -458,8 +458,8 @@ void TombRaiderLinuxLauncher::infoClicked() {
         ui->infoListWidget->setDefaultDropAction(Qt::IgnoreAction);
         ui->infoListWidget->setSelectionMode(QAbstractItemView::NoSelection);
         ui->infoListWidget->clear();
-        for (int i = 0; i < info.imageList.size(); ++i) {
-            const QIcon &icon = info.imageList.at(i);
+        for (int i = 0; i < info.m_imageList.size(); ++i) {
+            const QIcon &icon = info.m_imageList.at(i);
             QListWidgetItem *item = new QListWidgetItem(icon, "");
             ui->infoListWidget->addItem(item);
         }
