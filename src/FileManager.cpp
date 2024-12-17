@@ -30,7 +30,7 @@ bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir) {
             return false;
         }
     }
-    levelDir_m.setPath(levelDir);
+    m_levelDir.setPath(levelDir);
 
     QDir gameDirPath(gameDir);
     if (!gameDirPath.exists()) {
@@ -39,15 +39,15 @@ bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir) {
             return false;
         }
     }
-    gameDir_m.setPath(gameDir);
+    m_gameDir.setPath(gameDir);
 
     return true;
 }
 
 const QString FileManager::calculateMD5(const QString& file, bool lookGameDir) {
     const QString& path = lookGameDir ?
-        gameDir_m.absolutePath() + QDir::separator()+file :
-        levelDir_m.absolutePath() + QDir::separator()+file;
+        m_gameDir.absolutePath() + QDir::separator()+file :
+        m_levelDir.absolutePath() + QDir::separator()+file;
 
     QFileInfo fileInfo(path);
 
@@ -79,10 +79,10 @@ bool FileManager::extractZip(
     const QString& zipFilename,
     const QString& outputFolder) {
     const QString& zipPath =
-        levelDir_m.absolutePath() + QDir::separator() + zipFilename;
+        m_levelDir.absolutePath() + QDir::separator() + zipFilename;
 
     const QString& outputPath =
-        levelDir_m.absolutePath() + QDir::separator() + outputFolder;
+        m_levelDir.absolutePath() + QDir::separator() + outputFolder;
 
     qDebug() << "Unzipping file" << zipFilename << "to" << outputPath;
 
@@ -173,9 +173,9 @@ bool FileManager::extractZip(
 bool FileManager::checkDir(const QString& file, bool lookGameDir ) {
     QString path;
     if (!lookGameDir) {
-        path = levelDir_m.absolutePath() + QDir::separator() + file;
+        path = m_levelDir.absolutePath() + QDir::separator() + file;
     } else {
-        path = gameDir_m.absolutePath() + QDir::separator() + file;
+        path = m_gameDir.absolutePath() + QDir::separator() + file;
     }
     QDir directory(path);
     return directory.exists();
@@ -184,9 +184,9 @@ bool FileManager::checkDir(const QString& file, bool lookGameDir ) {
 bool FileManager::checkFile(const QString& file, bool lookGameDir ) {
     QString path;
     if (!lookGameDir) {
-        path = levelDir_m.absolutePath() + QDir::separator() + file;
+        path = m_levelDir.absolutePath() + QDir::separator() + file;
     } else {
-        path = gameDir_m.absolutePath() + QDir::separator() + file;
+        path = m_gameDir.absolutePath() + QDir::separator() + file;
     }
     QFile fFile(path);
     return fFile.exists();
@@ -194,8 +194,8 @@ bool FileManager::checkFile(const QString& file, bool lookGameDir ) {
 
 int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
     const QString& path = lookGameDir ?
-        gameDir_m.absolutePath() + QDir::separator()+file :
-        levelDir_m.absolutePath() + QDir::separator()+file;
+        m_gameDir.absolutePath() + QDir::separator()+file :
+        m_levelDir.absolutePath() + QDir::separator()+file;
 
     QFileInfo fileInfo(path);
     if (fileInfo.isDir()) {
@@ -215,8 +215,8 @@ int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
 }
 
 bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
-    const QString& l = levelDir_m.absolutePath() + levelDir;
-    const QString& g = gameDir_m.absolutePath() + gameDir;
+    const QString& l = m_levelDir.absolutePath() + levelDir;
+    const QString& g = m_gameDir.absolutePath() + gameDir;
 
     test(l);
 
@@ -245,7 +245,7 @@ bool FileManager::makeRelativeLink(
         const QString& levelDir,
         const QString& from,
         const QString& to) {
-    const QString& l = levelDir_m.absolutePath() + levelDir;
+    const QString& l = m_levelDir.absolutePath() + levelDir;
     const QString& f = l + from;
     const QString& t = l + to;
 
@@ -270,58 +270,65 @@ bool FileManager::makeRelativeLink(
     }
 }
 
-int FileManager::removeFileOrDirectory(const QString &file, bool lookGameDir) {
-    const QString& path = lookGameDir ?
-            gameDir_m.absolutePath() + QDir::separator()+file :
-            levelDir_m.absolutePath() + QDir::separator()+file;
+qint64 FileManager::removeFileOrDirectory(
+        const QString &file,
+        bool lookGameDir) {
+    qint64 status = 0;
+    const QString& sep = QDir::separator();
+    const QString& gamePath = m_gameDir.absolutePath() + sep + file;
+    const QString& levelPath = m_levelDir.absolutePath() + sep + file;
+    const QString& path = lookGameDir ? gamePath : levelPath;
 
     QDir dir(path);
     if (dir.exists()) {
         // Remove directory and its contents
         if (dir.removeRecursively()) {
             qDebug() << "Directory removed successfully:" << path;
-            return 0;
+            status = 0;
         } else {
             qWarning() << "Failed to remove directory:" << path;
-            return 1;
+            status = 1;
         }
     } else {
-        QFile file(path);
+        QFile f(path);
         // Check if the file exists before attempting to remove it
-        if (file.exists()) {
-            if (file.remove()) {
+        if (f.exists()) {
+            if (f.remove()) {
                 qDebug() << "File removed successfully:" << path;
-                return 0;
+                status = 0;
             } else {
                 qWarning() << "Failed to remove file:" << path;
-                return 1;
+                status = 1;
             }
         } else {
             qDebug() << "File or directory does not exist:" << path;
-            return 2;
+            status = 2;
         }
     }
+    return status;
 }
 
 int FileManager::createDirectory(const QString &file, bool gameDir) {
+    qint64 status = 0;
     const QString& sep = QDir::separator();
-    const QString& g = gameDir_m.absolutePath() + sep + file;
-    const QString& l = levelDir_m.absolutePath() + sep + file;
-    const QString& path = gameDir ? g : l;
+    const QString& gamePath = m_gameDir.absolutePath() + sep + file;
+    const QString& levelPath = m_levelDir.absolutePath() + sep + file;
+    const QString& path = gameDir ? gamePath : levelPath;
 
     // Create the directory if it doesn't exist
     if (!QDir(path).exists()) {
         if (QDir().mkpath(path)) {
             qDebug() << "Directory created successfully.";
-            return 0;
+            status = 0;
         } else {
             qDebug() << "Error creating directory.";
-            return 1;
+            status = 1;
         }
     } else {
         qDebug() << "Directory already exists.";
-        return 0;
+        status = 0;
     }
+    return status;
 }
 
 int FileManager::copyFile(
@@ -329,8 +336,8 @@ int FileManager::copyFile(
     const QString &levelFile,
     bool fromGameDir) {
 
-    const QString& gamePath = gameDir_m.absolutePath() + gameFile;
-    const QString& levelPath = levelDir_m.absolutePath() + levelFile;
+    const QString& gamePath = m_gameDir.absolutePath() + gameFile;
+    const QString& levelPath = m_levelDir.absolutePath() + levelFile;
 
     const QString& g = fromGameDir ? gamePath : levelPath;
     const QString& l = fromGameDir ? levelPath : gamePath;
@@ -364,7 +371,7 @@ int FileManager::copyFile(
 int FileManager::cleanWorkingDir(const QString &levelDir) {
     const QString sep = QDir::separator();
     const QString& directoryPath =
-        levelDir_m.absolutePath() + sep + levelDir;
+        m_levelDir.absolutePath() + sep + levelDir;
 
     QDir directory(directoryPath);
     if (directory.exists()) {
@@ -381,7 +388,7 @@ int FileManager::cleanWorkingDir(const QString &levelDir) {
 }
 
 bool FileManager::backupGameDir(const QString &gameDir) {
-    const QString& source = gameDir_m.absolutePath() + gameDir.chopped(1);
+    const QString& source = m_gameDir.absolutePath() + gameDir.chopped(1);
     const QString& des = source + ".old";
     QDir directory;
     if (directory.rename(source, des)) {
@@ -400,10 +407,10 @@ bool FileManager::moveFilesToDirectory(
     const QString& sep = QDir::separator();
 
     const QString& directoryFromPath =
-        levelDir_m.absolutePath() + sep + fromLevelDirectory;
+        m_levelDir.absolutePath() + sep + fromLevelDirectory;
 
     const QString& directoryToPath =
-        levelDir_m.absolutePath() + sep + toLevelDirectory;
+        m_levelDir.absolutePath() + sep + toLevelDirectory;
 
     QDir dir(directoryFromPath);
 
@@ -430,7 +437,7 @@ bool FileManager::moveFilesToParentDirectory(
     int levelsUp) {
 
     const QString& sep = QDir::separator();
-    QDir levelDirectoryFullPath(levelDir_m.absolutePath() + sep +
+    QDir levelDirectoryFullPath(m_levelDir.absolutePath() + sep +
         levelDirectory);
 
     if (!levelDirectoryFullPath.exists()) {

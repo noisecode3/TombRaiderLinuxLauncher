@@ -36,7 +36,7 @@ class FileManager : public QObject {
     bool checkDir(const QString& file, bool lookGameDir);
     bool checkFile(const QString& file, bool lookGameDir);
     int checkFileInfo(const QString& file, bool lookGameDir = true);
-    int removeFileOrDirectory(const QString &file, bool lookGameDir);
+    qint64 removeFileOrDirectory(const QString &file, bool lookGameDir);
     bool moveFilesToDirectory(
         const QString& fromLevelDirectory,
         const QString& toLevelDirectory);
@@ -65,8 +65,8 @@ class FileManager : public QObject {
  private:
     explicit FileManager(QObject *parent = nullptr)  : QObject(parent) {}
 
-    QDir levelDir_m;
-    QDir gameDir_m;
+    QDir m_levelDir;
+    QDir m_gameDir;
     Q_DISABLE_COPY(FileManager)
 };
 #endif  // SRC_FILEMANAGER_HPP_

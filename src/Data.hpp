@@ -36,7 +36,6 @@ struct FolderNames {
     const QString TR5 = "/Tomb Raider (V) Chronicles";
 };
 
-
 struct ZipData {
     /**
      * @struct ZipData
@@ -51,7 +50,7 @@ struct ZipData {
         QString md5sum,
         QString url,
         int version,
-        QString release) :
+        const QString& release) :
         name(zipName),
         megabyteSize(zipSize),
         md5sum(md5sum),
@@ -145,7 +144,7 @@ struct InfoData {
             QIcon finalIcon;
 
             // Load image data into a QPixmap and convert it to a QIcon
-            if (pixmap.loadFromData(image, "WEBP")) {
+            if (pixmap.loadFromData(image, "WEBP") == true) {
                 finalIcon.addPixmap(pixmap);
             }
 
@@ -168,7 +167,7 @@ class Data : public QObject {
 
     bool initializeDatabase(const QString& path) {
         bool status = false;
-        const QString filePath = path + "/tombll.db";
+        const QString filePath = QString("%1/%2").arg(path, "tombll.db");
         QFileInfo fileInfo(filePath);
 
         // Open the file
@@ -180,7 +179,7 @@ class Data : public QObject {
             db = QSqlDatabase::addDatabase("QSQLITE");
             db.setDatabaseName(path + "/tombll.db");
             db.setConnectOptions("QSQLITE_OPEN_READONLY");
-            if (db.open()) {  // flawfinder: ignore
+            if (db.open() == true) {  // flawfinder: ignore
                 status = true;
             } else {
                 qDebug() << "Error opening database:" << db.lastError().text();

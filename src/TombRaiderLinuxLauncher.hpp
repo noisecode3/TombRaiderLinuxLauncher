@@ -114,13 +114,10 @@ class TombRaiderLinuxLauncher : public QMainWindow {
         QListWidgetItem*,
         QListWidgetItem*)> compare);
 
-    // cppcheck-suppress unusedStructMember
     QSet<QListWidgetItem*> originalGamesSet_m;
-    // cppcheck-suppress unusedStructMember
     QList<QListWidgetItem*> originalGamesList_m;
     Controller& controller = Controller::getInstance();
     QSettings settings;
-    // cppcheck-suppress unusedStructMember
     Ui::TombRaiderLinuxLauncher *ui;
 };
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_
