@@ -31,6 +31,7 @@ class FileManager : public QObject {
         static FileManager instance;
         return instance;
     }
+    const QString lookGameDir(const QString& file, bool lookGameDir);
     const QString calculateMD5(const QString& file, bool lookGameDir);
     bool extractZip(const QString& zipFile, const QString& extractPath);
     bool checkDir(const QString& file, bool lookGameDir);
@@ -67,6 +68,7 @@ class FileManager : public QObject {
 
     QDir m_levelDir;
     QDir m_gameDir;
+    const QString m_sep = QDir::separator();
     Q_DISABLE_COPY(FileManager)
 };
 #endif  // SRC_FILEMANAGER_HPP_
