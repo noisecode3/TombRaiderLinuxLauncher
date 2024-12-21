@@ -422,13 +422,9 @@ void TombRaiderLinuxLauncher::linkClicked() {
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
     if (id) {
-        if (!controller.link(id)) {
-            qDebug() << "Sumo linko el la compleeteo";
-        } else {
-            qDebug() << "Problemo de link";
-        }
+        qint64 status = controller.link(id);
     } else {
-        qDebug() << "Say no more";
+        qDebug() << "id error";
     }
     QApplication::quit();
 }

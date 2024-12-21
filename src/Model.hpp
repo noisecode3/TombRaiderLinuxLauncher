@@ -54,7 +54,7 @@ class Model : public QObject {
         static Model instance;
         return instance;
     }
-    void checkCommonFiles();
+    bool checkCommonFiles();
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
     void getList(QVector<ListItemData>* list);
@@ -66,7 +66,7 @@ class Model : public QObject {
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool setDirectory(const QString& level, const QString& game);
-    void setup(const QString& level, const QString& game);
+    bool setup(const QString& level, const QString& game);
 
  signals:
     void askGameSignal(int);

@@ -151,27 +151,20 @@ ZipData Data::getDownload(const int id) {
     return ZipData();
 }
 
-std::array<QVector<QString>, 2> Data::getFileList(const int id, bool trleList) {
+std::array<QVector<QString>, 2> Data::getFileList(const int id) {
     std::array<QVector<QString>, 2> list;
     QSqlQuery query(db);
-    if (trleList) {
-        query.prepare("SELECT Files.path, Files.md5sum "
-                "FROM Files "
-                "JOIN LevelFileList ON Files.FileID = LevelFileList.fileID "
-                "JOIN Level ON LevelFileList.levelID = Level.LevelID "
-                "WHERE Level.LevelID = :id");
-    } else {
-        query.prepare("SELECT Files.path, Files.md5sum "
-                "FROM Files "
-                "JOIN GameFileList ON Files.FileID = GameFileList.fileID "
-                "JOIN Game ON GameFileList.gameID = Game.GameID "
-                "WHERE Game.GameID = :id");
+    if (!query.prepare("SELECT File.path, File.md5sum "
+            "FROM File "
+            "JOIN GameFileList ON File.FileID = GameFileList.fileID "
+            "WHERE GameFileList.gameID = :id")) {
+        qDebug() << "Error preparing query:" << query.lastError().text();
     }
     query.bindValue(":id", id);
     if (query.exec()) {
         while (query.next()) {
-            list[0] << query.value("Files.path").toString();
-            list[1] << query.value("Files.md5sum").toString();
+            list[0] << query.value("path").toString();
+            list[1] << query.value("md5sum").toString();
         }
     } else {
         qDebug() << "Error executing query:" << query.lastError().text();

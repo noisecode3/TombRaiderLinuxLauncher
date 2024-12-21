@@ -41,9 +41,13 @@ Model::Model(QObject *parent) : QObject(parent), checkCommonFilesIndex_m(1) {
 
 Model::~Model() {}
 
-void Model::setup(const QString& level, const QString& game) {
-    setDirectory(level, game);
-    checkCommonFiles();
+bool Model::setup(const QString& level, const QString& game) {
+    bool status = false;
+    if (setDirectory(level, game)) {
+        status = true;
+        checkCommonFiles();
+    }
+    return status;
 }
 
 bool Model::setDirectory(const QString& level, const QString& game) {
@@ -56,19 +60,24 @@ bool Model::setDirectory(const QString& level, const QString& game) {
         return false;
 }
 
-void Model::checkCommonFiles() {
+// true if there was new original game
+// false if there was no new original games
+bool Model::checkCommonFiles() {
     int index = checkCommonFilesIndex_m;
     assert(index >= 1 && index <= 5);
     for (int i = index; i <= 5; i++) {
         if (checkGameDirectory(i) == 2) {
+            // checkCommonFilesIndex_m this is becouse it should start here
+            // becouse we use a return, we should only use 1 return...
             checkCommonFilesIndex_m = i+1;
             emit askGameSignal(i);
             QCoreApplication::processEvents();
-            return;
+            return true;
         }
     }
     emit generateListSignal();
     QCoreApplication::processEvents();
+    return false;
 }
 
 QString Model::getGameDirectory(int id) {
@@ -131,7 +140,7 @@ bool Model::setLink(int id) {
 }
 
 void Model::setupGame(int id) {
-    std::array<QVector<QString>, 2> list = data.getFileList(id, false);
+    std::array<QVector<QString>, 2> list = data.getFileList(id);
     const size_t s = list[0].size();
     const size_t sm = list[1].size();
     if (s != sm) {
@@ -140,8 +149,9 @@ void Model::setupGame(int id) {
             << " more or less checksums for the files\n";
         assert(false);
     }
-    const QString& sd = "/Original.TR" + QString::number(id) +"/";
-    const QString& sg = getGameDirectory(id) + "/";
+    assert(s != 0);
+    const QString sd = "/Original.TR" + QString::number(id) +"/";
+    const QString sg = getGameDirectory(id) + "/";
     for (size_t i = 0; i < s; i++) {
         const QString& fFile = list[0][i];
         const QString& fMd5sum = list[1][i];
@@ -157,8 +167,8 @@ void Model::setupGame(int id) {
         }
     }
     if (fileManager.backupGameDir(sg)) {
-        const QString&  src = sd.chopped(1);
-        const QString&  des = sg.chopped(1);
+        const QString  src = sd.chopped(1);
+        const QString  des = sg.chopped(1);
         if (!fileManager.linkGameDir(src, des)) {
             checkCommonFiles();
             return;

@@ -198,7 +198,7 @@ class Data : public QObject {
     QString getWalkthrough(int id);
     int getType(int id);
 
-    std::array<QVector<QString>, 2> getFileList(const int id, bool trleList);
+    std::array<QVector<QString>, 2> getFileList(const int id);
     ZipData getDownload(int id);
 
  private:

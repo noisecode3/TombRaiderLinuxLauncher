@@ -23,25 +23,25 @@
 #include "gameTree.hpp"
 
 bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir) {
+    bool status = true;
+
     QDir levelDirPath(levelDir);
-    if (!levelDirPath.exists()) {
-        if (!levelDirPath.mkpath(levelDir)) {
-            qWarning() << "Failed to create level directory:" << levelDir;
-            return false;
-        }
+    if (!levelDirPath.exists() && !levelDirPath.mkpath(levelDir)) {
+        qWarning() << "Failed to create level directory:" << levelDir;
+        status = false;
+    } else {
+        m_levelDir.setPath(levelDir);
     }
-    m_levelDir.setPath(levelDir);
 
     QDir gameDirPath(gameDir);
-    if (!gameDirPath.exists()) {
-        if (!gameDirPath.mkpath(gameDir)) {
-            qWarning() << "Failed to create game directory:" << gameDir;
-            return false;
-        }
+    if (!gameDirPath.exists() && !gameDirPath.mkpath(gameDir)) {
+        qWarning() << "Failed to create game directory:" << gameDir;
+        status = false;
+    } else {
+        m_gameDir.setPath(gameDir);
     }
-    m_gameDir.setPath(gameDir);
 
-    return true;
+    return status;
 }
 
 inline const QString FileManager::lookGameDir(
@@ -178,13 +178,13 @@ bool FileManager::extractZip(
 /**
  *
  */
-bool FileManager::checkDir(const QString& file, bool lookGameDir ) {
+bool FileManager::checkDir(const QString& file, bool lookGameDir) {
     const QString path = FileManager::lookGameDir(file, lookGameDir);
     QDir directory(path);
     return directory.exists();
 }
 
-bool FileManager::checkFile(const QString& file, bool lookGameDir ) {
+bool FileManager::checkFile(const QString& file, bool lookGameDir) {
     const QString path = FileManager::lookGameDir(file, lookGameDir);
     QFile fFile(path);
     return fFile.exists();
@@ -193,7 +193,7 @@ bool FileManager::checkFile(const QString& file, bool lookGameDir ) {
 int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
     const QString path = FileManager::lookGameDir(file, lookGameDir);
     QFileInfo fileInfo(path);
-    if (fileInfo.isDir()) {
+    if (fileInfo.isDir() == true) {
         qDebug() << "The path is a directory.";
         if (fileInfo.isSymLink() == true) {
             qDebug() << "return value 1:The path is a symbolic link.";
@@ -242,18 +242,18 @@ bool FileManager::makeRelativeLink(
         const QString& levelDir,
         const QString& from,
         const QString& to) {
-    const QString& l = m_levelDir.absolutePath() + levelDir;
-    const QString& f = l + from;
-    const QString& t = l + to;
+    const QString& levelPath = m_levelDir.absolutePath() + levelDir;
+    const QString& fromPath = levelPath + from;
+    const QString& toPath = levelPath + to;
 
-    if (QFile::link(f, t)) {
+    if (QFile::link(fromPath, toPath)) {
         qDebug() << "Symbolic link created successfully.";
         return 0;
     } else {
-        QFileInfo i(t);
+        QFileInfo i(toPath);
         if (i.isSymLink()) {
-            QFile::remove(t);
-            if (QFile::link(f, t)) {
+            QFile::remove(toPath);
+            if (QFile::link(fromPath, toPath)) {
                 qDebug() << "Symbolic link created successfully.";
                 return 0;
             } else {
@@ -405,17 +405,18 @@ bool FileManager::moveFilesToDirectory(
         dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
 
     // Move files and recursively move directories
-    for (const QString& entry : entryFileList) {
+    bool allMoved = std::all_of(
+            entryFileList.cbegin(),
+            entryFileList.cend(),
+            [&](const QString& entry) {
         QString entryPath = directoryFromPath + m_sep + entry;
-
-        if (!QFile::rename(
-            entryPath,
-            directoryToPath + m_sep + entry)) {
+        if (!QFile::rename(entryPath, directoryToPath + m_sep + entry)) {
             qWarning() << "Failed to move file:" << entryPath;
             return false;
         }
-    }
-    return true;
+        return true;
+    });
+    return allMoved;
 }
 
 bool FileManager::moveFilesToParentDirectory(
