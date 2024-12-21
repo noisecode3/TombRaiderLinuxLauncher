@@ -29,6 +29,11 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
     )
 endif()
 
+# Update submodules if we forget
+# git submodule update --init --recursive
+# git submodule update --remote --merge
+# git submodule sync # (optional) if URL change
+
 add_subdirectory(libs/miniz)
 
 set(SOURCES_TESTS
