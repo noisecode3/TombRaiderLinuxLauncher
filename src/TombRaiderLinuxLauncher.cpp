@@ -419,14 +419,19 @@ void TombRaiderLinuxLauncher::setOptionsClicked() {
 }
 
 void TombRaiderLinuxLauncher::linkClicked() {
+    bool status = false;
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
     if (id) {
-        qint64 status = controller.link(id);
+        status = controller.link(id);
     } else {
         qDebug() << "id error";
     }
-    QApplication::quit();
+    if (status == true) {
+        QApplication::quit();
+    } else {
+        qDebug() << "link error";
+    }
 }
 
 void TombRaiderLinuxLauncher::downloadClicked() {

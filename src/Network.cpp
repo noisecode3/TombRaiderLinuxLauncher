@@ -74,62 +74,25 @@ std::string get_ssl_certificate(const std::string& host) {
     return cert_buffer;
 }
 
-struct WriteData {
-    Downloader* downloader;
-    FILE* file;
-};
-
 bool Downloader::setUpCamp(const QString& levelDir) {
     QFileInfo levelPathInfo(levelDir);
     if (levelPathInfo.isDir()) {
-        levelDir_m.setPath(levelDir);
+        m_levelDir.setPath(levelDir);
         return true;
     }
     return false;
 }
 
-size_t Downloader::write_callback(
-    void* contents,
-    size_t size,
-    size_t nmemb,
-    void* userData) {
-    WriteData* data = reinterpret_cast<WriteData*>(userData);
-    return fwrite(contents, size, nmemb, data->file);
-}
-
-int Downloader::progress_callback(
-    void* clientp,
-    curl_off_t dltotal,
-    curl_off_t dlnow,
-    curl_off_t ultotal,
-    curl_off_t ulnow) {
-    if (dltotal > 0) {
-        double progress = static_cast<double>(dlnow)
-            / static_cast<double>(dltotal) * 50.0;
-
-        // Emit signal only if progress has increased by at least 1%
-        static int lastEmittedProgress = 0;
-        if (static_cast<int>(progress) == 0) lastEmittedProgress = 0;
-        if (static_cast<int>(progress) > lastEmittedProgress) {
-            static Downloader& instance = Downloader::getInstance();
-            emit instance.networkWorkTickSignal();
-            QCoreApplication::processEvents();
-            lastEmittedProgress = static_cast<int>(progress);
-        }
-    }
-    return 0;
-}
-
 void Downloader::setUrl(QUrl url) {
-    url_m = url;
+    m_url = url;
 }
 
 void Downloader::setSaveFile(const QString& file) {
-    file_m = file;
+    m_file = file;
 }
 
 int Downloader::getStatus() {
-    return status_m;
+    return m_status;
 }
 
 void Downloader::saveToFile(const QByteArray& data, const QString& filePath) {
@@ -152,15 +115,21 @@ void Downloader::saveToFile(const QByteArray& data, const QString& filePath) {
 }
 
 void Downloader::run() {
-    if (url_m.isEmpty() || file_m.isEmpty() || levelDir_m.isEmpty())
+    if (m_url.isEmpty() || m_file.isEmpty() || m_levelDir.isEmpty())
         return;
 
-    QString urlString = url_m.toString();
+    qDebug() << "m_url: " << m_url.toString();
+    qDebug() << "m_file: " << m_file;
+    qDebug() << "m_levelDir: " << m_levelDir.absolutePath();
+
+    QString urlString = m_url.toString();
     QByteArray byteArray = urlString.toUtf8();
     const char* url_cstring = byteArray.constData();
 
-    const QString filePath = levelDir_m.absolutePath() +
-            QDir::separator() + file_m;
+    const QString filePath = QString("%1%2%3")
+        .arg(m_levelDir.absolutePath(), QDir::separator(), m_file);
+
+    qDebug() << "filePath: " << filePath;
 
     QFileInfo fileInfo(filePath);
 
@@ -169,13 +138,13 @@ void Downloader::run() {
         return;
     }
 
+    #pragma cppcheck-suppress fopen_s
     FILE* file = fopen(filePath.toUtf8(), "wb");  // flawfinder: ignore
     if (!file) {
         qDebug() << "Error opening file for writing:" << filePath;
         return;
     }
 
-    WriteData writeData = { this, file };
 
     CURL* curl = curl_easy_init();
     if (curl) {
@@ -189,18 +158,47 @@ void Downloader::run() {
 
         curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
         curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                Downloader::write_callback);
 
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeData);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY,
+            "sha256//7WRPcNY2QpOjWiQSLbiBu/9Og69JmzccPAdfj2RT5Vw=");
+
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+            +[](const void* buf, size_t size, size_t nmemb, void* data) -> size_t {
+                return fwrite(buf, size, nmemb, static_cast<FILE*>(data));
+            });
+
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
 
         // Follow redirects
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
         // Enable progress meter
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
-                Downloader::progress_callback);
+            +[](void* clientp, curl_off_t dltotal, curl_off_t dlnow,
+                curl_off_t ultotal, curl_off_t ulnow) -> int {
+                Downloader& downloader = Downloader::getInstance();
+
+                if (dltotal > 0) {
+                    int& lastEmittedProgress =
+                        downloader.m_lastEmittedProgress;
+
+                    double progress = static_cast<double>(dlnow)
+                        / static_cast<double>(dltotal) * 50.0;
+
+                    if (static_cast<int>(progress) == 0) {
+                        lastEmittedProgress = 0;
+                    }
+                    if (static_cast<int>(progress) > lastEmittedProgress) {
+                        emit downloader.networkWorkTickSignal();
+                        QCoreApplication::processEvents();
+                        lastEmittedProgress = static_cast<int>(progress);
+                    }
+                }
+                return 0;
+            });
 
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, nullptr);
 
@@ -208,7 +206,7 @@ void Downloader::run() {
         CURLcode res = curl_easy_perform(curl);
 
         if (res != CURLE_OK) {
-            status_m = 1;
+            m_status = 1;
             qDebug() << "CURL failed:" << curl_easy_strerror(res);
             // we need to catch any of those that seem inportant here to the GUI
             // and reset GUI state
@@ -224,7 +222,7 @@ void Downloader::run() {
                 QCoreApplication::processEvents();
             }
         } else {
-            status_m = 0;
+            m_status = 0;
             qDebug() << "Downloaded successfully";
         }
         curl_easy_cleanup(curl);

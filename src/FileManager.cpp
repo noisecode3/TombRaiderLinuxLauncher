@@ -74,10 +74,12 @@ const QString FileManager::calculateMD5(const QString& file, bool lookGameDir) {
     QCryptographicHash md5(QCryptographicHash::Md5);
 
     std::array<char, 1024> buffer;
-    qint64 bytesRead;
+    const int size = buffer.size();
+    int bytesRead;
 
-    while ((bytesRead = f.read(buffer.data(), buffer.size())) > 0) {
-        md5.addData(buffer.data(), static_cast<int>(bytesRead));
+    // flawfinder: ignore
+    while ((bytesRead = f.read(buffer.data(), size)) > 0) {
+        md5.addData(buffer.data(), bytesRead);
     }
 
     f.close();
