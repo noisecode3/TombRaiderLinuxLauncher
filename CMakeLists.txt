@@ -27,6 +27,10 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
         COMMAND git submodule update --init --recursive
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
+    file(READ "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" cmake)
+    string(REPLACE "cmake_minimum_required(VERSION 3.5)"
+        "cmake_minimum_required(VERSION 3.16)" my_cmake "${cmake}")
+    file(WRITE "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" "${my_cmake}")
 endif()
 
 # Update submodules if we forget
