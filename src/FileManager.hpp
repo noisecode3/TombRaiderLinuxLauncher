@@ -28,6 +28,7 @@ class FileManager : public QObject {
 
  public:
     static FileManager& getInstance() {
+        // cppcheck-suppress threadsafety-threadsafety
         static FileManager instance;
         return instance;
     }

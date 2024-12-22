@@ -51,6 +51,7 @@ class Model : public QObject {
 
  public:
     static Model& getInstance() {
+        // cppcheck-suppress threadsafety-threadsafety
         static Model instance;
         return instance;
     }

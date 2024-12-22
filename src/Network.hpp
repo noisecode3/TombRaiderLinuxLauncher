@@ -27,6 +27,7 @@ class Downloader : public QObject {
 
  public:
     static Downloader& getInstance() {
+        // cppcheck-suppress threadsafety-threadsafety
         static Downloader instance;
         return instance;
     }

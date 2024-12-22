@@ -26,6 +26,7 @@ class Controller : public QObject {
 
  public:
     static Controller& getInstance() {
+        // cppcheck-suppress threadsafety-threadsafety
         static Controller instance;
         return instance;
     }
