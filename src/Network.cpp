@@ -138,13 +138,11 @@ void Downloader::run() {
         return;
     }
 
-    #pragma cppcheck-suppress fopen_s
-    FILE* file = fopen(filePath.toUtf8(), "wb");  // flawfinder: ignore
-    if (!file) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly)) {  // flawfinder: ignore
         qDebug() << "Error opening file for writing:" << filePath;
         return;
     }
-
 
     CURL* curl = curl_easy_init();
     if (curl) {
@@ -164,11 +162,17 @@ void Downloader::run() {
             "sha256//7WRPcNY2QpOjWiQSLbiBu/9Og69JmzccPAdfj2RT5Vw=");
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-            +[](const void* buf, size_t size, size_t nmemb, void* data) -> size_t {
-                return fwrite(buf, size, nmemb, static_cast<FILE*>(data));
+            +[](const void* buf, size_t size, size_t nmemb, void* data)
+            -> size_t {
+                QFile* file = static_cast<QFile*>(data);
+                if (file->isOpen()) {
+                    return file->write(static_cast<const char*>(buf),
+                            size * nmemb);
+                }
+                return 0;
             });
 
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &file);
 
         // Follow redirects
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -227,5 +231,5 @@ void Downloader::run() {
         }
         curl_easy_cleanup(curl);
     }
-    fclose(file);
+    file.close();
 }
