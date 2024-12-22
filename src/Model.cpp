@@ -124,19 +124,20 @@ int Model::getItemState(int id) {
 }
 
 bool Model::setLink(int id) {
+    bool status = false;
     if (id < 0) {
         id = -id;
         const QString s = "/Original.TR" + QString::number(id);
         if (fileManager.checkDir(s, false ))
-            return fileManager.linkGameDir(s, getGameDirectory(id));
+            status = fileManager.linkGameDir(s, getGameDirectory(id));
     } else if (id > 0) {
         const QString s = "/"+QString::number(id) + ".TRLE";
         const int t = data.getType(id);
 
         if (fileManager.checkDir(s, false ))
-            return fileManager.linkGameDir(s, getGameDirectory(t));
+            status = fileManager.linkGameDir(s, getGameDirectory(t));
     }
-    return false;
+    return status;
 }
 
 void Model::setupGame(int id) {
@@ -187,7 +188,7 @@ bool Model::getGame(int id) {
 
         if (fileManager.checkFile(zipData.name, false)) {
             qDebug() << "File exists:" << zipData.name;
-            const QString& sum = fileManager.calculateMD5(zipData.name, false);
+            const QString sum = fileManager.calculateMD5(zipData.name, false);
             if (sum != zipData.md5sum) {
                 downloader.run();
                 status = downloader.getStatus();
@@ -204,7 +205,19 @@ bool Model::getGame(int id) {
             status = downloader.getStatus();
         }
         if (status == 0) {
-            fileManager.extractZip(zipData.name, QString::number(id)+".TRLE");
+            /* when the problem about updateing sum is solved it should verify
+             * the download md5sum can just change on trle so it should just
+             * update it
+            const QString sum = fileManager.calculateMD5(zipData.name, false);
+            if (sum == zipData.md5sum) {
+                const QString directory = QString::number(id)+".TRLE";
+                fileManager.extractZip(zipData.name, directory);
+                instructionManager.executeInstruction(id);
+                return true;
+            }
+            */
+            const QString directory = QString::number(id)+".TRLE";
+            fileManager.extractZip(zipData.name, directory);
             instructionManager.executeInstruction(id);
             return true;
         }

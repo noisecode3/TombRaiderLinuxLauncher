@@ -21,6 +21,8 @@
 #include <QByteArray>
 #include <QDataStream>
 #include "gameTree.hpp"
+#include "miniz.h"
+#include "miniz_zip.h"
 
 bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir) {
     bool status = true;
@@ -212,6 +214,7 @@ int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
 }
 
 bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
+    bool status = false;
     const QString levelPath = QString("%1%2")
         .arg(m_levelDir.absolutePath(), levelDir);
     const QString gamePath =  QString("%1%2")
@@ -228,16 +231,17 @@ bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
             QFile::remove(gamePath);
             if (QFile::link(levelPath, gamePath)) {
                 qDebug() << "Symbolic link created successfully.";
-                return 0;
+                status = true;
             } else {
                 qDebug() << "Failed to create symbolic link.";
-                return 1;
+                status = false;
             }
         } else {
             qDebug() << "Failed to create symbolic link.";
-            return 1;
+            status = false;
         }
     }
+    return status;
 }
 
 bool FileManager::makeRelativeLink(

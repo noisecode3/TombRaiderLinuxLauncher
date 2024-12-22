@@ -20,8 +20,6 @@
 #include <QDir>
 #include <QCryptographicHash>
 #include <QDebug>
-#include "miniz.h"
-#include "miniz_zip.h"
 
 class FileManager : public QObject {
     Q_OBJECT
