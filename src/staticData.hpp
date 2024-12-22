@@ -16,10 +16,19 @@
 #include <QString>
 #include <unordered_map>
 
-class StaticClass {
- public:
-    static const std::unordered_map<qint64, QString>& getMap() {
-        static const std::unordered_map<qint64, QString> idToString = {
+struct StaticData {
+    std::unordered_map<qint64, QString> getDifficulty() const {
+        return {
+            {0, "null"},
+            {1, "easy"},
+            {2, "medium"},
+            {3, "challenging"},
+            {4, "very challenging"}
+        };
+    }
+    std::unordered_map<qint64, QString> getClass() const {
+        return {
+            {0, "null"},
             {1, "Alien/Space"},
             {2, "Atlantis"},
             {3, "Base/Lab"},
@@ -58,28 +67,19 @@ class StaticClass {
             {36, "Xmas"},
             {36, "Young Lara"}
         };
-        return idToString;
     }
-};
-
-class StaticDifficulty {
- public:
-    static const std::unordered_map<qint64, QString>& getMap() {
-        static const std::unordered_map<qint64, QString> idToString = {
+    std::unordered_map<qint64, QString> getDuration() const {
+        return {
             {0, "null"},
-            {1, "easy"},
+            {1, "short"},
             {2, "medium"},
-            {3, "challenging"},
-            {4, "very challenging"}
+            {3, "long"},
+            {4, "very long"}
         };
-        return idToString;
     }
-};
-
-class StaticType {
- public:
-    static const std::unordered_map<qint64, QString>& getMap() {
-        static const std::unordered_map<qint64, QString> idToString = {
+    std::unordered_map<qint64, QString> getType() const {
+        return {
+            {0, "null"},
             {1, "TR1"},
             {2, "TR2"},
             {3, "TR3"},
@@ -87,21 +87,6 @@ class StaticType {
             {5, "TR5"},
             {6, "TEN"}
         };
-        return idToString;
-    }
-};
-
-class StaticDuration {
- public:
-    static const std::unordered_map<qint64, QString>& getMap() {
-        static const std::unordered_map<qint64, QString> idToString = {
-            {0, "null"},
-            {1, "short"},
-            {2, "medium"},
-            {3, "long"},
-            {4, "very long"}
-        };
-        return idToString;
     }
 };
 

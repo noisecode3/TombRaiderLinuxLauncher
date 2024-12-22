@@ -184,10 +184,11 @@ void TombRaiderLinuxLauncher::generateList() {
         }
     }
 
-    auto& mapType = StaticType::getMap();
-    auto& mapClass = StaticClass::getMap();
-    auto& mapDifficulty = StaticDifficulty::getMap();
-    auto& mapDuration = StaticDuration::getMap();
+    StaticData staticData;
+    auto mapType = staticData.getType();
+    auto mapClass = staticData.getClass();
+    auto mapDifficulty = staticData.getDifficulty();
+    auto mapDuration = staticData.getDuration();
 
     QVector<ListItemData> list;
     controller.getList(&list);

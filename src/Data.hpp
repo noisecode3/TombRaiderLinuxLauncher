@@ -161,6 +161,7 @@ class Data : public QObject {
 
  public:
     static Data& getInstance() {
+        // cppcheck-suppress threadsafety-threadsafety
         static Data instance;
         return instance;
     }

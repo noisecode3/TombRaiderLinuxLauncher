@@ -267,6 +267,10 @@ and have curl use certificate pinning
    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
    curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, "sha256//base64_encoded_hash_here"); // Pin the public key
 
+One way to get the base64 hash sum
+openssl s_client -connect trle.net:443 -servername trle.net < /dev/null | openssl x509 -pubkey -noout > pubkey.pem
+openssl pkey -pubin -inform PEM -in pubkey.pem -outform DER | sha256sum | xxd -r -p | base64
+
 and make sure the index database can't every change the host name,
 unless someone use a quantum computer or specialized illegal hardware, it could
 be difficult to tampered with the download of files. We must make sure we install
