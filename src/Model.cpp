@@ -14,6 +14,8 @@
 #include "Model.hpp"
 
 // Those lambda should be in another header file
+// I hate this and it should be able to recognize both the directory
+// when linking and the game exe to make a symbolic link to automatically
 Model::Model(QObject *parent) : QObject(parent), checkCommonFilesIndex_m(1) {
     instructionManager.addInstruction(4, [this](int id) {
         qDebug() << "Perform Operation A";

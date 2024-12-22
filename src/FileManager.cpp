@@ -248,29 +248,34 @@ bool FileManager::makeRelativeLink(
         const QString& levelDir,
         const QString& from,
         const QString& to) {
-    const QString& levelPath = m_levelDir.absolutePath() + levelDir;
-    const QString& fromPath = levelPath + from;
-    const QString& toPath = levelPath + to;
+    bool status = false;
+    const QString levelPath = QString("%1%2")
+        .arg(m_levelDir.absolutePath(), levelDir);
+    const QString fromPath = QString("%1%2")
+        .arg(levelPath, from);
+    const QString toPath = QString("%1%2")
+        .arg(levelPath, to);
 
     if (QFile::link(fromPath, toPath)) {
         qDebug() << "Symbolic link created successfully.";
-        return 0;
+        status = true;
     } else {
         QFileInfo i(toPath);
         if (i.isSymLink()) {
             QFile::remove(toPath);
             if (QFile::link(fromPath, toPath)) {
                 qDebug() << "Symbolic link created successfully.";
-                return 0;
+                status = true;
             } else {
                 qDebug() << "Failed to create symbolic link.";
-                return 1;
+                status = false;
             }
         } else {
             qDebug() << "Failed to create symbolic link.";
-            return 1;
+            status = false;
         }
     }
+    return status;
 }
 
 qint64 FileManager::removeFileOrDirectory(

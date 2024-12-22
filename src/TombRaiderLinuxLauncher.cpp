@@ -195,30 +195,30 @@ void TombRaiderLinuxLauncher::generateList() {
     const qint64 s = list.size();
     for (qint64 i = 0; i < s; i++) {
         QString tag = QString("%1 by %2\n")
-                          .arg(list[i].title)
-                          .arg(list[i].author);
+                          .arg(list[i].m_title)
+                          .arg(list[i].m_author);
 
         tag += QString(
                 "Type: %1\nClass: %2\nDifficulty: %3\nDuration: %4\nDate:%5")
-                   .arg(mapType.at(list[i].type))
-                   .arg(mapClass.at(list[i].class_))
-                   .arg(mapDifficulty.at(list[i].difficulty))
-                   .arg(mapDuration.at(list[i].duration))
-                   .arg(list[i].releaseDate);
+                   .arg(mapType.at(list[i].m_type))
+                   .arg(mapClass.at(list[i].m_class))
+                   .arg(mapDifficulty.at(list[i].m_difficulty))
+                   .arg(mapDuration.at(list[i].m_duration))
+                   .arg(list[i].m_releaseDate);
 
         QListWidgetItem *wi =
-            new QListWidgetItem(list[i].picture, tag);
+            new QListWidgetItem(list[i].m_picture, tag);
 
 
         wi->setData(Qt::UserRole, QVariant(i + 1));
         QVariantMap itemData;
-        itemData["title"] = list[i].title;
-        itemData["author"] = list[i].author;
-        itemData["type"] = list[i].type;
-        itemData["class_"] = list[i].class_;
-        itemData["releaseDate"] = list[i].releaseDate;
-        itemData["difficulty"] = list[i].difficulty;
-        itemData["duration"] = list[i].duration;
+        itemData["title"] = list[i].m_title;
+        itemData["author"] = list[i].m_author;
+        itemData["type"] = list[i].m_type;
+        itemData["class_"] = list[i].m_class;
+        itemData["releaseDate"] = list[i].m_releaseDate;
+        itemData["difficulty"] = list[i].m_difficulty;
+        itemData["duration"] = list[i].m_duration;
         // qDebug() << itemData << Qt::endl;
         wi->setData(Qt::UserRole + 1, itemData);
         ui->listWidgetModds->addItem(wi);

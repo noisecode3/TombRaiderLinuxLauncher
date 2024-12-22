@@ -18,15 +18,18 @@
 #include <QFileInfo>
 #include <QIcon>
 #include <QObject>
+#include <QPainter>
 #include <QPixmap>
+#include <QSize>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
 
 /**
  * @struct FolderNames
- * @brief Folder names game used on windows
- * @details These names are used by steam and installed in the common folder on linux.
+ * @brief Folder names game used on Windows
+ * These names are used by steam and installed in the common folder on Linux.
+ * Except for `TombEngine (TEN)` I made that one up.
  */
 struct FolderNames {
     const QString TR1 = "/Tomb Raider (I)";
@@ -34,6 +37,7 @@ struct FolderNames {
     const QString TR3 = "/TombRaider (III)";
     const QString TR4 = "/Tomb Raider (IV) The Last Revelation";
     const QString TR5 = "/Tomb Raider (V) Chronicles";
+    const QString TEN = "TombEngine (TEN)";
 };
 
 struct ZipData {
@@ -45,18 +49,10 @@ struct ZipData {
      */
     ZipData() {}
     ZipData(
-        QString zipName,
-        float zipSize,
-        QString md5sum,
-        QString url,
-        int version,
-        const QString& release) :
-        name(zipName),
-        megabyteSize(zipSize),
-        md5sum(md5sum),
-        url(url),
-        version(version),
-        release(release) {}
+        QString zipName, float zipSize, QString md5sum, QString url,
+        int version, const QString& release) :
+        name(zipName), megabyteSize(zipSize), md5sum(md5sum),
+        url(url), version(version), release(release) {}
     QString name;
     float megabyteSize;
     QString md5sum;
@@ -65,51 +61,90 @@ struct ZipData {
     QString release;
 };
 
+/**
+ * @struct ListItemData
+ * @brief Represents a Tomb Raider Level Entry Card.
+ *
+ * This struct is designed to store a single TRLE (Tomb Raider Level Editor) level record.
+ * Each record contains metadata and a cover image displayed as a card in the application.
+ * The struct includes properties to facilitate searching, filtering, and sorting.
+ */
 struct ListItemData {
     /**
-     * @struct InfoData
-     * @brief
-     * @param
-     * @details
+     * @brief Default constructor for `ListItemData`.
+     *
+     * Initializes an empty instance of `ListItemData`.
      */
     ListItemData() {}
+
+    /**
+     * @brief Parameterized constructor for `ListItemData`.
+     *
+     * This constructor initializes a `ListItemData` object with metadata and a cover image.
+     * The image is converted from raw `QByteArray` to a `QIcon` after scaling it to
+     * fit within 640x480 dimensions. The scaling maintains the aspect ratio and
+     * smooths out pixels using `Qt::SmoothTransformation`. The image is centered
+     * within a transparent background if its aspect ratio does not perfectly match the target.
+     *
+     * @param title The TRLE title. Expected to contain a single name.
+     * @param author The TRLE author(s). Can be a single name or multiple names separated by commas and spaces.
+     * @param type The TRLE type, represented by a numeric ID.
+     * @param classInput The TRLE class, represented by a numeric ID.
+     * @param releaseDate The release date in the format "DD-MMM-YYYY" (e.g., "01-Jan-2000").
+     * @param difficulty The TRLE difficulty, represented by a numeric ID.
+     * @param duration The TRLE duration, represented by a numeric ID.
+     * @param imageData The cover image as a `QByteArray`. Supported formats include JPEG, PNG, and WEBP.
+     */
     ListItemData(
-        QString title,
-        QString author,
-        qint64 type,
-        qint64 classIn,
-        QString releaseDate,
-        qint64 difficulty,
-        qint64 duration,
+        QString title, QString author, qint64 type, qint64 classInput,
+        QString releaseDate, qint64 difficulty, qint64 duration,
         QByteArray imageData):
-        title(title),
-        author(author),
-        type(type),
-        class_(classIn),
-        releaseDate(releaseDate),
-        difficulty(difficulty),
-        duration(duration) {
+        m_title(title), m_author(author), m_type(type),
+        m_class(classInput), m_releaseDate(releaseDate),
+        m_difficulty(difficulty), m_duration(duration) {
+        // Load the image from the byte array
         QPixmap pixmap;
         pixmap.loadFromData(imageData, "WEBP");
-        picture.addPixmap(pixmap);
-        // Scale the pixmap while maintaining aspect ratio
-        QSize newSize = pixmap.size().scaled(640, 480, Qt::KeepAspectRatio);
-        // Resize the pixmap to the scaled size
-        pixmap = pixmap.scaled(
+
+        // Define target dimensions and maintain aspect ratio
+        QSize targetSize(640, 480);
+        QSize newSize = pixmap.size().scaled(targetSize, Qt::KeepAspectRatio);
+
+        // Scale the pixmap
+        QPixmap scaledPixmap = pixmap.scaled(
             newSize,
             Qt::KeepAspectRatio,
             Qt::SmoothTransformation);
-        // Create QIcon and add the scaled pixmap
-        picture.addPixmap(pixmap);
+
+        // Create a centered pixmap with a transparent background
+        QPixmap centeredPixmap(targetSize);
+        // Ensure a transparent background
+        centeredPixmap.fill(Qt::transparent);
+
+        // Calculate offsets for centering the scaled image
+        qint64 xOffset = (targetSize.width() - newSize.width()) / 2;
+        qint64 yOffset = (targetSize.height() - newSize.height()) / 2;
+
+        // Draw the scaled image onto the centered pixmap
+        QPainter painter(&centeredPixmap);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        painter.drawPixmap(xOffset, yOffset, scaledPixmap);
+        painter.end();
+
+        // Store the resulting pixmap in a QIcon
+        m_picture.addPixmap(centeredPixmap);
     }
-    QString title;
-    QString author;
-    qint64  type;
-    qint64  class_;
-    QString releaseDate;
-    qint64  difficulty;
-    qint64  duration;
-    QIcon   picture;
+
+    // Data members
+    QString m_title;         ///< The TRLE level title.
+    QString m_author;        ///< The TRLE author(s), as a string.
+    qint64 m_type;           ///< ID of the type of level.
+    qint64 m_class;          ///< ID of the class of the level.
+    QString m_releaseDate;   ///< The release date in "DD-MMM-YYYY" format.
+    qint64 m_difficulty;     ///< ID of the difficulty of the level.
+    qint64 m_duration;       ///< ID of the estimated duration of the level.
+    QIcon m_picture;         ///< The cover image.
 };
 
 /**
