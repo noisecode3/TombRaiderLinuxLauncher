@@ -84,21 +84,6 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     QColor textColor = systemPalette.color(QPalette::ButtonText);
     QColor borderColor = systemPalette.color(QPalette::Mid);
 
-    // Convert colors to strings
-    // QString normalColorStr = normalColor.name();
-    QString hoverColorStr = hoverColor.name();
-    // QString textColorStr = textColor.name();
-    // QString borderColorStr = borderColor.name();
-
-    // Setup button style
-    ui->filterButton->setStyleSheet(
-        QString(
-            "QPushButton:hover {"
-            "    background-color: %1;"
-            "}")
-        .arg(hoverColorStr));
-
-
     QIcon arrowDownIcon(":/icons/down-arrow.svg");
     QIcon arrowUpIcon(":/icons/up-arrow.svg");
 
