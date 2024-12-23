@@ -25,6 +25,11 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+struct FileList {
+    QString path;
+    QString md5sum;
+};
+
 /**
  * @struct FolderNames
  * @brief Folder names game used on Windows
@@ -234,7 +239,7 @@ class Data : public QObject {
     QString getWalkthrough(int id);
     int getType(int id);
 
-    std::array<QVector<QString>, 2> getFileList(const int id);
+    QVector<FileList> getFileList(const int id);
     ZipData getDownload(int id);
 
  private:

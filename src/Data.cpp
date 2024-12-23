@@ -151,8 +151,8 @@ ZipData Data::getDownload(const int id) {
     return ZipData();
 }
 
-std::array<QVector<QString>, 2> Data::getFileList(const int id) {
-    std::array<QVector<QString>, 2> list;
+QVector<FileList> Data::getFileList(const int id) {
+    QVector<FileList> list;
     QSqlQuery query(db);
     if (!query.prepare("SELECT File.path, File.md5sum "
             "FROM File "
@@ -163,8 +163,9 @@ std::array<QVector<QString>, 2> Data::getFileList(const int id) {
     query.bindValue(":id", id);
     if (query.exec()) {
         while (query.next()) {
-            list[0] << query.value("path").toString();
-            list[1] << query.value("md5sum").toString();
+            list.append({
+                query.value("path").toString(),
+                query.value("md5sum").toString()});
         }
     } else {
         qDebug() << "Error executing query:" << query.lastError().text();

@@ -143,41 +143,39 @@ bool Model::setLink(int id) {
 }
 
 void Model::setupGame(int id) {
-    std::array<QVector<QString>, 2> list = data.getFileList(id);
-    const size_t s = list[0].size();
-    const size_t sm = list[1].size();
-    if (s != sm) {
-        qDebug()
-            << "Corrupt list, there seems to bee"
-            << " more or less checksums for the files\n";
-        assert(false);
-    }
+    QVector<FileList> list = data.getFileList(id);
+    const size_t s = list.size();
     assert(s != 0);
-    const QString sd = "/Original.TR" + QString::number(id) +"/";
-    const QString sg = getGameDirectory(id) + "/";
+
+    const QString levelPath = "/Original.TR" + QString::number(id) +"/";
+    const QString gamePath = getGameDirectory(id) + "/";
+
     for (size_t i = 0; i < s; i++) {
-        const QString& fFile = list[0][i];
-        const QString& fMd5sum = list[1][i];
-        const QString&  calculated = fileManager.calculateMD5(sg+fFile, true);
-        if (fMd5sum == calculated) {
-            fileManager.copyFile(sg+fFile, sd+fFile,  true);
+        const QString levelFile = QString("%1%2").arg(levelPath, list[i].path);
+        const QString gameFile = QString("%1%2").arg(gamePath, list[i].path);
+        const QString calculated = fileManager.calculateMD5(gameFile, true);
+
+        if (list[i].md5sum == calculated) {
+            fileManager.copyFile(gameFile, levelFile,  true);
         } else {
-            qDebug() << "Original file was modified, had" << fMd5sum
+            qDebug() << "Original file was modified, had" << list[i].md5sum
                      << " got " << calculated << " for file "
-                     << fFile << Qt::endl;
-            fileManager.cleanWorkingDir(sd + fFile);
+                     << list[i].path << Qt::endl;
+            fileManager.cleanWorkingDir(levelPath);
             break;
         }
     }
-    if (fileManager.backupGameDir(sg)) {
-        const QString  src = sd.chopped(1);
-        const QString  des = sg.chopped(1);
+    if (fileManager.backupGameDir(gamePath)) {
+        // remove the ending '/' and instantly link to
+        // the game directory link to new game directory
+        const QString src = levelPath.chopped(1);
+        const QString des = gamePath.chopped(1);
         if (!fileManager.linkGameDir(src, des)) {
-            checkCommonFiles();
+            checkCommonFiles();  // TODO(noisecode3): Remove this
             return;
         }
     }
-    checkCommonFiles();
+    checkCommonFiles();  // TODO(noisecode3): Remove this
 }
 
 bool Model::getGame(int id) {
