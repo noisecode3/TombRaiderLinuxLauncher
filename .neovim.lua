@@ -22,6 +22,7 @@ vim.api.nvim_set_keymap('n', 'ø', ":lua require'dapui'.toggle()<CR>", { noremap
 -- https://sourceware.org/gdb/current/onlinedocs/gdb.html/Interpreters.html
 -- https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debugger-Adapter-Protocol.html
 -- Require DAP and DAP-Python
+-- Use qtcreator to debug c++ part
 local dap = require("dap")
 require("dap-python").setup("python")
 
@@ -48,33 +49,6 @@ dap.configurations.python = {
     },
 }
 
--- C++ configuration with GDB
-dap.adapters.gdb = {
-    type = "executable",
-    command = "gdb", -- Ensure GDB is installed and available in your PATH
-    args = { "-i", "dap" }
-}
-
-dap.configurations.cpp = {
-    {
-        name = 'Launch executable (GDB)',
-        type = 'gdb',
-        request = 'launch',
-        program = '~/TombRaiderLinuxLauncher/TombRaiderLinuxLauncher',
-        stopOnEntry = false, -- or true if you want to stop at the beginning
-        cwd = '${workspaceFolder}',
-        setupCommands = {
-            {
-                text = '-enable-pretty-printing', -- Enable pretty-printing for gdb
-                description = 'enable pretty printing',
-                ignoreFailures = false
-            },
-        },
-        args = {}, -- Pass arguments to the executable
-        environment = {}, -- Set environment variables here
-    }
-}
-
 require("dapui").setup()
 
 local nvim_lsp = require('lspconfig')
@@ -92,7 +66,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
-
 function ToggleShiftwidth()
   if vim.g.current_shiftwidth == 2 then
     vim.g.current_shiftwidth = 4
@@ -105,16 +78,14 @@ end
 -- The style is meant to keep the code narrow, never let it over 80-100
 -- With cpplint --filter=-whitespace/braces,-whitespace/newline
 
-
 require('lint').linters_by_ft = {
   sh = {'shellcheck'}, -- Ensure you have shellcheck installed
   python = {'pylint', 'bandit', 'ruff', 'pydocstyle', 'mypy', 'flake8'}, -- Ensure these are installed
   cmake = { 'cmakelint' },
   cpp = {'cppcheck', 'cpplint', 'flawfinder'},
 }
--- add:
--- --check-level=exhaustive
 
+-- .local/share/nvim/plugged/nvim-lint/lua/lint/linters/cppcheck.lua
 -- cppcheck <= 1.84 doesn't support {column} so the start_col group is ambiguous
 local pattern = [[([^:]*):(%d*):([^:]*): %[([^%]\]*)%] ([^:]*): (.*)]]
 local groups = { "file", "lnum", "col", "code", "severity", "message" }
@@ -150,8 +121,29 @@ return {
     "--template={file}:{line}:{column}: [{id}] {severity}: {message}",
     "--check-level=exhaustive",
     "--library=qt",
+    "--suppress=unmatchedSuppression",
+    "--suppress=unusedStructMember",
   },
   stream = "stderr",
   parser = require("lint.parser").from_pattern(pattern, groups, severity_map, { ["source"] = "cppcheck" }),
+}
+
+-- .local/share/nvim/plugged/nvim-lint/lua/lint/linters/cpplint.lua
+-- path/to/file:line:  message  [code] [code_id]
+local pattern = '([^:]+):(%d+):  (.+)  (.+)'
+local groups = { 'file', 'lnum', 'message', 'code'}
+
+return {
+  cmd = 'cpplint',
+  stdin = false,
+  args = {
+    "--filter=-build/include_subdir",
+  },
+  ignore_exitcode = true,
+  stream = 'stderr',
+  parser = require('lint.parser').from_pattern(pattern, groups, nil, {
+    ['source'] = 'cpplint',
+    ['severity'] = vim.diagnostic.severity.WARN,
+  }),
 }
 

@@ -16,7 +16,7 @@
 // Those lambda should be in another header file
 // I hate this and it should be able to recognize both the directory
 // when linking and the game exe to make a symbolic link to automatically
-Model::Model(QObject *parent) : QObject(parent), checkCommonFilesIndex_m(1) {
+Model::Model(QObject *parent) : QObject(parent) {
     instructionManager.addInstruction(4, [this](int id) {
         qDebug() << "Perform Operation A";
         const QString s = "/"+QString::number(id) + ".TRLE";
@@ -32,54 +32,41 @@ Model::Model(QObject *parent) : QObject(parent), checkCommonFilesIndex_m(1) {
         const QString s = QString::number(id) + ".TRLE/TRBiohazard";
         fileManager.moveFilesToParentDirectory(s, 1);
     });
-    /*
-    instructionManager.addInstruction(12, [this](int id) {
-        qDebug() << "Perform Operation C";
-        const QString s = QString::number(id) + ".TRLE/Delca-KittenAdventureDemo/Engine";
-        fileManager.moveFilesToParentDirectory(s, 2);
-    });
-    */
 }
 
 Model::~Model() {}
 
 bool Model::setup(const QString& level, const QString& game) {
     bool status = false;
-    if (setDirectory(level, game)) {
+    if (setDirectory(level, game) == true) {
         status = true;
-        checkCommonFiles();
+        emit generateListSignal(checkCommonFiles());
+        QCoreApplication::processEvents();
     }
     return status;
 }
 
 bool Model::setDirectory(const QString& level, const QString& game) {
+    bool status = false;
     if (fileManager.setUpCamp(level, game) &&
-        downloader.setUpCamp(level) &&
-        data.initializeDatabase(level)
-    )
-        return true;
-    else
-        return false;
+            downloader.setUpCamp(level) &&
+            data.initializeDatabase(level)) {
+        status = true;
+    }
+    return status;
 }
 
-// true if there was new original game
-// false if there was no new original games
-bool Model::checkCommonFiles() {
-    int index = checkCommonFilesIndex_m;
-    assert(index >= 1 && index <= 5);
-    for (int i = index; i <= 5; i++) {
-        if (checkGameDirectory(i) == 2) {
-            // checkCommonFilesIndex_m this is becouse it should start here
-            // becouse we use a return, we should only use 1 return...
-            checkCommonFilesIndex_m = i+1;
-            emit askGameSignal(i);
-            QCoreApplication::processEvents();
-            return true;
+const QList<int>& Model::checkCommonFiles() {
+    m_availableGames.clear();
+    for (int i = 1; i <= 5; i++) {
+        int dirStatus = checkGameDirectory(i);
+        if (dirStatus == 1) {  // symbolic link
+            m_availableGames.append(i);
+        } else if (dirStatus == 2) {  // directory
+            m_availableGames.append(-i);
         }
     }
-    emit generateListSignal();
-    QCoreApplication::processEvents();
-    return false;
+    return m_availableGames;
 }
 
 QString Model::getGameDirectory(int id) {
@@ -95,6 +82,8 @@ QString Model::getGameDirectory(int id) {
         return folder.TR4;
     case 5:
         return folder.TR5;
+    case 10:
+        return folder.TEN;
     default:
         qDebug() << "Id number:"  << id << " is not a game.";
         return "";
@@ -102,10 +91,13 @@ QString Model::getGameDirectory(int id) {
 }
 
 int Model::checkGameDirectory(int id) {
+    int status = -1;
     const QString s = getGameDirectory(id);
-    if (s != "")
-        return fileManager.checkFileInfo(s, true);
-    return -1;
+    qDebug() << s;
+    if (s != "") {
+        status = fileManager.checkFileInfo(s, true);
+    }
+    return status;
 }
 
 void Model::getList(QVector<ListItemData>* list) {
@@ -113,21 +105,25 @@ void Model::getList(QVector<ListItemData>* list) {
 }
 
 int Model::getItemState(int id) {
+    int status = 0;
     if (id < 0) {
-        return 1;
+        status = 1;
     } else if (id > 0) {
-        QString map(QString::number(id) + ".TRLE");
-        if (fileManager.checkDir(map, false))
-            return 2;
-        else
-            return 0;
+        QString dir(QString::number(id) + ".TRLE");
+        if (fileManager.checkDir(dir, false)) {
+            status = 2;
+        } else {
+            status = 0;
+        }
+    } else {
+        status = -1;
     }
-    return -1;
+    return status;
 }
 
 bool Model::setLink(int id) {
     bool status = false;
-    if (id < 0) {
+    if (id < 0) {  // we use original game id as negative number
         id = -id;
         const QString s = "/Original.TR" + QString::number(id);
         if (fileManager.checkDir(s, false ))
@@ -171,14 +167,16 @@ void Model::setupGame(int id) {
         const QString src = levelPath.chopped(1);
         const QString des = gamePath.chopped(1);
         if (!fileManager.linkGameDir(src, des)) {
-            checkCommonFiles();  // TODO(noisecode3): Remove this
-            return;
+            qDebug() << "Faild to create the link to the new game directory";
         }
     }
-    checkCommonFiles();  // TODO(noisecode3): Remove this
+    for (int i=0; i < 100; i++) {
+        emit this->modelTickSignal();
+        QCoreApplication::processEvents();
+    }
 }
 
-bool Model::getGame(int id) {
+bool Model::getLevel(int id) {
     assert(id > 0);
     if (id) {
         int status = 0;

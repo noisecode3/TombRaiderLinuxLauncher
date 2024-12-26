@@ -15,6 +15,7 @@
 #include "TombRaiderLinuxLauncher.hpp"
 #include "ui_TombRaiderLinuxLauncher.h"
 #include "staticData.hpp"
+#include "debug.hpp"
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     :QMainWindow(parent),
@@ -40,16 +41,13 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         this, SLOT(workTick()));
 
     // Thread work done signal connections
-    connect(&Controller::getInstance(), SIGNAL(controllerGenerateList()),
-        this, SLOT(generateList()));
+    connect(&Controller::getInstance(),
+        SIGNAL(controllerGenerateList(const QList<int>&)),
+        this, SLOT(generateList(const QList<int>&)));
 
     // Error signal connections
     connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
         this, SLOT(downloadError(int)));
-
-    // Ask if a game should be moved and get a symbolic link
-    connect(&Controller::getInstance(), SIGNAL(controllerAskGame(int)),
-        this, SLOT(askGame(int)));
 
     // Set init state
     ui->pushButtonLink->setEnabled(false);
@@ -106,67 +104,43 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
             this, &TombRaiderLinuxLauncher::sortByReleaseDate);
 
     // Read settings
-    QString value = settings.value("setup").toString();
+    QString value = m_settings.value("setup").toString();
     if (value != "yes")
         setup();
     else
         readSavedSettings();
 }
 
-void TombRaiderLinuxLauncher::askGame(int id) {
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Confirmation");
-    msgBox.setText(
-        "TombRaider " +
-        QString::number(id) +
-        " found, you want to proceed?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    int result = msgBox.exec();
-    if (result == QMessageBox::Yes) {
-        qDebug() << "User clicked Yes.";
-        controller.setupGame(id);
-    } else {
-        qDebug() << "User clicked No or closed the dialog.";
-        controller.checkCommonFiles();
-    }
-}
+void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
+    const QString pictures = ":/pictures/";
 
-void TombRaiderLinuxLauncher::generateList() {
-    const QString& directoryPath = settings.value("levelPath").toString();
-    const QString& pictures = ":/pictures/";
+    QMap<int, QPair<QString, QString>> fileMap = {
+        {1, {"Tomb_Raider_I.jpg", "I"}},
+        {2, {"Tomb_Raider_II.jpg", "II"}},
+        {3, {"Tomb_Raider_III.jpg", "III"}},
+        {4, {"Tomb_Raider_IIII.jpg", "VI"}},
+        {5, {"Tomb_Raider_IIIII.jpg", "V"}} };
 
-    QDir info(directoryPath);
-    QFileInfoList entryInfoList = info.entryInfoList();
-
-    QMap<QString, QPair<QString, int>> fileMap = {
-        {".TR1", {"Tomb_Raider_I.jpg", -1}},
-        {".TR2", {"Tomb_Raider_II.jpg", -2}},
-        {".TR3", {"Tomb_Raider_III.jpg", -3}},
-        {".TR4", {"Tomb_Raider_IIII.jpg", -4}},
-        {".TR5", {"Tomb_Raider_IIIII.jpg", -5}}
-    };
-
-    foreach(const QFileInfo &file, entryInfoList) {
-        QString extension = file.suffix().prepend(".");
-        if (fileMap.contains(extension)) {
-            if (file.fileName() == "Original" + extension) {
-                QString iconPath = pictures + fileMap[extension].first;
-                QString itemName =
-                    QString("Tomb Raider %1 Original").arg(extension.mid(3));
-                int userRole = fileMap[extension].second;
-
-                QListWidgetItem *wi =
-                    new QListWidgetItem(QIcon(iconPath), itemName);
-                wi->setData(Qt::UserRole, QVariant(userRole));
-                ui->listWidgetModds->addItem(wi);
-                originalGamesSet_m.insert(wi);
-                originalGamesList_m.append(wi);
-            } else {
-                qDebug() << "No link or id implementation";
-                // Implement logic to handle other files
-            }
+    foreach(const int &id, availableGames) {
+        // debugStop(QString("%1").arg(id));
+        int IdPositive;
+        bool linkedGameDir;
+        if (id < 0) {
+            linkedGameDir = false;
+            IdPositive = id*(-1);
+        } else {
+            linkedGameDir = true;
+            IdPositive = id;
         }
+        QString iconPath = pictures + fileMap[IdPositive].first;
+        QString itemName =
+            QString("Tomb Raider %1 Original").arg(fileMap[IdPositive].second);
+        QListWidgetItem *wi = new QListWidgetItem(QIcon(iconPath), itemName);
+        wi->setData(Qt::UserRole, QVariant(IdPositive*(-1)));
+        wi->setData(Qt::UserRole + 1, QVariant(linkedGameDir));
+        ui->listWidgetModds->addItem(wi);
+        originalGamesSet_m.insert(wi);
+        originalGamesList_m.append(wi);
     }
 
     StaticData staticData;
@@ -194,7 +168,6 @@ void TombRaiderLinuxLauncher::generateList() {
         QListWidgetItem *wi =
             new QListWidgetItem(list[i].m_picture, tag);
 
-
         wi->setData(Qt::UserRole, QVariant(i + 1));
         QVariantMap itemData;
         itemData["title"] = list[i].m_title;
@@ -214,6 +187,7 @@ void TombRaiderLinuxLauncher::generateList() {
 void TombRaiderLinuxLauncher::sortItems(
     std::function<bool(QListWidgetItem*, QListWidgetItem*)> compare) {
     QList<QListWidgetItem*> items;
+
     // Step 1: Extract items from the QListWidget
     if (ui->checkBoxOriginalFirst->isChecked()) {
         for (int i = 0; i < ui->listWidgetModds->count(); ++i) {
@@ -228,7 +202,6 @@ void TombRaiderLinuxLauncher::sortItems(
             items.append(ui->listWidgetModds->item(i));
         }
     }
-
 
     // Step 2: Sort the items using the provided comparison lambda
     std::sort(items.begin(), items.end(), compare);
@@ -323,9 +296,9 @@ void TombRaiderLinuxLauncher::sortByReleaseDate() {
 }
 
 void TombRaiderLinuxLauncher::readSavedSettings() {
-    const QString& gamePathValue = settings.value("gamePath").toString();
+    const QString gamePathValue = m_settings.value("gamePath").toString();
     qDebug() << "Read game path value:" << gamePathValue;
-    const QString& levelPathValue = settings.value("levelPath").toString();
+    const QString levelPathValue = m_settings.value("levelPath").toString();
     qDebug() << "Read level path value:" << levelPathValue;
     controller.setup(levelPathValue, gamePathValue);
 }
@@ -341,17 +314,32 @@ void TombRaiderLinuxLauncher::setup() {
         ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Modding")), false);
 
     qDebug() << "Entering setup" << Qt::endl;
-    const QString& homeDir =
+    const QString homeDir =
         QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     qDebug() << "Home Directory:" << homeDir;
-    const QString& s = "/.steam/root/steamapps/common/";
-    const QString& l = "/.local/share/TombRaiderLinuxLauncher";
+    const QString s = "/.steam/root/steamapps/common/";
+    const QString l = "/.local/share/TombRaiderLinuxLauncher";
     ui->gamePathEdit->setText(homeDir + s);
     ui->levelPathEdit->setText(homeDir + l);
 }
 
-void TombRaiderLinuxLauncher::onListItemSelected() {
-    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
+void TombRaiderLinuxLauncher::originalSelected(QListWidgetItem *selectedItem) {
+    if (selectedItem) {
+        int id = selectedItem->data(Qt::UserRole).toInt();
+        bool linkedGameDir = selectedItem->data(Qt::UserRole + 1).toBool();
+        // the game dirr was a symbolic link and it has a level dir
+        if (linkedGameDir == true && controller.getItemState(id) == 1) {
+            ui->pushButtonLink->setEnabled(true);
+            ui->pushButtonDownload->setEnabled(false);
+        } else {
+            ui->pushButtonLink->setEnabled(false);
+            ui->pushButtonDownload->setEnabled(true);
+        }
+        ui->pushButtonInfo->setEnabled(false);
+    }
+}
+
+void TombRaiderLinuxLauncher::levelDirSelected(QListWidgetItem *selectedItem) {
     if (selectedItem) {
         int id = selectedItem->data(Qt::UserRole).toInt();
         int state = controller.getItemState(id);
@@ -382,12 +370,24 @@ void TombRaiderLinuxLauncher::onListItemSelected() {
     }
 }
 
+void TombRaiderLinuxLauncher::onListItemSelected() {
+    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
+    if (selectedItem) {
+        int id = selectedItem->data(Qt::UserRole).toInt();
+        if (id < 0) {  // its the original game
+            originalSelected(selectedItem);
+        } else if (id > 0) {  // do not know what to do with 0
+            levelDirSelected(selectedItem);
+        }
+    }
+}
+
 void TombRaiderLinuxLauncher::setOptionsClicked() {
     QString gamePath = ui->gamePathEdit->text();
     QString levelPath = ui->levelPathEdit->text();
-    settings.setValue("gamePath" , gamePath);
-    settings.setValue("levelPath" , levelPath);
-    settings.setValue("setup" , "yes");
+    m_settings.setValue("gamePath" , gamePath);
+    m_settings.setValue("levelPath" , levelPath);
+    m_settings.setValue("setup" , "yes");
 
     ui->tableWidgetSetup->item(0, 0)->setText(gamePath);
     ui->tableWidgetSetup->item(1, 0)->setText(levelPath);
@@ -423,7 +423,15 @@ void TombRaiderLinuxLauncher::linkClicked() {
 void TombRaiderLinuxLauncher::downloadClicked() {
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
-    if (id) {
+    if (id < 0) {
+        ui->listWidgetModds->setEnabled(false);
+        ui->progressBar->setValue(0);
+        ui->stackedWidgetBar->setCurrentWidget(
+            ui->stackedWidgetBar->findChild<QWidget*>("progress"));
+        // debugStop(QString("%1").arg(id*(-1)));
+        controller.setupGame(id*(-1));
+    } else if (id > 0) {
+        ui->listWidgetModds->setEnabled(false);
         ui->progressBar->setValue(0);
         ui->stackedWidgetBar->setCurrentWidget(
             ui->stackedWidgetBar->findChild<QWidget*>("progress"));
@@ -491,11 +499,21 @@ void TombRaiderLinuxLauncher::workTick() {
     ui->progressBar->setValue(value + 1);
     qDebug() << ui->progressBar->value() << "%";
     if (ui->progressBar->value() >= 100) {
-        ui->pushButtonLink->setEnabled(true);
-        ui->pushButtonInfo->setEnabled(true);
-        ui->pushButtonDownload->setEnabled(false);
+        QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
+        int id = selectedItem->data(Qt::UserRole).toInt();
+        if (id < 0) {  // its the original game
+            ui->pushButtonLink->setEnabled(true);
+            ui->pushButtonInfo->setEnabled(false);
+            ui->pushButtonDownload->setEnabled(false);
+            selectedItem->setData(Qt::UserRole + 1, QVariant(true));
+        } else if (id > 0) {  // do not know what to do with 0
+            ui->pushButtonLink->setEnabled(true);
+            ui->pushButtonInfo->setEnabled(true);
+            ui->pushButtonDownload->setEnabled(false);
+        }
         ui->stackedWidgetBar->setCurrentWidget(
             ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
+        ui->listWidgetModds->setEnabled(true);
     }
 }
 

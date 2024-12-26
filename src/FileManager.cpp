@@ -222,14 +222,14 @@ bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
 
     test(levelPath);  // here we just output the directory tree for now..
 
-    if (QFile::link(levelPath, gamePath)) {
+    if (QFile::link(levelPath, gamePath) == true) {
         qDebug() << "Symbolic link created successfully.";
-        return 0;
+        status = true;
     } else {
         QFileInfo fileInfo(gamePath);
         if (fileInfo.isSymLink() == true) {
             QFile::remove(gamePath);
-            if (QFile::link(levelPath, gamePath)) {
+            if (QFile::link(levelPath, gamePath) == true) {
                 qDebug() << "Symbolic link created successfully.";
                 status = true;
             } else {
@@ -256,14 +256,14 @@ bool FileManager::makeRelativeLink(
     const QString toPath = QString("%1%2")
         .arg(levelPath, to);
 
-    if (QFile::link(fromPath, toPath)) {
+    if (QFile::link(fromPath, toPath) == true) {
         qDebug() << "Symbolic link created successfully.";
         status = true;
     } else {
         QFileInfo i(toPath);
-        if (i.isSymLink()) {
+        if (i.isSymLink() == true) {
             QFile::remove(toPath);
-            if (QFile::link(fromPath, toPath)) {
+            if (QFile::link(fromPath, toPath) == true) {
                 qDebug() << "Symbolic link created successfully.";
                 status = true;
             } else {

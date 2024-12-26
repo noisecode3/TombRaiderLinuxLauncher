@@ -44,8 +44,7 @@ class Controller : public QObject {
     int getItemState(int id);
 
  signals:
-    void controllerAskGame(int id);
-    void controllerGenerateList();
+    void controllerGenerateList(const QList<int>& availableGames);
     void controllerTickSignal();
     void controllerDownloadError(int status);
 

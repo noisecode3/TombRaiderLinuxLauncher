@@ -31,10 +31,12 @@ void Controller::initializeThread() {
     controllerThread->start();
 
     //  Using the controller thread to start model work
+    /*
     connect(this, &Controller::checkCommonFilesThreadSignal,
             this, [this]() {
         model.checkCommonFiles();
     });
+    */
 
     connect(this, &Controller::setupThreadSignal,
             this, [this](const QString& level, const QString& game) {
@@ -43,7 +45,7 @@ void Controller::initializeThread() {
 
     connect(this, &Controller::setupLevelThreadSignal,
             this, [this](int id) {
-        model.getGame(id);
+        model.getLevel(id);
     });
 
     connect(this, &Controller::setupGameThreadSignal,
@@ -67,14 +69,9 @@ void Controller::initializeThread() {
         emit controllerDownloadError(status);
     }, Qt::QueuedConnection);
 
-    connect(&model, &Model::askGameSignal,
-            this, [this](int id) {
-        emit controllerAskGame(id);
-    }, Qt::QueuedConnection);
-
     connect(&model, &Model::generateListSignal,
-            this, [this]() {
-        emit controllerGenerateList();
+            this, [this](const QList<int>& availableGames) {
+        emit controllerGenerateList(availableGames);
     }, Qt::QueuedConnection);
 }
 
@@ -94,7 +91,7 @@ void Controller::setupLevel(int id) {
     emit setupLevelThreadSignal(id);
 }
 
-// GUI Threads
+// Using the GUI Threads
 int Controller::checkGameDirectory(int id) {
     return model.checkGameDirectory(id);
 }

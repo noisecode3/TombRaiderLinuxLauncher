@@ -33,82 +33,107 @@ namespace Ui { class TombRaiderLinuxLauncher; }
 QT_END_NAMESPACE
 
 /**
- * 
+ * View component in the MVC pattern; Main UI class for the launcher.
  */
 class TombRaiderLinuxLauncher : public QMainWindow {
     Q_OBJECT
 
  public:
     /**
-     * Create Main Window
+     * Constructs the main window.
      */
     explicit TombRaiderLinuxLauncher(QWidget *parent = nullptr);
     ~TombRaiderLinuxLauncher();
 
  public slots:
     /**
-     * Called by Link function button
+     * Triggered by the "Link" button.
      */
     void linkClicked();
     /**
-     * Called by Download function button
+     * Triggered by the "Download" button.
      */
     void downloadClicked();
     /**
-     * Called by Info navigation button
+     * Opens the Info thru the navigation bar.
      */
     void infoClicked();
     /**
-     *  Called by Walkthrough navigation button
+     * Opens the Walkthrough thru the navigation bar.
      */
     void walkthroughClicked();
     /**
-     *  Called by Back navigation button
+     * Returns to the first navigation state, the list.
      */
     void backClicked();
     /**
-     * Called by first time setup button
+     * Opens the first-time setup options.
      */
     void setOptionsClicked();
     /**
-     * Called when selecting menu level, for disable and enable buttons
+     * Updates button states based on selected menu level.
      */
     void onListItemSelected();
     /**
-     * Called when 1% work done calculated from total work steps
+     * Updates progress by 1% of total work steps.
      */
     void workTick();
     /**
-     *
+     * Displays an error dialog for a curl download error.
      */
     void downloadError(int status);
     /**
-     *
+     * Generates the initial level list after file analysis.
      */
-    void askGame(int id);
+    void generateList(const QList<int>& availableGames);
     /**
-     *
+     * Sorts the list by author.
      */
-    void generateList();
     void sortByAuthor();
+    /**
+     * Sorts the list by title.
+     */
     void sortByTitle();
+    /**
+     * Sorts the list by difficulty.
+     */
     void sortByDifficulty();
+    /**
+     * Sorts the list by duration.
+     */
     void sortByDuration();
+    /**
+     * Sorts the list by level class.
+     */
     void sortByClass();
+    /**
+     * Sorts the list by type.
+     */
     void sortByType();
+    /**
+     * Sorts the list by release date.
+     */
     void sortByReleaseDate();
 
  private:
     /**
      * 
      */
-    void setup();
+    void originalSelected(QListWidgetItem *selectedItem);
     /**
      * 
      */
+    void levelDirSelected(QListWidgetItem *selectedItem);
+    /**
+     * Configures game and level directories.
+     */
+    void setup();
+    /**
+     * Loads saved settings.
+     */
     void readSavedSettings();
     /**
-     * 
+     * Executes the sorting algorithm.
      */
     void sortItems(std::function<bool(
         QListWidgetItem*,
@@ -117,7 +142,7 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     QSet<QListWidgetItem*> originalGamesSet_m;
     QList<QListWidgetItem*> originalGamesList_m;
     Controller& controller = Controller::getInstance();
-    QSettings settings;
+    QSettings m_settings;
     Ui::TombRaiderLinuxLauncher *ui;
 };
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_
