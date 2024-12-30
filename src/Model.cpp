@@ -19,17 +19,17 @@
 Model::Model(QObject *parent) : QObject(parent) {
     instructionManager.addInstruction(4, [this](int id) {
         qDebug() << "Perform Operation A";
-        const QString s = "/"+QString::number(id) + ".TRLE";
+        const QString s = QString("/%1.TRLE").arg(id);
         fileManager.makeRelativeLink(s, "/The Rescue.exe", "/tomb4.exe");
     });
     instructionManager.addInstruction(5, [this](int id) {
         qDebug() << "Perform Operation B";
-        const QString s = "/"+QString::number(id) + ".TRLE";
+        const QString s = QString("/%1.TRLE").arg(id);
         fileManager.makeRelativeLink(s, "/War of the Worlds.exe", "/tomb4.exe");
     });
     instructionManager.addInstruction(11, [this](int id) {
         qDebug() << "Perform Operation C";
-        const QString s = QString::number(id) + ".TRLE/TRBiohazard";
+        const QString s = QString("%1.TRLE/TRBiohazard").arg(id);
         fileManager.moveFilesToParentDirectory(s, 1);
     });
 }
@@ -109,7 +109,7 @@ int Model::getItemState(int id) {
     if (id < 0) {
         status = 1;
     } else if (id > 0) {
-        QString dir(QString::number(id) + ".TRLE");
+        QString dir = QString("%1.TRLE").arg(id);
         if (fileManager.checkDir(dir, false)) {
             status = 2;
         } else {
@@ -125,11 +125,11 @@ bool Model::setLink(int id) {
     bool status = false;
     if (id < 0) {  // we use original game id as negative number
         id = -id;
-        const QString s = "/Original.TR" + QString::number(id);
+        const QString s = QString("/Original.TR%1").arg(id);
         if (fileManager.checkDir(s, false ))
             status = fileManager.linkGameDir(s, getGameDirectory(id));
     } else if (id > 0) {
-        const QString s = "/"+QString::number(id) + ".TRLE";
+        const QString s = QString("/%1.TRLE").arg(id);
         const int t = data.getType(id);
 
         if (fileManager.checkDir(s, false ))
@@ -143,8 +143,8 @@ void Model::setupGame(int id) {
     const size_t s = list.size();
     assert(s != 0);
 
-    const QString levelPath = "/Original.TR" + QString::number(id) +"/";
-    const QString gamePath = getGameDirectory(id) + "/";
+    const QString levelPath = QString("/Original.TR%1/").arg(id);
+    const QString gamePath = QString("%1/").arg(getGameDirectory(id));
 
     for (size_t i = 0; i < s; i++) {
         const QString levelFile = QString("%1%2").arg(levelPath, list[i].path);
@@ -176,51 +176,76 @@ void Model::setupGame(int id) {
     }
 }
 
+bool Model::unpackLevel(const int id, const QString& name) {
+    bool status = false;
+    const QString directory = QString("%1.TRLE").arg(id);
+    if (fileManager.extractZip(name, directory) == true) {
+        instructionManager.executeInstruction(id);
+        status = true;
+    }
+    return status;
+}
+
+bool Model::getLevelHaveFile(
+        const int id, const QString& md5sum, const QString& name) {
+    bool status = false;
+    if (md5sum != "") {
+        const QString existingFilesum = fileManager.calculateMD5(name, false);
+        if (existingFilesum != md5sum) {
+            downloader.run();
+            if (downloader.getStatus() == 0) {
+                const QString downloadedSum =
+                    fileManager.calculateMD5(name, false);
+                if (downloadedSum != md5sum) {
+                    data.setDownloadMd5(id, downloadedSum);
+                }
+                status = true;
+            }
+        } else {
+            // send 50% signal for skipped downloading ticks
+            for (int i=0; i < 50; i++) {
+                emit this->modelTickSignal();
+                QCoreApplication::processEvents();
+            }
+            status = true;
+        }
+    }
+    return status;
+}
+
+bool Model::getLevelDontHaveFile(
+        const int id, const QString& md5sum, const QString& name) {
+    bool status = false;
+    downloader.run();
+    if (!downloader.getStatus()) {
+        const QString downloadedSum = fileManager.calculateMD5(name, false);
+        if (downloadedSum != md5sum) {
+            data.setDownloadMd5(id, downloadedSum);
+        }
+        status = true;
+    }
+    return status;
+}
+
 bool Model::getLevel(int id) {
     assert(id > 0);
+    bool status = false;
     if (id) {
-        int status = 0;
         ZipData zipData = data.getDownload(id);
         downloader.setUrl(zipData.url);
         downloader.setSaveFile(zipData.name);
-
         if (fileManager.checkFile(zipData.name, false)) {
             qDebug() << "File exists:" << zipData.name;
-            const QString sum = fileManager.calculateMD5(zipData.name, false);
-            if (sum != zipData.md5sum) {
-                downloader.run();
-                status = downloader.getStatus();
-            } else {
-                // send 50% signal here
-                for (int i=0; i < 50; i++) {
-                    emit this->modelTickSignal();
-                    QCoreApplication::processEvents();
-                }
-            }
+            status = getLevelHaveFile(id, zipData.md5sum, zipData.name);
         } else {
             qWarning() << "File does not exist:" << zipData.name;
-            downloader.run();
-            status = downloader.getStatus();
+            status = getLevelDontHaveFile(id, zipData.md5sum, zipData.name);
         }
-        if (status == 0) {
-            /* when the problem about updateing sum is solved it should verify
-             * the download md5sum can just change on trle so it should just
-             * update it
-            const QString sum = fileManager.calculateMD5(zipData.name, false);
-            if (sum == zipData.md5sum) {
-                const QString directory = QString::number(id)+".TRLE";
-                fileManager.extractZip(zipData.name, directory);
-                instructionManager.executeInstruction(id);
-                return true;
-            }
-            */
-            const QString directory = QString::number(id)+".TRLE";
-            fileManager.extractZip(zipData.name, directory);
-            instructionManager.executeInstruction(id);
-            return true;
+        if (status == true) {
+            unpackLevel(id, zipData.name);
         }
     }
-    return false;
+    return status;
 }
 
 const InfoData Model::getInfo(int id) {

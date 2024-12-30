@@ -331,83 +331,87 @@ int FileManager::createDirectory(const QString &file, bool gameDir) {
     return status;
 }
 
-int FileManager::copyFile(
-    const QString &gameFile,
-    const QString &levelFile,
-    bool fromGameDir) {
+int FileManager::copyFile(const QString &gameFile,
+        const QString &levelFile, bool fromGameDir) {
+    int status = 0;
 
-    const QString& gamePath = m_gameDir.absolutePath() + gameFile;
-    const QString& levelPath = m_levelDir.absolutePath() + levelFile;
+    const QString gamePath = QString("%1%2")
+        .arg(m_gameDir.absolutePath(), gameFile);
 
-    const QString& g = fromGameDir ? gamePath : levelPath;
-    const QString& l = fromGameDir ? levelPath : gamePath;
+    const QString levelPath = QString("%1%2")
+        .arg(m_levelDir.absolutePath(), levelFile);
+
+    const QString sourceFile = fromGameDir ? gamePath : levelPath;
+    const QString destinationFile = fromGameDir ? levelPath : gamePath;
 
     // Ensure the destination directory exists
-    const QFileInfo destinationFileInfo(l);
+    const QFileInfo destinationFileInfo(destinationFile);
     QDir destinationDir(destinationFileInfo.absolutePath());
-    if (!destinationDir.exists()) {
+    if (!destinationDir.exists() == true) {
         if (!QDir().mkpath(destinationDir.absolutePath())) {
             qDebug() << "Error creating destination directory.";
-            return 1;
+            status = 1;
         }
-    }
-
-    // Copy the file
-    if (QFile::copy(g, l)) {
-        qDebug() << "File copy to " + l +" successfully.";
-        return 0;
+    } else if (QFile::copy(sourceFile, destinationFile) == true) {
+        qDebug() << "File copy to " << destinationFile << " successfully.";
+        status = 0;
     } else {
-        if (QFile::exists(l)) {
-            qDebug() << "File exist";
-            return 2;
+        if (QFile::exists(destinationFile) == true) {
+            qDebug() << "Target file already exist.";
+            status = 2;
         } else {
-            qDebug() << "Failed to copy file and dose not exist "
-                << l << Qt::endl;
-            return 3;
+            qDebug() << "Failed to copy file: " << destinationFile;
+            status = 3;
         }
     }
+    return status;
 }
 
 int FileManager::cleanWorkingDir(const QString &levelDir) {
-    const QString& directoryPath =
-        m_levelDir.absolutePath() + m_sep + levelDir;
+    int status = 0;
+    const QString directoryPath = QString("%1%2%3")
+        .arg(m_levelDir.absolutePath(), m_sep, levelDir);
 
     QDir directory(directoryPath);
-    if (directory.exists()) {
-        if (directory.removeRecursively()) {
+    if (directory.exists() == true) {
+        if (directory.removeRecursively() == true) {
             qDebug() << "Working Directory removed successfully.";
-            return 0;
+            status = 0;
         } else {
             qDebug() << "Error removing working directory.";
-            return 1;
+            status = 1;
         }
+    } else {
+        qDebug() << "Error working directory seems to not exist";
     }
-    qDebug() << "Error working directory seems to not exist";
-    return 3;
+    return status;
 }
 
 bool FileManager::backupGameDir(const QString &gameDir) {
-    const QString& source = m_gameDir.absolutePath() + gameDir.chopped(1);
-    const QString& des = source + ".old";
+    bool status = false;
+    const QString source = QString("%1%2")
+        .arg(m_gameDir.absolutePath(), gameDir.chopped(1));
+    const QString destination = QString("%1%2").arg(source, ".old");
     QDir directory;
-    if (directory.rename(source, des)) {
-        qDebug() << "Directory renamed successfully. New path:" << des;
-        return true;
+    if (directory.rename(source, destination) == true) {
+        qDebug() << "Directory renamed successfully. New path:" << destination;
+        status = true;
     } else {
         qWarning() << "Failed to rename directory:" << source;
-        return false;
+        status = false;
     }
+    return status;
 }
 
 bool FileManager::moveFilesToDirectory(
     const QString& fromLevelDirectory,
     const QString& toLevelDirectory) {
 
-    const QString& directoryFromPath =
-        m_levelDir.absolutePath() + m_sep + fromLevelDirectory;
+    const QString directoryFromPath = QString("%1%2%3")
+        .arg(m_levelDir.absolutePath(), m_sep, fromLevelDirectory);
 
-    const QString& directoryToPath =
-        m_levelDir.absolutePath() + m_sep + toLevelDirectory;
+    const QString directoryToPath = QString("%1%2%3")
+        .arg(m_levelDir.absolutePath(), m_sep, toLevelDirectory);
 
     QDir dir(directoryFromPath);
 
@@ -420,23 +424,29 @@ bool FileManager::moveFilesToDirectory(
             entryFileList.cbegin(),
             entryFileList.cend(),
             [&](const QString& entry) {
-        QString entryPath = directoryFromPath + m_sep + entry;
-        if (!QFile::rename(entryPath, directoryToPath + m_sep + entry)) {
-            qWarning() << "Failed to move file:" << entryPath;
-            return false;
+        bool status = true;
+
+        QString entryPath = QString("%1%2%3")
+            .arg(directoryFromPath, m_sep, entry);
+        QString destinationPath = QString("%1%2%3")
+            .arg(directoryToPath, m_sep, entry);
+
+        if (!QFile::rename(entryPath, destinationPath)) {
+            qWarning() << "Failed to move file from:"
+                << entryPath << "to:" << destinationPath;
+            status = false;
         }
-        return true;
+
+        return status;
     });
     return allMoved;
 }
 
 bool FileManager::moveFilesToParentDirectory(
-    const QString& levelDirectory,
-    int levelsUp) {
-
+        const QString& levelDirectory, int levelsUp) {
     const QString& sep = QDir::separator();
-    QDir levelDirectoryFullPath(m_levelDir.absolutePath() + sep +
-        levelDirectory);
+    QDir levelDirectoryFullPath(QString("%1%2%3")
+            .arg(m_levelDir.absolutePath(), sep, levelDirectory));
 
     if (!levelDirectoryFullPath.exists()) {
         qWarning() << "Directory does not exist:"

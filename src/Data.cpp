@@ -151,6 +151,32 @@ ZipData Data::getDownload(const int id) {
     return ZipData();
 }
 
+void Data::setDownloadMd5(const int id, const QString& newMd5sum) {
+    QSqlQuery query(db);
+    bool status = false;
+    status = query.prepare(
+        "UPDATE Zip "
+        "SET md5sum = :newMd5sum "
+        "WHERE Zip.ZipID IN ("
+        "    SELECT ZipList.zipID"
+        "    FROM Level"
+        "    JOIN ZipList ON Level.LevelID = ZipList.levelID"
+        "    WHERE Level.LevelID = :id)");
+
+    if (status) {
+        query.bindValue(":newMd5sum", newMd5sum);
+        query.bindValue(":id", id);
+
+        if (!query.exec()) {
+            qDebug() << "Error executing query:" << query.lastError().text();
+        } else {
+            qDebug() << "md5sum updated successfully.";
+        }
+    } else {
+        qDebug() << "Error preparing query:" << query.lastError().text();
+    }
+}
+
 QVector<FileList> Data::getFileList(const int id) {
     QVector<FileList> list;
     QSqlQuery query(db);
@@ -172,4 +198,3 @@ QVector<FileList> Data::getFileList(const int id) {
     }
     return list;
 }
-

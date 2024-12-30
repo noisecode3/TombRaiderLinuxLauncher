@@ -219,7 +219,7 @@ class Data : public QObject {
         } else {
             db = QSqlDatabase::addDatabase("QSQLITE");
             db.setDatabaseName(path + "/tombll.db");
-            db.setConnectOptions("QSQLITE_OPEN_READONLY");
+            // db.setConnectOptions("QSQLITE_OPEN_READONLY");
             if (db.open() == true) {  // flawfinder: ignore
                 status = true;
             } else {
@@ -240,7 +240,8 @@ class Data : public QObject {
     int getType(int id);
 
     QVector<FileList> getFileList(const int id);
-    ZipData getDownload(int id);
+    ZipData getDownload(const int id);
+    void setDownloadMd5(const int id, const QString& newMd5sum);
 
  private:
     explicit Data(QObject *parent = nullptr) : QObject(parent) {

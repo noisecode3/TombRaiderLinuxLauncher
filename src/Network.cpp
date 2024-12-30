@@ -115,8 +115,10 @@ void Downloader::saveToFile(const QByteArray& data, const QString& filePath) {
 }
 
 void Downloader::run() {
-    if (m_url.isEmpty() || m_file.isEmpty() || m_levelDir.isEmpty())
+    if (m_url.isEmpty() || m_file.isEmpty() || m_levelDir.isEmpty()) {
+        m_status = 3;  // object error
         return;
+    }
 
     qDebug() << "m_url: " << m_url.toString();
     qDebug() << "m_file: " << m_file;
@@ -135,12 +137,14 @@ void Downloader::run() {
 
     if (fileInfo.exists() && !fileInfo.isFile()) {
         qDebug() << "Error: The zip path is not a regular file." << filePath;
+        m_status = 2;  // file error
         return;
     }
 
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly)) {  // flawfinder: ignore
         qDebug() << "Error opening file for writing:" << filePath;
+        m_status = 2;
         return;
     }
 
@@ -210,7 +214,7 @@ void Downloader::run() {
         CURLcode res = curl_easy_perform(curl);
 
         if (res != CURLE_OK) {
-            m_status = 1;
+            m_status = 1;  // curl error
             qDebug() << "CURL failed:" << curl_easy_strerror(res);
             // we need to catch any of those that seem inportant here to the GUI
             // and reset GUI state
