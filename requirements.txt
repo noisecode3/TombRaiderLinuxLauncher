@@ -1,0 +1,6 @@
+bs4
+PIL
+cryptography
+pycurl
+tqdm
+git+https://github.com/ueber-devel/ueberzug.git
