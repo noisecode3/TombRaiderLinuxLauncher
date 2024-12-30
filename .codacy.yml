@@ -1,5 +1,0 @@
-engines:
-  python3:
-    dependencies:
-      - pip install -r requirements.txt
-
