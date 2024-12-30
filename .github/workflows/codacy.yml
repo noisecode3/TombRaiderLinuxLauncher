@@ -34,15 +34,13 @@ jobs:
     name: Codacy Security Scan
     runs-on: ubuntu-latest
     steps:
+        # Install dependencies required for `ueberzug`
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libxres-dev
+
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout code
         uses: actions/checkout@v3
-
-        # Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
 
       # Install dependencies
       - name: Install dependencies
