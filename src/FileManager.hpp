@@ -63,7 +63,7 @@ class FileManager : public QObject {
     void fileWorkTickSignal();
 
  private:
-    explicit FileManager(QObject *parent = nullptr)  : QObject(parent) {}
+    FileManager() {}
 
     QDir m_levelDir;
     QDir m_gameDir;

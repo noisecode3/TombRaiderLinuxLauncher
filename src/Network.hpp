@@ -50,7 +50,7 @@ class Downloader : public QObject {
     qint32 m_status;
     int m_lastEmittedProgress;
 
-    explicit Downloader(QObject* parent = nullptr) : QObject(parent),
+    Downloader() :
         m_url(""),
         m_file(""),
         m_levelDir(""),

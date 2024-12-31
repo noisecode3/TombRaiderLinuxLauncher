@@ -244,8 +244,7 @@ class Data : public QObject {
     void setDownloadMd5(const int id, const QString& newMd5sum);
 
  private:
-    explicit Data(QObject *parent = nullptr) : QObject(parent) {
-    }
+    Data() {}
     ~Data() {
         db.close();
     }

@@ -86,7 +86,7 @@ class Model : public QObject {
     Downloader& downloader = Downloader::getInstance();
     InstructionManager instructionManager;
 
-    explicit Model(QObject *parent = nullptr);
+    Model();
     ~Model();
 
     Q_DISABLE_COPY(Model)

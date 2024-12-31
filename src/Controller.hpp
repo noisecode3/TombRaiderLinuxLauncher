@@ -54,7 +54,7 @@ class Controller : public QObject {
     void setupLevelThreadSignal(int id);
 
  private:
-    explicit Controller(QObject *parent = nullptr);
+    Controller();
     void initializeThread();
     ~Controller();
 

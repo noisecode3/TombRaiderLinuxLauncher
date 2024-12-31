@@ -14,8 +14,7 @@
 #include "Controller.hpp"
 #include <QDebug>
 
-Controller::Controller(QObject *parent)
-    : QObject(parent), controllerThread(new QThread(this)) {
+Controller::Controller() : controllerThread(new QThread()) {
     initializeThread();
 }
 

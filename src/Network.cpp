@@ -105,7 +105,7 @@ void Downloader::saveToFile(const QByteArray& data, const QString& filePath) {
 
     QFile file(filePath);
 
-    if (file.open(QIODevice::WriteOnly)) {  // flawfinder: ignore
+    if (file.open(QIODevice::WriteOnly) == true) {  // flawfinder: ignore
         file.write(data);
         file.close();
         qDebug() << "Data saved to file:" << filePath;
@@ -149,7 +149,7 @@ void Downloader::run() {
     }
 
     CURL* curl = curl_easy_init();
-    if (curl) {
+    if (curl != nullptr) {
         std::string cert_buffer = get_ssl_certificate("www.trle.net");
 
         // Set up the in-memory blob for curl to use
@@ -169,7 +169,7 @@ void Downloader::run() {
             +[](const void* buf, size_t size, size_t nmemb, void* data)
             -> size_t {
                 QFile* file = static_cast<QFile*>(data);
-                if (file->isOpen()) {
+                if (file->isOpen() == true) {
                     return file->write(static_cast<const char*>(buf),
                             size * nmemb);
                 }
