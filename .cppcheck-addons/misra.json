@@ -1,0 +1,4 @@
+{
+  "script": "misra.py",
+  "args": ["--rule-texts=.cppcheck-addons/misra_rules.txt --suppress-rules 8.2,2.7,7.4"]
+}

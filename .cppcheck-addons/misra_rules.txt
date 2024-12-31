@@ -1,0 +1,189 @@
+Appendix A Summary of guidelines
+Rule 3.1
+MISRA 3.1 rule
+Rule 4.1
+MISRA 4.1 rule
+Rule 10.4
+MISRA 10.4 rule
+Rule 11.5
+MISRA 11.5 rule
+Rule 15.5
+MISRA 15.5 rule
+Rule 15.6
+MISRA 15.6 rule
+Rule 17.7
+MISRA 17.7 rule
+Rule 20.1
+MISRA 20.1 rule
+Rule 21.3
+MISRA 21.3 rule
+Rule 21.4
+MISRA 21.4 rule
+Rule 13.6
+MISRA 13.6 rule
+Rule 7.1
+MISRA 7.1 rule
+Rule 14.3
+MISRA 14.3 rule
+Rule 21.9
+MISRA 21.9 rule
+Rule 19.2
+MISRA 19.2 rule
+Rule 15.1
+MISRA 15.1 rule
+Rule 11.6
+MISRA 11.6 rule
+Rule 18.6
+MISRA 18.6 rule
+Rule 22.1
+MISRA 22.1 rule
+Rule 18.8
+MISRA 18.8 rule
+Rule 21.6
+MISRA 21.6 rule
+Rule 2.2
+MISRA 2.2 rule
+Rule 17.6
+MISRA 17.6 rule
+Rule 13.4
+MISRA 13.4 rule
+Rule 14.2
+MISRA 14.2 rule
+Rule 21.7
+MISRA 21.7 rule
+Rule 7.3
+MISRA 7.3 rule
+Rule 17.1
+MISRA 17.1 rule
+Rule 5.5
+MISRA 5.5 rule
+Rule 10.6
+MISRA 10.6 rule
+Rule 13.5
+MISRA 13.5 rule
+Rule 22.6
+MISRA 22.6 rule
+Rule 2.1
+MISRA 2.1 rule
+Rule 20.13
+MISRA 0.13 rule
+Rule 18.2
+MISRA 18.2 rule
+Rule 18.3
+MISRA 18.3 rule
+Rule 16.4
+MISRA 16.4 rule
+Rule 20.4
+MISRA 20.4 rule
+Rule 2.6
+MISRA 2.6 rule
+Rule 16.7
+MISRA 16.7 rule
+Rule 17.5
+MISRA 17.5 rule
+Rule 20.7
+MISRA 20.7 rule
+Rule 10.1
+MISRA 10.1 rule
+Rule 17.8
+MISRA 17.8 rule
+Rule 8.12
+MISRA 8.12 rule
+Rule 8.14
+MISRA 8.14 rule
+Rule 20.5
+MISRA 20.5 rule
+Rule 14.1
+MISRA 14.1 rule
+Rule 21.11
+MISRA 1.11 rule
+Rule 16.5
+MISRA 16.5 rule
+Rule 17.2
+MISRA 17.2 rule
+Rule 12.3
+MISRA 12.3 rule
+Rule 20.6
+MISRA 20.6 rule
+Rule 11.3
+MISRA 11.3 rule
+Rule 18.7
+MISRA 18.7 rule
+Rule 16.3
+MISRA 16.3 rule
+Rule 18.1
+MISRA 18.1 rule
+Rule 13.2
+MISRA 13.2 rule
+Rule 20.14
+MISRA 0.14 rule
+Rule 16.2
+MISRA 16.2 rule
+Rule 1.3
+MISRA 1.3 rule
+Rule 5.1
+MISRA 5.1 rule
+Rule 22.4
+MISRA 22.4 rule
+Rule 5.4
+MISRA 5.4 rule
+Rule 21.5
+MISRA 21.5 rule
+Rule 18.5
+MISRA 18.5 rule
+Rule 12.2
+MISRA 12.2 rule
+Rule 20.2
+MISRA 20.2 rule
+Rule 15.3
+MISRA 15.3 rule
+Rule 12.4
+MISRA 12.4 rule
+Rule 5.2
+MISRA 5.2 rule
+Rule 9.5
+MISRA 9.5 rule
+Rule 21.10
+MISRA 1.10 rule
+Rule 11.8
+MISRA 11.8 rule
+Rule 20.3
+MISRA 20.3 rule
+Rule 8.11
+MISRA 8.11 rule
+Rule 8.3
+MISRA 8.3 rule
+Rule 15.7
+MISRA 15.7 rule
+Rule 16.6
+MISRA 16.6 rule
+Rule 14.4
+MISRA 14.4 rule
+Rule 22.2
+MISRA 22.2 rule
+Rule 13.1
+MISRA 13.1 rule
+Rule 2.4
+MISRA 2.4 rule
+Rule 10.8
+MISRA 10.8 rule
+Rule 11.7
+MISRA 11.7 rule
+Rule 13.3
+MISRA 13.3 rule
+Rule 20.10
+MISRA 0.10 rule
+Rule 18.4
+MISRA 18.4 rule
+Rule 11.9
+MISRA 11.9 rule
+Rule 12.1
+MISRA 12.1 rule
+Rule 5.3
+MISRA 5.3 rule
+Rule 21.8
+MISRA 21.8 rule
+Rule 15.2
+MISRA 15.2 rule
+Rule 11.4
+MISRA 11.4 rule

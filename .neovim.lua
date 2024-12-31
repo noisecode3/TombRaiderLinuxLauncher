@@ -119,10 +119,15 @@ return {
       end
     end,
     "--template={file}:{line}:{column}: [{id}] {severity}: {message}",
-    "--check-level=exhaustive",
+    --"--check-level=exhaustive", -- pip cppcheck-wheel 1.4.7 only
+    "--force",  --cppcheck-2.6 only
     "--library=qt",
-    "--suppress=unmatchedSuppression",
+    "--suppress=unmatchedSuppression", -- pip cppcheck-wheel 1.4.7 only
     "--suppress=unusedStructMember",
+    "--addon=cert", -- works with cppcheck-2.6 only
+    "--addon=y2038", -- works with cppcheck-2.6 only
+    "--addon=threadsafety", -- works with cppcheck-2.6 only
+    "--addon=.cppcheck-addons/misra.json", --cppcheck-2.6 only
   },
   stream = "stderr",
   parser = require("lint.parser").from_pattern(pattern, groups, severity_map, { ["source"] = "cppcheck" }),
