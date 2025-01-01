@@ -23,14 +23,17 @@ namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
 
 std::string get_ssl_certificate(const std::string& host) {
+    bool status = true;
+    std::string cert_buffer;
     boost::asio::io_context io_context;
 
     // Use SSLv23 context (it's compatible with all versions of SSL/TLS)
     ssl::context ssl_context(ssl::context::sslv23);
 
-    // Restrict supported protocols to TLSv1.3 and TLSv1.2, these are no no
+    // Restrict supported protocol to TLSv1.3
     ssl_context.set_options(ssl::context::no_sslv2 | ssl::context::no_sslv3);
     ssl_context.set_options(ssl::context::no_tlsv1 | ssl::context::no_tlsv1_1);
+    ssl_context.set_options(ssl::context::no_tlsv1_2);
 
     // Resolver for HTTPS (default port 443)
     tcp::resolver resolver(io_context);
@@ -44,33 +47,34 @@ std::string get_ssl_certificate(const std::string& host) {
         stream.handshake(ssl::stream_base::client);
     } catch (const boost::system::system_error& e) {
         std::cerr << "SSL handshake failed: " << e.what() << std::endl;
-        return "";
+        status = false;
     }
 
-    // Get certificate
-    X509* cert = SSL_get_peer_certificate(stream.native_handle());
-    if (!cert) {
-        std::cerr << "No certificate found." << std::endl;
-        return "";
-    }
-
-    // Verify the certificate matches the host
-    if (X509_check_host(cert, host.c_str(), host.length(), 0, nullptr) != 1) {
-        std::cerr << "Hostname verification failed." << std::endl;
+    if (status) {
+        // Get certificate
+        X509* cert = SSL_get_peer_certificate(stream.native_handle());
+        if (!cert) {
+            std::cerr << "No certificate found." << std::endl;
+            status = false;
+        }
+        if (status) {
+            // Verify the certificate matches the host
+            if (X509_check_host(
+                        cert, host.c_str(), host.length(), 0, nullptr) != 1) {
+                std::cerr << "Hostname verification failed." << std::endl;
+                status = false;
+            }
+            if (status) {
+                BIO* bio = BIO_new(BIO_s_mem());
+                PEM_write_bio_X509(bio, cert);
+                char* cert_str = nullptr;
+                qint64 cert_len = BIO_get_mem_data(bio, &cert_str);
+                cert_buffer = std::string(cert_str, cert_len);
+                BIO_free(bio);
+            }
+        }
         X509_free(cert);
-        return "";
     }
-
-    BIO* bio = BIO_new(BIO_s_mem());
-    PEM_write_bio_X509(bio, cert);
-    char* cert_str = nullptr;
-    qint64 cert_len = BIO_get_mem_data(bio, &cert_str);
-    std::string cert_buffer(cert_str, cert_len);
-
-    // Clean up
-    BIO_free(bio);
-    X509_free(cert);
-
     return cert_buffer;
 }
 
@@ -94,25 +98,6 @@ void Downloader::setSaveFile(const QString& file) {
 
 int Downloader::getStatus() {
     return m_status;
-}
-
-void Downloader::saveToFile(const QByteArray& data, const QString& filePath) {
-    QFileInfo fileInfo(filePath);
-
-    if (fileInfo.exists() && !fileInfo.isFile()) {
-        qDebug() << "Error: The zip path is not a regular file." << filePath;
-        return;
-    }
-
-    QFile file(filePath);
-
-    if (file.open(QIODevice::WriteOnly) == true) {  // flawfinder: ignore
-        file.write(data);
-        file.close();
-        qDebug() << "Data saved to file:" << filePath;
-    } else {
-        qDebug() << "Error saving data to file:" << file.errorString();
-    }
 }
 
 void Downloader::run() {

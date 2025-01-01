@@ -64,12 +64,6 @@ class Model : public QObject {
     QString getGameDirectory(int id);
     void setupGame(int id);
     bool getLevel(int id);
-    bool getLevelHaveFile(
-        const int id, const QString& md5sum, const QString& name);
-    bool getLevelDontHaveFile(
-        const int id, const QString& md5sum, const QString& name);
-
-    bool unpackLevel(const int id, const QString& name);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool setDirectory(const QString& level, const QString& game);
@@ -80,6 +74,12 @@ class Model : public QObject {
     void modelTickSignal();
 
  private:
+    bool getLevelHaveFile(
+        const int id, const QString& md5sum, const QString& name);
+    bool getLevelDontHaveFile(
+        const int id, const QString& md5sum, const QString& name);
+    bool unpackLevel(const int id, const QString& name);
+
     QList<int> m_availableGames;
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
