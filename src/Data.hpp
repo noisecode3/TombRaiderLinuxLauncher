@@ -54,8 +54,8 @@ struct ZipData {
      */
     ZipData() {}
     ZipData(
-        QString zipName, float zipSize, QString md5sum, QString url,
-        int version, const QString& release) :
+        const QString& zipName, float zipSize, const QString& md5sum,
+        const QString& url, int version, const QString& release) :
         name(zipName), megabyteSize(zipSize), md5sum(md5sum),
         url(url), version(version), release(release) {}
     QString name;
@@ -101,9 +101,9 @@ struct ListItemData {
      * @param imageData The cover image as a `QByteArray`. Supported formats include JPEG, PNG, and WEBP.
      */
     ListItemData(
-        QString title, QString author, qint64 type, qint64 classInput,
-        QString releaseDate, qint64 difficulty, qint64 duration,
-        QByteArray imageData):
+        const QString& title, const QString& author, qint64 type,
+        qint64 classInput, const QString& releaseDate, qint64 difficulty,
+        qint64 duration, QByteArray imageData) :
         m_title(title), m_author(author), m_type(type),
         m_class(classInput), m_releaseDate(releaseDate),
         m_difficulty(difficulty), m_duration(duration) {
@@ -218,7 +218,7 @@ class Data : public QObject {
             status = false;
         } else {
             db = QSqlDatabase::addDatabase("QSQLITE");
-            db.setDatabaseName(path + "/tombll.db");
+            db.setDatabaseName(QString("%1/tombll.db").arg(path));
             // db.setConnectOptions("QSQLITE_OPEN_READONLY");
             if (db.open() == true) {  // flawfinder: ignore
                 status = true;
@@ -234,6 +234,7 @@ class Data : public QObject {
         db.close();
     }
 
+    qint64 getListRowCount();
     QVector<ListItemData> getListItems();
     InfoData getInfo(int id);
     QString getWalkthrough(int id);
