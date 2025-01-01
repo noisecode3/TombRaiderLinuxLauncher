@@ -230,7 +230,7 @@ bool Model::getLevelDontHaveFile(
 bool Model::getLevel(int id) {
     assert(id > 0);
     bool status = false;
-    if (id) {
+    if (id > 0) {
         ZipData zipData = data.getDownload(id);
         downloader.setUrl(zipData.url);
         downloader.setSaveFile(zipData.name);

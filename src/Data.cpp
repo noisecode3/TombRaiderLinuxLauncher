@@ -17,10 +17,10 @@ qint64 Data::getListRowCount() {
     QSqlQuery query(db);
     qint64 result = 0;
 
-    if (query.prepare("SELECT COUNT(*) FROM Level")) {
-        if (query.exec()) {
+    if (query.prepare("SELECT COUNT(*) FROM Level") == true) {
+        if (query.exec() == true) {
             // Move to the first (and only) result row
-            if (query.next()) {
+            if (query.next() == true) {
                 // Assign the count value to result
                 result = query.value(0).toInt();
                 qWarning() << "Number of rows in 'Level' table:" << result;
@@ -58,11 +58,11 @@ QVector<ListItemData> Data::getListItems() {
         status = false;
     }
 
-    if (status) {
+    if (status == true) {
         for (qint64 i = 1; i <= rowCount; i++) {
             query.bindValue(":id", i);  // Bind the current LevelID
-            if (query.exec()) {
-                while (query.next()) {
+            if (query.exec() == true) {
+                while (query.next() == true) {
                     items.append(ListItemData(
                         query.value("Info.title").toString(),
                         query.value("Author.value").toString(),
@@ -96,9 +96,9 @@ InfoData Data::getInfo(const int id) {
         "WHERE Level.LevelID = :id");
     query.bindValue(":id", id);
 
-    if (status) {
-        if (query.exec()) {
-            if (query.next()) {
+    if (status == true) {
+        if (query.exec() == true) {
+            if (query.next() == true) {
                 QString body = query.value("body").toString();
                 // notice that we jump over the fist image
                 // the first image is the cover image

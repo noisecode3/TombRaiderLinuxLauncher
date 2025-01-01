@@ -75,12 +75,13 @@ std::string get_ssl_certificate(const std::string& host) {
 }
 
 bool Downloader::setUpCamp(const QString& levelDir) {
+    bool status = false;
     QFileInfo levelPathInfo(levelDir);
-    if (levelPathInfo.isDir()) {
+    if (levelPathInfo.isDir() == true) {
         m_levelDir.setPath(levelDir);
-        return true;
+        status = true;
     }
-    return false;
+    return status;
 }
 
 void Downloader::setUrl(QUrl url) {

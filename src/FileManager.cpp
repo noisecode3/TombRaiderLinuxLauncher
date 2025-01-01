@@ -131,7 +131,7 @@ bool FileManager::extractZip(
         }
 
         QString filename = QString::fromUtf8(file_stat.m_filename);
-        if (filename.endsWith('/')) {
+        if (filename.endsWith('/') == true) {
             continue;  // Skip directories
         }
 
@@ -317,7 +317,7 @@ int FileManager::createDirectory(const QString &file, bool gameDir) {
     const QString path = FileManager::lookGameDir(file, gameDir);
     // Create the directory if it doesn't exist
     if (!QDir(path).exists()) {
-        if (QDir().mkpath(path)) {
+        if (QDir().mkpath(path) == true) {
             qDebug() << "Directory created successfully.";
             status = 0;
         } else {
@@ -473,7 +473,7 @@ bool FileManager::moveFilesToParentDirectory(
         QString destPath = levelDirectoryUpPath.absolutePath() + sep +
             fileInfo.fileName();
 
-        if (fileInfo.isDir()) {
+        if (fileInfo.isDir() == true) {
             // Move the directory recursively
             QDir srcDir(srcPath);
             if (!srcDir.rename(srcPath, destPath)) {
