@@ -58,7 +58,7 @@ QVector<ListItemData> Data::getListItems() {
         status = false;
     }
 
-    if (status == true) {
+    if (status) {
         for (qint64 i = 1; i <= rowCount; i++) {
             query.bindValue(":id", i);  // Bind the current LevelID
             if (query.exec() == true) {
@@ -96,13 +96,13 @@ InfoData Data::getInfo(const int id) {
         "WHERE Level.LevelID = :id");
     query.bindValue(":id", id);
 
-    if (status == true) {
+    if (status) {
         if (query.exec() == true) {
             if (query.next() == true) {
                 QString body = query.value("body").toString();
                 // notice that we jump over the fist image
                 // the first image is the cover image
-                while (query.next()) {
+                while (query.next() == true) {
                     imageList.push_back(
                         query.value("Picture.data").toByteArray());
                 }
@@ -127,8 +127,8 @@ QString Data::getWalkthrough(const int id) {
     query.bindValue(":id", id);
 
     if (status) {
-        if (query.exec()) {
-            if (query.next()) {
+        if (query.exec() == true) {
+            if (query.next() == true) {
                 result = query.value("Level.walkthrough").toString();
             } else {
                 qDebug() << "No results found for Level ID:" << id;
@@ -153,8 +153,8 @@ int Data::getType(const int id) {
     query.bindValue(":id", id);
 
     if (status) {
-        if (query.exec()) {
-            if (query.next()) {
+        if (query.exec() == true) {
+            if (query.next() == true) {
                 result = query.value("Info.type").toInt();
             } else {
                 qDebug() << "No results found for Level ID:" << id;
@@ -180,8 +180,8 @@ ZipData Data::getDownload(const int id) {
     query.bindValue(":id", id);
 
     if (status) {
-        if (query.exec()) {
-            if (query.next()) {
+        if (query.exec() == true) {
+            if (query.next() == true) {
                 result = ZipData(
                     query.value("Zip.name").toString(),
                     query.value("Zip.size").toFloat(),
@@ -239,7 +239,7 @@ QVector<FileList> Data::getFileList(const int id) {
     }
     query.bindValue(":id", id);
 
-    if (query.exec()) {
+    if (query.exec() == true) {
         while (query.next()) {
             list.append({
                 query.value("path").toString(),

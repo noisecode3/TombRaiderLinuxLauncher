@@ -18,8 +18,8 @@
 #include "debug.hpp"
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
-    :QMainWindow(parent),
-    ui(new Ui::TombRaiderLinuxLauncher) {
+    : QMainWindow(parent) {
+    ui = new Ui::TombRaiderLinuxLauncher;
     ui->setupUi(this);
 
     // Button signal connections
@@ -105,10 +105,11 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
     // Read settings
     QString value = m_settings.value("setup").toString();
-    if (value != "yes")
+    if (value != "yes") {
         setup();
-    else
+    } else {
         readSavedSettings();
+    }
 }
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
@@ -189,7 +190,7 @@ void TombRaiderLinuxLauncher::sortItems(
     QList<QListWidgetItem*> items;
 
     // Step 1: Extract items from the QListWidget
-    if (ui->checkBoxOriginalFirst->isChecked()) {
+    if (ui->checkBoxOriginalFirst->isChecked() == true) {
         for (int i = 0; i < ui->listWidgetModds->count(); ++i) {
             QListWidgetItem* item = ui->listWidgetModds->item(i);
             // Append the item only if it's not in originalGamesSet_m
@@ -207,12 +208,13 @@ void TombRaiderLinuxLauncher::sortItems(
     std::sort(items.begin(), items.end(), compare);
 
     // Step 3: Adjust the position of each item without clearing the list
-    qint64 s =
+    qint64 originalGamesSize =
         ui->checkBoxOriginalFirst->isChecked() ? originalGamesList_m.size() : 0;
 
-    for (int i = 0; i < s + items.size(); ++i) {
+    qint64 size = originalGamesSize + items.size();
+    for (qint64 i = 0; i < size; ++i) {
         QListWidgetItem* item;
-        if (i < s) {
+        if (i < originalGamesSize) {
             // Handle originalGamesList_m items
             item = ui->listWidgetModds->takeItem(
                     ui->listWidgetModds->row(originalGamesList_m[i]));
@@ -220,79 +222,94 @@ void TombRaiderLinuxLauncher::sortItems(
         } else {
             // Handle items list
             item = ui->listWidgetModds->takeItem(
-                    ui->listWidgetModds->row(items[i - s]));
+                    ui->listWidgetModds->row(items[i - originalGamesSize]));
             ui->listWidgetModds->insertItem(i, item);
         }
     }
 }
 
+bool compareTitles(QListWidgetItem* a, QListWidgetItem* b) {
+    const QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
+    const QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
+
+    return aData.value("title").toString().toLower()
+        < bData.value("title").toString().toLower();
+}
+
+bool compareAuthors(QListWidgetItem* a, QListWidgetItem* b) {
+    const QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
+    const QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
+    return aData.value("author").toString().toLower()
+        < bData.value("author").toString().toLower();
+}
+
+bool compareDifficulties(QListWidgetItem* a, QListWidgetItem* b) {
+    const QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
+    const QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
+    return aData.value("difficulty").toInt()
+        > bData.value("difficulty").toInt();
+}
+
+bool compareDurations(QListWidgetItem* a, QListWidgetItem* b) {
+    const QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
+    const QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
+    return aData.value("duration").toInt()
+        > bData.value("duration").toInt();
+}
+
+bool compareClasses(QListWidgetItem* a, QListWidgetItem* b) {
+    const QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
+    const QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
+    return aData.value("class_").toInt()
+        > bData.value("class_").toInt();
+}
+
+bool compareTypes(QListWidgetItem* a, QListWidgetItem* b) {
+    const QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
+    const QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
+    return aData.value("type").toInt()
+        > bData.value("type").toInt();
+}
+
+bool compareReleaseDates(QListWidgetItem* a, QListWidgetItem* b) {
+    const QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
+    const QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
+
+    const QDate dateA = QDate::fromString(
+        aData.value("releaseDate").toString(), "dd-MMM-yyyy");
+    const QDate dateB = QDate::fromString(
+        bData.value("releaseDate").toString(), "dd-MMM-yyyy");
+
+    return dateA > dateB;  // descending order
+}
+
+
 void TombRaiderLinuxLauncher::sortByTitle() {
-    sortItems([](QListWidgetItem* a, QListWidgetItem* b) {
-        QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
-        QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
-        return aData["title"].toString().toLower() <
-               bData["title"].toString().toLower();
-    });
+    sortItems(compareTitles);
 }
 
 void TombRaiderLinuxLauncher::sortByAuthor() {
-    sortItems([](QListWidgetItem* a, QListWidgetItem* b) {
-        QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
-        QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
-        return aData["author"].toString().toLower() <
-               bData["author"].toString().toLower();
-    });
+    sortItems(compareAuthors);
 }
 
 void TombRaiderLinuxLauncher::sortByDifficulty() {
-    sortItems([](QListWidgetItem* a, QListWidgetItem* b) {
-        QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
-        QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
-        return aData["difficulty"].toInt() >
-               bData["difficulty"].toInt();
-    });
+    sortItems(compareDifficulties);
 }
 
 void TombRaiderLinuxLauncher::sortByDuration() {
-    sortItems([](QListWidgetItem* a, QListWidgetItem* b) {
-        QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
-        QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
-        return aData["duration"].toInt() >
-               bData["duration"].toInt();
-    });
+    sortItems(compareDurations);
 }
 
 void TombRaiderLinuxLauncher::sortByClass() {
-    sortItems([](QListWidgetItem* a, QListWidgetItem* b) {
-        QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
-        QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
-        return aData["class_"].toInt() >
-               bData["class_"].toInt();
-    });
+    sortItems(compareClasses);
 }
 
 void TombRaiderLinuxLauncher::sortByType() {
-    sortItems([](QListWidgetItem* a, QListWidgetItem* b) {
-        QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
-        QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
-        return aData["type"].toInt() >
-               bData["type"].toInt();
-    });
+    sortItems(compareTypes);
 }
 
 void TombRaiderLinuxLauncher::sortByReleaseDate() {
-    sortItems([](QListWidgetItem* a, QListWidgetItem* b) {
-        QVariantMap aData = a->data(Qt::UserRole + 1).toMap();
-        QVariantMap bData = b->data(Qt::UserRole + 1).toMap();
-
-        // Parse dates using QDate::fromString
-        QDate dateA = QDate::fromString(
-            aData["releaseDate"].toString(), "dd-MMM-yyyy");
-        QDate dateB = QDate::fromString(
-            bData["releaseDate"].toString(), "dd-MMM-yyyy");
-
-        return dateA > dateB;  // descending order
-    });
+    sortItems(compareReleaseDates);
 }
 
 void TombRaiderLinuxLauncher::readSavedSettings() {
@@ -324,7 +341,7 @@ void TombRaiderLinuxLauncher::setup() {
 }
 
 void TombRaiderLinuxLauncher::originalSelected(QListWidgetItem *selectedItem) {
-    if (selectedItem) {
+    if (selectedItem != nullptr) {
         int id = selectedItem->data(Qt::UserRole).toInt();
         bool linkedGameDir = selectedItem->data(Qt::UserRole + 1).toBool();
         // the game dirr was a symbolic link and it has a level dir
@@ -340,7 +357,7 @@ void TombRaiderLinuxLauncher::originalSelected(QListWidgetItem *selectedItem) {
 }
 
 void TombRaiderLinuxLauncher::levelDirSelected(QListWidgetItem *selectedItem) {
-    if (selectedItem) {
+    if (selectedItem != nullptr) {
         int id = selectedItem->data(Qt::UserRole).toInt();
         int state = controller.getItemState(id);
         // Activate or deactivate pushbuttons based on the selected item
@@ -372,7 +389,7 @@ void TombRaiderLinuxLauncher::levelDirSelected(QListWidgetItem *selectedItem) {
 
 void TombRaiderLinuxLauncher::onListItemSelected() {
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
-    if (selectedItem) {
+    if (selectedItem != nullptr) {
         int id = selectedItem->data(Qt::UserRole).toInt();
         if (id < 0) {  // its the original game
             originalSelected(selectedItem);
@@ -408,7 +425,7 @@ void TombRaiderLinuxLauncher::linkClicked() {
     bool status = false;
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
-    if (id) {
+    if (id != 0) {
         status = controller.link(id);
     } else {
         qDebug() << "id error";
@@ -442,7 +459,7 @@ void TombRaiderLinuxLauncher::downloadClicked() {
 void TombRaiderLinuxLauncher::infoClicked() {
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
-    if (id) {
+    if (id != 0) {
         InfoData info = controller.getInfo(id);
         ui->infoWebEngineView->setHtml(info.m_body);
         ui->infoListWidget->setViewMode(QListView::IconMode);
@@ -472,7 +489,7 @@ void TombRaiderLinuxLauncher::infoClicked() {
 void TombRaiderLinuxLauncher::walkthroughClicked() {
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
-    if (id) {
+    if (id != 0) {
         ui->walkthroughWebEngineView->setHtml(controller.getWalkthrough(id));
         ui->walkthroughWebEngineView->show();
         ui->stackedWidget->setCurrentWidget(
