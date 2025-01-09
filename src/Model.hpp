@@ -16,6 +16,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <QBitArray>
 #include <QDebug>
 #include <QtCore>
 #include <cassert>
@@ -55,7 +56,7 @@ class Model : public QObject {
         static Model instance;
         return instance;
     }
-    const QList<int>& checkCommonFiles();
+    void checkCommonFiles(QByteArray* games);
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
     void getList(QVector<ListItemData>* list);
@@ -63,11 +64,11 @@ class Model : public QObject {
     bool setLink(int id);
     QString getGameDirectory(int id);
     void setupGame(int id);
-    bool getLevel(int id);
+    void getLevel(int id);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool setDirectory(const QString& level, const QString& game);
-    bool setup(const QString& level, const QString& game);
+    void setup(const QString& level, const QString& game);
 
  signals:
     void generateListSignal(QList<int> availableGames);

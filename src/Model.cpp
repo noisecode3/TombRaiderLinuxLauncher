@@ -36,14 +36,30 @@ Model::Model() {
 
 Model::~Model() {}
 
-bool Model::setup(const QString& level, const QString& game) {
-    bool status = false;
+void Model::setup(const QString& level, const QString& game) {
     if (setDirectory(level, game) == true) {
-        status = true;
-        emit generateListSignal(checkCommonFiles());
+        QByteArray commonFiles(8, '\0');
+        checkCommonFiles(&commonFiles);
+        m_availableGames.clear();
+        for (int i = 1; i <= 5; i++) {
+            qint8 dirStatus = commonFiles[i];
+            if (dirStatus == 1) {
+                m_availableGames.append(i);
+            } else if (dirStatus == 2) {
+                m_availableGames.append(-i);
+            } else {
+                if (fileManager.checkDir(
+                    QString("/Original.TR%1").arg(i), false) ==  true) {
+                    m_availableGames.append(i);
+                }
+            }
+        }
+        emit generateListSignal(m_availableGames);
         QCoreApplication::processEvents();
+    } else {
+        // send signal to gui with error about setup fail
+        qDebug() << "setDirectory setup failed";
     }
-    return status;
 }
 
 bool Model::setDirectory(const QString& level, const QString& game) {
@@ -56,17 +72,21 @@ bool Model::setDirectory(const QString& level, const QString& game) {
     return status;
 }
 
-const QList<int>& Model::checkCommonFiles() {
-    m_availableGames.clear();
+void Model::checkCommonFiles(QByteArray* games) {
     for (int i = 1; i <= 5; i++) {
         int dirStatus = checkGameDirectory(i);
         if (dirStatus == 1) {  // symbolic link
-            m_availableGames.append(i);
+            m_availableGames.append(1);
         } else if (dirStatus == 2) {  // directory
-            m_availableGames.append(-i);
+            m_availableGames.append(2);
+        } else if (dirStatus == 3) {
+            m_availableGames.append(3);
+            qDebug() << "File could be a broken link or a regular file";
+        } else {
+            m_availableGames.append(0);
+            qDebug() << "File don't exist";
         }
     }
-    return m_availableGames;
 }
 
 QString Model::getGameDirectory(int id) {
@@ -227,25 +247,27 @@ bool Model::getLevelDontHaveFile(
     return status;
 }
 
-bool Model::getLevel(int id) {
+void Model::getLevel(int id) {
     assert(id > 0);
-    bool status = false;
     if (id > 0) {
+        bool status = false;
         ZipData zipData = data.getDownload(id);
         downloader.setUrl(zipData.url);
         downloader.setSaveFile(zipData.name);
+        // this if just slips up execution but has nothing to do with the error
         if (fileManager.checkFile(zipData.name, false)) {
-            qDebug() << "File exists:" << zipData.name;
+            qWarning() << "File exists:" << zipData.name;
             status = getLevelHaveFile(id, zipData.md5sum, zipData.name);
         } else {
-            qWarning() << "File does not exist:" << zipData.name;
+            qDebug() << "File does not exist:" << zipData.name;
             status = getLevelDontHaveFile(id, zipData.md5sum, zipData.name);
         }
         if (status == true) {
-            unpackLevel(id, zipData.name);
+            if (!unpackLevel(id, zipData.name)) {
+                qDebug() << "unpackLevel failed";
+            }
         }
     }
-    return status;
 }
 
 const InfoData Model::getInfo(int id) {

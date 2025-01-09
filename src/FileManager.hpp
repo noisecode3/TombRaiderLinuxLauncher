@@ -18,6 +18,7 @@
 #include <QObject>
 #include <QFile>
 #include <QDir>
+#include <QByteArray>
 #include <QCryptographicHash>
 #include <QDebug>
 
@@ -35,7 +36,7 @@ class FileManager : public QObject {
     bool extractZip(const QString& zipFile, const QString& extractPath);
     bool checkDir(const QString& file, bool lookGameDir);
     bool checkFile(const QString& file, bool lookGameDir);
-    int checkFileInfo(const QString& file, bool lookGameDir = true);
+    int checkFileInfo(const QString& file, bool lookGameDir);
     qint64 removeFileOrDirectory(const QString &file, bool lookGameDir);
     bool moveFilesToDirectory(
         const QString& fromLevelDirectory,
@@ -70,4 +71,5 @@ class FileManager : public QObject {
     const QString m_sep = QDir::separator();
     Q_DISABLE_COPY(FileManager)
 };
+
 #endif  // SRC_FILEMANAGER_HPP_

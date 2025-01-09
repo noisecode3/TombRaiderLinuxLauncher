@@ -58,34 +58,31 @@ inline const QString FileManager::lookGameDir(
     return path;
 }
 
-const QString FileManager::calculateMD5(const QString& file, bool lookGameDir) {
-    const QString path = FileManager::lookGameDir(file, lookGameDir);
+const QString FileManager::calculateMD5(
+        const QString& fileName, bool lookGameDir) {
+    const QString path = FileManager::lookGameDir(fileName, lookGameDir);
     QFileInfo fileInfo(path);
+    QString result;
 
     if (fileInfo.exists() && !fileInfo.isFile()) {
         qDebug() << "Error: The path is not a regular file." << path;
-        return"";
+    } else {
+        QFile file(path);
+        bool status = file.open(QIODevice::ReadOnly);  // flawfinder: ignore
+        if (!status) {
+            qDebug()
+                << "Error opening file for reading: " << file.errorString();
+        } else {
+            QCryptographicHash md5(QCryptographicHash::Md5);
+            if (!md5.addData(&file)) {
+                qWarning() << "Failed to process file for MD5 hash.";
+            } else {
+                result = QString(md5.result().toHex());
+            }
+            file.close();
+        }
     }
-
-    QFile f(path);
-    if (!f.open(QIODevice::ReadOnly)) {  // flawfinder: ignore
-        qDebug() << "Error opening file for reading: " << f.errorString();
-        return "";
-    }
-
-    QCryptographicHash md5(QCryptographicHash::Md5);
-
-    std::array<char, 1024> buffer;
-    const int size = buffer.size();
-    int bytesRead;
-
-    // flawfinder: ignore
-    while ((bytesRead = f.read(buffer.data(), size)) > 0) {
-        md5.addData(buffer.data(), bytesRead);
-    }
-
-    f.close();
-    return QString(md5.result().toHex());
+    return result;
 }
 
 bool FileManager::extractZip(
@@ -195,22 +192,24 @@ bool FileManager::checkFile(const QString& file, bool lookGameDir) {
 }
 
 int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
+    int status = 0;
     const QString path = FileManager::lookGameDir(file, lookGameDir);
     QFileInfo fileInfo(path);
     if (fileInfo.isDir() == true) {
         qDebug() << "The path is a directory.";
         if (fileInfo.isSymLink() == true) {
             qDebug() << "return value 1:The path is a symbolic link.";
-            return 1;
+            status = 1;
         } else {
             qDebug() << "return value 2:The path is not a symbolic link.";
-            return 2;
+            status = 2;
         }
     } else {
         qDebug() << "value 3:The path is not a directory.";
         qDebug() << "filePath " << path;
-        return 3;
+        status = 3;
     }
+    return status;
 }
 
 bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {

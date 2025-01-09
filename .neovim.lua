@@ -81,8 +81,8 @@ end
 require('lint').linters_by_ft = {
   sh = {'shellcheck'}, -- Ensure you have shellcheck installed
   python = {'pylint', 'bandit', 'ruff', 'pydocstyle', 'mypy', 'flake8'}, -- Ensure these are installed
-  cmake = { 'cmakelint' },
-  cpp = {'cppcheck', 'cpplint', 'flawfinder'},
+  cmake = {'cmakelint'},
+  cpp = {'cppcheck', 'cpplint', 'flawfinder', 'clangtidy'},
 }
 
 -- .local/share/nvim/plugged/nvim-lint/lua/lint/linters/cppcheck.lua

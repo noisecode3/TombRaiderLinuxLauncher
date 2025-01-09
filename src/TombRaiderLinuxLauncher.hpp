@@ -145,4 +145,23 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     QSettings m_settings;
     Ui::TombRaiderLinuxLauncher *ui;
 };
+
+struct OriginalGameData {
+    QMap<int, QString> romanNumerals = {
+            {0, "null"},
+            {1, "I"},
+            {2, "II"},
+            {3, "III"},
+            {4, "IV"},
+            {5, "V"},
+            {6, "VI"},
+            {7, "IUB"},
+            {8, "IIGM"},
+            {9, "IIILM"},
+    };
+    const QString getPicture(int id) {
+        return QString ("Tomb_Raider_%1.jpg").arg(romanNumerals[id]);
+    }
+};
+
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_

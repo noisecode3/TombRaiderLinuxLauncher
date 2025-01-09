@@ -15,7 +15,7 @@
 #include "TombRaiderLinuxLauncher.hpp"
 #include "ui_TombRaiderLinuxLauncher.h"
 #include "staticData.hpp"
-#include "debug.hpp"
+// #include "debug.hpp"
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     : QMainWindow(parent) {
@@ -58,7 +58,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     filter_p->setVisible(false);
 
     connect(ui->filterButton, &QPushButton::clicked,
-        [filter_p, filterButton_p]() {
+        [filter_p, filterButton_p]() -> void {
             bool isVisible = !filter_p->isVisible();
             filter_p->setVisible(isVisible);
 
@@ -114,13 +114,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
     const QString pictures = ":/pictures/";
-
-    QMap<int, QPair<QString, QString>> fileMap = {
-        {1, {"Tomb_Raider_I.jpg", "I"}},
-        {2, {"Tomb_Raider_II.jpg", "II"}},
-        {3, {"Tomb_Raider_III.jpg", "III"}},
-        {4, {"Tomb_Raider_IIII.jpg", "VI"}},
-        {5, {"Tomb_Raider_IIIII.jpg", "V"}} };
+    OriginalGameData pictueData;
 
     foreach(const int &id, availableGames) {
         // debugStop(QString("%1").arg(id));
@@ -133,9 +127,15 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
             linkedGameDir = true;
             IdPositive = id;
         }
-        QString iconPath = pictures + fileMap[IdPositive].first;
+        // debugStop();
+        // Picture and title
+        QString iconPath = pictures + pictueData.getPicture(IdPositive);
         QString itemName =
-            QString("Tomb Raider %1 Original").arg(fileMap[IdPositive].second);
+            QString("Tomb Raider %1 Original")
+                .arg(pictueData.romanNumerals[IdPositive]);
+
+        qDebug() << "iconPath :" << iconPath;
+        qDebug() << "itemName :" << itemName;
         QListWidgetItem *wi = new QListWidgetItem(QIcon(iconPath), itemName);
         wi->setData(Qt::UserRole, QVariant(IdPositive*(-1)));
         wi->setData(Qt::UserRole + 1, QVariant(linkedGameDir));
@@ -344,8 +344,8 @@ void TombRaiderLinuxLauncher::originalSelected(QListWidgetItem *selectedItem) {
     if (selectedItem != nullptr) {
         int id = selectedItem->data(Qt::UserRole).toInt();
         bool linkedGameDir = selectedItem->data(Qt::UserRole + 1).toBool();
-        // the game dirr was a symbolic link and it has a level dir
-        if (linkedGameDir == true && controller.getItemState(id) == 1) {
+        // the game directory was a symbolic link and it has a level directory
+        if ((linkedGameDir == true) && (controller.getItemState(id) == 1)) {
             ui->pushButtonLink->setEnabled(true);
             ui->pushButtonDownload->setEnabled(false);
         } else {
