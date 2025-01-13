@@ -44,9 +44,18 @@ void Model::setup(const QString& level, const QString& game) {
         for (int i = 1; i <= 5; i++) {
             qint8 dirStatus = commonFiles[i];
             if (dirStatus == 1) {
-                m_availableGames.append(i);
+                if (fileManager.checkDir(
+                    QString("/Original.TR%1").arg(i), false) ==  true) {
+                    m_availableGames.append(i);
+                }
             } else if (dirStatus == 2) {
                 m_availableGames.append(-i);
+                // check if there is one of
+                // TOMBRAID/tomb.exe
+                // Tomb2.exe
+                // tomb3.exe
+                // tomb4.exe
+                // PCTomb5.exe
             } else {
                 if (fileManager.checkDir(
                     QString("/Original.TR%1").arg(i), false) ==  true) {

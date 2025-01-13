@@ -47,7 +47,8 @@ set(SOURCES_TESTS
 set(SOURCES_MC
     src/main.cpp
     src/binary.hpp
-    src/gameTree.hpp
+    src/GameFileTree.hpp
+    src/GameFileTree.cpp
     src/staticData.hpp
     src/Network.hpp
     src/Network.cpp

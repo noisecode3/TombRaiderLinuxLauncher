@@ -240,7 +240,7 @@ QVector<FileList> Data::getFileList(const int id) {
     query.bindValue(":id", id);
 
     if (query.exec() == true) {
-        while (query.next()) {
+        while (query.next() == true) {
             list.append({
                 query.value("path").toString(),
                 query.value("md5sum").toString()});

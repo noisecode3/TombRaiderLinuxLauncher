@@ -20,7 +20,7 @@
 #include <QtCore>
 #include <QByteArray>
 #include <QDataStream>
-#include "gameTree.hpp"
+#include "GameFileTree.hpp"
 #include "miniz.h"
 #include "miniz_zip.h"
 
@@ -88,6 +88,7 @@ const QString FileManager::calculateMD5(
 bool FileManager::extractZip(
     const QString& zipFilename,
     const QString& outputFolder) {
+    bool status = false;
     const QString& zipPath =
         QString("%1%2%3").arg(m_levelDir.absolutePath(), m_sep, zipFilename);
     const QString& outputPath =
@@ -103,77 +104,72 @@ bool FileManager::extractZip(
 
     // Open the zip file
     mz_zip_archive zip;
-    memset(&zip, 0, sizeof(zip));
-    mz_bool result =
-        mz_zip_reader_init_file(&zip, zipPath.toUtf8().constData(), 0);
-    if (!result) {
-        qWarning() << "Failed to open zip file" << zipPath;
-        return false;
-    }
+    (void)memset(&zip, 0, sizeof(zip));
+    if (mz_zip_reader_init_file(
+        &zip, zipPath.toUtf8().constData(), 0) == true) {
+        // Extract each file in the zip archive
+        quint64 numFiles = mz_zip_reader_get_num_files(&zip);
+        qDebug() << "Zip file contains" << numFiles << "files";
 
-    // Extract each file in the zip archive
-    mz_uint numFiles = mz_zip_reader_get_num_files(&zip);
-    qDebug() << "Zip file contains" << numFiles << "files";
+        quint64 gotoPercent = 50;  // Percentage of total work
+        quint64 lastPrintedPercent = 0;  // Last printed percentage
 
-    unsigned int gotoPercent = 50;  // Percentage of total work
-    unsigned int lastPrintedPercent = 0;  // Last printed percentage
-
-    for (uint i = 0; i < numFiles; i++) {
-        mz_zip_archive_file_stat file_stat;
-        if (!mz_zip_reader_file_stat(&zip, i, &file_stat)) {
-            qWarning() << "Failed to get file info for file" << i
-            << "in zip file" << zipPath;
-            mz_zip_reader_end(&zip);
-            return false;
-        }
-
-        QString filename = QString::fromUtf8(file_stat.m_filename);
-        if (filename.endsWith('/') == true) {
-            continue;  // Skip directories
-        }
-
-        QString outFile = outputPath + "/" + filename;
-        qDebug() << "Extracting" << filename;
-
-        if (!QDir().mkpath(QFileInfo(outFile).path())) {
-            qWarning() << "Failed to create directory for file" << outFile;
-            mz_zip_reader_end(&zip);
-            return false;
-        }
-
-        if (!mz_zip_reader_extract_to_file(
-                &zip,
-                i,
-                outFile.toUtf8().constData(),
-                0)) {
-            qWarning() << "Failed to extract file" << filename
-                    << "from zip file" << zipPath;
-            mz_zip_reader_end(&zip);
-            return false;
-        }
-
-        unsigned int currentPercent = ((i + 1) * gotoPercent) / numFiles;
-
-        if (currentPercent != lastPrintedPercent) {
-            for (unsigned int j = lastPrintedPercent + 1;
-                            j <= currentPercent; j++) {
-                emit this->fileWorkTickSignal();
-                QCoreApplication::processEvents();
+        for (quint64 i = 0; i < numFiles; i++) {
+            mz_zip_archive_file_stat file_stat;
+            if (!mz_zip_reader_file_stat(&zip, i, &file_stat)) {
+                qWarning() << "Failed to get file info for file" << i
+                << "in zip file" << zipPath;
+                mz_zip_reader_end(&zip);
+                break;
             }
-            lastPrintedPercent = currentPercent;
+
+            QString filename = QString::fromUtf8(file_stat.m_filename);
+            if (filename.endsWith('/') == true) {
+                continue;  // Skip directories
+            }
+
+            QString outFile = QString("%1/%2").arg(outputPath, filename);
+            qDebug() << "Extracting" << filename;
+
+            if (!QDir().mkpath(QFileInfo(outFile).path())) {
+                qWarning() << "Failed to create directory for file" << outFile;
+                mz_zip_reader_end(&zip);
+                break;
+            }
+
+            if (!mz_zip_reader_extract_to_file(
+                    &zip,
+                    i,
+                    outFile.toUtf8().constData(),
+                    0)) {
+                qWarning() << "Failed to extract file" << filename
+                        << "from zip file" << zipPath;
+                mz_zip_reader_end(&zip);
+                break;
+            }
+
+            quint64 currentPercent =
+                ((i + quint64(1)) * gotoPercent) / numFiles;
+
+            if (currentPercent != lastPrintedPercent) {
+                for (quint64 j = lastPrintedPercent + quint64(1);
+                                j <= currentPercent; j++) {
+                    emit this->fileWorkTickSignal();
+                    QCoreApplication::processEvents();
+                }
+                lastPrintedPercent = currentPercent;
+                if (currentPercent == gotoPercent) {
+                    status = true;
+                }
+            }
         }
+    } else {
+        qWarning() << "Failed to open zip file" << zipPath;
     }
-
-    // Ensure any remaining progress is emitted
-    for (unsigned int j = lastPrintedPercent + 1; j <= gotoPercent; j++) {
-        emit this->fileWorkTickSignal();
-        QCoreApplication::processEvents();
-    }
-
     // Clean up
     mz_zip_reader_end(&zip);
     qDebug() << "Unzip complete";
-    return true;
+    return status;
 }
 
 /**
@@ -219,7 +215,9 @@ bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
     const QString gamePath =  QString("%1%2")
         .arg(m_gameDir.absolutePath(), gameDir);
 
-    test(levelPath);  // here we just output the directory tree for now..
+    QDir dir(levelPath);
+    GameFileTree test(dir);
+    test.printTree(1);
 
     if (QFile::link(levelPath, gamePath) == true) {
         qDebug() << "Symbolic link created successfully.";
@@ -227,7 +225,7 @@ bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
     } else {
         QFileInfo fileInfo(gamePath);
         if (fileInfo.isSymLink() == true) {
-            QFile::remove(gamePath);
+            (void)QFile::remove(gamePath);
             if (QFile::link(levelPath, gamePath) == true) {
                 qDebug() << "Symbolic link created successfully.";
                 status = true;
@@ -261,7 +259,7 @@ bool FileManager::makeRelativeLink(
     } else {
         QFileInfo i(toPath);
         if (i.isSymLink() == true) {
-            QFile::remove(toPath);
+            (void)QFile::remove(toPath);
             if (QFile::link(fromPath, toPath) == true) {
                 qDebug() << "Symbolic link created successfully.";
                 status = true;
@@ -419,10 +417,10 @@ bool FileManager::moveFilesToDirectory(
         dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
 
     // Move files and recursively move directories
-    bool allMoved = std::all_of(
+    return std::all_of(
             entryFileList.cbegin(),
             entryFileList.cend(),
-            [&](const QString& entry) {
+            [&](const QString& entry) -> bool {
         bool status = true;
 
         QString entryPath = QString("%1%2%3")
@@ -435,10 +433,9 @@ bool FileManager::moveFilesToDirectory(
                 << entryPath << "to:" << destinationPath;
             status = false;
         }
-
+        // cppcheck-suppress misra-c2012-15.5
         return status;
     });
-    return allMoved;
 }
 
 bool FileManager::moveFilesToParentDirectory(
