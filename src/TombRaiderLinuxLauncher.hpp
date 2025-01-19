@@ -116,6 +116,11 @@ class TombRaiderLinuxLauncher : public QMainWindow {
      */
     void sortByReleaseDate();
 
+    void GlobalSaveClicked();
+    void GlobalResetClicked();
+    void LevelSaveClicked();
+    void LevelResetClicked();
+
  private:
     /**
      * 
