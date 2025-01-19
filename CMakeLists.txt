@@ -45,21 +45,23 @@ set(SOURCES_TESTS
 )
 
 set(SOURCES_MC
-    src/main.cpp
-    src/binary.hpp
-    src/GameFileTree.hpp
-    src/GameFileTree.cpp
-    src/staticData.hpp
-    src/Network.hpp
-    src/Network.cpp
     src/Controller.hpp
     src/Controller.cpp
-    src/FileManager.hpp
-    src/FileManager.cpp
-    src/Model.hpp
-    src/Model.cpp
     src/Data.hpp
     src/Data.cpp
+    src/FileManager.hpp
+    src/FileManager.cpp
+    src/GameFileTree.hpp
+    src/GameFileTree.cpp
+    src/Model.hpp
+    src/Model.cpp
+    src/Network.hpp
+    src/Network.cpp
+    src/Runner.cpp
+    src/Runner.hpp
+    src/binary.hpp
+    src/main.cpp
+    src/staticData.hpp
 )
 
 set(SOURCES_VIEW

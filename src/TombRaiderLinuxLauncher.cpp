@@ -422,6 +422,8 @@ void TombRaiderLinuxLauncher::setOptionsClicked() {
 }
 
 void TombRaiderLinuxLauncher::linkClicked() {
+    // m_r.run();
+    // test
     bool status = false;
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
