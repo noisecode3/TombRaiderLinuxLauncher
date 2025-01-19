@@ -24,6 +24,89 @@
 #include "miniz.h"
 #include "miniz_zip.h"
 
+struct StaticTrees {
+    QList<GameFileTree*> data;
+    StaticTrees() {
+        data.append(new GameFileTree(QStringList{
+            "TOMBRAID/tomb.exe",
+            "dosbox.exe",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "Tomb1Main.exe",
+            "cfg",
+            "data",
+            "shaders",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "TR1X.exe",
+            "cfg",
+            "data",
+            "shaders",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "TR2Main.json",
+            "data",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "Tomb2.exe",
+            "data",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "tomb3_ConfigTool.json",
+            "tomb3.exe",
+            "audio",
+            "data",
+            "pix",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "tomb3.exe",
+            "audio",
+            "data",
+            "Pix",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "tomb3.exe",
+            "audio",
+            "Data",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "tomb3.exe",
+            "audio",
+            "data",
+            "pix",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "tomb4.exe",
+            "audio",
+            "Data",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "tomb4.exe",
+            "audio",
+            "data",
+            "pix",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "audio",
+            "data",
+            "pix",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "PCTomb5.exe",
+            "audio",
+            "data",
+            "pix",
+        }));
+    }
+    ~StaticTrees() {
+        for (GameFileTree* tree : data) {
+            delete tree;
+        }
+        data.clear();
+    }
+};
+
+
 bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir) {
     bool status = true;
 
@@ -212,21 +295,35 @@ bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
     bool status = false;
     const QString levelPath = QString("%1%2")
         .arg(m_levelDir.absolutePath(), levelDir);
-    const QString gamePath =  QString("%1%2")
+    const QString gamePath =  QString("%1/%2")
         .arg(m_gameDir.absolutePath(), gameDir);
 
+    StaticTrees staticTrees;
     QDir dir(levelPath);
     GameFileTree test(dir);
     test.printTree(1);
+    QString extraPath;
 
-    if (QFile::link(levelPath, gamePath) == true) {
+    for (const GameFileTree* tree : staticTrees.data) {
+        extraPath = test.matchesFromAnyNode(tree);
+        if ((extraPath != QString("\0")) && (!extraPath.isEmpty())) {
+            QTextStream(stdout)
+                << "game tree matches: " << extraPath << Qt::endl;
+            break;
+        }
+    }
+
+    qDebug() << "levelPath: " << levelPath;
+    qDebug() << "gamePath: " << gamePath;
+
+    if (QFile::link(levelPath + extraPath, gamePath) == true) {
         qDebug() << "Symbolic link created successfully.";
         status = true;
     } else {
         QFileInfo fileInfo(gamePath);
         if (fileInfo.isSymLink() == true) {
             (void)QFile::remove(gamePath);
-            if (QFile::link(levelPath, gamePath) == true) {
+            if (QFile::link(levelPath + extraPath, gamePath) == true) {
                 qDebug() << "Symbolic link created successfully.";
                 status = true;
             } else {
@@ -438,60 +535,3 @@ bool FileManager::moveFilesToDirectory(
     });
 }
 
-bool FileManager::moveFilesToParentDirectory(
-        const QString& levelDirectory, int levelsUp) {
-    const QString& sep = QDir::separator();
-    QDir levelDirectoryFullPath(QString("%1%2%3")
-            .arg(m_levelDir.absolutePath(), sep, levelDirectory));
-
-    if (!levelDirectoryFullPath.exists()) {
-        qWarning() << "Directory does not exist:"
-            << levelDirectoryFullPath.absolutePath();
-        return false;
-    }
-
-    QDir levelDirectoryUpPath = levelDirectoryFullPath;
-
-    for (int i = 0; i < levelsUp; ++i) {
-        if (!levelDirectoryUpPath.cdUp()) {
-            qWarning() << "Failed to access parent directory at level "
-                << i + 1 << " from:" << levelDirectoryFullPath.absolutePath();
-            return false;
-        }
-    }
-
-    QFlags listFlags(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-    QFileInfoList fileList = levelDirectoryFullPath.entryInfoList(listFlags);
-
-    // Move all files and directories to the parent directory
-    for (const QFileInfo& fileInfo : fileList) {
-        QString srcPath = fileInfo.absoluteFilePath();
-        QString destPath = levelDirectoryUpPath.absolutePath() + sep +
-            fileInfo.fileName();
-
-        if (fileInfo.isDir() == true) {
-            // Move the directory recursively
-            QDir srcDir(srcPath);
-            if (!srcDir.rename(srcPath, destPath)) {
-                qWarning() << "Failed to move directory:" << srcPath;
-                return false;
-            }
-        } else {
-            // Move the file
-            if (!QFile::rename(srcPath, destPath)) {
-                qWarning() << "Failed to move file:" << srcPath;
-                return false;
-            }
-        }
-    }
-
-    QDir parentDir = levelDirectoryFullPath;  // Create a copy
-    parentDir.cdUp();  // Move to the parent directory
-
-    if (!parentDir.rmdir(levelDirectoryFullPath.dirName())) {
-        qWarning() << "Failed to remove directory:"
-            << levelDirectoryFullPath.absolutePath();
-        return false;
-    }
-    return true;
-}

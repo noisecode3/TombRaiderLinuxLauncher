@@ -37,12 +37,15 @@ struct FileList {
  * Except for `TombEngine (TEN)` I made that one up.
  */
 struct FolderNames {
-    const QString TR1 = "/Tomb Raider (I)";
-    const QString TR2 = "/Tomb Raider (II)";
-    const QString TR3 = "/TombRaider (III)";
-    const QString TR4 = "/Tomb Raider (IV) The Last Revelation";
-    const QString TR5 = "/Tomb Raider (V) Chronicles";
-    const QString TEN = "TombEngine (TEN)";
+    QMap<int, QString> data = {
+            {0, "null"},
+            {1, "Tomb Raider (I)"},
+            {2, "Tomb Raider (II)"},
+            {3, "TombRaider (III)"},
+            {4, "Tomb Raider (IV) The Last Revelation"},
+            {5, "Tomb Raider (V) Chronicles"},
+            {6, "TombEngine (TEN)"},
+        };
 };
 
 struct ZipData {

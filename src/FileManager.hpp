@@ -42,7 +42,6 @@ class FileManager : public QObject {
         const QString& fromLevelDirectory,
         const QString& toLevelDirectory);
 
-    bool moveFilesToParentDirectory(const QString& directoryPath, int levelsUp);
     int createDirectory(const QString &file, bool gameDir);
     int copyFile(
         const QString &gameFile,

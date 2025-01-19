@@ -44,6 +44,7 @@ class Downloader : public QObject {
 
  private:
     void saveToFile(const QByteArray& data, const QString& filePath);
+    void connect(QFile *file, const char*);
     QUrl m_url;
     QString m_file;
     QDir m_levelDir;

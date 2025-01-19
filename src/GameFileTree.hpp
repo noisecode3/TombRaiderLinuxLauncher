@@ -19,14 +19,17 @@
 #include <QDir>
 #include <QStringList>
 #include <QDebug>
+#include <QList>
 
 class GameFileTree {
  public:
     explicit GameFileTree(const QDir& fullPath);
-    explicit GameFileTree(const QString& fileList);
+    explicit GameFileTree(const QStringList& pathList);
     ~GameFileTree();
 
     void printTree(int level) const;
+    bool matchesSubtree(const GameFileTree* other) const;
+    QString matchesFromAnyNode(const GameFileTree* other);
 
  private:
     explicit GameFileTree(

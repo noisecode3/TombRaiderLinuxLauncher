@@ -27,11 +27,6 @@ Model::Model() {
         const QString s = QString("/%1.TRLE").arg(id);
         fileManager.makeRelativeLink(s, "/War of the Worlds.exe", "/tomb4.exe");
     });
-    instructionManager.addInstruction(11, [this](int id) {
-        qDebug() << "Perform Operation C";
-        const QString s = QString("%1.TRLE/TRBiohazard").arg(id);
-        fileManager.moveFilesToParentDirectory(s, 1);
-    });
 }
 
 Model::~Model() {}
@@ -99,24 +94,14 @@ void Model::checkCommonFiles(QByteArray* games) {
 }
 
 QString Model::getGameDirectory(int id) {
-    struct FolderNames folder;
-    switch (id) {
-    case 1:
-        return folder.TR1;
-    case 2:
-        return folder.TR2;
-    case 3:
-        return folder.TR3;
-    case 4:
-        return folder.TR4;
-    case 5:
-        return folder.TR5;
-    case 10:
-        return folder.TEN;
-    default:
-        qDebug() << "Id number:"  << id << " is not a game.";
-        return "";
+    QString value;
+    FolderNames folder;
+    if (folder.data.contains(id)) {
+        value = folder.data[id];
+    } else {
+        qDebug() << "Id number:" << id << " is not a game.";
     }
+    return value;
 }
 
 int Model::checkGameDirectory(int id) {
@@ -153,16 +138,22 @@ int Model::getItemState(int id) {
 bool Model::setLink(int id) {
     bool status = false;
     if (id < 0) {  // we use original game id as negative number
-        id = -id;
-        const QString s = QString("/Original.TR%1").arg(id);
-        if (fileManager.checkDir(s, false ))
-            status = fileManager.linkGameDir(s, getGameDirectory(id));
-    } else if (id > 0) {
+        int orgId = (-1)*id;
+        const QString s = QString("/Original.TR%1").arg(orgId);
+        if (fileManager.checkDir(s, false )) {
+            status = fileManager.linkGameDir(s, getGameDirectory(orgId));
+        } else {
+            qDebug() << "Dirr: " << s << " seems to bee missing";
+        }
+    } else {
         const QString s = QString("/%1.TRLE").arg(id);
         const int t = data.getType(id);
 
-        if (fileManager.checkDir(s, false ))
+        if (fileManager.checkDir(s, false )) {
             status = fileManager.linkGameDir(s, getGameDirectory(t));
+        } else {
+            qDebug() << "Dirr: " << s << " seems to bee missing";
+        }
     }
     return status;
 }
@@ -170,7 +161,7 @@ bool Model::setLink(int id) {
 void Model::setupGame(int id) {
     QVector<FileList> list = data.getFileList(id);
     const size_t s = list.size();
-    assert(s != 0);
+    assert(s != (unsigned int)0);
 
     const QString levelPath = QString("/Original.TR%1/").arg(id);
     const QString gamePath = QString("%1/").arg(getGameDirectory(id));
@@ -181,12 +172,12 @@ void Model::setupGame(int id) {
         const QString calculated = fileManager.calculateMD5(gameFile, true);
 
         if (list[i].md5sum == calculated) {
-            fileManager.copyFile(gameFile, levelFile,  true);
+            (void)fileManager.copyFile(gameFile, levelFile,  true);
         } else {
             qDebug() << "Original file was modified, had" << list[i].md5sum
                      << " got " << calculated << " for file "
                      << list[i].path << Qt::endl;
-            fileManager.cleanWorkingDir(levelPath);
+            (void)fileManager.cleanWorkingDir(levelPath);
             break;
         }
     }
