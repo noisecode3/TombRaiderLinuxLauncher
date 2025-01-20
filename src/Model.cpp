@@ -135,6 +135,20 @@ int Model::getItemState(int id) {
     return status;
 }
 
+bool Model::runWine(const int id) {
+    bool status = true;
+    if (id < 0) {  // we use original game id as negative number
+        int orgId = (-1)*id;
+        const QString s = QString("/Original.TR%1").arg(orgId);
+        m_wineRunner.setWorkingDirectory(fileManager.getExtraPath(s));
+    } else {
+        const QString s = QString("/%1.TRLE").arg(id);
+        m_wineRunner.setWorkingDirectory(fileManager.getExtraPath(s));
+    }
+    m_wineRunner.run();
+    return status;
+}
+
 bool Model::setLink(int id) {
     bool status = false;
     if (id < 0) {  // we use original game id as negative number

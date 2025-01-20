@@ -23,6 +23,7 @@
 #include "Data.hpp"
 #include "FileManager.hpp"
 #include "Network.hpp"
+#include "Runner.hpp"
 
 class InstructionManager : public QObject {
     Q_OBJECT
@@ -61,6 +62,7 @@ class Model : public QObject {
     int checkLevelDirectory(int id);
     void getList(QVector<ListItemData>* list);
     int getItemState(int id);
+    bool runWine(const int id);
     bool setLink(int id);
     QString getGameDirectory(int id);
     void setupGame(int id);
@@ -81,6 +83,7 @@ class Model : public QObject {
         const int id, const QString& md5sum, const QString& name);
     bool unpackLevel(const int id, const QString& name);
 
+    Runner m_wineRunner = Runner("/usr/bin/wine");
     QList<int> m_availableGames;
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();

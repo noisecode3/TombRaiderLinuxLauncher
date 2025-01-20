@@ -28,10 +28,13 @@ Runner::Runner(const QString& cmd)
     m_command = cmd;
 }
 
+void Runner::setWorkingDirectory(const QString& cwd) {
+    m_process.setWorkingDirectory(cwd);
+}
+
 void Runner::run() {
     // Start Wine with the application as an argument
-    m_process.setWorkingDirectory("/home/noisecode3/.local/share/TombRaiderLinuxLauncher/19.TRLE");
-    m_process.start(m_command, QStringList() << "SabatuTR2.exe");
+    m_process.start(m_command, QStringList() << "tomb4.exe");
     QObject::connect(&m_process, &QProcess::readyReadStandardOutput, [&]() {
         // Read and print the output to standard output
         QTextStream(stdout) << m_process.readAllStandardOutput();

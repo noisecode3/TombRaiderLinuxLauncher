@@ -25,7 +25,6 @@
 #include <QDebug>
 #include <QVector>
 #include <QString>
-#include "Runner.hpp"
 
 #include "Controller.hpp"
 
@@ -150,7 +149,6 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     Controller& controller = Controller::getInstance();
     QSettings m_settings;
     Ui::TombRaiderLinuxLauncher *ui;
-    Runner m_r = Runner("/usr/bin/wine");
 };
 
 struct OriginalGameData {

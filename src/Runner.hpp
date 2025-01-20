@@ -29,6 +29,7 @@ class Runner : public QObject {
     int getStatus();
     int getCommand();
     bool setCommand(const QString& cmd);
+    void setWorkingDirectory(const QString& cwd);
 
  signals:
     void started();

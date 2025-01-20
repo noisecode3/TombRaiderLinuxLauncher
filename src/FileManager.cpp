@@ -291,39 +291,43 @@ int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
     return status;
 }
 
-bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
-    bool status = false;
+QString FileManager::getExtraPath(const QString& levelDir) {
     const QString levelPath = QString("%1%2")
         .arg(m_levelDir.absolutePath(), levelDir);
-    const QString gamePath =  QString("%1/%2")
-        .arg(m_gameDir.absolutePath(), gameDir);
-
     StaticTrees staticTrees;
     QDir dir(levelPath);
-    GameFileTree test(dir);
-    test.printTree(1);
+    GameFileTree tree(dir);
+    tree.printTree(1);
     QString extraPath;
 
-    for (const GameFileTree* tree : staticTrees.data) {
-        extraPath = test.matchesFromAnyNode(tree);
+    for (const GameFileTree* stree : staticTrees.data) {
+        extraPath = tree.matchesFromAnyNode(stree);
         if ((extraPath != QString("\0")) && (!extraPath.isEmpty())) {
             QTextStream(stdout)
                 << "game tree matches: " << extraPath << Qt::endl;
             break;
         }
     }
+    return levelPath + extraPath;
+}
 
+bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
+    bool status = false;
+    const QString gamePath =  QString("%1/%2")
+        .arg(m_gameDir.absolutePath(), gameDir);
+
+    const QString levelPath = getExtraPath(levelDir);
     qDebug() << "levelPath: " << levelPath;
     qDebug() << "gamePath: " << gamePath;
 
-    if (QFile::link(levelPath + extraPath, gamePath) == true) {
+    if (QFile::link(levelPath, gamePath) == true) {
         qDebug() << "Symbolic link created successfully.";
         status = true;
     } else {
         QFileInfo fileInfo(gamePath);
         if (fileInfo.isSymLink() == true) {
             (void)QFile::remove(gamePath);
-            if (QFile::link(levelPath + extraPath, gamePath) == true) {
+            if (QFile::link(levelPath, gamePath) == true) {
                 qDebug() << "Symbolic link created successfully.";
                 status = true;
             } else {

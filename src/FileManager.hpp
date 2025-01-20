@@ -56,6 +56,7 @@ class FileManager : public QObject {
     int cleanWorkingDir(const QString &levelDir);
     bool backupGameDir(const QString &gameDir);
     bool linkGameDir(const QString& levelDir, const QString& gameDir);
+    QString getExtraPath(const QString& levelDir);
     bool ensureDirectoryExists(const QString& dirPath, const QDir& dir);
     bool setUpCamp(const QString& levelDir, const QString& gameDir);
 

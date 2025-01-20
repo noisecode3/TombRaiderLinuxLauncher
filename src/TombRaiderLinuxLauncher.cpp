@@ -449,20 +449,22 @@ void TombRaiderLinuxLauncher::setOptionsClicked() {
 }
 
 void TombRaiderLinuxLauncher::linkClicked() {
-    // m_r.run();
-    // test
-    bool status = false;
     QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
     int id = selectedItem->data(Qt::UserRole).toInt();
-    if (id != 0) {
-        status = controller.link(id);
+    if (m_settings.value(QString("level%1/RunnerType").arg(id)) == 2) {
+        Model::getInstance().runWine(id);
     } else {
-        qDebug() << "id error";
-    }
-    if (status == true) {
-        QApplication::quit();
-    } else {
-        qDebug() << "link error";
+        bool status = false;
+        if (id != 0) {
+            status = controller.link(id);
+        } else {
+            qDebug() << "id error";
+        }
+        if (status == true) {
+            QApplication::quit();
+        } else {
+            qDebug() << "link error";
+        }
     }
 }
 
