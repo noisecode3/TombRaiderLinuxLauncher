@@ -36,6 +36,7 @@ endif()
 add_subdirectory(libs/miniz)
 
 # Add LIEF as a subdirectory
+set(LIEF_INSTALL OFF CACHE BOOL "Disable installation of LIEF")
 set(LIEF_EXAMPLES OFF)
 set(LIEF_TESTS OFF)
 set(LIEF_DOC OFF)
