@@ -1,3 +1,6 @@
 [submodule "libs/miniz"]
 	path = libs/miniz
 	url = https://github.com/richgel999/miniz
+[submodule "libs/LIEF"]
+	path = libs/LIEF
+	url = https://github.com/lief-project/LIEF

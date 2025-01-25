@@ -1,74 +1,96 @@
 # Tomb Raider Linux Launcher
 
-A tool to run Tomb Raider classics 1, 2, 3, 4, 5 on Linux with Wine/Proton.
-Problems that you may face for 3 and 4 are one particular input problem and
-sometimes graphical glitches, crashes or lags. The work around for the input
-problem is to avoid ctrl alt. The other work around is to use a kernel suitable
-for gaming/wine and try to use mature suitable graphics drivers, usually open
-source. That will get you far if you want to play those games, but you should
-also know modding is tricky and only some might work. I'm doing it for fun
-and I would love to learn more c++ and Qt
+A tool for running and modding classic Tomb Raider games (1–5) on Linux with Wine/Proton. It also supports searching and downloading levels from trle.net, enabling direct play from the application.
 
-This application will be written in c++ for the GUI and for modding and
-manipulation configuration files. Bash for launching with Steam or Lutris or just Wine.
+This project is my passion for Tomb Raider classics combined with learning C++, Python, and SQL. My dream is to create an arcade machine featuring all classic Tomb Raider games and TRLE levels, potentially with a co-op mode.
 
 ## Features
 
-* with steam or Lutris to select a map from trle.net to play
-* launch along the game a controller mapper like qjoypad or antimicrox
-* script so that I dont have to manually move all game files when I want to play a mod with steam input to steams tomb raider game folder
-* backup game savefiles and configurations for all maps and moods.
-* check for corrupted config.txt file and possible other workarounds. (TR3)
-* check if I forgot to connect controller and so on... On Linux. I like my Steam controller configurations also.
-* implement patching of files and backup.
-* checksums
-* download maps/mods, and install them
-* add a filter for html in database
-* make sure the rest of the GUI still updates while downloading
+- Integrates with Linux launchers (Steam, Lutris, etc.)
+- Controller mapper support (e.g., qjoypad, antimicrox)
+- Save file and configuration backups
+- Workarounds for Linux/Wine compatibility issues
+- Modding support for executable-based mods
+- Level download and installation from trle.net
+- Respectful scraping and filtering of data from trle.net (with site owner permission)
 
-## trle.net mods the launcher will download and play with wine-tkg that I tested
+## Installation
 
-* [Calypsis Jungle - Part One](https://www.trle.net/sc/levelfeatures.php?lid=3500)
-* [Feder - Templars Secret](https://www.trle.net/sc/levelfeatures.php?lid=3082)
-* [Delca - Kitten Adventure](https://www.trle.net/sc/levelfeatures.php?lid=3379)
+### Dependencies
+Ensure the following are installed on your Linux desktop:
+- `curl` (7.71.0 or newer)
+- Boost
+- OpenSSL
+- Qt5
 
-## Prepare
-
-This install the program in you're ".local" home directory
-You need those, should be installed on a desktop linux
-
-* curl 7.71.0 or newer
-* Boost
-* OpenSSL
-* Qt5
-
-## Build
-
+### Build
 ```shell
 cmake -DCMAKE_INSTALL_PREFIX=~/.local .
-make install
+make install -j$(nproc)
 ```
 
 ## Use database
 
-You can add maps to the database if you cd into database.
-This should add Kitten Adventure Demo.
-
-If it don't work try installing the
-python3 module from the error, with pip, you'll need, beautifulsoup4 and tqdm
+### pip
+Never use sudo with pip, you can use a virtual environment or keep updating them in home.
+If a required module isn't available in the system's package manager, fall back to pip.
 
 ```shell
-python3 tombll_get_data.py https://www.trle.net/sc/levelfeatures.php?lid=3379
-
+python3 -m venv myenv
+source myenv/bin/activate
+pip install pycurl tqdm cryptography beautifulsoup4 pillow
+```
+or just
+```shell
+pip install pycurl tqdm cryptography beautifulsoup4 pillow
+```
+how to update
+```shell
+#!/bin/bash
+pimp_my_pip() {
+    pip list --outdated | awk 'NR > 2 {print $1}' | xargs -n1 pip install -U
+}
+pimp_my_pip
 ```
 
-It will show
-
-```text
-ERROR:The file at https://www.trle.net/scadm/trle_dl.php?lid=3379 is not a ZIP file. Content-Type: text/html
+### Arch Linux
+```shell
+sudo pacman -S python-pycurl python-tqdm python-cryptography python-beautifulsoup4 python-pillow
 ```
 
-This means that you have to open the data.json file and add those values
+### Ubuntu/Debian
+```shell
+sudo apt update
+sudo apt install python3-pycurl python3-tqdm python3-cryptography python3-bs4 python3-pil
+```
+
+### Fedora
+```shell
+sudo dnf install python3-pycurl python3-tqdm python3-cryptography python3-beautifulsoup4 python3-pillow
+```
+
+### openSUSE
+```shell
+sudo zypper install python3-pycurl python3-tqdm python3-cryptography python3-beautifulsoup4 python3-Pillow
+```
+
+### Alpine Linux
+```shell
+sudo apk add py3-pycurl py3-tqdm py3-cryptography py3-beautifulsoup4 py3-pillow
+```
+
+Some levels wont be added because they use external or different download URL's
+You can add maps to the database if you cd into where you installed you're database.
+
+If you did just follow the command above you can use:
+
+
+```shell
+python3 tombll_get_data.py https://www.trle.net/sc/levelfeatures.php?lid=3684
+
+```
+Now that you have an data.json file you get a chance to edit it.
+Sometimes you need or want to edit those but right now I allow only trle.net
 
 ```text
   "zipFileName": "",
@@ -88,6 +110,11 @@ compile with cmake -DTEST=on
 ./TombRaiderLinuxLauncherTest -w tomb4.exe
 ```
 
+I was going to mix trle.net with trcustoms.org data, I have not made contacted with the site owner
+to ask if I can use the site for scraping for non commercial use. As this task turned out to be
+harder than I thought, to match data without creating doubles, I'm gonna wait until the basics
+and trle.net part is implemented. 
+
 ## Screenshots
 
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot1.jpg)
@@ -97,42 +124,30 @@ compile with cmake -DTEST=on
 
 ## Guide
 
-How to play Tomb Raider 3 (need to update)
+The game uses old API and old optimizations, but you can play basically on a potato laptop.
+It depends on drivers quality, but with proton you can try `PROTON_USE_WINED3D=1`
+or using [dgvoodoo2] with `PROTON_USE_WINED3D=0` usually you get the best performance with (DXVK/dgvoodoo2).
+The easiest way to get this setup it using Lutris. Some levels can be lagging even on
+a computer with a strong video card.
+[dgvoodoo2]: https://github.com/lutris/dgvoodoo2/releases
 
-## Patches
+### TR1
+* <https://github.com/LostArtefacts/TRX>
 
-The game uses old API and old optimizations..
-With wine you need a minimum
-4 x DDR3-1600mhz and 3.0 GHz CPU
-It's a bit demanding on the memory, try use gallium nine if you have nouveau
-No special graphics card, but if you gonna play mods you could need
-One 2010+ card that has about 2-4 Gb for some Tomb Raider 4 mods with enhanced graphics
-recommend patches, on steam proton 7 (old)
-
-* <https://github.com/Trxyebeep/tomb3>
-
-* <https://github.com/dege-diosg/dgVoodoo2> (use Lutris, not manual)
-* <https://tombraiders.net/stella/downloads/widescreen.html>
-* <https://core-design.com/community_tr3withoutcrystals.html>
+### TR2
+* <https://github.com/Arsunt/TR2Main>
 
 ### TR3
+* <https://github.com/Trxyebeep/tomb3>
 
-Most, if not all trle.net tr3 mods will work with proton 7, if unpacked and configured with dgVoodoo2
-some new tr3 mods already comes with the tomb3 patch. A combination of tomb3 and dgVoodoo2 is recommended for the original game.
+### TR4
+* <https://github.com/Trxyebeep/TOMB4>
 
-## Tips
+### TR5
+* <https://github.com/Trxyebeep/TOMB5>
 
-### Recommended compatibility layer
+## Targets
+I program mostly on Slackware-current and Arch, I gonna try target and test SteamOS for second release.
 
-* Proton 7.0 for TR3 - with dgVoodoo2
-* Proton 5.0-10 for TR3
-* Sometimes avoiding Ctrl and Alt will make wine/proton
-* [GloriousEggroll](https://github.com/GloriousEggroll/proton-ge-custom/releases/tag/6.21-GE-2)
-* [Wine-tkg](https://github.com/Frogging-Family/wine-tkg-git/releases/tag/7.6.r12.g51472395) tick "emulate a virtual desktop"
-
-### Recommended compatibility layer configuration and other tips
-
-* Use fsync or esync
-* If you have problems witn FMV cut-scenes. Run winecfg go to graphics tab and tick "emulate a virtual desktop" use same size as you're desktop under. Or use dgVoodoo2
-* Sometimes when you run tomb3.exe -setup you window manager will put the background over the configuration windows, for example in i3 mod+f "full screen key" or something similar like alt+tab could help you see the window
-* The game will recognize your controller, left stick only, see [https://github.com/AntiMicroX/antimicrox](https://github.com/AntiMicroX/antimicrox)
+## License
+This project is licensed under GPLv3. Art assets are under Creative Commons Attribution-NonCommercial-ShareAlike 4.0. Tomb Raider is a trademark of Embracer Group AB.

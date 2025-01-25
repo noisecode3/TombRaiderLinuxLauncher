@@ -22,7 +22,8 @@ Runner::Runner() : m_env(QProcessEnvironment::systemEnvironment()) {
 
 Runner::Runner(const QString& cmd)
     : m_env(QProcessEnvironment::systemEnvironment()) {
-    m_env.insert("WINEDLLOVERRIDES", "winmm=n,b");
+    m_env.insert("WINEDLLOVERRIDES", "winmm=n,b;ddraw=n,b");
+    m_env.insert("WINEFSYNC", "1");
     m_process.setProcessEnvironment(m_env);
     m_status = 0;
     m_command = cmd;

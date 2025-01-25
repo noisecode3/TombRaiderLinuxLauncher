@@ -33,12 +33,33 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
     file(WRITE "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" "${my_cmake}")
 endif()
 
+add_subdirectory(libs/miniz)
+
+# Add LIEF as a subdirectory
+set(LIEF_EXAMPLES OFF)
+set(LIEF_TESTS OFF)
+set(LIEF_DOC OFF)
+set(LIEF_C_API OFF)
+set(LIEF_ELF OFF)
+set(LIEF_PE ON)
+set(LIEF_MACHO OFF)
+set(LIEF_DEX OFF)
+set(LIEF_ART OFF)
+
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt")
+    message(STATUS "Submodule 'libs/LIEF' not found. Updating submodules...")
+    execute_process(
+        COMMAND git submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endif()
+
+add_subdirectory(libs/LIEF)
+
 # Update submodules if we forget
 # git submodule update --init --recursive
 # git submodule update --remote --merge
 # git submodule sync # (optional) if URL change
-
-add_subdirectory(libs/miniz)
 
 set(SOURCES_TESTS
     test/test.hpp
@@ -60,6 +81,7 @@ set(SOURCES_MC
     src/Runner.cpp
     src/Runner.hpp
     src/binary.hpp
+    src/binary.cpp
     src/main.cpp
     src/staticData.hpp
 )
@@ -77,6 +99,7 @@ set(LINK_COMMON
     Qt5::WebEngineWidgets
     Qt5::Sql
     miniz
+    LIEF::LIEF
     ${CURL_LIBRARY}
     OpenSSL::SSL
     Boost::system
@@ -91,13 +114,12 @@ set(INCLUDE_DIR
     ${CURL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     libs/miniz
+    libs/LIEF/include
     src
 )
 
-set(COMPILE_OPT
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(TEST)
     enable_testing()
@@ -106,14 +128,20 @@ if(TEST)
     add_test(NAME ${PROJECT_NAME}Test COMMAND ${PROJECT_NAME}Test)
     target_link_libraries(${PROJECT_NAME}Test PUBLIC ${LINK_COMMON} Qt5::Test)
     target_include_directories(${PROJECT_NAME}Test PRIVATE ${INCLUDE_DIR} test)
-    set_target_properties(${PROJECT_NAME}Test PROPERTIES ${COMPILE_OPT})
     target_compile_definitions(${PROJECT_NAME}Test PRIVATE TEST)
+    set_target_properties(${PROJECT_NAME}Test PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+    )
 else()
     set(SOURCES ${SOURCES_MC} ${SOURCES_VIEW})
     add_executable(${PROJECT_NAME} ${SOURCES})
     target_link_libraries(${PROJECT_NAME} PUBLIC ${LINK_COMMON} ${LINK_GUI})
     target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
-    set_target_properties(${PROJECT_NAME} PROPERTIES ${COMPILE_OPT})
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+    )
 endif()
 
 if(NOT TEST)
@@ -121,8 +149,15 @@ if(NOT TEST)
         DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
     )
 
-    install(FILES ${CMAKE_SOURCE_DIR}/database/tombll.db
+    install(FILES
+        ${CMAKE_SOURCE_DIR}/database/tombll.db
+        ${CMAKE_SOURCE_DIR}/database/data_factory.py
+        ${CMAKE_SOURCE_DIR}/database/get_leaf_cert.py
+        ${CMAKE_SOURCE_DIR}/database/https.py
+        ${CMAKE_SOURCE_DIR}/database/scrape.py
+        ${CMAKE_SOURCE_DIR}/database/tombll_add_data.py
+        ${CMAKE_SOURCE_DIR}/database/tombll_get_data.py
+        ${CMAKE_SOURCE_DIR}/database/tombll_get_list.py
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
     )
 endif()
-

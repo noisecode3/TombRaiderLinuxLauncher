@@ -16,76 +16,66 @@
 
 #include <QString>
 #include <QFile>
+#include <QFileInfo>
 #include <QByteArray>
 #include <QDebug>
+#include <QDataStream>
 
-/**
- * @brief Look for a bit pattern that set 16:9 aspect ratio for Tomb Raider 4.
- * @param[in] Open file object reference.
- * @retval 0 Success.
- * @retval 1 Pattern was not found in the file.
- * @retval 2 Could not open the file.
- * @retval 3 Could not write to the file.
- * @return error qint64.
- */
-qint64 findReplacePattern(QFile* const file) {
-    qint64 status = 0;
-    QByteArray fileContent = file->readAll();
-    file->close();
+// Define structures for PE headers
+#pragma pack(push, 1)  // Set 1-byte alignment
+struct DosHeader {
+    std::array<char, 2> magic;          // Magic number ("MZ")
+    quint16 lastPageBytes;
+    quint16 totalPages;
+    quint16 numRelocations;
+    quint16 headerSizeInParagraphs;
+    quint16 minExtraParagraphs;
+    quint16 maxExtraParagraphs;
+    quint16 initialSS;
+    quint16 initialSP;
+    quint16 checksum;
+    quint16 initialIP;
+    quint16 initialCS;
+    quint16 relocationTableOffset;
+    quint16 overlayNumber;
+    quint8 reserved[8];
+    quint16 oemIdentifier;
+    quint16 oemInformation;
+    quint8 reserved2[20];
+    quint32 e_lfanew;                  // Offset to PE header
+};
 
-    // Define the pattern to find and replace
-    QByteArray pattern = QByteArray::fromHex("abaaaa3f0ad7a33b");
-    QByteArray replacement = QByteArray::fromHex("398ee33f0ad7a33b");
+struct PEHeader {
+    std::array<char, 4> signature;     // Signature ("PE\0\0")
+    quint16 machine;
+    quint16 numSections;
+    quint32 timeDateStamp;
+    quint32 pointerToSymbolTable;
+    quint32 numberOfSymbols;
+    quint16 sizeOfOptionalHeader;
+    quint16 characteristics;
+};
 
-    // Find the pattern in the file content
-    int index = fileContent.indexOf(pattern);
-    if (index != -1) {
-        // Replace the pattern
-        fileContent.replace(index, pattern.size(), replacement);
+struct ExportDirectory {
+    quint32 characteristics;
+    quint32 timeDateStamp;
+    quint16 majorVersion;
+    quint16 minorVersion;
+    quint32 nameRVA;          // RVA of the DLL name
+    quint32 ordinalBase;      // Starting ordinal number
+    quint32 addressTableRVA;  // RVA of the Export Address Table
+    quint32 namePointerRVA;   // RVA of the array of names
+    quint32 ordinalTableRVA;  // RVA of the Ordinal Table
+    quint32 numExportAddresses;  // Number of entries in Export Address Table
+    quint32 numNamePointers;    // Number of entries in Name Pointer Table
+};
 
-        // Reopen the file for writing
-        if (!file->open(QIODevice::WriteOnly)) {  // flawfinder: ignore
-            qCritical() << "Error opening file for writing!";
-            status = 2;
-        } else if (file->write(fileContent) == -1) {
-            qCritical() << "Error writing to file!";
-            status = 3;
-        } else {
-            qDebug() << "Widescreen patch applied successfully!";
-        }
-    } else {
-        qDebug() << "Pattern not found in the file.";
-        status = 1;
-    }
-    file->close();
-    return status;
-}
+#pragma pack(pop)
 
-/**
- * @brief Widescreen in binary set function.
- * @param[in] File path to windows exe.
- * @retval 0 Success.
- * @retval 1 Path was not an safe file regular file.
- * @retval 2 Could not preform the first read only opening of the file.
- * @return error qint64.
- */
-qint64 widescreen_set(const QString& path) {
-    qint64 status = 0;
-    QFileInfo fileInfo(path);
-    QFile file(path);
-
-    // Open the file
-    if (!fileInfo.exists() || !fileInfo.isFile()) {
-        qCritical() << "Error: The exe path is not a regular file: " << path;
-        status = 1;  // Invalid file path
-    } else if (!file.open(QIODevice::ReadOnly)) {  // flawfinder: ignore
-        qCritical() << "Error opening file for reading!";
-        status = 2;  // File open error
-    } else {
-        // Perform the pattern replacement and propagate the status
-        status = findReplacePattern(&file);
-    }
-    return status;
-}
+void analyzeImportTable(const std::string& peFilePath);
+void readPEHeader(const QString &filePath);
+void readExportTable(const QString &filePath);
+qint64 findReplacePattern(QFile* const file);
+qint64 widescreen_set(const QString& path);
 
 #endif  // SRC_BINARY_HPP_
