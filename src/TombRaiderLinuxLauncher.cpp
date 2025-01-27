@@ -493,6 +493,17 @@ void TombRaiderLinuxLauncher::infoClicked() {
     if (id != 0) {
         InfoData info = controller.getInfo(id);
         ui->infoWebEngineView->setHtml(info.m_body);
+
+        // Get the vertical scrollbar size to center the images for all themes
+        int scrollbarWidth = ui->infoListWidget
+            ->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+        QMargins margins = ui->infoListWidget->contentsMargins();
+        int left = margins.left();
+        int right = margins.right();
+
+        ui->infoListWidget->setMinimumWidth(left+502+scrollbarWidth+right);
+        ui->infoListWidget->setMaximumWidth(left+502+scrollbarWidth+right);
+
         ui->infoListWidget->setViewMode(QListView::IconMode);
         ui->infoListWidget->setIconSize(QSize(502, 377));
         ui->infoListWidget->setDragEnabled(false);
@@ -504,6 +515,7 @@ void TombRaiderLinuxLauncher::infoClicked() {
         for (int i = 0; i < info.m_imageList.size(); ++i) {
             const QIcon &icon = info.m_imageList.at(i);
             QListWidgetItem *item = new QListWidgetItem(icon, "");
+            item->setSizeHint(QSize(502, 377));
             ui->infoListWidget->addItem(item);
         }
         ui->infoWebEngineView->show();
