@@ -1,0 +1,76 @@
+Guide: Setting Up Tomb Raider 2 on Wine with TR2Main & OGG Audio Support
+1. Install TR2Main (Enhanced Engine for Tomb Raider 2)
+
+    Open a terminal and navigate to the game directory:
+
+cd /path/to/your/tomb-raider-2/
+
+Extract the TR2Main files into the game directory:
+
+    unzip /path/to/TR2Main_v0.9.0.zip
+
+    This will replace the original Tomb2.exe with the improved TR2Main version.
+
+2. Replace winmm.dll for OGG Audio Support
+
+Tomb Raider 2 originally used CD audio for music. To enable OGG playback in Wine, you need to replace winmm.dll with ogg-winmm:
+
+    Download ogg-winmm from GitHub:
+        https://github.com/ayuanx/ogg-winmm
+    Extract the winmm.dll from the archive.
+    Copy winmm.dll into the game directory, replacing the existing one:
+
+    cp /path/to/ogg-winmm/winmm.dll /path/to/your/tomb-raider-2/
+
+3. Convert or Extract Audio Files
+
+You need to ensure that the game has OGG format music in the music/ directory.
+Option 1: Convert Existing MP3s
+
+If you already have the MP3 soundtrack, convert them:
+
+    Navigate to the music/ folder:
+
+cd /path/to/your/tomb-raider-2/music/
+
+Run the conversion script:
+
+    ./convert.sh
+
+Option 2: Extract Audio from the Game Files
+
+If you don't have the MP3 soundtrack, extract it from the game’s original audio/ files:
+
+    Navigate to the audio/ directory:
+
+cd /path/to/your/tomb-raider-2/audio/
+
+Run the extraction script:
+
+./extract_audio.sh
+
+Ensure that the music/ folder now contains the OGG files.
+Remove or move the audio/ directory:
+
+    rm -r /path/to/your/tomb-raider-2/audio/
+
+4. Fixing Video Playback Issues
+
+If cutscenes don't play, you may need to use DXVK (DirectX to Vulkan translation layer).
+
+    Install DXVK:
+
+    WINEPREFIX=/path/to/your/wineprefix winetricks dxvk
+
+    Ensure Wine is using DXVK by setting d3d9.dll to native in winecfg:
+        Run winecfg
+        Go to the Libraries tab
+        Add d3d9 and set it to "Native"
+
+5. Run the Game
+
+Once everything is set up, start the game:
+
+WINEPREFIX=/path/to/your/wineprefix WINEDLLOVERRIDES="winmm=n,b" wine tomb2.exe -setup
+Then run:
+WINEPREFIX=/path/to/your/wineprefix WINEDLLOVERRIDES="winmm=n,b" wine tomb2.exe
