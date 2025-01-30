@@ -57,7 +57,7 @@ class Model : public QObject {
         static Model instance;
         return instance;
     }
-    void checkCommonFiles(QByteArray* games);
+    void checkCommonFiles(QList<int>* games);
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
     void getList(QVector<ListItemData>* list);
@@ -84,7 +84,6 @@ class Model : public QObject {
     bool unpackLevel(const int id, const QString& name);
 
     Runner m_wineRunner = Runner("/usr/bin/wine");
-    QList<int> m_availableGames;
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
     Downloader& downloader = Downloader::getInstance();

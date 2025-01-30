@@ -31,41 +31,6 @@ Model::Model() {
 
 Model::~Model() {}
 
-void Model::setup(const QString& level, const QString& game) {
-    if (setDirectory(level, game) == true) {
-        QByteArray commonFiles(8, '\0');
-        checkCommonFiles(&commonFiles);
-        m_availableGames.clear();
-        for (int i = 1; i <= 5; i++) {
-            qint8 dirStatus = commonFiles[i];
-            if (dirStatus == 1) {
-                if (fileManager.checkDir(
-                    QString("/Original.TR%1").arg(i), false) ==  true) {
-                    m_availableGames.append(i);
-                }
-            } else if (dirStatus == 2) {
-                m_availableGames.append(-i);
-                // check if there is one of
-                // TOMBRAID/tomb.exe
-                // Tomb2.exe
-                // tomb3.exe
-                // tomb4.exe
-                // PCTomb5.exe
-            } else {
-                if (fileManager.checkDir(
-                    QString("/Original.TR%1").arg(i), false) ==  true) {
-                    m_availableGames.append(i);
-                }
-            }
-        }
-        emit generateListSignal(m_availableGames);
-        QCoreApplication::processEvents();
-    } else {
-        // send signal to gui with error about setup fail
-        qDebug() << "setDirectory setup failed";
-    }
-}
-
 bool Model::setDirectory(const QString& level, const QString& game) {
     bool status = false;
     if (fileManager.setUpCamp(level, game) &&
@@ -76,18 +41,42 @@ bool Model::setDirectory(const QString& level, const QString& game) {
     return status;
 }
 
-void Model::checkCommonFiles(QByteArray* games) {
+void Model::setup(const QString& level, const QString& game) {
+    if (setDirectory(level, game) == true) {
+        QList<int> commonFiles;
+        checkCommonFiles(&commonFiles);
+        // Iterate backward to avoid index shifting
+        for (int i = 4; i >= 0; i--) {
+            int dirStatus = commonFiles[i];
+            if (fileManager.checkDir(
+                QString("/Original.TR%1").arg(i + 1), false) == true) {
+                commonFiles[i] = i + 1;
+            } else if (dirStatus == 2) {
+                commonFiles[i] = -(i + 1);
+            } else {
+                commonFiles.removeAt(i);
+            }
+        }
+        emit generateListSignal(commonFiles);
+        QCoreApplication::processEvents();
+    } else {
+        // send signal to gui with error about setup fail
+        qDebug() << "setDirectory setup failed";
+    }
+}
+
+void Model::checkCommonFiles(QList<int>* games) {
     for (int i = 1; i <= 5; i++) {
         int dirStatus = checkGameDirectory(i);
         if (dirStatus == 1) {  // symbolic link
-            m_availableGames.append(1);
+            games->append(1);
         } else if (dirStatus == 2) {  // directory
-            m_availableGames.append(2);
+            games->append(2);
         } else if (dirStatus == 3) {
-            m_availableGames.append(3);
+            games->append(3);
             qDebug() << "File could be a broken link or a regular file";
         } else {
-            m_availableGames.append(0);
+            games->append(0);
             qDebug() << "File don't exist";
         }
     }
@@ -178,7 +167,7 @@ void Model::setupGame(int id) {
     assert(s != (unsigned int)0);
 
     const QString levelPath = QString("/Original.TR%1/").arg(id);
-    const QString gamePath = QString("%1/").arg(getGameDirectory(id));
+    const QString gamePath = QString("/%1/").arg(getGameDirectory(id));
 
     for (size_t i = 0; i < s; i++) {
         const QString levelFile = QString("%1%2").arg(levelPath, list[i].path);

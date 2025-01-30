@@ -124,6 +124,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 }
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
+    ui->listWidgetModds->clear();
     const QString pictures = ":/pictures/";
     OriginalGameData pictueData;
 
@@ -599,8 +600,18 @@ void TombRaiderLinuxLauncher::downloadError(int status) {
 }
 
 void TombRaiderLinuxLauncher::GlobalSaveClicked() {
-    m_settings.setValue("gamePath" , ui->tableWidgetSetup->item(0, 0)->text());
-    m_settings.setValue("levelPath" , ui->tableWidgetSetup->item(1, 0)->text());
+    const QString newLevelPath = ui->tableWidgetSetup->item(1, 0)->text();
+    const QString newGamePath = ui->tableWidgetSetup->item(0, 0)->text();
+
+    const QString oldLevelPath = m_settings.value("levelPath").toString();
+    const QString oldGamePath = m_settings.value("gamePath").toString();
+
+    if ((newLevelPath != oldLevelPath) || (newGamePath != oldGamePath)) {
+        m_settings.setValue("levelPath" , newLevelPath);
+        m_settings.setValue("gamePath" , newGamePath);
+
+        controller.setup(newLevelPath, newGamePath);
+    }
 }
 void TombRaiderLinuxLauncher::GlobalResetClicked() {
     ui->tableWidgetSetup->item(0, 0)->setText(
