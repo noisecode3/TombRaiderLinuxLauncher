@@ -22,6 +22,11 @@ Ensure the following are installed on your Linux desktop:
 - Boost
 - OpenSSL
 - Qt5
+On Arch this should be enough, you get the rest probably when you install the base, curl + openssl
+
+```shell
+sudo pacman -S qt5-wayland qt5-webengine qt5-imageformats boost
+```
 
 ### Build
 ```shell
