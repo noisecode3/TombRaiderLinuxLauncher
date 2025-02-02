@@ -1,0 +1,56 @@
+Developed for but can work with others, it should but there is no garantee
+Playstation DualShock4 controller hw_version=0x0000b418 fw_version=0x0000a00b
+
+I could not get Dpad to work with this API but the Sticks works.
+I use the Dpad only around edges but can play without it.
+This is just a way to take the kernel RAW when everything else is not working
+You might just need to replace this line.
+device = evdev.InputDevice('/dev/input/event21')  # Replace X with the correct number
+
+The quick way:
+sudo modprobe uinput
+sudo chown root:input /dev/uinput
+sudo chmod 0660 /dev/uinput
+
+Fixing /dev/uinput Permissions
+
+To make it persist across reboots, add it to /etc/modules-load.d/uinput.conf:
+
+echo "uinput" | sudo tee /etc/modules-load.d/uinput.conf
+
+2 Give Your User Access to /dev/uinput
+
+By default, only root and the input group can access it.
+
+    Add yourself to the input group:
+
+    sudo usermod -aG input $USER
+
+    Log out and back in (or reboot) for the group change to take effect.
+
+If that still doesn't work, you might need udev rules.
+3 Create a udev Rule to Fix Permissions
+
+If /dev/uinput still has crw------- (only root access), create a new rule:
+
+sudo nano /etc/udev/rules.d/99-uinput.rules
+
+Add this line:
+
+KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+
+Then apply the new rule:
+
+sudo udevadm control --reload-rules && sudo udevadm trigger
+
+Now, check if the permissions are fixed:
+
+ls -l /dev/uinput
+
+It should look like:
+
+crw-rw---- 1 root input 10, 223 Feb  1 4:20 /dev/uinput
+
+If it still says crw-------, reboot.
+
+Now your Python script should be able to read/write to /dev/uinput without sudo! 🚀
