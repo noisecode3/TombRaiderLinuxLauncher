@@ -4,8 +4,6 @@ Playstation DualShock4 controller hw_version=0x0000b418 fw_version=0x0000a00b
 I could not get Dpad to work with this API but the Sticks works.
 I use the Dpad only around edges but can play without it.
 This is just a way to take the kernel RAW when everything else is not working
-You might just need to replace this line.
-device = evdev.InputDevice('/dev/input/event21')  # Replace X with the correct number
 
 The quick way:
 sudo modprobe uinput

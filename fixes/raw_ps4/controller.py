@@ -2,7 +2,17 @@ import evdev
 from evdev import UInput, ecodes as e
 
 # Open your PS4 controller device
-device = evdev.InputDevice('/dev/input/by-id/usb-Sony_Interactive_Entertainment_Wireless_Controller-if03-event-joystick')  # Replace
+controller_names = (
+    "Wireless Controller",
+    "Sony Interactive Entertainment Wireless Controller"
+)
+
+for device_path in evdev.list_devices():
+    device = evdev.InputDevice(device_path)
+
+    if any(name in device.name for name in controller_names):
+        device = evdev.InputDevice(device.path)
+        break
 
 # Create a virtual keyboard
 ui = UInput()
