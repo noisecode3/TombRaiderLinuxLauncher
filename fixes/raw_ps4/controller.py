@@ -1,3 +1,4 @@
+import sys
 import evdev
 from evdev import UInput, ecodes as e
 
@@ -7,12 +8,16 @@ controller_names = (
     "Sony Interactive Entertainment Wireless Controller"
 )
 
+device = None
 for device_path in evdev.list_devices():
-    device = evdev.InputDevice(device_path)
-
-    if any(name in device.name for name in controller_names):
-        device = evdev.InputDevice(device.path)
+    temp_device = evdev.InputDevice(device_path)
+    if temp_device.name in controller_names:
+        device = temp_device
         break
+
+if device == None:
+    print("No device found")
+    sys.exit(1)
 
 # Create a virtual keyboard
 ui = UInput()
