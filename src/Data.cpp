@@ -172,10 +172,11 @@ ZipData Data::getDownload(const int id) {
     ZipData result;
 
     status = query.prepare(
-        "SELECT Zip.* "
+        "SELECT Zip.*, Info.type "
         "FROM Level "
         "JOIN ZipList ON Level.LevelID = ZipList.levelID "
         "JOIN Zip ON ZipList.zipID = Zip.ZipID "
+        "JOIN Info ON Level.infoID = Info.InfoID "
         "WHERE Level.LevelID = :id");
     query.bindValue(":id", id);
 
@@ -188,6 +189,7 @@ ZipData Data::getDownload(const int id) {
                     query.value("Zip.md5sum").toString(),
                     query.value("Zip.url").toString(),
                     query.value("Zip.version").toInt(),
+                    query.value("Info.type").toInt(),
                     query.value("Zip.release").toString());
             } else {
                 qDebug() << "No results found for Level ID:" << id;

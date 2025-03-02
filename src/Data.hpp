@@ -48,6 +48,18 @@ struct FolderNames {
         };
 };
 
+struct ExecutableNames {
+    QMap<int, QString> data = {
+            {0, "null"},
+            {1, "tomb.exe"},
+            {2, "Tomb2.exe"},
+            {3, "tomb3.exe"},
+            {4, "tomb4.exe"},
+            {5, "PCTOMB5.EXE"},
+            {6, "TombEngine.exe"},
+        };
+};
+
 struct ZipData {
     /**
      * @struct ZipData
@@ -57,15 +69,26 @@ struct ZipData {
      */
     ZipData() {}
     ZipData(
-        const QString& zipName, float zipSize, const QString& md5sum,
-        const QString& url, int version, const QString& release) :
-        name(zipName), megabyteSize(zipSize), md5sum(md5sum),
-        url(url), version(version), release(release) {}
+        const QString& zipName,
+        float zipSize,
+        const QString& md5sum,
+        const QString& url,
+        int version,
+        int type,
+        const QString& release) :
+        name(zipName),
+        megabyteSize(zipSize),
+        md5sum(md5sum),
+        url(url),
+        version(version),
+        type(type),
+        release(release) {}
     QString name;
     float megabyteSize;
     QString md5sum;
     QString url;
     int version;
+    int type;
     QString release;
 };
 

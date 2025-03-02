@@ -289,3 +289,6 @@ still the app should support rar also at some point
 
 we need to support this kind of download link also
 https://www.trle.net/levels/levels/2020/0620/BtB
+
+we have typechecking lint, so we need to install like this:
+pip install types-tqdm

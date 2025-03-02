@@ -16,19 +16,7 @@
 // Those lambda should be in another header file
 // I hate this and it should be able to recognize both the directory
 // when linking and the game exe to make a symbolic link to automatically
-Model::Model() {
-    instructionManager.addInstruction(4, [this](int id) {
-        qDebug() << "Perform Operation A";
-        const QString s = QString("/%1.TRLE").arg(id);
-        fileManager.makeRelativeLink(s, "/The Rescue.exe", "/tomb4.exe");
-    });
-    instructionManager.addInstruction(5, [this](int id) {
-        qDebug() << "Perform Operation B";
-        const QString s = QString("/%1.TRLE").arg(id);
-        fileManager.makeRelativeLink(s, "/War of the Worlds.exe", "/tomb4.exe");
-    });
-}
-
+Model::Model() {}
 Model::~Model() {}
 
 bool Model::setDirectory(const QString& level, const QString& game) {
@@ -93,6 +81,17 @@ QString Model::getGameDirectory(int id) {
     return value;
 }
 
+QString Model::getExecutableName(int id) {
+    QString value;
+    ExecutableNames name;
+    if (name.data.contains(id)) {
+        value = name.data[id];
+    } else {
+        qDebug() << "Id number:" << id << " is not a game.";
+    }
+    return value;
+}
+
 int Model::checkGameDirectory(int id) {
     int status = -1;
     const QString s = getGameDirectory(id);
@@ -129,10 +128,10 @@ bool Model::runWine(const int id) {
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
         const QString s = QString("/Original.TR%1").arg(orgId);
-        m_wineRunner.setWorkingDirectory(fileManager.getExtraPath(s));
+        m_wineRunner.setWorkingDirectory(fileManager.getExtraPathToExe(s));
     } else {
         const QString s = QString("/%1.TRLE").arg(id);
-        m_wineRunner.setWorkingDirectory(fileManager.getExtraPath(s));
+        m_wineRunner.setWorkingDirectory(fileManager.getExtraPathToExe(s));
     }
     m_wineRunner.run();
     return status;
@@ -199,11 +198,10 @@ void Model::setupGame(int id) {
     }
 }
 
-bool Model::unpackLevel(const int id, const QString& name) {
+bool Model::unpackLevel(const int id, const QString& name, const QString& exe) {
     bool status = false;
     const QString directory = QString("%1.TRLE").arg(id);
-    if (fileManager.extractZip(name, directory) == true) {
-        instructionManager.executeInstruction(id);
+    if (fileManager.extractZip(name, directory, exe) == true) {
         status = true;
     }
     return status;
@@ -266,7 +264,10 @@ void Model::getLevel(int id) {
             status = getLevelDontHaveFile(id, zipData.md5sum, zipData.name);
         }
         if (status == true) {
-            if (!unpackLevel(id, zipData.name)) {
+            if (!unpackLevel(
+                id,
+                zipData.name,
+                getExecutableName(zipData.type))) {
                 qDebug() << "unpackLevel failed";
             }
         }

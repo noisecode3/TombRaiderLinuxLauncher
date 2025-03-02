@@ -31,16 +31,17 @@ class FileManager : public QObject {
         static FileManager instance;
         return instance;
     }
-    const QString lookGameDir(const QString& file, bool lookGameDir);
+    const QString getFullPath(const QString& file, bool lookGameDir);
     const QString calculateMD5(const QString& file, bool lookGameDir);
-    bool extractZip(const QString& zipFile, const QString& extractPath);
+    bool extractZip(
+        const QString& zipFilename,
+        const QString& outputFolder,
+        const QString& executable);
+
     bool checkDir(const QString& file, bool lookGameDir);
     bool checkFile(const QString& file, bool lookGameDir);
     int checkFileInfo(const QString& file, bool lookGameDir);
     qint64 removeFileOrDirectory(const QString &file, bool lookGameDir);
-    bool moveFilesToDirectory(
-        const QString& fromLevelDirectory,
-        const QString& toLevelDirectory);
 
     int createDirectory(const QString &file, bool gameDir);
     int copyFile(
@@ -56,15 +57,18 @@ class FileManager : public QObject {
     int cleanWorkingDir(const QString &levelDir);
     bool backupGameDir(const QString &gameDir);
     bool linkGameDir(const QString& levelDir, const QString& gameDir);
-    QString getExtraPath(const QString& levelDir);
+    void createLinkToExe(const QString& path, const QString& expectedFileName);
+    QString getExtraPathToExe(const QString& levelPath);
     bool ensureDirectoryExists(const QString& dirPath, const QDir& dir);
     bool setUpCamp(const QString& levelDir, const QString& gameDir);
+
 
  signals:
     void fileWorkTickSignal();
 
  private:
     FileManager() {}
+    bool isFullPath(const QString& path);
 
     QDir m_levelDir;
     QDir m_gameDir;

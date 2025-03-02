@@ -1,4 +1,4 @@
-"""Get a request response for https only with curl"""
+"""Get a request response for https only with curl."""
 import os
 import sys
 import time
@@ -38,8 +38,9 @@ class AcquireLock:
         lock (socket.socket): The TCP socket used to enforce the single instance.
         To protect the server from user error.
     """
+
     def __init__(self):
-        # Create a TCP socket
+        """Set the lock, so that it don't accidentally span too many requests."""
         self.lock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # Bind to localhost and a specific port
@@ -63,6 +64,7 @@ class RequestHandler:
     """Handle HTTPS requests with retry and certificate handling."""
 
     def __init__(self):
+        """Set default values."""
         self.misconfigured_server = False
         self.leaf_cert = None
 
@@ -70,6 +72,7 @@ class RequestHandler:
         """Limit to used domains."""
         allowed_domains = (
             "https://www.trle.net/",
+            "https://trle.net/",
             "https://trcustoms.org/",
             "https://data.trcustoms.org/"
         )
@@ -127,7 +130,7 @@ class RequestHandler:
             sys.exit(1)
 
     def set_leaf(self, curl):
-        """Write the certificate to a temporary file manually"""
+        """Write the certificate to a temporary file manually."""
         if self.leaf_cert is None:
             raise ValueError("Leaf certificate is None and cannot be written to a file.")
 
@@ -142,7 +145,7 @@ class RequestHandler:
         return temp_cert_path
 
     def get_leaf(self, url):
-        """Check if we need to grab the first certificate"""
+        """Check if we need to grab the first certificate."""
         if not self.misconfigured_server:
             self.leaf_cert = get_leaf_cert.run(url)
         if not isinstance(self.leaf_cert, bytes):
@@ -156,7 +159,7 @@ class RequestHandler:
             sys.exit(1)
 
     def setup_before_get_response(self, url, content_type):
-        """validate known url and content type"""
+        """Validate known URL and content type."""
         self.validate_url(url)
         self.validate_data_type(content_type)
 
@@ -164,7 +167,7 @@ class RequestHandler:
             self.get_leaf(url)
 
     def get_response(self, url, content_type):
-        """Handle all https requests"""
+        """Handle all https requests."""
         self.setup_before_get_response(url, content_type)
 
         if content_type == 'application/zip':
@@ -228,7 +231,7 @@ class RequestHandler:
         return self.close_response(curl, headers, response_buffer, content_type)
 
     def close_response(self, curl, headers, response_buffer, content_type):
-        """Pack response and close curl"""
+        """Pack response and close curl."""
         if curl is None:
             logging.error("No curl instance")
             sys.exit(1)
@@ -252,7 +255,7 @@ class RequestHandler:
         sys.exit(1)
 
     def pack_response_buffer(self, content_type, response_buffer):
-        """Validate and return the response based on content type"""
+        """Validate and return the response based on content type."""
         if content_type == 'text/html':
             raw_data = response_buffer.getvalue()
             for encoding in ['utf-8', 'windows-1252', 'utf-16', 'utf-32']:
@@ -272,8 +275,7 @@ class RequestHandler:
         return None
 
     def extract_content_type(self, headers):
-        """Read the header lines to look for content-type"""
-
+        """Read the header lines to look for content-type."""
         for header in headers.splitlines():
             if header.lower().startswith('content-type:'):
                 return header.split(':', 1)[1].split(';')[0].strip()
@@ -282,19 +284,21 @@ class RequestHandler:
 
 
 class Downloader:
-    """Zip file downloader to be used in RequestHandler"""
+    """Zip file downloader to be used in RequestHandler."""
+
     def __init__(self):
+        """Set default values."""
         self.buffer = BytesIO()
         self.status = 0
         self.progress_bar = None
 
     def write_callback(self, data):
-        """Callback function for writing downloaded data."""
+        """Write the downloaded data."""
         self.buffer.write(data)
         return len(data)
 
     def progress_callback(self, total_to_download, downloaded, total_to_upload, uploaded):
-        """Callback function for reporting download progress.
+        """Report download progress.
 
         Args:
             total_to_download (int): Total size of the file to download.
@@ -319,7 +323,7 @@ class Downloader:
 
     def download_file(self, url):
         """
-        Downloads a file from the specified URL and stores its contents in a buffer.
+        Download a file from the specified URL and stores its contents in a buffer.
 
         This method utilizes the `pycurl` library to perform the download, providing
         a progress bar for user feedback. It handles server misconfigurations,
@@ -434,7 +438,7 @@ DOWNLOADER = Downloader()
 
 def get(url, content_type):
     """
-    Get server response from TRLE or Trcustom hosts
+    Get server response from TRLE or Trcustom hosts.
 
     content_type:
         'application/json'
@@ -454,10 +458,10 @@ def get(url, content_type):
 
 
 def release_lock():
-    """Release lock for this instance"""
+    """Release lock for this instance."""
     ACQUIRE_LOCK.release_lock()
 
 
 def is_locked():
-    """Lock this instance"""
+    """Lock this instance."""
     ACQUIRE_LOCK.is_locked()

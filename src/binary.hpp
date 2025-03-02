@@ -72,6 +72,7 @@ struct ExportDirectory {
 
 #pragma pack(pop)
 
+QString decideExe(const QDir& dir);
 void analyzeImportTable(const std::string& peFilePath);
 void readPEHeader(const QString &filePath);
 void readExportTable(const QString &filePath);

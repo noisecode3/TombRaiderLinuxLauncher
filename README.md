@@ -17,12 +17,12 @@ This project is my passion for Tomb Raider classics combined with learning C++, 
 ## Installation
 
 ### Dependencies
+On Arch this should be enough, you get the rest probably when you install the base, curl + openssl
 Ensure the following are installed on your Linux desktop:
 - `curl` (7.71.0 or newer)
-- Boost
-- OpenSSL
-- Qt5
-On Arch this should be enough, you get the rest probably when you install the base, curl + openssl
+- `Boost`
+- `OpenSSL`
+- `Qt5`
 
 ```shell
 sudo pacman -S qt5-wayland qt5-webengine qt5-imageformats boost

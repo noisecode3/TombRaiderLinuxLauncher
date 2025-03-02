@@ -65,6 +65,7 @@ class Model : public QObject {
     bool runWine(const int id);
     bool setLink(int id);
     QString getGameDirectory(int id);
+    QString getExecutableName(int id);
     void setupGame(int id);
     void getLevel(int id);
     const InfoData getInfo(int id);
@@ -81,13 +82,12 @@ class Model : public QObject {
         const int id, const QString& md5sum, const QString& name);
     bool getLevelDontHaveFile(
         const int id, const QString& md5sum, const QString& name);
-    bool unpackLevel(const int id, const QString& name);
+    bool unpackLevel(const int id, const QString& name, const QString& exe);
 
     Runner m_wineRunner = Runner("/usr/bin/wine");
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
     Downloader& downloader = Downloader::getInstance();
-    InstructionManager instructionManager;
 
     Model();
     ~Model();

@@ -216,6 +216,13 @@ for event in device.read_loop():
                 ui.write(e.EV_KEY, e.KEY_ESC, 0)  # Deactivate ESC
                 ui.syn()
 
+        if event.code == e.BTN_MODE:  # PS button
+            if event.value == 1:
+                ui.write(e.EV_KEY, e.KEY_P, 1)  # Activate P
+                ui.syn()
+            else:
+                ui.write(e.EV_KEY, e.KEY_P, 0)  # Deactivate P
+                ui.syn()
 
 # This function implements an analog-to-digital conversion with angular thresholding,
 # where the joystick angle determines whether to send a full digital press or a pulsed key press.
