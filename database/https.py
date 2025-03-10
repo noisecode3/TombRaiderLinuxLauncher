@@ -93,7 +93,7 @@ class RequestHandler:
             curl.setopt(pycurl.HEADERFUNCTION, buffer.write)
             curl.setopt(pycurl.NOBODY, True)
             curl.setopt(pycurl.URL, url)
-            curl.setopt(pycurl.FOLLOWLOCATION, True)
+            curl.setopt(pycurl.FOLLOWLOCATION, False)
 
             if self.misconfigured_server:
                 if not self.leaf_cert:
@@ -321,9 +321,9 @@ class Downloader:
             self.progress_bar.total = total_to_download
         return 0  # Returning 0 means to continue
 
-    def download_file(self, url):
+    def download_file_trle(self, url):
         """
-        Download a file from the specified URL and stores its contents in a buffer.
+        Download a file from the trle URL and stores its contents in a buffer.
 
         This method utilizes the `pycurl` library to perform the download, providing
         a progress bar for user feedback. It handles server misconfigurations,
@@ -422,13 +422,155 @@ class Downloader:
 
         finally:
             if self.progress_bar:
-                self.progress_bar.close()  # Close the progress bar
+                self.progress_bar.close()
             curl.close()
             if temp_cert_path:
                 if os.path.exists(temp_cert_path):
                     os.remove(temp_cert_path)
 
         return zip_file  # Always return the zip_file dictionary
+
+    def download_file_trcustoms(self, url):
+        """
+        Download a file from the trcustoms URL and stores its contents in a buffer.
+
+        This method utilizes the `pycurl` library to perform the download, providing
+        a progress bar for user feedback. It handles server JSON API, follows redirects,
+        and calculates the MD5 checksum of the downloaded file.
+
+        Parameters:
+        ----------
+        url : str
+            The URL of the file to download. Must be a valid URL.
+
+        Raises:
+        -------
+        SystemExit
+            Exits the program if the server is misconfigured and no leaf certificate is available.
+
+        Exceptions:
+        ------------
+        pycurl.error
+            Raised if an error occurs during the download process.
+
+        Returns:
+        --------
+        dict
+            Returns a dictionary containing details of the downloaded file, including:
+            - 'size': Size of the file in MiB (mebibytes).
+            - 'url': The effective URL from which the file was downloaded.
+            - 'name': The name of the file.
+            - 'md5': The MD5 checksum of the downloaded content.
+
+        Notes:
+        ------
+        - The progress bar is displayed using the `tqdm` library to indicate the download status.
+        - The method checks the HTTP response code after the download to ensure success (HTTP 200).
+        - Temporary files created for certificate handling are cleaned up after the download.
+        """
+        curl = pycurl.Curl()
+        zip_file = data_factory.make_zip_file()  # Initialize the zip_file dictionary
+
+        REQUEST_HANDLER.misconfigured_server = False
+        level_id = url.split("https://trcustoms.org/levels/")[1]
+        print(f'https://trcustoms.org/api/levels/{level_id}/')
+        level_json = get(f'https://trcustoms.org/api/levels/{level_id}/', 'application/json')
+        if not isinstance(level_json, dict):
+            sys.exit(1)
+        level_files = level_json.get('files', [])
+        level_last_file = level_files[-1]
+        url = level_last_file.get('url', '')
+
+        try:
+            # Get header info
+            total_size = level_last_file.get('size', '')
+            zip_file['size'] = round(total_size / (1024 * 1024), 2)  # Size in MiB
+            zip_file['url'] = level_last_file.get('url', '')
+            level_version = level_last_file.get('version', '')
+            zip_file['name'] = f"{level_id}-title-V{level_version}-authors.zip"
+
+            # Set up for download
+            curl.setopt(pycurl.URL, url)
+            curl.setopt(pycurl.FOLLOWLOCATION, True)
+            curl.setopt(pycurl.WRITEFUNCTION, self.write_callback)
+            curl.setopt(pycurl.WRITEDATA, self.buffer)
+
+            # Enable progress meter
+            self.progress_bar = tqdm(total=total_size,
+                                     unit='B',
+                                     unit_scale=True,
+                                     unit_divisor=1024,
+                                     desc="Downloading")
+
+            curl.setopt(pycurl.NOPROGRESS, False)
+            curl.setopt(pycurl.XFERINFOFUNCTION, self.progress_callback)
+
+            # Perform the download
+            curl.perform()
+
+            # Check for errors
+            http_code = curl.getinfo(pycurl.RESPONSE_CODE)
+            if http_code != 200:
+                self.status = 1
+                print(f"Error: HTTP response code {http_code}")
+                return {}  # Return an empty dict on error
+
+            self.status = 0
+
+            # Finalize MD5 checksum
+            md5_hash = hashlib.md5(usedforsecurity=False)
+            self.buffer.seek(0)  # Reset buffer pointer
+            md5_hash.update(self.buffer.getvalue())
+            zip_file['md5'] = md5_hash.hexdigest()
+
+        except pycurl.error as e:
+            self.status = 1
+            print(f"Error: {e}")
+            return {}  # Return an empty dict on error
+
+        finally:
+            if self.progress_bar:
+                self.progress_bar.close()
+            curl.close()
+            REQUEST_HANDLER.misconfigured_server = True
+
+        return zip_file  # Always return the zip_file dictionary
+
+    def download_file(self, url):
+        """
+        Branch the download from an trle.net redirect link to trcustoms or trle.
+
+        This method checks the head for the domain the redirection leads to.
+
+        Parameters:
+        ----------
+        url : str
+            The URL of the file to download. Must be a valid URL.
+
+        Returns:
+        --------
+        dict
+            Returns a dictionary containing details of the downloaded file, including:
+            - 'size': Size of the file in MiB (mebibytes).
+            - 'url': The effective URL from which the file was downloaded.
+            - 'name': The name of the file.
+            - 'md5': The MD5 checksum of the downloaded content.
+
+        """
+        head_string = REQUEST_HANDLER.head(url)
+        redirect_url = head_string.partition("Location: ")[2].split("\r\n", 1)[0]
+
+        if redirect_url.startswith("https://trcustoms.org/levels/"):
+            print("trcustoms.org")
+            return self.download_file_trcustoms(redirect_url)
+        if redirect_url.startswith("https://www.trle.net/levels/"):
+            print("trle.net")
+            return self.download_file_trle(url)
+        if redirect_url.startswith("https://trle.net/levels/"):
+            print("trle.net")
+            return self.download_file_trle(url)
+
+        return data_factory.make_zip_file()
 
 
 ACQUIRE_LOCK = AcquireLock()

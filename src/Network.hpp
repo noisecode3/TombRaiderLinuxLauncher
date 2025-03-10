@@ -21,6 +21,7 @@
 #include <QtCore>
 #include <QDebug>
 #include <curl/curl.h>
+#include <string>
 
 class Downloader : public QObject {
     Q_OBJECT
@@ -44,7 +45,7 @@ class Downloader : public QObject {
 
  private:
     void saveToFile(const QByteArray& data, const QString& filePath);
-    void connect(QFile *file, const char*);
+    void connect(QFile *file, const std::string& url);
     QUrl m_url;
     QString m_file;
     QDir m_levelDir;

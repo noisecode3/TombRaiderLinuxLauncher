@@ -1,4 +1,4 @@
-"""Scraping of all data; level info, cover images and https keys"""
+"""Scraping of all data; level info, cover images and https keys."""
 import sys
 import re
 import os
@@ -26,7 +26,7 @@ logging.getLogger("requests").setLevel(logging.DEBUG)
 
 def trle_search_parser(url):
     """
-    Prepares a URL for level title searches on TRLE by encoding special characters.
+    Prepare a URL for level title searches on TRLE by encoding special characters.
 
     Note: This function should generally be avoided in favor of searching the local
     database, as it may not fully cover all cases or include recent updates.
@@ -46,7 +46,7 @@ def trle_search_parser(url):
 
 def url_postfix(url):
     """
-    Extracts the file extension from a URL without the leading dot.
+    Extract the file extension from a URL without the leading dot.
 
     Args:
         url (str): The URL to extract the file extension from.
@@ -112,7 +112,7 @@ def url_domain(url):
 
 def trle_url_to_int(url):
     """
-    Converts a TRLE level URL into its corresponding integer level ID.
+    Convert a TRLE level URL into its corresponding integer level ID.
 
     This function processes URLs from the TRLE website that contain a level ID
     as a query parameter (lid). The following URL formats are usually used:
@@ -143,7 +143,7 @@ def trle_url_to_int(url):
 
 
 def is_valid_uuid(value):
-    """Validate uuid format"""
+    """Validate uuid format."""
     try:
         uuid_obj = uuid.UUID(value, version=4)
         return str(uuid_obj) == value
@@ -218,8 +218,7 @@ def get_trle_cover_by_id(trle_id):
 
 def normalize_level_name(name):
     """
-    Normalizes a level name string for creating consistent
-    zip file names and enabling lenient searches.
+    Normalize a level name string for creating consistent zip file names.
 
     This function removes spaces and special characters to create a simplified version
     of the level name suitable for use in file naming conventions, particularly for
@@ -238,7 +237,6 @@ def normalize_level_name(name):
 
 def convert_to_iso(date_str):
     """Convert date string from various formats to ISO-8601 (YYYY-MM-DD) format."""
-
     # Try to parse '01-Jan-2024' format
     try:
         return datetime.strptime(date_str, '%d-%b-%Y').strftime('%Y-%m-%d')
@@ -266,7 +264,7 @@ def convert_to_iso(date_str):
 
 def get_soup(url):
     """
-    Retrieves and parses the HTML content from a URL using BeautifulSoup.
+    Retrieve and parses the HTML content from a URL using BeautifulSoup.
 
     Args:
         url (str): The URL of the webpage to fetch and parse.
@@ -274,15 +272,22 @@ def get_soup(url):
     Returns:
         BeautifulSoup: A BeautifulSoup object representing the parsed HTML content.
     """
-    if validate_url(url) is None:
+    validated_url = validate_url(url)
+    if validated_url is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
-    return BeautifulSoup(https.get(validate_url(url), 'text/html'), 'html.parser')
+
+    html = https.get(validated_url, 'text/html')
+    if not isinstance(html, str):
+        print(f"{url} could not grab ")
+        sys.exit(1)
+
+    return BeautifulSoup(html, 'html.parser')
 
 
 def get_image(url):
     """
-    Fetches an image from a URL, handling both JPEG and PNG formats.
+    Fetch an image from a URL, handling both JPEG and PNG formats.
 
     Args:
         url (str): The URL of the image file.
@@ -307,7 +312,7 @@ def get_image(url):
 
 def get_jpg(url):
     """
-    Fetches a JPEG image from a URL.
+    Fetch a JPEG image from a URL.
 
     Args:
         url (str): The URL of the JPEG image file.
@@ -323,7 +328,7 @@ def get_jpg(url):
 
 def get_png(url):
     """
-    Fetches a PNG image from a URL.
+    Fetch a PNG image from a URL.
 
     Args:
         url (str): The URL of the PNG image file.
@@ -339,7 +344,7 @@ def get_png(url):
 
 def get_json(url):
     """
-    Fetches JSON data from a URL.
+    Fetch JSON data from a URL.
 
     Args:
         url (str): The URL of the JSON resource.
@@ -355,7 +360,7 @@ def get_json(url):
 
 def get_zip(url):
     """
-    Fetches a ZIP file from a URL and returns it in dictionary format.
+    Fetch a ZIP file from a URL and returns it in dictionary format.
 
     Args:
         url (str): The URL of the ZIP file.
@@ -431,7 +436,7 @@ def get_trle_page(offset, sort_created_first=False):
 
 
 def trle_page_table(table):
-    """filter out data from the TRLE level table result"""
+    """Filter out data from the TRLE level table result."""
     levels = []
 
     # Mapping index to level data fields
@@ -480,11 +485,18 @@ def get_trcustoms_page(page_number, sort_created_first=False):
     }
     query_string = urlencode(params)
     data = get_json(f"{host}?{query_string}")
+    if not isinstance(data, dict):
+        print("data was from trcustoms was currupt.")
+        sys.exit(1)
+
     page = data_factory.make_trcustoms_page_data()
     page['current_page'] = data.get('current_page')
     page['total_pages'] = data.get('last_page')
     page['records_total'] = data.get('total_count')
     results = data.get('results')
+    if results is None:
+        print("data was from trcustoms was currupt.")
+        sys.exit(1)
 
     for item in results:
         repacked_data = data_factory.make_trcustoms_level_data()
@@ -618,7 +630,7 @@ def get_trle_cover(level, want_tempfile=False):
 
 
 def get_trcustoms_cover_list(levels, want_tempfile=False):
-    """Get a list of picture data ready to use from Trcustoms"""
+    """Get a list of picture data ready to use from Trcustoms."""
     base_url = "https://data.trcustoms.org/media/level_images/"
     level_list = []
 
@@ -694,7 +706,7 @@ def get_trcustoms_cover(image, md5sum, want_tempfile=False):
 ###############################################################################
 
 def get_trle_walkthrough(level_soup):
-    """Finds the walkthrough link on the TRLE page."""
+    """Find the walkthrough link on the TRLE page."""
     walkthrough_link = level_soup.find('a', string='Walkthrough')
     if walkthrough_link:
         # Constructs the walkthrough URL
@@ -745,7 +757,7 @@ def get_trle_zip_file(soup):
 
 
 def get_trle_authors(soup):
-    """Extracts the authors list."""
+    """Extract the authors list."""
     # Find the first <td> with class "medGText"
     first_td = soup.find('td', class_='medGText')
 
@@ -762,22 +774,22 @@ def get_trle_authors(soup):
 
 
 def get_trle_type(soup):
-    """Extracts the level type."""
+    """Extract the level type."""
     return soup.find('td', string='file type:').find_next('td').get_text(strip=True) or ""
 
 
 def get_trle_class(soup):
-    """Extracts the level class."""
+    """Extract the level class."""
     return soup.find('td', string='class:').find_next('td').get_text(strip=True) or ""
 
 
 def get_trle_release(soup):
-    """Extracts the release date."""
+    """Extract the release date."""
     return soup.find('td', string='release date:').find_next('td').get_text(strip=True) or ""
 
 
 def get_trle_difficulty(soup):
-    """Extracts the level difficulty."""
+    """Extract the level difficulty."""
     difficulty_td = soup.find('td', string='difficulty:')
     if difficulty_td:
         next_td = difficulty_td.find_next('td')
@@ -787,7 +799,7 @@ def get_trle_difficulty(soup):
 
 
 def get_trle_duration(soup):
-    """Extracts the level duration."""
+    """Extract the level duration."""
     duration_td = soup.find('td', string='duration:')
     if duration_td:
         next_td = duration_td.find_next('td')
@@ -797,25 +809,25 @@ def get_trle_duration(soup):
 
 
 def get_trle_body(soup):
-    """Extracts the main level description body."""
+    """Extract the main level description body."""
     specific_tags = soup.find_all('td', class_='medGText', align='left', valign='top')
     return str(specific_tags[1]) if len(specific_tags) >= 2 else ""
 
 
 def get_trle_large_screens(soup):
-    """Extracts the large screens URLs to the right of page."""
+    """Extract the large screens URLs to the right of page."""
     onmouseover_links = soup.find_all(lambda tag: tag.name == 'a' and 'onmouseover' in tag.attrs)
     return [link['href'] for link in onmouseover_links]
 
 
 def get_trle_screen(soup):
-    """Extracts the main cover image URL."""
+    """Extract the main cover image URL."""
     image_tag = soup.find('img', class_='border')
     return 'https://www.trle.net' + image_tag['src']
 
 
 def get_trle_title(soup):
-    """Extracts title at the to of the page."""
+    """Extract title at the to of the page."""
     title_span = soup.find('span', class_='subHeader')
     if title_span:
         title = title_span.get_text(strip=True)
@@ -828,11 +840,8 @@ def get_trle_title(soup):
 
 
 def get_trle_level(soup, data):
-    """Calls all the other soup extracts for TRLE."""
+    """Call all the other soup extracts for TRLE."""
     data['title'] = get_trle_title(soup)
-    if not data['title']:
-        logging.info("This was an empty page")
-        return
     data['authors'] = get_trle_authors(soup)
     data['type'] = get_trle_type(soup)
     data['class'] = get_trle_class(soup)
@@ -841,17 +850,36 @@ def get_trle_level(soup, data):
     data['duration'] = get_trle_duration(soup)
     data['screen'] = get_trle_screen(soup)
     data['large_screens'] = get_trle_large_screens(soup)
-    data['zip_files'] = [get_trle_zip_file(soup)]
+    zip_file = get_trle_zip_file(soup)
+    if not isinstance(zip_file, dict):
+        sys.exit(1)
+    if zip_file['url'].startswith("https://trcustoms.org/api/level_files/"):
+        parted = zip_file['name'].split("-")
+        zip_file['name'] = normalize_trcustoms_zip_name(
+            parted[0], data['title'],
+            int(parted[2].removeprefix("V")), data['authors'])
+    data['zip_files'] = [zip_file]
     data['body'] = get_trle_body(soup)
     data['walkthrough'] = get_trle_walkthrough(soup)
 
 
+def normalize_trcustoms_zip_name(level_id, title, version, preauthors):
+    """Generate a normalized zip file name."""
+    name = normalize_level_name(title)
+    authors = "-".join(author for author in preauthors) if preauthors else ""
+    version = f"-V{version}" if version != 1 else ""
+    return f"{level_id}-{name}{version}-{authors}.zip"
+
+
 def get_trcustoms_level(url, data):
-    """Gets the main json and also looks for corresponding TRLE"""
+    """Get the main json and also looks for corresponding TRLE."""
     if "api" not in url:
         parts = url.split("/")
         url = f"{parts[0]}//{parts[2]}/api/{'/'.join(parts[3:])}"
         trcustom_level = https.get(url, 'application/json')
+        if not isinstance(trcustom_level, dict):
+            print("level data from trcustoms was corrupt.")
+            sys.exit(1)
 
         title = trcustom_level['name']
         title = trle_search_parser(title)
@@ -875,19 +903,13 @@ def get_trcustoms_level(url, data):
 
         for file_data in trcustom_level['files']:
             zip_file = https.get(file_data['url'], 'application/zip')
+            if not isinstance(zip_file, dict):
+                print("zip file data from trcustoms was corrupt.")
+                sys.exit(1)
 
-            name = normalize_level_name(trcustom_level['name'])
-            authors = ""
-            for author in trcustom_level['authors']:
-                if authors != "":
-                    authors = authors + "-"
-                authors = authors + author['username']
-
-            if file_data['version'] == 1:
-                version = ""
-            else:
-                version = f"-V{file_data['version']}"
-            zip_file['name'] = f"{file_data['id']}-{name}{version}-{authors}.zip"
+            zip_file['name'] = normalize_trcustoms_zip_name(
+                file_data['id'], trcustom_level['name'],
+                trcustom_level['authors'], file_data['version'])
 
             zip_file['url'] = file_data['url']
             zip_file['release'] = file_data['created']
@@ -919,8 +941,7 @@ def get_trcustoms_level(url, data):
 
 def get_trle_index(title):
     """
-    Searches for a level on trle.net by its title and returns the URL
-    of the selected level's details page.
+    Search for a level  by its title and returns the URLs.
 
     Parameters:
         title (str): The title of the level to search for.

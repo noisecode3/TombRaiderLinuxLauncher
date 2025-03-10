@@ -11,10 +11,11 @@
  * GNU General Public License for more details.
  */
 
-#include "Network.hpp"
+#include "../src/Network.hpp"
 #include <curl/curl.h>
 #include <cstdio>
 #include <iostream>
+#include <vector>
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
@@ -137,26 +138,55 @@ void Downloader::run() {
     }
 }
 
+void Downloader::connect(QFile *file, const std::string& url) {
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        std::cerr << "Failed to initialize CURL\n";
+    } else {
+        CURLcode status = CURLE_OK;
+        const std::string trle_domain = "https://www.trle.net";
+        const std::string trcustoms_domain = "https://trcustoms.org";
 
-void Downloader::connect(QFile *file, const char* url_cstring) {
-        CURL* curl = curl_easy_init();
-        if (curl != nullptr) {
+        // Securely determine which domain is being accessed
+        if (url.compare(0, trle_domain.size(), trle_domain) == 0) {
             std::string cert_buffer = get_ssl_certificate("www.trle.net");
+            std::vector<char>
+                cert_buffer_vec(cert_buffer.begin(), cert_buffer.end());
 
-            // Set up the in-memory blob for curl to use
             curl_blob blob;
-            blob.data = cert_buffer.data();
-            blob.len = cert_buffer.size();
+            blob.data = cert_buffer_vec.data();
+            blob.len = cert_buffer_vec.size();
             blob.flags = CURL_BLOB_COPY;
 
-            curl_easy_setopt(curl, CURLOPT_URL, url_cstring);
-            curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+            status = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+        }
 
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-            curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY,
-                "sha256//7WRPcNY2QpOjWiQSLbiBu/9Og69JmzccPAdfj2RT5Vw=");
+        // Set the URL securely
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        }
 
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+        // Enable SSL verification
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        }
+
+        // Secure Public Key Pinning
+        if (status == CURLE_OK) {
+            if (url.compare(0, trle_domain.size(), trle_domain) == 0) {
+                status = curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY,
+                    "sha256//7WRPcNY2QpOjWiQSLbiBu/9Og69JmzccPAdfj2RT5Vw=");
+            } else if (url.compare(
+                    0, trcustoms_domain.size(), trcustoms_domain) == 0) {
+                qDebug() << "trcustoms dont pinn key.";
+            } else {
+                status = CURLE_SSL_CERTPROBLEM;
+                qDebug() << "CURL: Unknown host, have no publick key for it.";
+            }
+        }
+
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                 +[](const void* buf, size_t size, size_t nmemb, void* data)
                 -> size_t {
                     size_t writtenSize = 0;
@@ -167,17 +197,26 @@ void Downloader::connect(QFile *file, const char* url_cstring) {
                     }
                     // cppcheck-suppress misra-c2012-15.5
                     return writtenSize;
-                });
+            });
+        }
 
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+        // The file object to save to
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+        }
 
-            // Follow redirects
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        // Follow redirects
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        }
 
-            // Enable progress meter
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        // Enable progress meter
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        }
 
-            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
                 +[](void* clientp, curl_off_t dltotal, curl_off_t dlnow,
                     curl_off_t ultotal, curl_off_t ulnow) -> int {
                     Downloader& downloader = Downloader::getInstance();
@@ -200,31 +239,37 @@ void Downloader::connect(QFile *file, const char* url_cstring) {
                     }
                     // cppcheck-suppress misra-c2012-15.5
                     return 0;
-                });
-
-            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, nullptr);
-
-            // Perform the download
-            CURLcode res = curl_easy_perform(curl);
-
-            if (res != CURLE_OK) {
-                m_status = 1;  // curl error
-                qDebug() << "CURL failed:" << curl_easy_strerror(res);
-                // https://curl.se/libcurl/c/libcurl-errors.html
-                if ((res == 6) || (res == 7) || (res == 28) || (res == 35)) {
-                    emit this->networkWorkErrorSignal(1);
-                    QCoreApplication::processEvents();
-                } else if (res == CURLE_PEER_FAILED_VERIFICATION) {
-                    emit this->networkWorkErrorSignal(2);
-                    QCoreApplication::processEvents();
-                } else {
-                    emit this->networkWorkErrorSignal(3);
-                    QCoreApplication::processEvents();
-                }
-            } else {
-                m_status = 0;
-                qDebug() << "Downloaded successfully";
-            }
-            curl_easy_cleanup(curl);
+            });
         }
+
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_XFERINFODATA, nullptr);
+        }
+
+        // Perform the download
+        if (status == CURLE_OK) {
+            status = curl_easy_perform(curl);
+        }
+
+        if (status != CURLE_OK) {
+            m_status = 1;  // curl error
+            qDebug() << "CURL failed:" << curl_easy_strerror(status);
+            // https://curl.se/libcurl/c/libcurl-errors.html
+            if ((status == 6) || (status == 7) ||
+                (status == 28) || (status == 35)) {
+                emit this->networkWorkErrorSignal(1);
+                QCoreApplication::processEvents();
+            } else if (status == CURLE_PEER_FAILED_VERIFICATION) {
+                emit this->networkWorkErrorSignal(2);
+                QCoreApplication::processEvents();
+            } else {
+                emit this->networkWorkErrorSignal(3);
+                QCoreApplication::processEvents();
+            }
+        } else {
+            m_status = 0;
+            qDebug() << "Downloaded successfully";
+        }
+        curl_easy_cleanup(curl);
+    }
 }

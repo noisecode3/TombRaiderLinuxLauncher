@@ -88,11 +88,11 @@ for event in device.read_loop():
         threshold we can start with a 8 way square.
         """
         if event.code == e.ABS_X:  # Left stick X
-            if event.value < 63:  # Left threshold
+            if event.value < 53:  # Left threshold
                 INDEADZONE_X = False
                 ui.write(e.EV_KEY, e.KEY_LEFT, 1)  # Press Left Arrow
                 ui.syn()
-            elif event.value > 192: # Right threshold
+            elif event.value > 202:  # Right threshold
                 INDEADZONE_X = False
                 ui.write(e.EV_KEY, e.KEY_RIGHT, 1)  # Press Right Arrow
                 ui.syn()
@@ -107,7 +107,7 @@ for event in device.read_loop():
                 INDEADZONE_Y = False
                 ui.write(e.EV_KEY, e.KEY_UP, 1)  # Press Up Arrow
                 ui.syn()
-            elif event.value > 192: # Down threshold
+            elif event.value > 192:  # Down threshold
                 INDEADZONE_Y = False
                 ui.write(e.EV_KEY, e.KEY_DOWN, 1)  # Press Down Arrow
                 ui.syn()
@@ -120,21 +120,21 @@ for event in device.read_loop():
         elif event.code == e.ABS_Z:  # Left trigger Z
             if event.value > 200:
                 INDEADZONE_Z = False
-                ui.write(e.EV_KEY, e.KEY_S, 1)  # Activate S
+                ui.write(e.EV_KEY, e.KEY_DOT, 1)  # Activate S
                 ui.syn()
             elif not INDEADZONE_Z:
                 INDEADZONE_Z = True
-                ui.write(e.EV_KEY, e.KEY_S, 0)  # Deactivate S
+                ui.write(e.EV_KEY, e.KEY_DOT, 0)  # Deactivate S
                 ui.syn()
 
         elif event.code == e.ABS_RZ:  # Right trigger Z
             if event.value > 200:
                 INDEADZONE_RZ = False
-                ui.write(e.EV_KEY, e.KEY_C, 1)  # Activate C
+                ui.write(e.EV_KEY, e.KEY_SLASH, 1)  # Activate C
                 ui.syn()
             elif not INDEADZONE_RZ:
                 INDEADZONE_RZ = True
-                ui.write(e.EV_KEY, e.KEY_C, 0)  # Deactivate C
+                ui.write(e.EV_KEY, e.KEY_SLASH, 0)  # Deactivate C
                 ui.syn()
 
     if event.type == e.EV_KEY:  # Detects simple click buttons
