@@ -190,8 +190,15 @@ def _get_trcustoms_download_info(trcustom_level_dict):
 def _get_trle_btb_download_info(trle_btb_url, lid):
     zip_file = data_factory.make_zip_file()
     parted = trle_btb_url.split("BtB")
-    btb_soup = scrape_common.get_soup(parted[0] + "BtB" + "/Web/downloads.html")
+    btb_soup = None
+    for case in ["web", "Web"]:
+        btb_soup = scrape_common.get_soup(parted[0] + "BtB" + f"/{case}/downloads.html")
+        if btb_soup:
+            break  # Stop when a valid response is found
 
+    if not btb_soup:
+        print("Fucked up")
+        sys.exit(1)
     trle_info = _get_trle_info(lid)
     trle_title = trle_info[0]
     trle_zip_size = trle_info[2]
@@ -309,6 +316,7 @@ def get_zip_file_info(lid):
     _check_lid(lid)
     head = scrape_common.https.get(f"https://www.trle.net/scadm/trle_dl.php?lid={lid}", 'head')
     if head:
+        print(f"head: {head}")
         redirect_url = head.partition("Location: ")[2].split("\r\n", 1)[0]
         print(f"Location: {redirect_url}")
         if redirect_url:
@@ -320,8 +328,8 @@ def get_zip_file_info(lid):
                 trle_info = _get_trle_info(lid)
                 return _search_trcustoms(trle_info)
 
-            if redirect_url.endswith("/BtB/Web/index.html") and \
-                    redirect_url.startswith("https://www.trle.net/levels/levels/"):
+            if redirect_url.lower().endswith("/btb/web/index.html") and \
+                    redirect_url.startswith("https://www.trle.net/levels/levels"):
                 return _get_trle_btb_download_info(redirect_url, lid)
 
             if redirect_url.endswith(".htm") and \
