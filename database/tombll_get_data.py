@@ -5,7 +5,7 @@ import sys
 import json
 import logging
 
-import scrape
+import scrape_trle
 import data_factory
 
 # Set up logging
@@ -14,19 +14,13 @@ logging.getLogger("requests").setLevel(logging.DEBUG)
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        logging.error("Usage: python3 getData.py URL")
+        logging.error("Usage: python3 tombll_get_data.py lid")
         sys.exit(1)
     else:
-        URL = sys.argv[1]
-        HOST = scrape.url_domain(URL)
+        LID = sys.argv[1]
         DATA = data_factory.make_trle_tombll_data()
-        if HOST == "trle.net":
-            DATA = data_factory.make_trle_tombll_data()
-            SOUP = scrape.get_soup(URL)
-            scrape.get_trle_level(SOUP, DATA)
-            with open('data.json', mode='w', encoding='utf-8') as json_file:
-                json.dump(DATA, json_file)
-        if HOST == "trcustoms.org":
-            scrape.get_trcustoms_level(URL, DATA)
-            with open('data.json', mode='w', encoding='utf-8') as json_file:
-                json.dump(DATA, json_file)
+        URL = f"https://www.trle.net/sc/levelfeatures.php?lid={LID}"
+        SOUP = scrape_trle.scrape_common.get_soup(URL)
+        scrape_trle.get_trle_level(SOUP, DATA)
+        with open('data.json', mode='w', encoding='utf-8') as json_file:
+            json.dump(DATA, json_file)

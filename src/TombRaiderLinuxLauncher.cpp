@@ -585,6 +585,7 @@ void TombRaiderLinuxLauncher::downloadError(int status) {
     ui->pushButtonDownload->setEnabled(true);
     ui->stackedWidgetBar->setCurrentWidget(
         ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
+    ui->listWidgetModds->setEnabled(true);
     QMessageBox msgBox;
     msgBox.setWindowTitle("Error");
     if (status == 1) {

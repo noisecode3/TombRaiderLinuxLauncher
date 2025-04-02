@@ -7,7 +7,8 @@ import sqlite3
 import json
 import logging
 
-import scrape
+import scrape_trle
+
 
 def get_tombll_json(path):
     """Load and parse a JSON file from a specified path.
@@ -254,7 +255,7 @@ def add_screen_to_database(screen, level_id, con):
     # Ensure the screen URL matches the TRLE.net screens directory
     if screen.startswith("https://www.trle.net/screens/"):
         # Fetch the .webp image data for the screen
-        webp_image_data = scrape.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
+        webp_image_data = scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
 
         # Insert the .webp image data into the Picture table and retrieve its ID
         query_insert_picture = "INSERT INTO Picture (data) VALUES (?)"

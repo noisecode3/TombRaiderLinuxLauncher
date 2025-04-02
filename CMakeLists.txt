@@ -155,7 +155,9 @@ if(NOT TEST)
         ${CMAKE_SOURCE_DIR}/database/data_factory.py
         ${CMAKE_SOURCE_DIR}/database/get_leaf_cert.py
         ${CMAKE_SOURCE_DIR}/database/https.py
-        ${CMAKE_SOURCE_DIR}/database/scrape.py
+        ${CMAKE_SOURCE_DIR}/database/scrape_common.py
+        ${CMAKE_SOURCE_DIR}/database/scrape_trle.py
+        ${CMAKE_SOURCE_DIR}/database/scrape_trle_download.py
         ${CMAKE_SOURCE_DIR}/database/tombll_add_data.py
         ${CMAKE_SOURCE_DIR}/database/tombll_get_data.py
         ${CMAKE_SOURCE_DIR}/database/tombll_get_list.py

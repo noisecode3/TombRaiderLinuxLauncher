@@ -30,7 +30,9 @@ sudo pacman -S qt5-wayland qt5-webengine qt5-imageformats boost
 
 ### Build
 ```shell
-cmake -DCMAKE_INSTALL_PREFIX=~/.local .
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/.local ..
 make install -j$(nproc)
 ```
 
@@ -85,17 +87,20 @@ sudo apk add py3-pycurl py3-tqdm py3-cryptography py3-beautifulsoup4 py3-pillow
 ```
 
 Some levels wont be added because they use external or different download URL's
-You can add maps to the database if you cd into where you installed you're database.
+You can add levels to the database if you cd into where you installed you're database.
+From you're browser copy the number from level page https://www.trle.net/sc/levelfeatures.php?lid=3684
 
 If you did just follow the command above you can use:
 
 
 ```shell
-python3 tombll_get_data.py https://www.trle.net/sc/levelfeatures.php?lid=3684
+python3 tombll_get_data.py 3684
 
 ```
 Now that you have an data.json file you get a chance to edit it.
 Sometimes you need or want to edit those but right now I allow only trle.net
+You can add you're own local file with its md5sum and it should not try to download it.
+But it has to be a zip file at this point.
 
 ```text
   "zipFileName": "",
