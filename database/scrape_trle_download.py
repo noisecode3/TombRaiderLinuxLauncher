@@ -180,7 +180,7 @@ def _get_trcustoms_download_info(trcustom_level_dict):
 
     zip_file['name'] = f"{zip_id}-{title}{version_str}-{authors_str}.zip"
     zip_file['size'] = round(last_file.get('size', 0) / (1024 * 1024), 2)  # Size in MiB
-    zip_file['md5'] = ""
+    zip_file['md5'] = "MISSING"
     zip_file['url'] = last_file.get('url', '')
     zip_file['release'] = scrape_common.convert_to_iso(last_file.get('created', ''))
     zip_file['version'] = version
@@ -260,7 +260,7 @@ def _get_trlevel_download_info(trle_info):
                 match = re.search(r'filename\*?=(?:UTF-8\'\')?["\']?([^"\']+)["\']?', head)
                 zip_file['name'] = match.group(1) if match else ''
                 zip_file['size'] = trle_info[2]
-                zip_file['md5'] = ""
+                zip_file['md5'] = "MISSING"
                 zip_file['url'] = download_url
                 break
 
@@ -305,7 +305,7 @@ def _get_download_info(lid, url):
     trle_info = _get_trle_info(lid)
     zip_file['name'] = urlparse(url).path.split("/")[-1]
     zip_file['size'] = trle_info[2]
-    zip_file['md5'] = ""
+    zip_file['md5'] = "MISSING"
     zip_file['url'] = url
     return zip_file
 
