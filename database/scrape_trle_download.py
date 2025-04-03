@@ -192,9 +192,8 @@ def _get_trle_btb_download_info(trle_btb_url, lid):
     parted = trle_btb_url.split("BtB")
     btb_soup = None
     for case in ["web", "Web"]:
-        btb_soup = scrape_common.get_soup(parted[0] + "BtB" + f"/{case}/downloads.html")
-        if btb_soup:
-            break  # Stop when a valid response is found
+        if parted[1] == f"/{case}/index.html" and len(parted) > 1:
+            btb_soup = scrape_common.get_soup(parted[0] + "BtB" + f"/{case}/downloads.html")
 
     if not btb_soup:
         print("Fucked up")
