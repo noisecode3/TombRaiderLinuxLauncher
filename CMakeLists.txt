@@ -8,7 +8,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(CMAKE_BUILD_TYPE Debug)
+if(NOT RELEASE)
+    set(CMAKE_BUILD_TYPE Debug)
+else()
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
 find_package(Qt5 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
 
@@ -150,8 +154,12 @@ if(NOT TEST)
         DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
     )
 
+    install(DIRECTORY
+        ${CMAKE_SOURCE_DIR}/database/data
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
+    )
+
     install(FILES
-        ${CMAKE_SOURCE_DIR}/database/tombll.db
         ${CMAKE_SOURCE_DIR}/database/data_factory.py
         ${CMAKE_SOURCE_DIR}/database/get_leaf_cert.py
         ${CMAKE_SOURCE_DIR}/database/https.py
@@ -161,6 +169,14 @@ if(NOT TEST)
         ${CMAKE_SOURCE_DIR}/database/tombll_add_data.py
         ${CMAKE_SOURCE_DIR}/database/tombll_get_data.py
         ${CMAKE_SOURCE_DIR}/database/tombll_get_list.py
+        ${CMAKE_SOURCE_DIR}/database/make_tombll_database.py
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
     )
+
+    if(NOT NO_DATABASE)
+        install(FILES
+            ${CMAKE_SOURCE_DIR}/database/tombll.db
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
+        )
+    endif()
 endif()

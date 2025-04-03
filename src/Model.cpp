@@ -13,9 +13,6 @@
 
 #include "Model.hpp"
 
-// Those lambda should be in another header file
-// I hate this and it should be able to recognize both the directory
-// when linking and the game exe to make a symbolic link to automatically
 Model::Model() {}
 Model::~Model() {}
 

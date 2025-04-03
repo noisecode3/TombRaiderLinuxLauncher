@@ -32,7 +32,8 @@ sudo pacman -S qt5-wayland qt5-webengine qt5-imageformats boost
 ```shell
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/.local ..
+cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/.local -DRELEASE=on ..
+# or cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/.local -DNO_DATABASE=ON -DRELEASE=on ..
 make install -j$(nproc)
 ```
 
