@@ -238,13 +238,14 @@ def _get_generic_download(soup):
 
 
 def _get_trlevel_download_info(trle_info):
-    zip_file = data_factory.make_zip_file()
+    zip_file = []
     url = "https://www.trlevel.de/filebase/index.php?category-file-list/558-trle-custom-levels/"
     page_prefix = "&sortField=time&sortOrder=DESC&pageNo="
     number = 1
     max_pages = 20
 
     while True:
+
         trlevel_soup = scrape_common.get_soup(url + f"{page_prefix}{number}")
         if not trlevel_soup:
             print(f"Failed to fetch page {number}")
@@ -253,16 +254,23 @@ def _get_trlevel_download_info(trle_info):
         card_links = trlevel_soup.find_all("a", class_="filebaseFileCardLink")
         for link in card_links:
             if trle_info[0].lower() in link.get_text(strip=True).lower():
-                level = link['href'].split("https://www.trlevel.de/filebase/index.php?file/")[1]
-                level_id = level.split('-')[0]
-                download_url = f"https://www.trlevel.de/index.php?file-download/{level_id}/"
+                trlevel_level_page_soup = scrape_common.get_soup(link['href'])
+                download_tag = trlevel_level_page_soup.find(
+                        "a", class_="button buttonPrimary", itemprop="downloadUrl")
+
+                if not isinstance(download_tag, Tag):
+                    print("Did not get download url from trlevel.de page")
+                    sys.exit(1)
+
+                download_url = download_tag.get('href')
                 head = scrape_common.https.get(f"{download_url}", "head")
                 match = re.search(r'filename\*?=(?:UTF-8\'\')?["\']?([^"\']+)["\']?', head)
+                zip_file = data_factory.make_zip_file()
                 zip_file['name'] = match.group(1) if match else ''
                 zip_file['size'] = trle_info[2]
                 zip_file['md5'] = "MISSING"
                 zip_file['url'] = download_url
-                break
+                return [zip_file]
 
         if len(card_links) < 20:
             break  # Stop if less than 20 links (end of pages)
@@ -276,6 +284,7 @@ def _get_trlevel_download_info(trle_info):
 
 
 def _search_trcustoms(trle_info):
+    zip_file = []
     title = quote(trle_info[0])
     release = trle_info[1]
     trcustoms = scrape_common.get_json(f"https://trcustoms.org/api/levels/?search={title}")
@@ -288,8 +297,8 @@ def _search_trcustoms(trle_info):
                 # check if it has the files attribute
                 last_file = level.get('last_file', {})
                 if last_file:
-                    return _get_trcustoms_download_info(level)
-    return []
+                    zip_file = [_get_trcustoms_download_info(level)]
+    return zip_file
 
 
 def _check_lid(lid):
@@ -299,6 +308,7 @@ def _check_lid(lid):
         else:
             logging.error("Error: lid not a digit")
             sys.exit(1)
+
 
 def _get_download_info(lid, url):
     zip_file = data_factory.make_zip_file()
@@ -314,6 +324,7 @@ def get_zip_file_info(lid):
     """Entery function for trle download module."""
     _check_lid(lid)
     head = scrape_common.https.get(f"https://www.trle.net/scadm/trle_dl.php?lid={lid}", 'head')
+    files = []
     if head:
         print(f"head: {head}")
         redirect_url = head.partition("Location: ")[2].split("\r\n", 1)[0]
@@ -321,32 +332,32 @@ def get_zip_file_info(lid):
         if redirect_url:
             if redirect_url.endswith(".zip") and \
                     redirect_url.startswith("https://www.trle.net/levels/levels/"):
-                return _get_download_info(lid, redirect_url)
+                files = [_get_download_info(lid, redirect_url)]
 
             if redirect_url.startswith("https://www.trle.net/sc/levelfeatures.php?lid="):
                 trle_info = _get_trle_info(lid)
-                return _search_trcustoms(trle_info)
+                files.extend(_search_trcustoms(trle_info))
 
             if redirect_url.lower().endswith("/btb/web/index.html") and \
                     redirect_url.startswith("https://www.trle.net/levels/levels"):
-                return _get_trle_btb_download_info(redirect_url, lid)
+                files = [_get_trle_btb_download_info(redirect_url, lid)]
 
             if redirect_url.endswith(".htm") and \
                     redirect_url.startswith("https://www.trle.net/levels/levels/"):
                 url = _get_generic_download(scrape_common.get_soup(redirect_url))
-                return _get_download_info(lid, url)
+                files = [_get_download_info(lid, url)]
 
             if redirect_url.startswith("https://trcustoms.org/levels/") and \
                     redirect_url.split("/")[-1].isdigit():
                 api_url = f"https://trcustoms.org/api/levels/{redirect_url.split("/")[-1]}/"
                 trcustoms_level_dict = scrape_common.get_json(api_url)
-                return _get_trcustoms_download_info(trcustoms_level_dict)
+                files = [_get_trcustoms_download_info(trcustoms_level_dict)]
 
             if redirect_url == "https://www.trlevel.de":
                 trle_info = _get_trle_info(lid)
-                return _get_trlevel_download_info(trle_info)
+                files.extend(_get_trlevel_download_info(trle_info))
 
-    return []
+    return files
 
 
 if __name__ == '__main__':
@@ -357,7 +368,5 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         LID = sys.argv[1]
-        if LID == "":
-            LID = "1978"
         ZIP_DATA = get_zip_file_info(LID)
         print(f"{ZIP_DATA}")

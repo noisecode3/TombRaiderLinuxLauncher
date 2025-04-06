@@ -168,7 +168,7 @@ if(NOT TEST)
         ${CMAKE_SOURCE_DIR}/database/scrape_trle_download.py
         ${CMAKE_SOURCE_DIR}/database/tombll_add_data.py
         ${CMAKE_SOURCE_DIR}/database/tombll_get_data.py
-        ${CMAKE_SOURCE_DIR}/database/tombll_get_list.py
+        ${CMAKE_SOURCE_DIR}/database/tombll_manage_data.py
         ${CMAKE_SOURCE_DIR}/database/make_tombll_database.py
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
     )
