@@ -1,109 +1,11 @@
-"""
-Take tombll json file and add it to the database
-"""
+"""Take tombll json file and add it to the database."""
 import os
 import sys
 import sqlite3
-import json
 import logging
 
 import scrape_trle
-
-
-def get_tombll_json(path):
-    """Load and parse a JSON file from a specified path.
-
-    Attempts to open and read a JSON file, parsing its content into a dictionary.
-    Handles errors for file not found, JSON decoding issues, and other I/O problems.
-
-    Args:
-        path (str): The path to the JSON file.
-
-    Returns:
-        dict: Parsed content of the JSON file.
-
-    Exits:
-        Logs an error and exits the program if the file cannot be read or parsed.
-    """
-    try:
-        # Open the file with UTF-8 encoding
-        with open(path, mode='r', encoding='utf-8') as json_file:
-            try:
-                # Parse and return JSON content
-                return json.load(json_file)
-            except json.JSONDecodeError as json_error:
-                # Log and exit if JSON content is invalid
-                logging.error("Error decoding JSON from file '%s': %s", path, json_error)
-                sys.exit(1)
-    except FileNotFoundError:
-        # Log and exit if file is not found
-        logging.error("File not found: '%s'", path)
-        sys.exit(1)
-    except IOError as file_error:
-        # Log and exit if any other I/O error occurs
-        logging.error("I/O error occurred while opening file '%s': %s", path, file_error)
-        sys.exit(1)
-
-
-def query_return_id(query, params, con):
-    """Execute a SQL query and return an ID.
-
-    If the query is an INSERT, this function returns the last inserted row ID.
-    For other queries, it fetches and returns the first integer result, if it exists and is
-    non-negative.
-
-    Args:
-        query (str): SQL query to execute.
-        params (tuple): Parameters for the query.
-        con (sqlite3.Connection): SQLite database connection.
-
-    Returns:
-        int or None: The ID from the query result, or None if not found.
-
-    Exits:
-        Logs an error and exits if a database error occurs.
-    """
-    cursor = con.cursor()
-    try:
-        # Execute the query with provided parameters
-        cursor.execute(query, params)
-
-        # Check if it's an INSERT query to return the last inserted row ID
-        if query.strip().upper().startswith("INSERT"):
-            return cursor.lastrowid
-
-        # For non-INSERT queries, fetch and validate the first result
-        result = cursor.fetchone()
-        if result and isinstance(result[0], int) and result[0] >= 0:
-            return result[0]
-
-        return None  # Return None if no valid ID is found
-
-    except sqlite3.DatabaseError as db_error:
-        # Log the database error and exit
-        logging.error("Database error occurred: %s", db_error)
-        sys.exit(1)
-
-
-def query_run(query, params, con):
-    """Execute a SQL query with the provided parameters.
-
-    Args:
-        query (str): The SQL query to execute.
-        params (tuple): Parameters to substitute in the SQL query.
-        con (sqlite3.Connection): SQLite database connection.
-
-    Exits:
-        Logs an error and exits if a database error occurs.
-    """
-    cursor = con.cursor()
-    try:
-        # Execute the query with provided parameters
-        cursor.execute(query, params)
-    except sqlite3.DatabaseError as db_error:
-        # Log the database error and exit the program
-        logging.error("Database error occurred: %s", db_error)
-        sys.exit(1)
+import tombll_common
 
 
 def make_empty_null(value):
@@ -139,12 +41,12 @@ def add_authors_to_database(authors_array, level_id, con):
         query_insert_middle = "INSERT INTO AuthorList (authorID, levelID) VALUES (?, ?)"
 
         # Try to get the existing author ID; if none, insert a new author and get its ID
-        author_id = query_return_id(query_select_id, (author,), con)
+        author_id = tombll_common.query_return_id(query_select_id, (author,), con)
         if author_id is None:
-            author_id = query_return_id(query_insert, (author,), con)
+            author_id = tombll_common.query_return_id(query_insert, (author,), con)
 
         # Link the author with the level in AuthorList table
-        query_run(query_insert_middle, (author_id, level_id), con)
+        tombll_common.query_run(query_insert_middle, (author_id, level_id), con)
 
 
 def add_genres_to_database(genres_array, level_id, con):
@@ -166,12 +68,12 @@ def add_genres_to_database(genres_array, level_id, con):
         query_insert_middle = "INSERT INTO GenreList (genreID, levelID) VALUES (?, ?)"
 
         # Try to get the existing genre ID; if none, insert a new genre and get its ID
-        genre_id = query_return_id(query_select_id, (genre,), con)
+        genre_id = tombll_common.query_return_id(query_select_id, (genre,), con)
         if genre_id is None:
-            genre_id = query_return_id(query_insert, (genre,), con)
+            genre_id = tombll_common.query_return_id(query_insert, (genre,), con)
 
         # Link the genre with the level in GenreList table
-        query_run(query_insert_middle, (genre_id, level_id), con)
+        tombll_common.query_run(query_insert_middle, (genre_id, level_id), con)
 
 
 def add_tags_to_database(tags_array, level_id, con):
@@ -193,12 +95,12 @@ def add_tags_to_database(tags_array, level_id, con):
         query_insert_middle = "INSERT INTO TagList (tagID, levelID) VALUES (?, ?)"
 
         # Try to get the existing tag ID; if not found, insert a new tag and get its ID
-        tag_id = query_return_id(query_select_id, (tag,), con)
+        tag_id = tombll_common.query_return_id(query_select_id, (tag,), con)
         if tag_id is None:
-            tag_id = query_return_id(query_insert, (tag,), con)
+            tag_id = tombll_common.query_return_id(query_insert, (tag,), con)
 
         # Link the tag with the level in TagList table
-        query_run(query_insert_middle, (tag_id, level_id), con)
+        tombll_common.query_run(query_insert_middle, (tag_id, level_id), con)
 
 
 def add_zip_files_to_database(zip_files_array, level_id, con):
@@ -232,12 +134,12 @@ def add_zip_files_to_database(zip_files_array, level_id, con):
         )
 
         # Insert the ZIP file and get its ID
-        zip_id = query_return_id(query_insert, insert_args, con)
+        zip_id = tombll_common.query_return_id(query_insert, insert_args, con)
 
         # Link the ZIP file to the level in ZipList table
         query_insert_middle = "INSERT INTO ZipList (zipID, levelID) VALUES (?, ?)"
         middle_args = (zip_id, level_id)
-        query_run(query_insert_middle, middle_args, con)
+        tombll_common.query_run(query_insert_middle, middle_args, con)
 
 
 def add_screen_to_database(screen, level_id, con):
@@ -255,15 +157,16 @@ def add_screen_to_database(screen, level_id, con):
     # Ensure the screen URL matches the TRLE.net screens directory
     if screen.startswith("https://www.trle.net/screens/"):
         # Fetch the .webp image data for the screen
-        webp_image_data = scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
+        webp_image_data = \
+                scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
 
         # Insert the .webp image data into the Picture table and retrieve its ID
         query_insert_picture = "INSERT INTO Picture (data) VALUES (?)"
-        picture_id = query_return_id(query_insert_picture, (webp_image_data,), con)
+        picture_id = tombll_common.query_return_id(query_insert_picture, (webp_image_data,), con)
 
         # Link the inserted picture to the specified level in the Screens table
         query_insert_screen = "INSERT INTO Screens (pictureID, levelID) VALUES (?, ?)"
-        query_run(query_insert_screen, (picture_id, level_id), con)
+        tombll_common.query_run(query_insert_screen, (picture_id, level_id), con)
 
 
 def add_screens_to_database(large_screens_array, level_id, con):
@@ -308,7 +211,7 @@ def add_level_to_database(data, con):
     )
 
     # Execute the query and get the ID of the inserted level
-    level_id = query_return_id(query, arg, con)
+    level_id = tombll_common.query_return_id(query, arg, con)
 
     # Log the current level ID for debugging or tracking purposes
     logging.info("Current tombll level_id: %s", level_id)
@@ -334,24 +237,24 @@ def add_info_to_database(data, con):
     info_difficulty_id = None
     if info_difficulty:
         query = "SELECT InfoDifficultyID FROM InfoDifficulty WHERE value = ?"
-        info_difficulty_id = query_return_id(query, (info_difficulty,), con)
+        info_difficulty_id = tombll_common.query_return_id(query, (info_difficulty,), con)
 
     # Retrieve or assign InfoDurationID, or set to None if not specified
     info_duration = data.get('duration')
     info_duration_id = None
     if info_duration:
         query = "SELECT InfoDurationID FROM InfoDuration WHERE value = ?"
-        info_duration_id = query_return_id(query, (info_duration,), con)
+        info_duration_id = tombll_common.query_return_id(query, (info_duration,), con)
 
     # Retrieve or assign InfoTypeID, allowing None if not specified
     info_type = data.get('type') or None
     query = "SELECT InfoTypeID FROM InfoType WHERE value = ?"
-    info_type_id = query_return_id(query, (info_type,), con)
+    info_type_id = tombll_common.query_return_id(query, (info_type,), con)
 
     # Retrieve or assign InfoClassID, allowing None if not specified
     info_class = data.get('class') or None
     query = "SELECT InfoClassID FROM InfoClass WHERE value = ?"
-    info_class_id = query_return_id(query, (info_class,), con)
+    info_class_id = tombll_common.query_return_id(query, (info_class,), con)
 
     # Insert a new Info record with the retrieved or default IDs
     query = (
@@ -369,7 +272,7 @@ def add_info_to_database(data, con):
         data.get('trcustoms_id')    # TRCustoms ID if available
     )
 
-    return query_return_id(query, arg, con)
+    return tombll_common.query_return_id(query, arg, con)
 
 
 def add_tombll_json_to_database(data, con):
@@ -407,8 +310,10 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         logging.error("Usage: python3 addData.py FILE.json")
         sys.exit(1)
-    DATA = get_tombll_json(sys.argv[1])
-    CON = sqlite3.connect(os.path.dirname(os.path.abspath(__file__)) + '/tombll.db')
-    add_tombll_json_to_database(DATA, CON)
-    CON.commit()
-    CON.close()
+    main_data = tombll_common.get_tombll_json(sys.argv[1])
+    main_con = sqlite3.connect(os.path.dirname(os.path.abspath(__file__)) + '/tombll.db')
+    main_cur = main_con.cursor()
+    main_cur.execute("BEGIN;")
+    add_tombll_json_to_database(main_data, main_con)
+    main_con.commit()
+    main_con.close()

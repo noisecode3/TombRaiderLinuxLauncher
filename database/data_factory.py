@@ -1,8 +1,8 @@
-"""Index dictionary data definitions"""
+"""Index dictionary data definitions."""
 
 
 def make_trle_page_data():
-    """trle.net page, represents the same data as a page on the site"""
+    """trle.net page, represents the same data as a page on the site."""
     return {
         "offset": 0,
         "records_total": 0,
@@ -11,7 +11,7 @@ def make_trle_page_data():
 
 
 def make_trle_level_data():
-    """trle.net record data"""
+    """trle.net record data."""
     return {
         "trle_id": 0,
         "author": "",
@@ -25,7 +25,7 @@ def make_trle_level_data():
 
 
 def make_trle_tombll_data():
-    """This is the app data at the moment"""
+    """Level data the app uses at the moment."""
     return {
         "title": "",
         "authors": [],
@@ -47,7 +47,7 @@ def make_trle_tombll_data():
 
 
 def make_trcustoms_page_data():
-    """trcustoms.org page, represents the same data as a page on the site"""
+    """trcustoms.org page, represents the same data as a page on the site."""
     return {
         "current_page": 0,
         "total_pages": 0,
@@ -57,7 +57,7 @@ def make_trcustoms_page_data():
 
 
 def make_trcustoms_level_data():
-    """trcustoms.org record data"""
+    """trcustoms.org record data."""
     return {
         "trcustoms_id": 0,
         "authors": [],
@@ -74,7 +74,7 @@ def make_trcustoms_level_data():
 
 
 def make_zip_file():
-    """trcustoms.org or TRLE zipfile"""
+    """trcustoms.org or TRLE zipfile."""
     return {
         "name": "",
         "size": 0.0,
