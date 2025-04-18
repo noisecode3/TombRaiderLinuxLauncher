@@ -117,6 +117,7 @@ struct ListItemData {
      * smooths out pixels using `Qt::SmoothTransformation`. The image is centered
      * within a transparent background if its aspect ratio does not perfectly match the target.
      *
+     * @param id The database numeric ID.
      * @param title The TRLE title. Expected to contain a single name.
      * @param author The TRLE author(s). Can be a single name or multiple names separated by commas and spaces.
      * @param type The TRLE type, represented by a numeric ID.
@@ -127,10 +128,10 @@ struct ListItemData {
      * @param imageData The cover image as a `QByteArray`. Supported formats include JPEG, PNG, and WEBP.
      */
     ListItemData(
-        const QString& title, const QString& author, qint64 type,
+        qint64 id, const QString& title, const QString& author, qint64 type,
         qint64 classInput, const QString& releaseDate, qint64 difficulty,
         qint64 duration, QByteArray imageData) :
-        m_title(title), m_author(author), m_type(type),
+        m_id(id), m_title(title), m_author(author), m_type(type),
         m_class(classInput), m_releaseDate(releaseDate),
         m_difficulty(difficulty), m_duration(duration) {
         // Load the image from the byte array
@@ -168,6 +169,7 @@ struct ListItemData {
     }
 
     // Data members
+    qint64 m_id;             ///< The database level id.
     QString m_title;         ///< The TRLE level title.
     QString m_author;        ///< The TRLE author(s), as a string.
     qint64 m_type;           ///< ID of the type of level.

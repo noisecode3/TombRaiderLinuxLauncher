@@ -12,9 +12,9 @@
  */
 
 #include <algorithm>
-#include "TombRaiderLinuxLauncher.hpp"
+#include "../src/TombRaiderLinuxLauncher.hpp"
 #include "ui_TombRaiderLinuxLauncher.h"
-#include "staticData.hpp"
+#include "../src/staticData.hpp"
 // #include "debug.hpp"
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
@@ -181,7 +181,7 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
         QListWidgetItem *wi =
             new QListWidgetItem(list[i].m_picture, tag);
 
-        wi->setData(Qt::UserRole, QVariant(i + 1));
+        wi->setData(Qt::UserRole, QVariant(list[i].m_id));
         QVariantMap itemData;
         itemData["title"] = list[i].m_title;
         itemData["author"] = list[i].m_author;

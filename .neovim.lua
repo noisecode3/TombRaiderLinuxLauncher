@@ -85,6 +85,7 @@ require('lint').linters_by_ft = {
   cpp = {'cppcheck', 'cpplint', 'flawfinder', 'clangtidy'},
 }
 
+-- build cppcheck-2.6.3 or you are on you're own with new version
 -- .local/share/nvim/plugged/nvim-lint/lua/lint/linters/cppcheck.lua
 -- cppcheck <= 1.84 doesn't support {column} so the start_col group is ambiguous
 local pattern = [[([^:]*):(%d*):([^:]*): %[([^%]\]*)%] ([^:]*): (.*)]]

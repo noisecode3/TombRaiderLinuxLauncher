@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "Model.hpp"
+#include "../src/Model.hpp"
 
 Model::Model() {}
 Model::~Model() {}

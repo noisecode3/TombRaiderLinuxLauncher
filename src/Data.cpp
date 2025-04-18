@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "Data.hpp"
+#include "../src/Data.hpp"
 
 qint64 Data::getListRowCount() {
     QSqlQuery query(db);
@@ -37,21 +37,20 @@ qint64 Data::getListRowCount() {
 }
 
 QVector<ListItemData> Data::getListItems() {
-    QSqlQuery query(db);
     bool status = true;
+    QSqlQuery query(db);
     QVector<ListItemData> items;
-    qint64 rowCount = getListRowCount();
 
     if (!query.prepare(
-            "SELECT Info.title, Author.value, Info.type, "
+            "SELECT Level.LevelID, Info.title, Author.value, Info.type, "
             "Info.class, Info.release, Info.difficulty, "
-            "Info.duration, Picture.data FROM Level "
+            "Info.duration, Picture.data "
+            "FROM Level "
             "JOIN Info ON Level.infoID = Info.InfoID "
             "JOIN Screens ON Level.LevelID = Screens.levelID "
             "JOIN Picture ON Screens.pictureID = Picture.PictureID "
             "JOIN AuthorList ON Level.LevelID = AuthorList.levelID "
             "JOIN Author ON AuthorList.authorID = Author.AuthorID "
-            "WHERE Level.LevelID = :id "
             "GROUP BY Level.LevelID "
             "ORDER BY MIN(Picture.PictureID) ASC")) {
         qDebug() << "Error preparing query:" << query.lastError().text();
@@ -59,26 +58,24 @@ QVector<ListItemData> Data::getListItems() {
     }
 
     if (status) {
-        for (qint64 i = 1; i <= rowCount; i++) {
-            query.bindValue(":id", i);  // Bind the current LevelID
-            if (query.exec() == true) {
-                while (query.next() == true) {
-                    items.append(ListItemData(
-                        query.value("Info.title").toString(),
-                        query.value("Author.value").toString(),
-                        query.value("Info.type").toInt(),
-                        query.value("Info.class").toInt(),
-                        query.value("Info.release").toString(),
-                        query.value("Info.difficulty").toInt(),
-                        query.value("Info.duration").toInt(),
-                        query.value("Picture.data").toByteArray()));
-                }
-            } else {
-                qDebug() << "Error executing query for Level ID:" << i
-                         << query.lastError().text();
+        if (query.exec()) {
+            while (query.next()) {
+                items.append(ListItemData(
+                    query.value("Level.LevelID").toInt(),
+                    query.value("Info.title").toString(),
+                    query.value("Author.value").toString(),
+                    query.value("Info.type").toInt(),
+                    query.value("Info.class").toInt(),
+                    query.value("Info.release").toString(),
+                    query.value("Info.difficulty").toInt(),
+                    query.value("Info.duration").toInt(),
+                    query.value("Picture.data").toByteArray()));
             }
+        } else {
+            qDebug() << "Error executing query:" << query.lastError().text();
         }
     }
+
     return items;
 }
 
