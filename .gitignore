@@ -15,3 +15,4 @@ build
 .gdbinit
 .vscode
 .mypy_cache
+database/*.db-journal
