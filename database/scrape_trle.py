@@ -310,8 +310,8 @@ def get_trle_level(soup, data):
     data['duration'] = scrape_common.get_trle_duration(soup)
     data['screen'] = scrape_common.get_trle_screen(soup)
     data['large_screens'] = scrape_common.get_trle_large_screens(soup)
-    level_id = scrape_common.trle_url_to_int(soup.find('a', string='Download').get('href'))
-    data['zip_files'] = scrape_trle_download.get_zip_file_info(level_id)
+    data['trle_id'] = scrape_common.trle_url_to_int(soup.find('a', string='Download').get('href'))
+    data['zip_files'] = scrape_trle_download.get_zip_file_info(data['trle_id'])
     data['body'] = scrape_common.get_trle_body(soup)
     data['walkthrough'] = get_trle_walkthrough(soup)
 

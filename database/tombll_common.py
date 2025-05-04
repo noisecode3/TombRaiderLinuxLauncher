@@ -146,3 +146,17 @@ def query_run(query, params, con):
         logging.error("Database error occurred: %s", db_error)
         con.rollback()
         sys.exit(1)
+
+
+def make_empty_null(value):
+    """Convert empty strings or zero float values to None.
+
+    Args:
+        value: The value to check, which can be a string, float, or other types.
+
+    Returns:
+        None if the value is an empty string or exactly 0.0; otherwise, returns the original value.
+    """
+    if value in ("", 0.0):
+        return None
+    return value

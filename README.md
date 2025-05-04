@@ -95,7 +95,8 @@ If you did just follow the command above you can use:
 
 
 ```shell
-python3 tombll_get_data.py 3684
+python tombll_manage_data.py -h
+python3 tombll_manage_data.py -a 3684
 
 ```
 Now that you have an data.json file you get a chance to edit it.
@@ -110,7 +111,7 @@ But it has to be a zip file at this point.
 ```
 
 ```shell
-python3 tombll_add_data.py data.json
+python3 tombll_manage_data.py -af data.json
 
 ```
 
