@@ -1,0 +1,12 @@
+Put the file ~/.local/share/lutris/runtime/dgvoodoo2/v2.8.2/dgVoodoo.conf
+It has helped me fix some crashes from using default dgVoodoo.conf
+Here's what was changed:
+    DirectX:
+            ForceVerticalSync: true
+            Resolution: max_qhd_isf
+            VRAM: 256
+            dgVoodooWatermark: false
+    General:
+            CaptureMouse: false
+            FullScreenMode: false
+            ScalingMode: stretched_ar
