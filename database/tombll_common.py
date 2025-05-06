@@ -9,7 +9,7 @@ def get_tombll_json(path):
     """Load and parse a JSON file from a specified path.
 
     Attempts to open and read a JSON file, parsing its content into a dictionary.
-    Handles errors for file not found, JSON decoding issues, and other I/O problems.
+    Exit on errors for file not found, JSON decoding issues, and other I/O problems.
 
     Args:
         path (str): The path to the JSON file.
@@ -52,7 +52,7 @@ def query_return_everything(query, params, con):
 
     Args:
         query (str): The SQL query to execute. Expected to be a SELECT or similar.
-        params (tuple): A tuple of parameters to safely bind to the query.
+        params (tuple or None): A tuple of parameters to safely bind to the query.
         con (sqlite3.Connection): An open SQLite database connection.
 
     Returns:
@@ -92,9 +92,12 @@ def query_return_id(query, params, con):
     For other queries, it fetches and returns the first integer result, if it exists and is
     non-negative.
 
+    If a database error occurs, the error is logged, any open transaction is rolled back,
+    and the program exits with an error status.
+
     Args:
         query (str): SQL query to execute.
-        params (tuple): Parameters for the query.
+        params (tuple or None): Parameters for the query.
         con (sqlite3.Connection): SQLite database connection.
 
     Returns:
@@ -105,8 +108,12 @@ def query_return_id(query, params, con):
     """
     cursor = con.cursor()
     try:
-        # Execute the query with provided parameters
-        cursor.execute(query, params)
+        if params:
+            # Execute the query with the given parameters
+            cursor.execute(query, params)
+        else:
+            # Execute the query without parameters
+            cursor.execute(query)
 
         # Check if it's an INSERT query to return the last inserted row ID
         if query.strip().upper().startswith("INSERT"):
@@ -129,9 +136,12 @@ def query_return_id(query, params, con):
 def query_run(query, params, con):
     """Execute a SQL query with the provided parameters.
 
+    If a database error occurs, the error is logged, any open transaction is rolled back,
+    and the program exits with an error status.
+
     Args:
         query (str): The SQL query to execute.
-        params (tuple): Parameters to substitute in the SQL query.
+        params (tuple or None): Parameters to substitute in the SQL query.
         con (sqlite3.Connection): SQLite database connection.
 
     Exits:
@@ -139,8 +149,13 @@ def query_run(query, params, con):
     """
     cursor = con.cursor()
     try:
-        # Execute the query with provided parameters
-        cursor.execute(query, params)
+        if params:
+            # Execute the query with the given parameters
+            cursor.execute(query, params)
+        else:
+            # Execute the query without parameters
+            cursor.execute(query)
+
     except sqlite3.DatabaseError as db_error:
         # Log the database error and exit the program
         logging.error("Database error occurred: %s", db_error)
@@ -157,6 +172,6 @@ def make_empty_null(value):
     Returns:
         None if the value is an empty string or exactly 0.0; otherwise, returns the original value.
     """
-    if value in ("", 0.0):
+    if value in ("", 0.0, 0):
         return None
     return value

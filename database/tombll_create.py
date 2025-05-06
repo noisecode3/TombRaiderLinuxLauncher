@@ -291,14 +291,14 @@ def database_info(data, con):
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     '''
     arg = (
-        data.get('title'),          # Title of the level
-        data.get('release'),        # Release date
-        info_difficulty_id,         # Retrieved or NULL difficulty ID
-        info_duration_id,           # Retrieved or NULL duration ID
-        info_type_id,               # Retrieved or NULL type ID
-        info_class_id,              # Retrieved or NULL class ID
-        data.get('trle_id'),        # TRLE ID if available
-        data.get('trcustoms_id')    # TRCustoms ID if available
+        data.get('title'),      # Title of the level
+        data.get('release'),    # Release date
+        info_difficulty_id,     # Retrieved or NULL difficulty ID
+        info_duration_id,       # Retrieved or NULL duration ID
+        info_type_id,           # Retrieved or NULL type ID
+        info_class_id,          # Retrieved or NULL class ID
+        tombll_common.make_empty_null(data.get('trle_id')),        # TRLE ID if available
+        tombll_common.make_empty_null(data.get('trcustoms_id'))    # TRCustoms ID if available
     )
 
     return tombll_common.query_return_id(query, arg, con)

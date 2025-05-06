@@ -28,7 +28,7 @@ Usage: python3 tombll_manage_data.py [options]
       -a    [lid] Add a level record
       -aj   [lid path] Download a level record to json file
       -af   [path] Add from the json file
-      -rm   [Level.LevelID] Remove one level
+      -rm   [lid] Remove one level
       -u    [lid] Update a level record
 
       -lz   [Level.LevelID] List zip file records
@@ -172,8 +172,8 @@ if __name__ == "__main__":
         scrape_trle.get_trle_level(main_soup, main_data)
         add_tombll_json_to_database(main_data, main_con)
         main_con.commit()
-
         print(f"Level {sys.argv[2]} and related authors removed successfully.")
+
     elif (sys.argv[1] == "-aj" and number_of_argument == 4):
         main_lid = sys.argv[2]
         main_data = data_factory.make_trle_tombll_data()
@@ -183,6 +183,7 @@ if __name__ == "__main__":
         with open(sys.argv[3], mode='w', encoding='utf-8') as json_file:
             json.dump(main_data, json_file)
         print(f"Level {sys.argv[2]} saved to {sys.argv[3]} successfully.")
+
     elif (sys.argv[1] == "-af" and number_of_argument == 3):
         main_data = tombll_common.get_tombll_json(sys.argv[2])
         main_cur = main_con.cursor()
@@ -190,12 +191,15 @@ if __name__ == "__main__":
         add_tombll_json_to_database(main_data, main_con)
         main_con.commit()
         print(f"File {sys.argv[2]} added successfully.")
+
     elif (sys.argv[1] == "-rm" and number_of_argument == 3):
+        level_id = tombll_read.database_level_id(sys.argv[2], main_con)
         cur = main_con.cursor()
         cur.execute("BEGIN;")
-        tombll_delete.database_level(sys.argv[2], main_con)
+        tombll_delete.database_level(level_id, main_con)
         main_con.commit()
         print(f"Level {sys.argv[2]} removed successfully.")
+
     elif (sys.argv[1] == "-u" and number_of_argument == 3):
         main_cur = main_con.cursor()
         main_cur.execute("BEGIN;")
@@ -208,8 +212,10 @@ if __name__ == "__main__":
         update_tombll_json_to_database(main_data, main_level_id, main_con)
         main_con.commit()
         print(f"Level {sys.argv[2]} updated successfully.")
+
     elif (sys.argv[1] == "-lz" and number_of_argument == 3):
         print_download_list(sys.argv[2], main_con)
+
     elif (sys.argv[1] == "-az" and number_of_argument >= 5):
         main_data = data_factory.make_zip_file()
         main_data["name"] = sys.argv[3]
@@ -220,6 +226,7 @@ if __name__ == "__main__":
         main_data["version"] = sys.argv[8] if number_of_argument == 9 else None
         tombll_create.database_zip_file(main_data, sys.argv[2], main_con)
         main_con.commit()
+
     else:
         print_info()
     main_con.close()
