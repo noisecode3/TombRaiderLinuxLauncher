@@ -28,6 +28,7 @@ Usage: python3 tombll_manage_data.py [options]
       -a    [lid] Add a level record
       -aj   [lid path] Download a level record to json file
       -af   [path] Add from the json file
+      -ac   [lid] Add a level card record without info and walkthrough
       -rm   [lid] Remove one level
       -u    [lid] Update a level record
 
@@ -326,6 +327,18 @@ if __name__ == "__main__":
         main_data = tombll_common.get_tombll_json(sys.argv[2])
         main_cur = main_con.cursor()
         main_cur.execute("BEGIN;")
+        add_tombll_json_to_database(main_data, main_con)
+        main_con.commit()
+        print(f"File {sys.argv[2]} added successfully.")
+
+    elif (sys.argv[1] == "-ac" and number_of_argument == 3):
+        main_cur = main_con.cursor()
+        main_cur.execute("BEGIN;")
+        main_lid = sys.argv[2]
+        main_data = data_factory.make_trle_tombll_data()
+        main_soup = scrape_trle.scrape_common.get_soup(
+            f"https://www.trle.net/sc/levelfeatures.php?lid={main_lid}")
+        scrape_trle.get_trle_level_card(main_soup, main_data)
         add_tombll_json_to_database(main_data, main_con)
         main_con.commit()
         print(f"File {sys.argv[2]} added successfully.")

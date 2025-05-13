@@ -299,6 +299,23 @@ def get_trle_walkthrough(level_soup):
     return None
 
 
+def get_trle_level_card(soup, data):
+    """Call all the other soup extracts for TRLE card."""
+    data['title'] = scrape_common.get_trle_title(soup)
+    data['authors'] = scrape_common.get_trle_authors(soup)
+    data['type'] = scrape_common.get_trle_type(soup)
+    data['class'] = scrape_common.get_trle_class(soup)
+    data['release'] = scrape_common.get_trle_release(soup)
+    data['difficulty'] = scrape_common.get_trle_difficulty(soup)
+    data['duration'] = scrape_common.get_trle_duration(soup)
+    data['screen'] = scrape_common.get_trle_screen(soup)
+    data['large_screens'] = []
+    data['trle_id'] = scrape_common.trle_url_to_int(soup.find('a', string='Download').get('href'))
+    data['zip_files'] = scrape_trle_download.get_zip_file_info(data['trle_id'])
+    data['body'] = ""
+    data['walkthrough'] = ""
+
+
 def get_trle_level(soup, data):
     """Call all the other soup extracts for TRLE."""
     data['title'] = scrape_common.get_trle_title(soup)
@@ -336,7 +353,7 @@ def get_trle_level(soup, data):
 
 def get_trle_index(title):
     """
-    Search for a level  by its title and returns the URLs.
+    Search for a level by its title and returns the URLs.
 
     Parameters:
         title (str): The title of the level to search for.
