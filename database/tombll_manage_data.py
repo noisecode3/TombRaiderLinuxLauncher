@@ -1,6 +1,7 @@
 """Manage data for the tombll database."""
 import os
 import sys
+import re
 import sqlite3
 import json
 import logging
@@ -78,6 +79,15 @@ def print_download_list(level_id, con):
         print(row)
 
 
+def parse_position(s):
+    """Pares the letter to int from an jpg name."""
+    match = re.match(r'^(\d+)([a-z]?)$', s)
+    if not match:
+        raise ValueError(f"Invalid format: {s}")
+    suffix = match.group(2)
+    return ord(suffix) - ord('a') + 1 if suffix else 0
+
+
 def add_tombll_json_to_database(data, con):
     """Insert level data and related details into the database.
 
@@ -108,7 +118,7 @@ def add_tombll_json_to_database(data, con):
         # Fetch the .webp image data for the screen
         picture['data'] = \
             scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-        picture['position'] = scrape_trle.scrape_common.url_basename_prefix(screen)
+        picture['position'] = parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
         picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
         tombll_create.database_screen(picture, level_id, con)
 
@@ -121,7 +131,8 @@ def add_tombll_json_to_database(data, con):
                 picture = data_factory.make_picture()
                 picture['data'] = \
                     scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-                picture['position'] = scrape_trle.scrape_common.url_basename_prefix(screen)
+                picture['position'] = \
+                    parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
                 picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
                 webp_imgage_array.append(picture)
 
@@ -259,7 +270,7 @@ def update_tombll_json_to_database(data, level_id, con):
         # Fetch the .webp image data for the screen
         picture['data'] = \
             scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-        picture['position'] = scrape_trle.scrape_common.url_basename_prefix(screen)
+        picture['position'] = parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
         picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
         picture_id = tombll_create.database_screen(picture, level_id, con)
         new_set.add(picture_id)
@@ -273,7 +284,8 @@ def update_tombll_json_to_database(data, level_id, con):
                 picture = data_factory.make_picture()
                 picture['data'] = \
                     scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-                picture['position'] = scrape_trle.scrape_common.url_basename_prefix(screen)
+                picture['position'] = \
+                    parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
                 picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
                 webp_imgage_array.append(picture)
 
