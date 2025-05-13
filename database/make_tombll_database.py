@@ -108,6 +108,7 @@ CREATE TABLE GameFileList (
 C.execute('''
 CREATE TABLE Picture (
     PictureID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    md5sum TEXT NOT NULL UNIQUE,
     data BLOB NOT NULL
 )''')
 
@@ -130,7 +131,9 @@ C.execute('''
 CREATE TABLE Screens (
     pictureID INTEGER NOT NULL,
     levelID INTEGER NOT NULL,
+    position INTEGER NOT NULL,
     PRIMARY KEY (pictureID, levelID),
+    UNIQUE (levelID, position),
     FOREIGN KEY (pictureID) REFERENCES Picture(PictureID),
     FOREIGN KEY (levelID) REFERENCES Level(LevelID)
 )''')

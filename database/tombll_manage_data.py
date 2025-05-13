@@ -103,22 +103,121 @@ def add_tombll_json_to_database(data, con):
     # Single screen image, checked for None in the add_screen_to_database function
     screen = data.get('screen')
     if screen.startswith("https://www.trle.net/screens/"):
+        picture = data_factory.make_picture()
         # Fetch the .webp image data for the screen
-        webp_image_data = \
-                scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-        tombll_create.database_screen(webp_image_data, level_id, con)
+        picture['data'] = \
+            scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
+        picture['position'] = scrape_trle.scrape_common.url_basename_prefix(screen)
+        picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
+        tombll_create.database_screen(picture, level_id, con)
 
     # Add large screens if they are provided
     large_screens = data.get('large_screens')
     if large_screens:
         webp_imgage_array = []
         for screen in large_screens:
-            webp_image_data = \
-                scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-            webp_imgage_array.append(webp_image_data)
+            if screen.startswith("https://www.trle.net/screens/"):
+                picture = data_factory.make_picture()
+                picture['data'] = \
+                    scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
+                picture['position'] = scrape_trle.scrape_common.url_basename_prefix(screen)
+                picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
+                webp_imgage_array.append(picture)
 
         if webp_imgage_array:
             tombll_create.database_screens(webp_imgage_array, level_id, con)
+
+
+def update_tombll_authors_to_database(authors, level_id, con):
+    """Update authors data by adding and deleting.
+
+    Args:
+        authors (list of str): A list containing author names.
+        level_id (int): Level.LevelID number.
+        con (sqlite3.Connection): SQLite database connection.
+    """
+    database_authors = tombll_read.database_author_ids(level_id, con)
+    new_set = set()
+    for name in authors:
+        author_id = tombll_create.database_author(name, level_id, con)
+        new_set.add(author_id)
+
+    if database_authors:
+        current_set = set(a[0] for a in database_authors)
+        to_remove = current_set - new_set
+        for author_id in to_remove:
+            tombll_delete.database_author(author_id, level_id, con)
+
+
+def update_tombll_genres_to_database(genres, level_id, con):
+    """Update genres data by adding and deleting.
+
+    Args:
+        genres (list of str): A list containing genres.
+        level_id (int): Level.LevelID number.
+        con (sqlite3.Connection): SQLite database connection.
+    """
+    database_genres = tombll_read.database_genre_ids(level_id, con)
+    new_set = set()
+    for genre in genres:
+        genre_id = tombll_create.database_genre(genre, level_id, con)
+        new_set.add(genre_id)
+
+    if database_genres:
+        current_set = set(a[0] for a in database_genres)
+        to_remove = current_set - new_set
+        for genre_id in to_remove:
+            tombll_delete.database_genre(genre_id, level_id, con)
+
+
+def update_tombll_tags_to_database(tags, level_id, con):
+    """Update tags data by adding and deleting.
+
+    Args:
+        tags (list of str): A list containing tags.
+        level_id (int): Level.LevelID number.
+        con (sqlite3.Connection): SQLite database connection.
+    """
+    database_tags = tombll_read.database_tag_ids(level_id, con)
+    new_set = set()
+    for tag in tags:
+        tag_id = tombll_create.database_tag(tag, level_id, con)
+        new_set.add(tag_id)
+
+    if database_tags:
+        current_set = set(a[0] for a in database_tags)
+        to_remove = current_set - new_set
+        for tag_id in to_remove:
+            tombll_delete.database_tag(tag_id, level_id, con)
+
+
+def update_tombll_zip_files_to_database(zip_files, level_id, con):
+    """Update zip_files data by adding and deleting.
+
+    Args:
+        zip_files (list of dict): A list containing zip_files.
+        level_id (int): Level.LevelID number.
+        con (sqlite3.Connection): SQLite database connection.
+    """
+    database_zip_files = tombll_read.database_zip_list(level_id, con)
+
+    # Build sets for fast comparison
+    current_set = set((z[1], z[4]) for z in database_zip_files)  # (name, url)
+    new_set = set((z['name'], z['url']) for z in zip_files)
+
+    # Find new files to add (using set difference)
+    to_add = new_set - current_set
+    for name, url in to_add:
+        zip_file = next(z for z in zip_files if (z['name'], z['url']) == (name, url))
+        tombll_create.database_zip_file(zip_file, level_id, con)
+
+    # Find files to remove (using set difference)
+    to_remove = current_set - new_set
+    for name, url in to_remove:
+        for d in database_zip_files:
+            if (d[1], d[4]) == (name, url):
+                tombll_delete.database_zip_file(d[0], level_id, con)
+                break
 
 
 def update_tombll_json_to_database(data, level_id, con):
@@ -135,18 +234,57 @@ def update_tombll_json_to_database(data, level_id, con):
     info_id = tombll_update.database_level(data, level_id, con)
     tombll_update.database_info(data, info_id, con)
 
-    if data.get('authors'):
-        database_authors = tombll_read.database_author_list(level_id, con)
-        current_set = set(a[0] for a in database_authors)
-        new_set = set(data['authors'])
-        to_add = new_set - current_set
-        to_remove = current_set - new_set
-        for author in to_add:
-            tombll_create.database_author(author, level_id, con)
-        for author in to_remove:
-            tombll_delete.database_author(author, level_id, con)
+    authors = data.get('authors')
+    if isinstance(authors, list):
+        update_tombll_authors_to_database(authors, level_id, con)
 
-    # TODO: update more
+    genres = data.get('genres')
+    if isinstance(genres, list):
+        update_tombll_genres_to_database(genres, level_id, con)
+
+    tags = data.get('tags')
+    if isinstance(tags, list):
+        update_tombll_tags_to_database(tags, level_id, con)
+
+    zip_files = data.get('zip_files')
+    if zip_files:
+        update_tombll_zip_files_to_database(zip_files, level_id, con)
+
+    new_set = set()
+    # Single screen image, checked for None in the add_screen_to_database function
+    screen = data.get('screen')
+    if screen.startswith("https://www.trle.net/screens/"):
+        picture = data_factory.make_picture()
+        # Fetch the .webp image data for the screen
+        picture['data'] = \
+            scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
+        picture['position'] = scrape_trle.scrape_common.url_basename_prefix(screen)
+        picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
+        picture_id = tombll_create.database_screen(picture, level_id, con)
+        new_set.add(picture_id)
+
+    # Add large screens if they are provided
+    large_screens = data.get('large_screens')
+    if large_screens:
+        webp_imgage_array = []
+        for screen in large_screens:
+            if screen.startswith("https://www.trle.net/screens/"):
+                picture = data_factory.make_picture()
+                picture['data'] = \
+                    scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
+                picture['position'] = scrape_trle.scrape_common.url_basename_prefix(screen)
+                picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
+                webp_imgage_array.append(picture)
+
+        if webp_imgage_array:
+            new_set.update(tombll_create.database_screens(webp_imgage_array, level_id, con))
+
+    database_pictures = tombll_read.database_picture_ids(level_id, con)
+    if database_pictures:
+        current_set = set(a[0] for a in database_pictures)
+        to_remove = current_set - new_set
+        for picture_id in to_remove:
+            tombll_delete.database_picture(picture_id, level_id, con)
 
 
 if __name__ == "__main__":
@@ -172,7 +310,7 @@ if __name__ == "__main__":
         scrape_trle.get_trle_level(main_soup, main_data)
         add_tombll_json_to_database(main_data, main_con)
         main_con.commit()
-        print(f"Level {sys.argv[2]} and related authors removed successfully.")
+        print(f"File {sys.argv[2]} added successfully.")
 
     elif (sys.argv[1] == "-aj" and number_of_argument == 4):
         main_lid = sys.argv[2]
@@ -193,10 +331,10 @@ if __name__ == "__main__":
         print(f"File {sys.argv[2]} added successfully.")
 
     elif (sys.argv[1] == "-rm" and number_of_argument == 3):
-        level_id = tombll_read.database_level_id(sys.argv[2], main_con)
-        cur = main_con.cursor()
-        cur.execute("BEGIN;")
-        tombll_delete.database_level(level_id, main_con)
+        main_level_id = tombll_read.database_level_id(sys.argv[2], main_con)
+        main_cur = main_con.cursor()
+        main_cur.execute("BEGIN;")
+        tombll_delete.database_level(main_level_id, main_con)
         main_con.commit()
         print(f"Level {sys.argv[2]} removed successfully.")
 

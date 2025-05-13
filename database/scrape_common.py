@@ -334,7 +334,7 @@ def trle_search_parser(url):
               .replace("'", r"%5C%27")
 
 
-def url_postfix(url):
+def url_basename_postfix(url):
     """
     Extract the file extension from a URL without the leading dot.
 
@@ -346,6 +346,20 @@ def url_postfix(url):
         or an empty string if no extension is present.
     """
     return os.path.splitext(os.path.basename(urlparse(url).path))[1][1:]
+
+
+def url_basename_prefix(url):
+    """
+    Extract the file naem from a URL without the extension.
+
+    Args:
+        url (str): The URL to extract the file extension from.
+
+    Returns:
+        str: The file name without the extension,
+        or an empty string if no extension is present.
+    """
+    return os.path.splitext(os.path.basename(urlparse(url).path))[0]
 
 
 ###############################################################################
@@ -391,7 +405,7 @@ def get_image(url):
     if validate_url(url) is None:
         print(f"{url} had wrong domain")
         sys.exit(1)
-    ext = url_postfix(url).lower()
+    ext = url_basename_postfix(url).lower()
     if ext in ('jpg', 'jpeg'):
         return get_jpg(url)
     if ext == 'png':

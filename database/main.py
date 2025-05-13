@@ -1,4 +1,4 @@
-"""Main loop for CLI menu like interfaces"""
+"""Main loop for CLI menu like interfaces."""
 import sys
 import os
 import time
@@ -53,12 +53,7 @@ def test_trle_pic_local():
 
 
 def test_insert_trle_book():
-    """This must not bother the server but at the same time its not
-       meant for normal users but the database admin to run this,
-       it could take 30-45 min. there is a problem about how TRLE sort result
-       so this method might not work, cus it will miss results, there is another
-       method that is much slower but will work and accurate"""
-
+    """Make a book."""
     # Get the first page to determine the total number of records
     page = scrape_trle.get_trle_page(0)
     total_records = page['records_total']
@@ -66,7 +61,7 @@ def test_insert_trle_book():
     # Insert the first page of data
     index_query.insert_trle_page(page)
     print(f"Records number:20 of {total_records}")
-    time.sleep(15)
+    time.sleep(3)
 
     # Start offset at 20 and loop through all records in steps of 20
     offset = 20
@@ -82,12 +77,12 @@ def test_insert_trle_book():
             offset += 20
         print(f"Records number:{offset} of {total_records}")
 
-        # Introduce a random delay of 15 seconds
-        time.sleep(15)
+        # Introduce a random delay of 3 seconds
+        time.sleep(3)
 
 
 def show_menu():
-    """Main menu"""
+    """Print main menu."""
     print("\nPlease select a command:")
     print("1. new - Create a new empty index database and add static data")
     print("2. new - Create a new full index database, without info and walkthrough data")

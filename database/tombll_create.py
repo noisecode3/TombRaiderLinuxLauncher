@@ -13,19 +13,22 @@ def database_author(author, level_id, con):
     """Add a author to the database, linking with a specific level.
 
     This function checks if a author already exists in the database.
-    If it does it will use this ID number.
-    If not, it inserts the author and creates an entry in the AuthorList table
-    to link the author to the specified level.
+    If it does it will use this ID number. If not, it inserts the author.
+    Then creates an entry in the AuthorList table that will link the author
+    to the specified level ID.
 
     Args:
-        author (str): Author names.
+        author (str): Author name value to insert.
         level_id (int): The ID of the level to link author with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        int: The ID of the newly inserted author or existing one.
     """
     # SQL queries for selecting, inserting, and linking author
     query_select_id = "SELECT AuthorID FROM Author WHERE value = ?"
     query_insert = "INSERT INTO Author (value) VALUES (?)"
-    query_insert_middle = "INSERT INTO AuthorList (authorID, levelID) VALUES (?, ?)"
+    query_insert_middle = "INSERT OR IGNORE INTO AuthorList (authorID, levelID) VALUES (?, ?)"
 
     # Try to get the existing author ID; if none, insert a new author and get its ID
     author_id = tombll_common.query_return_id(query_select_id, (author,), con)
@@ -34,6 +37,7 @@ def database_author(author, level_id, con):
 
     # Link the author with the level in AuthorList table
     tombll_common.query_run(query_insert_middle, (author_id, level_id), con)
+    return author_id
 
 
 def database_authors(authors_array, level_id, con):
@@ -43,28 +47,36 @@ def database_authors(authors_array, level_id, con):
         authors_array (list of str): List of author names.
         level_id (int): The ID of the level to link authors with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        set of int: The set of IDs for the newly inserted authors or the existing one.
     """
+    ids = set()
     for author in authors_array:
-        database_author(author, level_id, con)
+        ids.add(database_author(author, level_id, con))
+    return ids
 
 
 def database_genre(genre, level_id, con):
     """Add a genre to the database, linking them with a specific level.
 
     This function checks if the genre already exists in the database.
-    If it does it will use this ID number.
-    If not, it inserts the genre and creates an entry in the GenreList table
-    to link the genre to the specified level.
+    If it does it will use this ID number. If not, it inserts the genre.
+    Then creates an entry in the GenreList table that will link the genre
+    to the specified level.
 
     Args:
         genre (str): Genre names.
         level_id (int): The ID of the level to link genre with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        int: The ID of the newly inserted genre of existing one.
     """
     # SQL queries for selecting, inserting, and linking genre
     query_select_id = "SELECT GenreID FROM Genre WHERE value = ?"
     query_insert = "INSERT INTO Genre (value) VALUES (?)"
-    query_insert_middle = "INSERT INTO GenreList (genreID, levelID) VALUES (?, ?)"
+    query_insert_middle = "INSERT OR IGNORE INTO GenreList (genreID, levelID) VALUES (?, ?)"
 
     # Try to get the existing genre ID; if none, insert a new genre and get its ID
     genre_id = tombll_common.query_return_id(query_select_id, (genre,), con)
@@ -73,6 +85,7 @@ def database_genre(genre, level_id, con):
 
     # Link the genre with the level in GenreList table
     tombll_common.query_run(query_insert_middle, (genre_id, level_id), con)
+    return genre_id
 
 
 def database_genres(genres_array, level_id, con):
@@ -82,6 +95,9 @@ def database_genres(genres_array, level_id, con):
         genres_array (list of str): List of genre names.
         level_id (int): The ID of the level to link genres with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        set of int: The set of IDs for the newly inserted genres or the existing one.
     """
     for genre in genres_array:
         database_genre(genre, level_id, con)
@@ -91,19 +107,22 @@ def database_tag(tag, level_id, con):
     """Add a tag to the database, linking them with a specific level.
 
     This function checks if the tag already exists in the database.
-    If it does it will use this ID number.
-    If not, it inserts the tag and creates an entry in the TagList table
-    to link the tag to the specified level.
+    If it does it will use this ID number. If not, it inserts the tag.
+    Then creates an entry in the TagList table that will link the tag
+    to the specified level.
 
     Args:
         tags_array (list of str): List of tag names.
         level_id (int): The ID of the level to link tags with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        int: The ID of the newly inserted tag of existing one.
     """
     # SQL queries for selecting, inserting, and linking tags
     query_select_id = "SELECT TagID FROM Tag WHERE value = ?"
     query_insert = "INSERT INTO Tag (value) VALUES (?)"
-    query_insert_middle = "INSERT INTO TagList (tagID, levelID) VALUES (?, ?)"
+    query_insert_middle = "INSERT OR IGNORE INTO TagList (tagID, levelID) VALUES (?, ?)"
 
     # Try to get the existing tag ID; if not found, insert a new tag and get its ID
     tag_id = tombll_common.query_return_id(query_select_id, (tag,), con)
@@ -112,6 +131,7 @@ def database_tag(tag, level_id, con):
 
     # Link the tag with the level in TagList table
     tombll_common.query_run(query_insert_middle, (tag_id, level_id), con)
+    return tag_id
 
 
 def database_tags(tags_array, level_id, con):
@@ -121,6 +141,9 @@ def database_tags(tags_array, level_id, con):
         tags_array (list of str): List of tag names.
         level_id (int): The ID of the level to link tags with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        set of int: The set of IDs for the newly inserted tags or the existing one.
     """
     for tag in tags_array:
         database_tag(tag, level_id, con)
@@ -134,10 +157,13 @@ def database_zip_file(zip_file, level_id, con):
     the inserted ZIP file to the specified level in the ZipList table.
 
     Args:
-        zip_files (dict): List of ZIP file details, represented as a dictionary
-        with keys 'name', 'size', 'md5', 'url', 'version', 'release'.
+        zip_file (dict): Dictionary of ZIP file details, with keys
+            'name', 'size', 'md5', 'url', 'version', 'release'.
         level_id (int): The ID of the level to link ZIP files with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        int: The ID of the newly inserted zip file.
     """
     # SQL queries for inserting ZIP file data and linking ZIP files to a level
     query_insert = '''
@@ -162,40 +188,60 @@ def database_zip_file(zip_file, level_id, con):
     query_insert_middle = "INSERT INTO ZipList (zipID, levelID) VALUES (?, ?)"
     middle_args = (zip_id, level_id)
     tombll_common.query_run(query_insert_middle, middle_args, con)
+    return zip_id
 
 
 def database_zip_files(zip_files_array, level_id, con):
     """Add ZIP files to the database, linking them with a specific level.
 
     Args:
-        zip_files_array (list of dict): List of ZIP file details, each represented as a dictionary
-            with keys 'name', 'size', 'md5', 'url', 'version', 'release'.
+        zip_files_array (list of dict): List of ZIP file details, each represented
+            as a dictionary with keys 'name', 'size', 'md5', 'url', 'version', 'release'.
         level_id (int): The ID of the level to link ZIP files with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        set of int: The set of IDs for the newly inserted zip files.
     """
+    ids = set()
     for zip_file in zip_files_array:
-        database_zip_file(zip_file, level_id, con)
+        ids.add(database_zip_file(zip_file, level_id, con))
+    return ids
 
 
-def database_screen(webp_image_data, level_id, con):
+def database_screen(picture, level_id, con):
     """Add a screen image to the database and link it to a specific level.
 
-    This function takes the corresponding image as a .webp file, and inserts
-    it into the Picture table. It also creates an association with the specified
-    level in the Screens table.
+    This function takes the corresponding image as a .webp file, md5sum and inserts
+    it into the Picture table. It also creates an association with the specified level
+    in the Screens middle table with its position number. Picture dictionary has data(byte),
+    md5sum(str) and position(int) attributes.
 
     Args:
-        webp_image_data (byte): URL of the screen image.
+        picture (dict): Picture dictionary to insert.
         level_id (int): The ID of the level to link the screen image with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        int: The ID of the newly inserted screen of existing one.
     """
-    # Insert the .webp image data into the Picture table and retrieve its ID
-    query_insert_picture = "INSERT INTO Picture (data) VALUES (?)"
-    picture_id = tombll_common.query_return_id(query_insert_picture, (webp_image_data,), con)
+    # Insert the .webp image and md5sum data into the Picture table and retrieve its ID
+    query_select_id = "SELECT PictureID FROM Picture WHERE md5sum = ?"
+    query_insert = "INSERT OR IGNORE INTO Picture (md5sum, data) VALUES (?, ?)"
+    arg = (picture['md5sum'], picture['data'])
+
+    picture_id = tombll_common.query_return_id(query_select_id, (picture['md5sum'], ), con)
+    if picture_id is None:
+        picture_id = tombll_common.query_return_id(query_insert, arg, con)
 
     # Link the inserted picture to the specified level in the Screens table
-    query_insert_screen = "INSERT INTO Screens (pictureID, levelID) VALUES (?, ?)"
-    tombll_common.query_run(query_insert_screen, (picture_id, level_id), con)
+    query_insert_screen = '''
+        INSERT OR IGNORE
+        INTO Screens (pictureID, levelID, position)
+        VALUES (?, ?, ?)
+    '''
+    tombll_common.query_run(query_insert_screen, (picture_id, level_id, picture['position']), con)
+    return picture_id
 
 
 def database_screens(webp_image_data_array, level_id, con):
@@ -205,13 +251,18 @@ def database_screens(webp_image_data_array, level_id, con):
     and linking it to the specified level using the `create_screen_to_database` helper function.
 
     Args:
-        large_screens_array (list): List of byte of screen images.
+        large_screens_array (list of dict): List of dict of screen images.
         level_id (int): The ID of the level to associate the screen images with.
         con (sqlite3.Connection): SQLite database connection.
+
+    Returns:
+        set of int: The set of IDs for the newly inserted screens or existing one.
     """
     # Iterate over each screen in the provided array and add it to the database
+    ids = set()
     for screen in webp_image_data_array:
-        database_screen(screen, level_id, con)
+        ids.add(database_screen(screen, level_id, con))
+    return ids
 
 
 def database_level(data, con):

@@ -8,6 +8,31 @@ equal to the make_trle_tombll_data() from the data_factory to access data, we do
 import tombll_common
 
 
+def database_author_list(level_id, con):
+    """
+    Get a list of author entries associated with a specific level.
+
+    This function queries the database to retrieve all unique authors
+    linked to the given level via the `AuthorList` relation. The results
+    are fetched and returned.
+
+    Args:
+        level_id (int): The ID of the level for which to retrieve authors.
+        con (sqlite3.Connection): An active SQLite database connection.
+
+    Returns:
+        None: List of all authors.
+    """
+    query = '''
+        SELECT Author.value FROM AuthorList
+        JOIN Author ON AuthorList.authorID = Author.AuthorID
+        WHERE AuthorList.levelID = ?
+    '''
+
+    # Fetch all rows from the executed query
+    return tombll_common.query_return_everything(query, (level_id, ), con)
+
+
 def database_level_list(con):
     """
     Retrieve and returns a list of level information.
@@ -63,32 +88,6 @@ def database_zip_list(level_id, con):
     return tombll_common.query_return_everything(query, (level_id, ), con)
 
 
-def database_picture_list(level_id, con):
-    """
-    Get a list of pictures entries associated with a specific level.
-
-    This function queries the database to retrieve all unique pictures
-    linked to the given level via the `Screens` relation. The results
-    are fetched and returned.
-
-    Args:
-        level_id (int): The ID of the level for which to retrieve ZIP files.
-        con (sqlite3.Connection): An active SQLite database connection.
-
-    Returns:
-        None: List of all pictures.
-    """
-    query = '''
-        SELECT Screens.pictureID
-        FROM Level
-        JOIN Screens ON Level.LevelID = Screens.levelID
-        WHERE Level.LevelID = ?
-    '''
-
-    # Fetch all rows from the executed query
-    return tombll_common.query_return_everything(query, (level_id, ), con)
-
-
 def database_level_id(trle_id, con):
     """
     Get level ID form TRLE lid.
@@ -111,50 +110,96 @@ def database_level_id(trle_id, con):
     return tombll_common.query_return_id(query, (trle_id, ), con)
 
 
-def database_author_id(level_id, author_name, con):
+def database_author_ids(level_id, con):
     """
-    Get author ID form level ID and author name.
+    Get author ID form level ID.
 
     This function queries the 'AuthorList' table using the given `level_id`
-    and author_name to determine if the author is already present.
-    It helps avoid inserting duplicates.
+    to determine if the author is already present. It helps avoid inserting
+    duplicates when updating.
 
     Args:
         level_id (int or str): The level ID to.
-        author_name (str): The TRLE author name.
         con (sqlite3.Connection): An active SQLite database connection.
 
     Returns:
-        int: ID number if the author ID exists in the database, None otherwise.
+        list of int: ID numbers if the level exists in the database, None otherwise.
     """
     query = '''
         SELECT AuthorList.authorID FROM AuthorList
         JOIN Author ON AuthorList.authorID = Author.AuthorID
-        WHERE AuthorList.levelID = ? AND Author.value = ?
+        WHERE AuthorList.levelID = ?
     '''
-    return tombll_common.query_return_id(query, (level_id, author_name), con)
+    return tombll_common.query_return_everything(query, (level_id, ), con)
 
 
-def database_author_list(level_id, con):
+def database_genre_ids(level_id, con):
     """
-    Get a list of author entries associated with a specific level.
+    Get genre ID form level ID.
 
-    This function queries the database to retrieve all unique authors
-    linked to the given level via the `AuthorList` relation. The results
-    are fetched and returned.
+    This function queries the 'GenreList' table using the given `level_id`
+    to determine if the genre is already present. It helps avoid inserting
+    duplicates when updating.
 
     Args:
-        level_id (int): The ID of the level for which to retrieve authors.
+        level_id (int or str): The level ID to.
         con (sqlite3.Connection): An active SQLite database connection.
 
     Returns:
-        None: List of all authors.
+        list of int: ID numbers if the level exists in the database, None otherwise.
     """
     query = '''
-        SELECT Author.value FROM AuthorList
-        JOIN Author ON AuthorList.authorID = Author.AuthorID
-        WHERE AuthorList.levelID = ?
+        SELECT GenreList.genreID FROM GenreList
+        JOIN Genre ON GenreList.genreID = Genre.GenreID
+        WHERE GenreList.levelID = ?
+    '''
+    return tombll_common.query_return_everything(query, (level_id, ), con)
+
+
+def database_picture_ids(level_id, con):
+    """
+    Get a list of pictures entries associated with a specific level.
+
+    This function queries the database to retrieve all unique pictures
+    linked to the given level via the `Screens` relation. The results
+    are fetched and returned.
+
+    Args:
+        level_id (int): The ID of the level for which to retrieve ZIP files.
+        con (sqlite3.Connection): An active SQLite database connection.
+
+    Returns:
+        List of int: List of all pictures IDs.
+    """
+    query = '''
+        SELECT Screens.pictureID
+        FROM Level
+        JOIN Screens ON Level.LevelID = Screens.levelID
+        WHERE Level.LevelID = ?
     '''
 
     # Fetch all rows from the executed query
+    return tombll_common.query_return_everything(query, (level_id, ), con)
+
+
+def database_tag_ids(level_id, con):
+    """
+    Get tag ID form level ID.
+
+    This function queries the 'TagList' table using the given `level_id`
+    to determine if the tag is already present. It helps avoid inserting
+    duplicates when updating.
+
+    Args:
+        level_id (int or str): The level ID to.
+        con (sqlite3.Connection): An active SQLite database connection.
+
+    Returns:
+        list of int: ID numbers if the level exists in the database, None otherwise.
+    """
+    query = '''
+        SELECT TagList.tagID FROM TagList
+        JOIN Tag ON TagList.tagID = Tag.TagID
+        WHERE TagList.levelID = ?
+    '''
     return tombll_common.query_return_everything(query, (level_id, ), con)

@@ -83,3 +83,12 @@ def make_zip_file():
         "release": "",
         "version": ""
     }
+
+
+def make_picture():
+    """trcustoms.org or TRLE picture data."""
+    return {
+        "position": 0,
+        "md5sum": "",
+        "md5": b''
+    }

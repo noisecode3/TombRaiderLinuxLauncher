@@ -283,7 +283,7 @@ def get_trle_walkthrough(level_soup):
     url = "https://www.trle.net" + iframe_src
 
     # Check the type of "document"
-    typ = scrape_common.url_postfix(url)
+    typ = scrape_common.url_basename_postfix(url)
     if typ == 'jpg':
         # we should handle all images here but right now
         # we return "" this is a bit more complex
