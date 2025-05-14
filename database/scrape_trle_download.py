@@ -16,6 +16,10 @@ Even if we end up on some other site we sill gonna use bt4
 ´x-´= we find another download for the same or reworked version elsewhere.
 Scraping should be able to follow but a small list with spacial cases could be accepted.
 
+The special once that we need to handle separately
+War of the Worlds 3430 -> https://sites.google.com/view/trwotw/war-of-the-worlds/download
+There should be one more download that don't work but can remember which one
+
 Fragments of the Core 1158 x- https://trcustoms.org/levels/1137
 Land of the Rising Sun 1186 -> trlevel.de x- https://trcustoms.org/levels/1165
 LB Advent Calendar 2004 - December 17th 1236 x- NO DOWNLOAD
@@ -109,7 +113,6 @@ Sanguis Virginis (Demo) 3328 x- https://trcustoms.org/levels/3262
 Louvre Galleries (Demo) 3362 -> https://trcustoms.org/levels/3295
 Kitten Adventure (Demo) 3379 -> https://trcustoms.org/levels/3312
 Create a Classic 2021 - Fantome 3426 -> https://trcustoms.org/levels/3359
-War of the Worlds 3430 -> https://sites.google.com/view/trwotw/war-of-the-worlds/download
 The Forbidden Place 3470 -> https://trcustoms.org/levels/3421
 Sanguis Virginis (Definitive Demo) 3491 x- https://trcustoms.org/levels/3438
 The Perils Ahead 3495 x- https://trcustoms.org/levels/3466
@@ -334,9 +337,11 @@ def get_zip_file_info(lid):
                     redirect_url.startswith("https://www.trle.net/levels/levels/"):
                 files = [_get_download_info(lid, redirect_url)]
 
-            if redirect_url.startswith("https://www.trle.net/sc/levelfeatures.php?lid="):
+            if redirect_url.startswith("https://www.trle.net/sc/levelfeatures.php?lid=") or \
+                    redirect_url == "https://www.trlevel.de":
                 trle_info = _get_trle_info(lid)
                 files.extend(_search_trcustoms(trle_info))
+                files.extend(_get_trlevel_download_info(trle_info))
 
             if redirect_url.lower().endswith("/btb/web/index.html") and \
                     redirect_url.startswith("https://www.trle.net/levels/levels"):
@@ -352,10 +357,6 @@ def get_zip_file_info(lid):
                 api_url = f"https://trcustoms.org/api/levels/{redirect_url.split("/")[-1]}/"
                 trcustoms_level_dict = scrape_common.get_json(api_url)
                 files = [_get_trcustoms_download_info(trcustoms_level_dict)]
-
-            if redirect_url == "https://www.trlevel.de":
-                trle_info = _get_trle_info(lid)
-                files.extend(_get_trlevel_download_info(trle_info))
 
     return files
 
