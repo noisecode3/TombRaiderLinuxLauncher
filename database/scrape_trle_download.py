@@ -195,18 +195,29 @@ def _get_trle_btb_download_info(trle_btb_url, lid):
     parted = trle_btb_url.split("BtB")
     btb_soup = None
     for case in ["web", "Web"]:
-        if parted[1] == f"/{case}/index.html" and len(parted) > 1:
+        if parted[1] == f"/{case}/index.html" and len(parted) == 2:
             btb_soup = scrape_common.get_soup(parted[0] + "BtB" + f"/{case}/downloads.html")
+            break
 
     if not btb_soup:
-        print("Fucked up")
+        print("No BtB download page soup")
         sys.exit(1)
+
     trle_info = _get_trle_info(lid)
     trle_title = trle_info[0]
     trle_zip_size = trle_info[2]
+
+    btb_title = scrape_common.normalize_level_name(" - ".join(trle_title.split(" - ")[1:]))
+
     link_tag = None
-    if isinstance(trle_info[0], str):
-        link_tag = btb_soup.find("a", string=trle_title.split(" - ")[1])
+    for a in btb_soup.find_all("a"):
+        if scrape_common.normalize_level_name(a.get_text()) == btb_title:
+            link_tag = a
+            break
+
+    if not link_tag:
+        print("No BtB link tag found")
+        sys.exit(1)
 
     download_url = None
     if isinstance(link_tag, Tag):

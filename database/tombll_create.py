@@ -165,6 +165,9 @@ def database_zip_file(zip_file, level_id, con):
     Returns:
         int: The ID of the newly inserted zip file.
     """
+    # SQL queries for selecting, inserting, and linking tags
+    query_select_id = "SELECT ZipID FROM Zip WHERE name = ?"
+
     # SQL queries for inserting ZIP file data and linking ZIP files to a level
     query_insert = '''
         INSERT INTO Zip (name, size, md5sum, url, version, release)
@@ -182,10 +185,12 @@ def database_zip_file(zip_file, level_id, con):
     )
 
     # Insert the ZIP file and get its ID
-    zip_id = tombll_common.query_return_id(query_insert, insert_args, con)
+    zip_id = tombll_common.query_return_id(query_select_id, (zip_file.get('name'), ), con)
+    if zip_id is None:
+        zip_id = tombll_common.query_return_id(query_insert, insert_args, con)
 
     # Link the ZIP file to the level in ZipList table
-    query_insert_middle = "INSERT INTO ZipList (zipID, levelID) VALUES (?, ?)"
+    query_insert_middle = "INSERT OR IGNORE INTO ZipList (zipID, levelID) VALUES (?, ?)"
     middle_args = (zip_id, level_id)
     tombll_common.query_run(query_insert_middle, middle_args, con)
     return zip_id
