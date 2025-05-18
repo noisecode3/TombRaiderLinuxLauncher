@@ -251,6 +251,15 @@ def _get_generic_download(soup):
     return link
 
 
+def _get_war_of_the_worlds_download():
+    zip_file = data_factory.make_zip_file()
+    zip_file['name'] = "MD-WarOfTheWorlds.zip"
+    zip_file['size'] = 2246.00
+    zip_file['md5'] = "MISSING"
+    zip_file['url'] = "https://www.trle.net/levels/levels/2021/1221/MD-WarOfTheWorlds.zip"
+    return zip_file
+
+
 def _get_trlevel_download_info(trle_info):
     zip_file = []
     url = "https://www.trlevel.de/filebase/index.php?category-file-list/558-trle-custom-levels/"
@@ -348,26 +357,29 @@ def get_zip_file_info(lid):
                     redirect_url.startswith("https://www.trle.net/levels/levels/"):
                 files = [_get_download_info(lid, redirect_url)]
 
-            if redirect_url.startswith("https://www.trle.net/sc/levelfeatures.php?lid=") or \
+            elif redirect_url.startswith("https://www.trle.net/sc/levelfeatures.php?lid=") or \
                     redirect_url == "https://www.trlevel.de":
                 trle_info = _get_trle_info(lid)
                 files.extend(_search_trcustoms(trle_info))
                 files.extend(_get_trlevel_download_info(trle_info))
 
-            if redirect_url.lower().endswith("/btb/web/index.html") and \
-                    redirect_url.startswith("https://www.trle.net/levels/levels"):
-                files = [_get_trle_btb_download_info(redirect_url, lid)]
-
-            if redirect_url.endswith(".htm") and \
-                    redirect_url.startswith("https://www.trle.net/levels/levels/"):
-                url = _get_generic_download(scrape_common.get_soup(redirect_url))
-                files = [_get_download_info(lid, url)]
-
-            if redirect_url.startswith("https://trcustoms.org/levels/") and \
+            elif redirect_url.startswith("https://trcustoms.org/levels/") and \
                     redirect_url.split("/")[-1].isdigit():
                 api_url = f"https://trcustoms.org/api/levels/{redirect_url.split("/")[-1]}/"
                 trcustoms_level_dict = scrape_common.get_json(api_url)
                 files = [_get_trcustoms_download_info(trcustoms_level_dict)]
+
+            elif redirect_url.lower().endswith("/btb/web/index.html") and \
+                    redirect_url.startswith("https://www.trle.net/levels/levels"):
+                files = [_get_trle_btb_download_info(redirect_url, lid)]
+
+            elif redirect_url.endswith(".htm") and \
+                    redirect_url.startswith("https://www.trle.net/levels/levels/"):
+                url = _get_generic_download(scrape_common.get_soup(redirect_url))
+                files = [_get_download_info(lid, url)]
+
+            elif redirect_url == "https://sites.google.com/view/trwotw/war-of-the-worlds/download":
+                files = [_get_war_of_the_worlds_download()]
 
     return files
 
