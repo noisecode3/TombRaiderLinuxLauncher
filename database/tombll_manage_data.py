@@ -4,6 +4,7 @@ import sys
 import re
 import sqlite3
 import json
+import time
 import logging
 
 import scrape_trle
@@ -30,6 +31,7 @@ Usage: python3 tombll_manage_data.py [options]
       -aj   [lid path] Download a level record to json file
       -af   [path] Add from the json file
       -ac   [lid] Add a level card record without info and walkthrough
+      -acr  [lid lid] Add a range of level card records
       -rm   [lid] Remove one level
       -u    [lid] Update a level record
 
@@ -323,7 +325,7 @@ if __name__ == "__main__":
         scrape_trle.get_trle_level(main_soup, main_data)
         add_tombll_json_to_database(main_data, main_con)
         main_con.commit()
-        print(f"File {sys.argv[2]} added successfully.")
+        print(f"lid {sys.argv[2]} added successfully.")
 
     elif (sys.argv[1] == "-aj" and number_of_argument == 4):
         main_lid = sys.argv[2]
@@ -353,7 +355,24 @@ if __name__ == "__main__":
         scrape_trle.get_trle_level_card(main_soup, main_data)
         add_tombll_json_to_database(main_data, main_con)
         main_con.commit()
-        print(f"File {sys.argv[2]} added successfully.")
+        print(f"lid {sys.argv[2]} card added successfully.")
+
+    elif (sys.argv[1] == "-acr" and number_of_argument == 4):
+        main_cur = main_con.cursor()
+        main_cur.execute("BEGIN;")
+        main_range_a = int(sys.argv[2])
+        main_range_b = int(sys.argv[3])
+
+        for i in range(min(main_range_a, main_range_b), max(main_range_a, main_range_b) + 1):
+            print(i)
+            main_data = data_factory.make_trle_tombll_data()
+            main_soup = scrape_trle.scrape_common.get_soup(
+                f"https://www.trle.net/sc/levelfeatures.php?lid={i}")
+            scrape_trle.get_trle_level_card(main_soup, main_data)
+            add_tombll_json_to_database(main_data, main_con)
+            main_con.commit()
+            print(f"lid {i} card added successfully.")
+            time.sleep(5)
 
     elif (sys.argv[1] == "-rm" and number_of_argument == 3):
         main_level_id = tombll_read.database_level_id(sys.argv[2], main_con)
