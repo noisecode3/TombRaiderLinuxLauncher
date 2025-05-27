@@ -165,7 +165,7 @@ def _get_trle_info(lid):
     if isinstance(trle_soup, Tag):
         trle_title = scrape_common.get_trle_title(trle_soup)
         trle_release = scrape_common.get_trle_release(trle_soup)
-        trle_zip_size = float(scrape_common.get_trle_zip_size(trle_soup))
+        trle_zip_size = float(scrape_common.get_trle_zip_size(trle_soup).replace(',', ''))
         return [trle_title, trle_release, trle_zip_size]
     return []
 
