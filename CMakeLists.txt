@@ -163,6 +163,8 @@ if(NOT TEST)
         ${CMAKE_SOURCE_DIR}/database/data_factory.py
         ${CMAKE_SOURCE_DIR}/database/get_leaf_cert.py
         ${CMAKE_SOURCE_DIR}/database/https.py
+        ${CMAKE_SOURCE_DIR}/database/main.py
+        ${CMAKE_SOURCE_DIR}/database/make_tombll_database.py
         ${CMAKE_SOURCE_DIR}/database/scrape_common.py
         ${CMAKE_SOURCE_DIR}/database/scrape_trle.py
         ${CMAKE_SOURCE_DIR}/database/scrape_trle_download.py
@@ -172,7 +174,7 @@ if(NOT TEST)
         ${CMAKE_SOURCE_DIR}/database/tombll_manage_data.py
         ${CMAKE_SOURCE_DIR}/database/tombll_read.py
         ${CMAKE_SOURCE_DIR}/database/tombll_update.py
-        ${CMAKE_SOURCE_DIR}/database/make_tombll_database.py
+        ${CMAKE_SOURCE_DIR}/database/tombll_view.py
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
     )
 

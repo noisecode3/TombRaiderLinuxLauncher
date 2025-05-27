@@ -1,17 +1,78 @@
-"""terminal menus, prompts for data, tests and setting up the database"""
+"""terminal menus, prompts for data, tests and setting up the database."""
+
 import os
+import subprocess  # nosec
+import json
+
+import tempfile
+import getpass
+
 import sys
 import shutil
 import gc
-import ueberzug as ueberzug_root  # type: ignore
-import ueberzug.lib.v0 as ueberzug  # type: ignore
+import sqlite3
+
+import scrape_trle
+import tombll_read
 
 gc.collect()
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-def print_trle_page(page):
-    print(f"{page['offset'] + 20} of {page['records_total']} records")
+def scrape_trle_index():
+    """Browse TRLE data by using normal https requests."""
+    offset = 0
+    while True:
+        _print_trle_page(scrape_trle.get_trle_page(offset, True))
+        user_input = input("Press Enter for the next page (or type 'q' to quit: ")
+        if user_input.lower() == 'q':
+            print("Exiting...")
+            break
+        offset += 20
+
+
+def local_trle_index():
+    """Browse local TRLE data."""
+    con = sqlite3.connect(os.path.dirname(os.path.abspath(__file__)) + '/tombll.db')
+    offset = 0
+    while True:
+        page = tombll_read.trle_page(offset, con, sort_latest_first=True)
+        _print_trle_page(page)
+        if len(page['levels']) < 20:
+            break
+        user_input = input("Press Enter for the next page (or type 'q' to quit: ")
+        if user_input.lower() == 'q':
+            print("Exiting...")
+            break
+        offset += 20
+    con.close()
+
+
+def local_trle_pictures_index():
+    """Browse local TRLE data with pictures."""
+    con = sqlite3.connect(os.path.dirname(os.path.abspath(__file__)) + '/tombll.db')
+    if _check_ueberzugpp():
+        offset = 1
+        while True:
+            page = tombll_read.trle_page(offset, con, sort_latest_first=True)
+            levels = page['levels']
+            covers = []
+            for level in levels:
+                data = tombll_read.trle_cover_picture(level['trle_id'], con)
+                covers.append(scrape_trle.scrape_common.cover_to_tempfile(data))
+
+            _display_menu(levels, covers)
+            for file in covers:
+                try:
+                    os.remove(file)
+                except FileNotFoundError:
+                    print(f"{file} not found, skipping.")
+            offset += 1
+    con.close()
+
+
+def _print_trle_page(page):
+    print(f"{page['offset'] + len(page['levels'])} of {page['records_total']} records")
     levels = page['levels']
 
     # Column widths for even spacing
@@ -33,41 +94,36 @@ def print_trle_page(page):
             truncated_text = cell[:width-1].ljust(width-1)  # Truncate and pad the text
             cell_data.append(truncated_text + ' ')
         print("".join(cell_data))  # Print the row in one line
+    print("")
 
 
-def print_trcustoms_page(page):
-    for level in page['levels']:
-        print(f"\nid: {level['trcustoms_id']} tile: {level['title']}")
-        print(f"authors: {level['authors']}")
-        print(f"tags: {level['tags']}")
-        print(f"created: {level['release']}")
-        print(f"duration: {level['duration']} difficulty: {level['difficulty']}")
-        print(f"type: {level['type']}")
-        print(f"genres: {level['genres']}")
-        print(f"picture_url: {level['cover']}")
-        print(f"picture_md5sum: {level['cover_md5sum']}")
+def _check_ueberzugpp():
+    if shutil.which("ueberzugpp") is None:
+        print("ueberzugpp is not installed or not in PATH.")
+        return False
 
-    print(f"\nPage number:{page['current_page']} of {page['total_pages']}")
-    print(f"Total records: {page['records_total']}")
-
-
-def check_ueberzug():
     try:
-        version_str = ueberzug_root.__version__
-        version_parts = [int(v) for v in version_str.split('.')]  # Split and convert to integers
-        # Check if version is at least 18.2.3
-        if version_parts < [18, 2, 3]:
-            print("Your version of ueberzug is too old.")
-            print("Please upgrade by running the following:")
-            print("pip install git+https://github.com/ueber-devel/ueberzug.git")
-            print("")
-            print("ueberzug is packaged on most popular distros debian, arch, fedora, gentoo")
-            print("and void, please request the package maintainer of your favourite distro to")
-            print("package the latest release of ueberzug.")
-            return False
+        result = subprocess.run(  # nosec
+            ["ueberzugpp", "--version"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        version_str = result.stdout.strip()
+        print(f"Found ueberzugpp version: {version_str}")
+        # Optionally parse and check version here
         return True
-    except AttributeError:
-        print("Could not determine the version of ueberzug.")
+
+    except FileNotFoundError:
+        print("ueberzugpp binary not found.")
+        return False
+
+    except subprocess.CalledProcessError as e:
+        print(f"ueberzugpp returned a non-zero exit code: {e}")
+        return False
+
+    except OSError as e:
+        print(f"OS error occurred while running ueberzugpp: {e}")
         return False
 
 
@@ -100,7 +156,7 @@ def check_ueberzug():
 # family = "Hack"
 # style = "Regular"
 
-def display_menu(items, image_paths):
+def _display_menu(items, image_paths):
     """Display a list of items with images next to them."""
     supported_terminals = ['alacritty', 'xterm']
     term = os.getenv('TERM', '').lower()
@@ -125,25 +181,35 @@ def display_menu(items, image_paths):
         print("Screen width too small")
         sys.exit(1)
 
-    with ueberzug.Canvas() as canvas:
-        full_board = min(len(items), max_rows * max_columns)
-        display_items = items[:full_board]
-        remaining_items = items[full_board:]
-        display_image_paths = image_paths[:full_board]
-        remaining_image_paths = image_paths[full_board:]
+    proc = subprocess.Popen(  # nosec
+        ["ueberzugpp", "layer", "-o", "wayland"],
+        stdin=subprocess.PIPE,
+        text=True
+    )
 
-        for i in range(len(display_items)):
-            if i == len(identifiers):
-                cover_canvas = canvas.create_placement(
-                    f'cover_{i}',
-                    x=(i % max_columns) * 79 + 2,
-                    y=(i // max_columns) * 7 + 1,
-                    scaler=ueberzug.ScalerOption.COVER.value,
-                    width=16, height=6
-                )
-                cover_canvas.path = display_image_paths[i]
-                cover_canvas.visibility = ueberzug.Visibility.VISIBLE
-                identifiers.append(cover_canvas)
+    if proc is None:
+        sys.exit(1)
+
+    full_board = min(len(items), max_rows * max_columns)
+    display_items = items[:full_board]
+    remaining_items = items[full_board:]
+    display_image_paths = image_paths[:full_board]
+    remaining_image_paths = image_paths[full_board:]
+    for i in range(len(display_items)):
+        if i == len(identifiers):
+            command = {
+                "action": "add",
+                "identifier": f"cover_{i}",
+                "x": (i % max_columns) * 79 + 2,
+                "y": (i // max_columns) * 7 + 1,
+                "path": display_image_paths[i],
+                "scaler": "stretch",
+                "width": 16,
+                "height": 6
+            }
+            proc.stdin.write(json.dumps(command) + '\n')
+            proc.stdin.flush()
+            identifiers.append(f"cover_{i}")
 
         # Calculate full rows and handle the last row separately
         full_rows = len(display_items) // max_columns
@@ -152,12 +218,12 @@ def display_menu(items, image_paths):
         # Display full rows
         for row in range(full_rows):
             row_offset = row * max_columns
-            print_row(display_items, row_offset, max_columns)
+            _print_row(display_items, row_offset, max_columns)
 
         # Display last row if there are any remaining items
         if last_row_items > 0:
             row_offset = full_rows * max_columns
-            print_row(display_items, row_offset, last_row_items)
+            _print_row(display_items, row_offset, last_row_items)
 
         awn = input(f"  {len(display_items)} of {len(items)} results, " +
                     "Press 'q' and Enter to exit, else press Enter for next page...")
@@ -169,16 +235,20 @@ def display_menu(items, image_paths):
 
         # Remove all previous images
         for identifier in identifiers:
-            # Create the remove command
-            identifier.visibility = ueberzug.Visibility.INVISIBLE
+            command = {
+                "action": "remove",
+                "identifier": identifier,
+            }
+            proc.stdin.write(json.dumps(command) + '\n')
+            proc.stdin.flush()
 
         # Recursive call with remaining items
         if remaining_items:
-            display_menu(remaining_items, remaining_image_paths)
+            _display_menu(remaining_items, remaining_image_paths)
 
 
-def print_row(items, row_offset, columns):
-    """Helper function to print a single row."""
+def _print_row(items, row_offset, columns):
+    """Print a single row."""
     # Title row
     for column in range(columns):
         print(f"{' '*19}{items[row_offset + column]['title'][:60]:<60}", end="")

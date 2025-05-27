@@ -6,6 +6,7 @@ If we can access the json array directly or use all of the data
 equal to the make_trle_tombll_data() from the data_factory to access data, we do it here.
 """
 import tombll_common
+import data_factory
 
 
 def database_author_list(level_id, con):
@@ -203,3 +204,69 @@ def database_tag_ids(level_id, con):
         WHERE TagList.levelID = ?
     '''
     return tombll_common.query_return_everything(query, (level_id, ), con)
+
+
+def trle_page(offset, con, limit=20, sort_latest_first=False):
+    """Get a trle page."""
+    page = data_factory.make_trle_page_data()
+    page['offset'] = offset
+
+    order_direction = 1 if sort_latest_first else 0
+
+    result = []
+    page['records_total'] = tombll_common.query_return_everything(
+        "SELECT COUNT(*) FROM Level",
+        None,
+        con)[0][0]
+
+    result = tombll_common.query_return_everything("""
+        SELECT
+            Info.trleID,
+            Author.value,
+            Info.title,
+            InfoDifficulty.value,
+            InfoDuration.value,
+            InfoClass.value,
+            InfoType.value,
+            Info.release
+        FROM Info
+        INNER JOIN Level ON (Info.InfoID = Level.infoID)
+        INNER JOIN AuthorList ON (Level.LevelID = AuthorList.levelID)
+        INNER JOIN Author ON (Author.AuthorID = AuthorList.authorID)
+        LEFT JOIN InfoDifficulty ON (InfoDifficulty.InfoDifficultyID = Info.difficulty)
+        LEFT JOIN InfoDuration ON (InfoDuration.InfoDurationID = Info.duration)
+        INNER JOIN InfoType ON (InfoType.InfoTypeID = Info.type)
+        LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
+        GROUP BY Info.trleID  -- Group by the trleID to get unique records?? needed?
+        ORDER BY
+            CASE WHEN ? = 0 THEN Info.release END ASC,
+            CASE WHEN ? = 1 THEN Info.release END DESC
+        LIMIT ? OFFSET ?;
+        """, (order_direction, order_direction, limit, offset), con)
+
+    for row in result:
+        level = data_factory.make_trle_level_data()
+        level['trle_id'] = row[0]
+        level['author'] = row[1]
+        level['title'] = row[2]
+        level['difficulty'] = row[3]
+        level['duration'] = row[4]
+        level['class'] = row[5]
+        level['type'] = row[6]
+        level['release'] = row[7]
+        page['levels'].append(level)
+
+    return page
+
+
+def trle_cover_picture(trle_id, con):
+    """Get TRLE cover picture."""
+    return tombll_common.query_return_everything("""
+        SELECT
+            Picture.data
+        FROM Info
+        INNER JOIN Level ON (Info.InfoID = Level.infoID)
+        INNER JOIN Screens ON (Level.LevelID = Screens.levelID)
+        INNER JOIN Picture ON (Screens.pictureID = Picture.PictureID)
+        WHERE Info.trleID = ? AND Screens.position = 0
+        """, (trle_id, ), con)[0][0]

@@ -1,6 +1,6 @@
-# Tomb Raider Linux Launcher
+# Tomb Raider Level Launcher
 
-A tool for running and modding classic Tomb Raider games (1–5) on Linux with Wine/Proton. It also supports searching and downloading levels from trle.net, enabling direct play from the application.
+A tool for running and modding classic Tomb Raider games (1–5) on Windows (After Linux) and Linux with Wine/Proton. It also supports searching and downloading levels from trle.net, enabling direct play from the application. Obs repository will move to TombRaiderLevelLauncher.
 
 This project is my passion for Tomb Raider classics combined with learning C++, Python, and SQL. My dream is to create an arcade machine featuring all classic Tomb Raider games and TRLE levels, potentially with a co-op mode.
 
@@ -12,6 +12,7 @@ This project is my passion for Tomb Raider classics combined with learning C++, 
 - Workarounds for Linux/Wine compatibility issues
 - Modding support for executable-based mods
 - Level download and installation from trle.net
+- Pool level files to save disk space, need NTFS on Windows for hard links
 - Respectful scraping and filtering of data from trle.net (with site owner permission)
 
 ## Installation
@@ -160,6 +161,9 @@ a computer with a strong video card.
 
 ## Targets
 I program mostly on Slackware-current and Arch, I gonna try target and test SteamOS for second release.
+I don't use Windows but it should build on both Windows and Linux with MinGw. I will test with Wine/VM.
+It's recommended as a standard to use Arch Linux or MSYS2 on Windows, with qt-creator.
+Its possible to set it up with neovim or vscode or any other but its more work.
 
 ## License
 This project is licensed under GPLv3. Art assets are under Creative Commons Attribution-NonCommercial-ShareAlike 4.0. Tomb Raider is a trademark of Embracer Group AB.

@@ -10,6 +10,22 @@ CONNECTION = sqlite3.connect('tombll.db')
 C = CONNECTION.cursor()
 
 C.execute('''
+CREATE TABLE Version (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    value TEXT -- Your desired columns
+)''')
+
+C.execute('''INSERT INTO Version (id, value) VALUES (1, '0.0.1')''')
+
+C.execute('''
+CREATE TRIGGER limit_singleton
+BEFORE INSERT ON Version
+WHEN (SELECT COUNT(*) FROM Version) >= 1
+BEGIN
+    SELECT RAISE(FAIL, 'Only one record is allowed.');
+END;''')
+
+C.execute('''
 CREATE TABLE InfoDifficulty (
     InfoDifficultyID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     value TEXT NOT NULL UNIQUE

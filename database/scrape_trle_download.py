@@ -224,7 +224,12 @@ def _get_trle_btb_download_info(trle_btb_url, lid):
         download_url = link_tag.get("href", '')
     if isinstance(download_url, str):
         zip_file['name'] = urlparse(download_url).path.split("/")[-1]
+    else:
+        print("No BtB url from tag")
+        sys.exit(1)
+
     zip_file['size'] = trle_zip_size
+    zip_file['md5'] = "MISSING"
     zip_file['url'] = download_url
     return zip_file
 

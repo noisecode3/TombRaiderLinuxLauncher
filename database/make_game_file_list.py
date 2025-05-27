@@ -1,12 +1,13 @@
-"""Record original game files"""
+"""Record original game files."""
 import re
 import os
 import sys
 import json
 import hashlib
 
-def get_game_dir():
-    """Get basic user input"""
+
+def _get_game_dir():
+    """Get basic user input."""
     path = input("Path to directory: ")
 
     # Check if the provided path is a valid directory
@@ -23,8 +24,8 @@ def get_game_dir():
     return path, tag
 
 
-def game_file_loop(game_dir):
-    """Loop through the files"""
+def _game_file_loop(game_dir):
+    """Loop through the files."""
     file_info = {}
     savegame_pattern = re.compile(r'^savegame\.\d+$', re.IGNORECASE)
     dxvk_caches = re.compile(r'^.*\.dxvk-cache$')
@@ -56,9 +57,9 @@ def game_file_loop(game_dir):
 
 
 def make_game_file_list():
-    """Main part of the module"""
-    game_dir, tag = get_game_dir()
-    file_info = game_file_loop(game_dir)
+    """Get the game file list."""
+    game_dir, tag = _get_game_dir()
+    file_info = _game_file_loop(game_dir)
 
     if not isinstance(file_info, dict):
         print("File type return from game_file_loop error")
