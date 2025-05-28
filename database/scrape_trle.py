@@ -62,7 +62,7 @@ def get_trle_cover_by_id(trle_id):
 # get_trle_page(offset, False)
 ###############################################################################
 
-def get_trle_page(offset, sort_created_first=False):
+def get_trle_page(offset=0, sort_created_first=False):
     """Scrape one TRLE page where the offset starts from the earliest date."""
     params = {
         "atype": "",
@@ -75,7 +75,7 @@ def get_trle_page(offset, sort_created_first=False):
         "rating": "",
         "sortidx": 8,
         "sorttype": 2 if sort_created_first else 1,
-        "idx": "" if offset == 0 else str(offset)
+        "idx": int(offset)
     }
     query_string = urlencode(params)
     soup = scrape_common.get_soup(f"https://www.trle.net/pFind.php?{query_string}")

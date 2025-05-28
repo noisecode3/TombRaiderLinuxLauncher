@@ -1,6 +1,10 @@
 """Main loop for CLI menu like interfaces."""
 import sys
+import os
 import tombll_view
+import make_tombll_database
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def show_menu():
@@ -13,7 +17,6 @@ def show_menu():
     print("5. update - Insert missing TRLE book records with info and walkthrough")
     print("6. trle - Run http TRLE")
     print("7. trle_local - Run TRLE local")
-    print("8. trle_local_pic - Run TRLE local picture cards")
     print("0. Exit")
 
 
@@ -24,7 +27,7 @@ def main_menu():
         choice = input("Enter your choice: ").strip()
 
         if choice == "1":
-            pass
+            make_tombll_database.run()
         elif choice == "2":
             pass
         elif choice == "3":
@@ -34,12 +37,10 @@ def main_menu():
         elif choice == "5":
             pass
         elif choice == "6":
-            pass
+            tombll_view.scrape_trle_index()
         elif choice == "7":
             tombll_view.local_trle_index()
-        elif choice == "8":
-            tombll_view.local_trle_pictures_index()
-        elif choice == "0":
+        elif choice in ("0", "q"):
             print("Exiting...")
             sys.exit(0)
         else:

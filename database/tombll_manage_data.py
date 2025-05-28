@@ -138,6 +138,27 @@ def parse_position(s):
     return ord(suffix) - ord('a') + 1 if suffix else 0
 
 
+def add_screen_from_url(screen, level_id, con):
+    """
+    Scrape the url picture and add to database.
+
+    Returns:
+        INT: Picture ID.
+
+    """
+    if screen.startswith("https://www.trle.net/screens/"):
+        picture = data_factory.make_picture()
+        # Fetch the .webp image data
+        relative_path = screen.replace("https://www.trle.net/screens/", "")
+        picture['data'] = scrape_trle.get_trle_cover(relative_path)
+        picture['position'] = parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
+        picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
+        return tombll_create.database_screen(picture, level_id, con)
+
+    print("Cover did not start with https://www.trle.net/screens/ ")
+    sys.exit(1)
+
+
 def add_tombll_json_to_database(data, con):
     """Insert level data and related details into the database.
 
@@ -162,32 +183,13 @@ def add_tombll_json_to_database(data, con):
         tombll_create.database_zip_files(data['zip_files'], level_id, con)
 
     # Single screen image, checked for None in the add_screen_to_database function
-    screen = data.get('screen')
-    if screen.startswith("https://www.trle.net/screens/"):
-        picture = data_factory.make_picture()
-        # Fetch the .webp image data for the screen
-        picture['data'] = \
-            scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-        picture['position'] = parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
-        picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
-        tombll_create.database_screen(picture, level_id, con)
+    add_screen_from_url(data.get('screen'), level_id, con)
 
     # Add large screens if they are provided
     large_screens = data.get('large_screens')
     if large_screens:
-        webp_imgage_array = []
         for screen in large_screens:
-            if screen.startswith("https://www.trle.net/screens/"):
-                picture = data_factory.make_picture()
-                picture['data'] = \
-                    scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-                picture['position'] = \
-                    parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
-                picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
-                webp_imgage_array.append(picture)
-
-        if webp_imgage_array:
-            tombll_create.database_screens(webp_imgage_array, level_id, con)
+            add_screen_from_url(screen, level_id, con)
 
 
 def update_tombll_authors_to_database(authors, level_id, con):
@@ -312,35 +314,15 @@ def update_tombll_json_to_database(data, level_id, con):
     if zip_files:
         update_tombll_zip_files_to_database(zip_files, level_id, con)
 
-    new_set = set()
     # Single screen image, checked for None in the add_screen_to_database function
-    screen = data.get('screen')
-    if screen.startswith("https://www.trle.net/screens/"):
-        picture = data_factory.make_picture()
-        # Fetch the .webp image data for the screen
-        picture['data'] = \
-            scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-        picture['position'] = parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
-        picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
-        picture_id = tombll_create.database_screen(picture, level_id, con)
-        new_set.add(picture_id)
+    new_set = set()
+    new_set.add(add_screen_from_url(data.get('screen'), level_id, con))
 
     # Add large screens if they are provided
     large_screens = data.get('large_screens')
     if large_screens:
-        webp_imgage_array = []
         for screen in large_screens:
-            if screen.startswith("https://www.trle.net/screens/"):
-                picture = data_factory.make_picture()
-                picture['data'] = \
-                    scrape_trle.get_trle_cover(screen.replace("https://www.trle.net/screens/", ""))
-                picture['position'] = \
-                    parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
-                picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
-                webp_imgage_array.append(picture)
-
-        if webp_imgage_array:
-            new_set.update(tombll_create.database_screens(webp_imgage_array, level_id, con))
+            new_set.add(add_screen_from_url(screen, level_id, con))
 
     database_pictures = tombll_read.database_picture_ids(level_id, con)
     if database_pictures:
@@ -478,7 +460,7 @@ if __name__ == "__main__":
         print_download_list(sys.argv[2], main_con)
         main_con.close()
 
-    elif (sys.argv[1] == "-az" and number_of_argument >= 5):
+    elif (sys.argv[1] == "-az" and number_of_argument >= 6):
         main_data = data_factory.make_zip_file()
         main_data["name"] = sys.argv[3]
         main_data["size"] = sys.argv[4]

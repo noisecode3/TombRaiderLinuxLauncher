@@ -214,10 +214,13 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
     order_direction = 1 if sort_latest_first else 0
 
     result = []
-    page['records_total'] = tombll_common.query_return_everything(
-        "SELECT COUNT(*) FROM Level",
-        None,
-        con)[0][0]
+    page['records_total'] = tombll_common.query_return_everything("""
+        SELECT COUNT(*)
+        FROM Info
+        INNER JOIN Level ON Info.InfoID = Level.infoID
+        INNER JOIN AuthorList ON Level.LevelID = AuthorList.levelID
+        INNER JOIN Author ON Author.AuthorID = AuthorList.authorID
+    """, None, con)[0][0]
 
     result = tombll_common.query_return_everything("""
         SELECT
@@ -237,7 +240,6 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
         LEFT JOIN InfoDuration ON (InfoDuration.InfoDurationID = Info.duration)
         INNER JOIN InfoType ON (InfoType.InfoTypeID = Info.type)
         LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
-        GROUP BY Info.trleID  -- Group by the trleID to get unique records?? needed?
         ORDER BY
             CASE WHEN ? = 0 THEN Info.release END ASC,
             CASE WHEN ? = 1 THEN Info.release END DESC
