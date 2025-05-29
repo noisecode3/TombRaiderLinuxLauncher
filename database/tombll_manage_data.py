@@ -35,18 +35,23 @@ Usage: python3 tombll_manage_data.py [options]
       -rm   [lid] Remove one level record
       -u    [lid] Update a level record
 
-      -ld   [Level.LevelID] List download files records
-      -ad   [Level.LevelID Zip.name Zip.size Zip.md5sum]
+      -ld   [lid] List download files records
+      -ad   [lid Zip.name Zip.size Zip.md5sum]
                 Add a local zip file to a level without a file
 """
     print(help_text.strip())
 
 
 def list_levels():
-    """List all level in the database."""
+    """Retrieve and prints a list of level information."""
+    # Fetch all rows
     con = database_make_connection()
-    print_list(con)
+    results = tombll_read.database_level_list(con)
     con.close()
+
+    # Iterate over the results and print each row
+    for row in results:
+        print(row)
 
 
 def add_level(lid):
@@ -173,15 +178,22 @@ def add_download(lid, name, size, md5):
 
     con = database_make_connection()
     database_begin_write(con)
-    tombll_create.database_zip_file(data, lid, con)
+    level_id = tombll_read.database_level_id(lid, con)
+    tombll_create.database_zip_file(data, level_id, con)
     database_commit_and_close(con)
 
 
 def list_downloads(lid):
-    """List all download files for a level by taking the lid number."""
+    """Print a list of ZIP file entries associated with a specific level."""
+    # Fetch all rows
     con = database_make_connection()
-    print_download_list(lid, con)
+    level_id = tombll_read.database_level_id(lid, con)
+    results = tombll_read.database_zip_list(level_id, con)
     con.close()
+
+    # Print each row in the result
+    for row in results:
+        print(row)
 
 
 def get_local_page(offset, con):
@@ -232,25 +244,6 @@ def database_commit_and_close(con):
     con.close()
 
 
-def print_list(con):
-    """
-    Retrieve and prints a list of level information.
-
-    Args:
-        con (sqlite3.Connection): An open SQLite database connection.
-
-    Returns:
-        None: This function does not return any value.
-        It prints the results directly to the console.
-    """
-    # Fetch all rows
-    results = tombll_read.database_level_list(con)
-
-    # Iterate over the results and print each row
-    for row in results:
-        print(row)
-
-
 def trle_level_url(lid):
     """
     Get level TRLE url from lid number.
@@ -259,26 +252,6 @@ def trle_level_url(lid):
         con (sqlite3.Connection): An open SQLite database connection.
     """
     return f"https://www.trle.net/sc/levelfeatures.php?lid={lid}"
-
-
-def print_download_list(level_id, con):
-    """
-    Print a list of ZIP file entries associated with a specific level.
-
-    Args:
-        level_id (int): The ID of the level for which to retrieve ZIP files.
-        con (sqlite3.Connection): An active SQLite database connection.
-
-    Returns:
-        None: This function prints the query results to the console.
-
-    """
-    # Fetch all rows
-    results = tombll_read.database_zip_list(level_id, con)
-
-    # Print each row in the result
-    for row in results:
-        print(row)
 
 
 def parse_position(s):

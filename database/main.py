@@ -13,8 +13,8 @@ def show_menu():
     print("1. new - Create a new empty index database and add static data")
     print("2. new - Create a new full index database, without info and walkthrough data")
     print("3. new - Create a new full index database, with info and walkthrough data")
-    print("4. update - Insert missing TRLE book basic records")
-    print("5. update - Insert missing TRLE book records with info and walkthrough")
+    print("4. update - Insert missing TRLE card records")
+    print("5. update - Insert missing TRLE full records with info and walkthrough")
     print("6. resync all - Update or remove every record to mirror TRLE")
     print("7. trle - Run https TRLE")
     print("8. trle_local - Run TRLE local")
@@ -30,15 +30,17 @@ def main_menu():
         if choice == "1":
             make_tombll_database.run()
         elif choice == "2":
-            pass
+            make_tombll_database.run()
+            tombll_view.update_level_cards()
         elif choice == "3":
-            pass
+            make_tombll_database.run()
+            tombll_view.update_levels()
         elif choice == "4":
-            pass
+            tombll_view.update_level_cards()
         elif choice == "5":
-            pass
+            tombll_view.update_levels()
         elif choice == "6":
-            pass
+            print("Not Implemented...")
         elif choice == "7":
             tombll_view.scrape_trle_index()
         elif choice == "8":

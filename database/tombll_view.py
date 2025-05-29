@@ -1,4 +1,4 @@
-"""terminal menus, prompts for data, tests and setting up the database."""
+"""Terminal menus, prompts for data, tests and setting up the database."""
 
 import os
 import sqlite3
@@ -6,6 +6,65 @@ import sqlite3
 import tombll_manage_data
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+def compare_pages(estimate):
+    """Get the range from database and server pages. Its a bit stupid but lets do this at first."""
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tombll.db')
+    con = sqlite3.connect(db_path)
+    database_page = tombll_manage_data.get_local_page(0, con)
+    con.close()
+
+    database_id = 1
+    if database_page['levels']:
+        database_id = database_page['levels'][0]['trle_id']
+
+    trle_id = int(tombll_manage_data.get_trle_page(0)['levels'][0]['trle_id'])
+    total_records = trle_id - database_id + 1
+    about_time_sec = total_records * estimate
+
+    hours, remainder = divmod(about_time_sec, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    print(f"There are {total_records} level records (or fewer) to update.")
+    print(f"Estimated time: {hours:02d}:{minutes:02d}:{seconds:02d}")
+
+    return (database_id, trle_id)
+
+
+def update_level_cards():
+    """
+    Update the database by getting the missing last card records.
+
+    Get a local page from the database and compare it to a scraped page from trle.net.
+    Then add all the level cards in the range of ID numbers from the last date ID in the database
+    to the last date ID on trle.net.
+    """
+    trle_range = compare_pages(6)
+    print("I will upload a database on MEGA to offload the server.")
+    print("The program can't even handle that many records right now.")
+    print("There is no reason for you to test this.")
+    print("Do you want to continue?")
+    awn = input("y or n: ")
+    if awn == 'y':
+        tombll_manage_data.add_level_card_range(trle_range[0], trle_range[1])
+
+
+def update_levels():
+    """
+    Update the databse by getting the missing last level records.
+
+    Get a local page from the database and then compare it by a scraped page form trle.net.
+    Then add all the level in the range of id numbers from the last date id on the database
+    to the last date id on trle.net.
+    """
+    '''
+    trle_range = compare_pages(7)
+    print("Do you want to continue?")
+    awn = input("y or n: ")
+    if awn == 'y':
+        tombll_manage_data.add_level_range(trle_range[0], trle_range[1])
+    '''
 
 
 def scrape_trle_index():

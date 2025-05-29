@@ -49,7 +49,7 @@ def database_level_list(con):
         List: List of all levels.
     """
     query = '''
-        SELECT Level.LevelID, Info.Title, Author.value
+        SELECT Info.trleID, Info.Title, Author.value
         FROM Level
         JOIN Info ON Level.infoID = Info.InfoID
         JOIN AuthorList ON Level.LevelID = AuthorList.levelID
@@ -77,7 +77,7 @@ def database_zip_list(level_id, con):
         None: List of all zip files.
     """
     query = '''
-        SELECT Zip.*
+        SELECT Zip.name, Zip.size, Zip.md5sum, Zip.url, Zip.version, Zip.release
         FROM Level
         JOIN ZipList ON Level.LevelID = ZipList.levelID
         JOIN Zip ON ZipList.zipID = Zip.ZipID
