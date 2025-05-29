@@ -15,11 +15,11 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QTest>
-#include "binary.hpp"
-#include "test.hpp"
+#include "../src/binary.hpp"
+#include "../test/test.hpp"
 #else
 #include <QApplication>
-#include "TombRaiderLinuxLauncher.hpp"
+#include "../src/TombRaiderLinuxLauncher.hpp"
 #endif
 
 #ifdef TEST

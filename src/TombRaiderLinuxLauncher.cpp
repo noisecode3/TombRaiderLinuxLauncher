@@ -15,7 +15,6 @@
 #include "../src/TombRaiderLinuxLauncher.hpp"
 #include "ui_TombRaiderLinuxLauncher.h"
 #include "../src/staticData.hpp"
-// #include "debug.hpp"
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     : QMainWindow(parent) {
@@ -169,6 +168,11 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
         QString tag = QString("%1 by %2\n")
                           .arg(list[i].m_title)
                           .arg(list[i].m_author);
+
+        //list[i].m_type
+        //list[i].m_class
+        //list[i].m_difficulty
+        //list[i].m_duration
 
         tag += QString(
                 "Type: %1\nClass: %2\nDifficulty: %3\nDuration: %4\nDate:%5")

@@ -20,6 +20,7 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QDataStream>
+#include <string>
 
 // Define structures for PE headers
 #pragma pack(push, 1)  // Set 1-byte alignment

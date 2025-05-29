@@ -65,7 +65,7 @@ struct StaticData {
             {34, "Venice"},
             {35, "Wild West"},
             {36, "Xmas"},
-            {36, "Young Lara"}
+            {37, "Young Lara"}
         };
     }
     std::unordered_map<qint64, QString> getDuration() const {
