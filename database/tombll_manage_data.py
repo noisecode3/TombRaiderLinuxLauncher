@@ -28,18 +28,170 @@ Usage: python3 tombll_manage_data.py [options]
   Options:
       -l    List level records
       -a    [lid] Add a level record
-      -aj   [lid path] Download a level record to json file
-      -af   [path] Add from the json file
+      -sj   [lid path] Save a level record to json file
+      -aj   [path] Add a level record from a json file
       -ac   [lid] Add a level card record without info and walkthrough
       -acr  [lid lid] Add a range of level card records
-      -rm   [lid] Remove one level
+      -rm   [lid] Remove one level record
       -u    [lid] Update a level record
 
-      -lz   [Level.LevelID] List zip file records
-      -az   [Level.LevelID Zip.name Zip.size Zip.md5sum]
-                Optional and in order [Zip.url Zip.version Zip.release] Add a zip file
+      -ld   [Level.LevelID] List download files records
+      -ad   [Level.LevelID Zip.name Zip.size Zip.md5sum]
+                Add a local zip file to a level without a file
 """
     print(help_text.strip())
+
+
+def list_levels():
+    """List all level in the database."""
+    con = database_make_connection()
+    print_list(con)
+    con.close()
+
+
+def add_level(lid):
+    """Add a level by taking the lid number."""
+    data = data_factory.make_trle_tombll_data()
+
+    soup = scrape_trle.scrape_common.get_soup(trle_level_url(lid))
+    scrape_trle.get_trle_level(soup, data)
+
+    if data['title']:
+        con = database_make_connection()
+        database_begin_write(con)
+        add_tombll_json_to_database(data, con)
+        database_commit_and_close(con)
+        print(f"lid {lid} with title \"{data['title']}\" added successfully.")
+    else:
+        print(f"lid {lid} was an empty page.")
+
+
+def save_json_level(lid, path):
+    """Save a level to a json file on disk by taking the lid number."""
+    data = data_factory.make_trle_tombll_data()
+
+    soup = scrape_trle.scrape_common.get_soup(trle_level_url(lid))
+    scrape_trle.get_trle_level(soup, data)
+
+    if data['title']:
+        with open(path, mode='w', encoding='utf-8') as json_file:
+            json.dump(data, json_file)
+        print(
+            f"lid {lid} with title \"{data['title']}\" "
+            f"saved to {path} successfully."
+        )
+    else:
+        print(f"lid {lid} was an empty page.")
+
+
+def add_file(path):
+    """Add a level from a json file on disk."""
+    data = tombll_common.get_tombll_json(path)
+
+    con = database_make_connection()
+    database_begin_write(con)
+    add_tombll_json_to_database(data, con)
+    database_commit_and_close(con)
+    print(f"File {path} with title \"{data['title']}\" added successfully.")
+
+
+def add_level_card(lid):
+    """Add a level card by taking the lid number."""
+    data = data_factory.make_trle_tombll_data()
+
+    soup = scrape_trle.scrape_common.get_soup(trle_level_url(lid))
+    scrape_trle.get_trle_level_card(soup, data)
+
+    if data['title']:
+        con = database_make_connection()
+        database_begin_write(con)
+        add_tombll_json_to_database(data, con)
+        database_commit_and_close(con)
+        print(f"lid {lid} card with title \"{data['title']}\" added successfully.")
+    else:
+        print(f"lid {lid} was an empty page.")
+
+
+def add_level_card_range(range_a, range_b):
+    """Add a level card by taking a lid range."""
+    for i in range(min(int(range_a), int(range_b)), max(int(range_a), int(range_b)) + 1):
+        data = data_factory.make_trle_tombll_data()
+        soup = scrape_trle.scrape_common.get_soup(trle_level_url(i))
+        scrape_trle.get_trle_level_card(soup, data)
+
+        if data['title']:
+            con = database_make_connection()
+            database_begin_write(con)
+            add_tombll_json_to_database(data, con)
+            database_commit_and_close(con)
+            print(f"lid {i} card with title \"{data['title']}\" added successfully.")
+        else:
+            print(f"lid {i} was an empty page.")
+
+        time.sleep(5)
+
+
+def remove_level(lid):
+    """Remove a level from the database by taking the lid number."""
+    con = database_make_connection()
+    database_level_id = tombll_read.database_level_id(lid, con)
+
+    database_begin_write(con)
+    tombll_delete.database_level(database_level_id, con)
+    database_commit_and_close(con)
+    print(f"lid {lid} removed successfully.")
+
+
+def update_level(lid):
+    """Update a level by taking the lid number."""
+    data = data_factory.make_trle_tombll_data()
+
+    soup = scrape_trle.scrape_common.get_soup(trle_level_url(lid))
+    scrape_trle.get_trle_level(soup, data)
+
+    if data['title']:
+        con = database_make_connection()
+        level_id = tombll_read.database_level_id(lid, con)
+
+        database_begin_write(con)
+        update_tombll_json_to_database(data, level_id, con)
+        database_commit_and_close(con)
+        print(f"lid {lid} with title \"{data['title']}\" updated successfully.")
+    else:
+        print(f"lid {lid} was an empty page.")
+
+
+def add_download(lid, name, size, md5):
+    """Add a download file to a level by taking the lid number."""
+    data = data_factory.make_zip_file()
+    data["name"] = name
+    data["size"] = size
+    data["md5"] = md5
+    data["url"] = None
+    data["release"] = None
+    data["version"] = None
+
+    con = database_make_connection()
+    database_begin_write(con)
+    tombll_create.database_zip_file(data, lid, con)
+    database_commit_and_close(con)
+
+
+def list_downloads(lid):
+    """List all download files for a level by taking the lid number."""
+    con = database_make_connection()
+    print_download_list(lid, con)
+    con.close()
+
+
+def get_local_page(offset, con):
+    """Pass down API to get a TRLE page from the database."""
+    return tombll_read.trle_page(offset, con, sort_latest_first=True)
+
+
+def get_trle_page(offset):
+    """Pass down API to scrape a TRLE page from "trle.net"."""
+    return scrape_trle.get_trle_page(offset, sort_created_first=True)
 
 
 def database_make_connection():
@@ -343,136 +495,34 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if (sys.argv[1] == "-l" and number_of_argument == 2):
-        main_con = database_make_connection()
-        print_list(main_con)
-        main_con.close()
+        list_levels()
 
     elif (sys.argv[1] == "-a" and number_of_argument == 3):
-        main_lid = sys.argv[2]
-        main_data = data_factory.make_trle_tombll_data()
+        add_level(sys.argv[2])
 
-        main_soup = scrape_trle.scrape_common.get_soup(trle_level_url(main_lid))
-        scrape_trle.get_trle_level(main_soup, main_data)
+    elif (sys.argv[1] == "-sj" and number_of_argument == 4):
+        save_json_level(sys.argv[2], sys.argv[3])
 
-        if main_data['title']:
-            main_con = database_make_connection()
-            database_begin_write(main_con)
-            add_tombll_json_to_database(main_data, main_con)
-            database_commit_and_close(main_con)
-            print(f"lid {main_lid} with title \"{main_data['title']}\" added successfully.")
-        else:
-            print(f"lid {main_lid} was an empty page.")
-
-    elif (sys.argv[1] == "-aj" and number_of_argument == 4):
-        main_lid = sys.argv[2]
-        main_path = sys.argv[3]
-        main_data = data_factory.make_trle_tombll_data()
-
-        main_soup = scrape_trle.scrape_common.get_soup(trle_level_url(main_lid))
-        scrape_trle.get_trle_level(main_soup, main_data)
-
-        if main_data['title']:
-            with open(main_path, mode='w', encoding='utf-8') as json_file:
-                json.dump(main_data, json_file)
-            print(
-                f"lid {main_lid} with title \"{main_data['title']}\" "
-                f"saved to {main_path} successfully."
-            )
-        else:
-            print(f"lid {main_lid} was an empty page.")
-
-    elif (sys.argv[1] == "-af" and number_of_argument == 3):
-        main_path = sys.argv[2]
-        main_data = tombll_common.get_tombll_json(main_path)
-
-        main_con = database_make_connection()
-        database_begin_write(main_con)
-        add_tombll_json_to_database(main_data, main_con)
-        database_commit_and_close(main_con)
-        print(f"File {main_path} with title \"{main_data['title']}\" added successfully.")
+    elif (sys.argv[1] == "-aj" and number_of_argument == 3):
+        add_file(sys.argv[2])
 
     elif (sys.argv[1] == "-ac" and number_of_argument == 3):
-        main_lid = sys.argv[2]
-        main_data = data_factory.make_trle_tombll_data()
-
-        main_soup = scrape_trle.scrape_common.get_soup(trle_level_url(main_lid))
-        scrape_trle.get_trle_level_card(main_soup, main_data)
-
-        if main_data['title']:
-            main_con = database_make_connection()
-            database_begin_write(main_con)
-            add_tombll_json_to_database(main_data, main_con)
-            database_commit_and_close(main_con)
-            print(f"lid {main_lid} card with title \"{main_data['title']}\" added successfully.")
-        else:
-            print(f"lid {main_lid} was an empty page.")
+        add_level_card(sys.argv[2])
 
     elif (sys.argv[1] == "-acr" and number_of_argument == 4):
-        main_range_a = int(sys.argv[2])
-        main_range_b = int(sys.argv[3])
-
-        for i in range(min(main_range_a, main_range_b), max(main_range_a, main_range_b) + 1):
-            main_data = data_factory.make_trle_tombll_data()
-            main_soup = scrape_trle.scrape_common.get_soup(trle_level_url(i))
-            scrape_trle.get_trle_level_card(main_soup, main_data)
-
-            if main_data['title']:
-                main_con = database_make_connection()
-                database_begin_write(main_con)
-                add_tombll_json_to_database(main_data, main_con)
-                database_commit_and_close(main_con)
-                print(f"lid {i} card with title \"{main_data['title']}\" added successfully.")
-            else:
-                print(f"lid {i} was an empty page.")
-
-            time.sleep(5)
+        add_level_card_range(sys.argv[2], sys.argv[3])
 
     elif (sys.argv[1] == "-rm" and number_of_argument == 3):
-        main_lid = sys.argv[2]
-        main_con = database_make_connection()
-        main_database_level_id = tombll_read.database_level_id(main_lid, main_con)
-
-        database_begin_write(main_con)
-        tombll_delete.database_level(main_database_level_id, main_con)
-        database_commit_and_close(main_con)
-        print(f"lid {main_lid} removed successfully.")
+        remove_level(sys.argv[2])
 
     elif (sys.argv[1] == "-u" and number_of_argument == 3):
-        main_lid = sys.argv[2]
-        main_data = data_factory.make_trle_tombll_data()
+        update_level(sys.argv[2])
 
-        main_soup = scrape_trle.scrape_common.get_soup(trle_level_url(main_lid))
-        scrape_trle.get_trle_level(main_soup, main_data)
+    elif (sys.argv[1] == "-ld" and number_of_argument == 3):
+        list_downloads(sys.argv[2])
 
-        if main_data['title']:
-            main_con = database_make_connection()
-            main_level_id = tombll_read.database_level_id(main_lid, main_con)
-
-            database_begin_write(main_con)
-            update_tombll_json_to_database(main_data, main_level_id, main_con)
-            database_commit_and_close(main_con)
-            print(f"lid {main_lid} with title \"{main_data['title']}\" updated successfully.")
-        else:
-            print(f"lid {main_lid} was an empty page.")
-
-    elif (sys.argv[1] == "-lz" and number_of_argument == 3):
-        main_con = database_make_connection()
-        print_download_list(sys.argv[2], main_con)
-        main_con.close()
-
-    elif (sys.argv[1] == "-az" and number_of_argument >= 6):
-        main_data = data_factory.make_zip_file()
-        main_data["name"] = sys.argv[3]
-        main_data["size"] = sys.argv[4]
-        main_data["md5"] = sys.argv[5]
-        main_data["url"] = sys.argv[6] if number_of_argument >= 7 else None
-        main_data["release"] = sys.argv[7] if number_of_argument >= 8 else None
-        main_data["version"] = sys.argv[8] if number_of_argument >= 9 else None
-
-        main_con = database_make_connection()
-        database_begin_write(main_con)
-        tombll_create.database_zip_file(main_data, sys.argv[2], main_con)
-        database_commit_and_close(main_con)
+    elif (sys.argv[1] == "-ad" and number_of_argument == 6):
+        add_download(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 
     else:
         print_info()

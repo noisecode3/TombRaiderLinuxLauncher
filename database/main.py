@@ -15,8 +15,9 @@ def show_menu():
     print("3. new - Create a new full index database, with info and walkthrough data")
     print("4. update - Insert missing TRLE book basic records")
     print("5. update - Insert missing TRLE book records with info and walkthrough")
-    print("6. trle - Run http TRLE")
-    print("7. trle_local - Run TRLE local")
+    print("6. resync all - Update or remove every record to mirror TRLE")
+    print("7. trle - Run https TRLE")
+    print("8. trle_local - Run TRLE local")
     print("0. Exit")
 
 
@@ -37,8 +38,10 @@ def main_menu():
         elif choice == "5":
             pass
         elif choice == "6":
-            tombll_view.scrape_trle_index()
+            pass
         elif choice == "7":
+            tombll_view.scrape_trle_index()
+        elif choice == "8":
             tombll_view.local_trle_index()
         elif choice in ("0", "q"):
             print("Exiting...")

@@ -3,8 +3,7 @@
 import os
 import sqlite3
 
-import scrape_trle
-import tombll_read
+import tombll_manage_data
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -13,7 +12,7 @@ def scrape_trle_index():
     """Browse TRLE data by using normal https requests."""
     offset = 0
     while True:
-        _print_trle_page(scrape_trle.get_trle_page(offset, True))
+        _print_trle_page(tombll_manage_data.get_trle_page(offset))
         user_input = input("Press Enter for the next page (or type 'q' to quit: ")
         if user_input.lower() == 'q':
             print("Exiting...")
@@ -26,7 +25,7 @@ def local_trle_index():
     con = sqlite3.connect(os.path.dirname(os.path.abspath(__file__)) + '/tombll.db')
     offset = 0
     while True:
-        page = tombll_read.trle_page(offset, con, sort_latest_first=True)
+        page = tombll_manage_data.get_local_page(offset, con)
         _print_trle_page(page)
         if len(page['levels']) < 20:
             break
