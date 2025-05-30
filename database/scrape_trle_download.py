@@ -315,7 +315,8 @@ def _search_trcustoms(trle_info):
     zip_file = []
     title = quote(trle_info[0])
     release = trle_info[1]
-    trcustoms = scrape_common.get_json(f"https://trcustoms.org/api/levels/?search={title}")
+    search_url = f"https://trcustoms.org/api/levels/?search={title}"
+    trcustoms = scrape_common.get_json(search_url)
     results = trcustoms.get('results', [])
     for level in results:
         # if level and date match exactly
@@ -395,7 +396,21 @@ if __name__ == '__main__':
         logging.error("You will find the level id in URL string")
         logging.error("https://www.trle.net/sc/levelfeatures.php?lid=LID")
         sys.exit(1)
+    elif sys.argv[1] == "test1":
+        levels = [
+            3430, 1158, 1186, 1236, 1237, 1297, 1300, 1338, 2005, 1413, 1467, 1526, 1555, 1556,
+            1557, 1565, 1588, 1635, 1641, 1642, 1643, 1644, 171,  172,  173,  1738, 1739, 1794,
+            1811, 1864, 1912, 1978, 1989, 1999, 2339, 2341, 2424, 2425, 2435, 2438, 2458, 2468,
+            2476, 2491, 2676, 2727, 2757, 2784, 2798, 2847, 2874, 2876, 2881, 2882, 2897, 2919,
+            2930, 2989, 3008, 3013, 3032, 3041, 3042, 3043, 3044, 3045, 3046, 3047, 3048, 3213,
+            3222, 3228, 3229, 3230, 3231, 3232, 3233, 3234, 3235, 3236, 3237, 3238, 3239, 3240,
+            3241, 3242, 3243, 3244, 3290, 3328, 3362, 3379, 3426, 3470, 3491, 3495, 3527, 3528,
+            3529, 3543, 3547, 3554, 3561, 3565, 3579, 3610, 3634, 3635, 3636, 3637, 3638, 3639,
+            3640, 3641, 3642, 3643, 3644, 3645, 3646, 3647, 3648, 3649, 680,  805,  909,  1795]
+        for main_lid in levels:
+            zip_data = get_zip_file_info(main_lid)
+            print(f"{zip_data}")
     else:
-        LID = sys.argv[1]
-        ZIP_DATA = get_zip_file_info(LID)
-        print(f"{ZIP_DATA}")
+        main_lid = int(sys.argv[1])
+        zip_data = get_zip_file_info(main_lid)
+        print(f"{zip_data}")
