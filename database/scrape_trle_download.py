@@ -318,11 +318,11 @@ def _search_trcustoms(trle_info):
     search_url = f"https://trcustoms.org/api/levels/?search={title}"
     trcustoms = scrape_common.get_json(search_url)
     results = trcustoms.get('results', [])
+
     for level in results:
         # if level and date match exactly
         if level.get('name', '') == trle_info[0]:
-            if scrape_common.convert_to_iso(level.get('created', '')) == \
-                    scrape_common.convert_to_iso(release):
+            if scrape_common.convert_to_iso(level.get('created', '')) == release:
                 # check if it has the files attribute
                 last_file = level.get('last_file', {})
                 if last_file:
