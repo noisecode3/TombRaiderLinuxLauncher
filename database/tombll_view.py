@@ -1,10 +1,11 @@
 """Terminal menus, prompts for data, tests and setting up the database."""
-
 import os
 import sqlite3
 
+import shutil
 import tombll_manage_data
 
+size = shutil.get_terminal_size(fallback=(149, 14))
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -100,8 +101,13 @@ def _print_trle_page(page):
     print(f"{page['offset'] + len(page['levels'])} of {page['records_total']} records")
     levels = page['levels']
 
+    if size.columns < 149:
+        print("You're scrren is to small")
+        print("Make you font smaller")
+        input("Press Enter see the page")
+
     # Column widths for even spacing
-    column_widths = [6, 20, 70, 17, 11, 16, 6, 10]
+    column_widths = [6, 20, 70, 17, 11, 16, 6, 11]
 
     headers = ["ID", "Author", "Level Name", "Difficulty",
                "Duration", "Class", "Type", "Released"]

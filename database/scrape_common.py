@@ -233,7 +233,8 @@ def get_trle_class(soup):
 
 def get_trle_release(soup):
     """Extract the release date."""
-    return soup.find('td', string='release date:').find_next('td').get_text(strip=True) or ""
+    raw_date = soup.find('td', string='release date:').find_next('td').get_text(strip=True) or ""
+    return convert_to_iso(raw_date)
 
 
 def get_trle_difficulty(soup):

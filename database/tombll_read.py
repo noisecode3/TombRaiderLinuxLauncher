@@ -210,10 +210,8 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
     """Get a trle page."""
     page = data_factory.make_trle_page_data()
     page['offset'] = offset
-
-    order_direction = 1 if sort_latest_first else 0
-
     result = []
+
     page['records_total'] = tombll_common.query_return_everything("""
         SELECT COUNT(*)
         FROM Info
@@ -222,29 +220,50 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
         INNER JOIN Author ON Author.AuthorID = AuthorList.authorID
     """, None, con)[0][0]
 
-    result = tombll_common.query_return_everything("""
-        SELECT
-            Info.trleID,
-            Author.value,
-            Info.title,
-            InfoDifficulty.value,
-            InfoDuration.value,
-            InfoClass.value,
-            InfoType.value,
-            Info.release
-        FROM Info
-        INNER JOIN Level ON (Info.InfoID = Level.infoID)
-        INNER JOIN AuthorList ON (Level.LevelID = AuthorList.levelID)
-        INNER JOIN Author ON (Author.AuthorID = AuthorList.authorID)
-        LEFT JOIN InfoDifficulty ON (InfoDifficulty.InfoDifficultyID = Info.difficulty)
-        LEFT JOIN InfoDuration ON (InfoDuration.InfoDurationID = Info.duration)
-        INNER JOIN InfoType ON (InfoType.InfoTypeID = Info.type)
-        LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
-        ORDER BY
-            CASE WHEN ? = 0 THEN Info.release END ASC,
-            CASE WHEN ? = 1 THEN Info.release END DESC
-        LIMIT ? OFFSET ?;
-        """, (order_direction, order_direction, limit, offset), con)
+    if sort_latest_first:
+        result = tombll_common.query_return_everything("""
+            SELECT
+                Info.trleID,
+                Author.value,
+                Info.title,
+                InfoDifficulty.value,
+                InfoDuration.value,
+                InfoClass.value,
+                InfoType.value,
+                Info.release
+            FROM Info
+            INNER JOIN Level ON (Info.InfoID = Level.infoID)
+            INNER JOIN AuthorList ON (Level.LevelID = AuthorList.levelID)
+            INNER JOIN Author ON (Author.AuthorID = AuthorList.authorID)
+            LEFT JOIN InfoDifficulty ON (InfoDifficulty.InfoDifficultyID = Info.difficulty)
+            LEFT JOIN InfoDuration ON (InfoDuration.InfoDurationID = Info.duration)
+            INNER JOIN InfoType ON (InfoType.InfoTypeID = Info.type)
+            LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
+            ORDER BY Info.release DESC
+            LIMIT ? OFFSET ?
+            """, (limit, offset), con)
+    else:
+        result = tombll_common.query_return_everything("""
+            SELECT
+                Info.trleID,
+                Author.value,
+                Info.title,
+                InfoDifficulty.value,
+                InfoDuration.value,
+                InfoClass.value,
+                InfoType.value,
+                Info.release
+            FROM Info
+            INNER JOIN Level ON (Info.InfoID = Level.infoID)
+            INNER JOIN AuthorList ON (Level.LevelID = AuthorList.levelID)
+            INNER JOIN Author ON (Author.AuthorID = AuthorList.authorID)
+            LEFT JOIN InfoDifficulty ON (InfoDifficulty.InfoDifficultyID = Info.difficulty)
+            LEFT JOIN InfoDuration ON (InfoDuration.InfoDurationID = Info.duration)
+            INNER JOIN InfoType ON (InfoType.InfoTypeID = Info.type)
+            LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
+            ORDER BY Info.release ASC
+            LIMIT ? OFFSET ?
+            """, (limit, offset), con)
 
     for row in result:
         level = data_factory.make_trle_level_data()
