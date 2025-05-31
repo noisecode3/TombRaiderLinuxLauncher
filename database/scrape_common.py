@@ -192,6 +192,12 @@ def convert_to_iso(date_str):
     except ValueError:
         pass
 
+    # Try to parse ISO format with timezone offset like '2013-08-17T02:00:00+02:00'
+    try:
+        return datetime.fromisoformat(date_str).strftime('%Y-%m-%d')
+    except ValueError:
+        pass
+
     raise ValueError(f"Unsupported date format: {date_str}")
 
 
