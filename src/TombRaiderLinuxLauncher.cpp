@@ -16,6 +16,7 @@
 #include "ui_TombRaiderLinuxLauncher.h"
 #include "../src/staticData.hpp"
 
+
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     : QMainWindow(parent) {
     ui = new Ui::TombRaiderLinuxLauncher;
@@ -33,8 +34,6 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->walkthroughBackButton, SIGNAL(clicked()),
         this, SLOT(backClicked()));
     connect(ui->setOptions, SIGNAL(clicked()), this, SLOT(setOptionsClicked()));
-    connect(ui->listWidgetModds, SIGNAL(itemSelectionChanged()),
-        this, SLOT(onListItemSelected()));
 
     // Settings tab
     connect(ui->commandLinkButtonGSSave, SIGNAL(clicked()),
@@ -113,6 +112,16 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->radioButtonReleaseDate, &QRadioButton::clicked,
             this, &TombRaiderLinuxLauncher::sortByReleaseDate);
 
+    model = new LevelListModel(this);
+    ui->listViewLevels->setModel(model);
+    ui->listViewLevels->setItemDelegate(new CardItemDelegate(ui->listViewLevels));
+    ui->listViewLevels->setSpacing(8);
+    connect(
+        ui->listViewLevels->selectionModel(),
+        &QItemSelectionModel::currentChanged,
+        this,
+        &TombRaiderLinuxLauncher::onCurrentItemChanged);
+
     // Read settings
     QString value = m_settings.value("setup").toString();
     if (value != "yes") {
@@ -123,12 +132,13 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 }
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
-    ui->listWidgetModds->clear();
+    model->setLevels();
+    /*
+    ui->listViewLevels->clear();
     const QString pictures = ":/pictures/";
     OriginalGameData pictueData;
 
     foreach(const int &id, availableGames) {
-        // debugStop(QString("%1").arg(id));
         int IdPositive;
         bool linkedGameDir;
         if (id < 0) {
@@ -138,7 +148,7 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
             linkedGameDir = true;
             IdPositive = id;
         }
-        // debugStop();
+
         // Picture and title
         QString iconPath = pictures + pictueData.getPicture(IdPositive);
         QString itemName =
@@ -150,7 +160,7 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
         QListWidgetItem *wi = new QListWidgetItem(QIcon(iconPath), itemName);
         wi->setData(Qt::UserRole, QVariant(IdPositive*(-1)));
         wi->setData(Qt::UserRole + 1, QVariant(linkedGameDir));
-        ui->listWidgetModds->addItem(wi);
+        ui->listViewLevels->addItem(wi);
         originalGamesSet_m.insert(wi);
         originalGamesList_m.append(wi);
     }
@@ -161,18 +171,16 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
     auto mapDifficulty = staticData.getDifficulty();
     auto mapDuration = staticData.getDuration();
 
-    QVector<ListItemData> list;
-    controller.getList(&list);
     const qint64 s = list.size();
     for (qint64 i = 0; i < s; i++) {
         QString tag = QString("%1 by %2\n")
                           .arg(list[i].m_title)
                           .arg(list[i].m_author);
 
-        //list[i].m_type
-        //list[i].m_class
-        //list[i].m_difficulty
-        //list[i].m_duration
+        // list[i].m_type
+        // list[i].m_class
+        // list[i].m_difficulty
+        // list[i].m_duration
 
         tag += QString(
                 "Type: %1\nClass: %2\nDifficulty: %3\nDuration: %4\nDate:%5")
@@ -196,9 +204,10 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
         itemData["duration"] = list[i].m_duration;
         // qDebug() << itemData << Qt::endl;
         wi->setData(Qt::UserRole + 1, itemData);
-        ui->listWidgetModds->addItem(wi);
+        ui->listViewLevels->addItem(wi);
     }
     sortByTitle();
+    */
 }
 
 void TombRaiderLinuxLauncher::sortItems(
@@ -206,17 +215,23 @@ void TombRaiderLinuxLauncher::sortItems(
     QList<QListWidgetItem*> items;
 
     // Step 1: Extract items from the QListWidget
+    int count = 0;
+    if (ui->listViewLevels->model()) {
+        count = ui->listViewLevels->model()->rowCount();
+    }
     if (ui->checkBoxOriginalFirst->isChecked() == true) {
-        for (int i = 0; i < ui->listWidgetModds->count(); ++i) {
-            QListWidgetItem* item = ui->listWidgetModds->item(i);
+        for (int i = 0; i < count; ++i) {
+            /*
+            QListWidgetItem* item = ui->listViewLevels->item(i);
             // Append the item only if it's not in originalGamesSet_m
             if (!originalGamesSet_m.contains(item)) {
                 items.append(item);
             }
+            */
         }
     } else {
-        for (int i = 0; i < ui->listWidgetModds->count(); ++i) {
-            items.append(ui->listWidgetModds->item(i));
+        for (int i = 0; i < count; ++i) {
+            // items.append(ui->listViewLevels->item(i));
         }
     }
 
@@ -229,17 +244,20 @@ void TombRaiderLinuxLauncher::sortItems(
 
     qint64 size = originalGamesSize + items.size();
     for (qint64 i = 0; i < size; ++i) {
-        QListWidgetItem* item;
         if (i < originalGamesSize) {
             // Handle originalGamesList_m items
-            item = ui->listWidgetModds->takeItem(
-                    ui->listWidgetModds->row(originalGamesList_m[i]));
-            ui->listWidgetModds->insertItem(i, item);
+            /*
+            item = ui->listViewLevels->takeItem(
+                    ui->listViewLevels->row(originalGamesList_m[i]));
+            ui->listViewLevels->insertItem(i, item);
+            */
         } else {
             // Handle items list
-            item = ui->listWidgetModds->takeItem(
-                    ui->listWidgetModds->row(items[i - originalGamesSize]));
-            ui->listWidgetModds->insertItem(i, item);
+            /*
+            item = ui->listViewLevels->takeItem(
+                    ui->listViewLevels->row(items[i - originalGamesSize]));
+            ui->listViewLevels->insertItem(i, item);
+            */
         }
     }
 }
@@ -358,12 +376,11 @@ void TombRaiderLinuxLauncher::setup() {
     ui->levelPathEdit->setText(homeDir + l);
 }
 
-void TombRaiderLinuxLauncher::originalSelected(QListWidgetItem *selectedItem) {
-    if (selectedItem != nullptr) {
-        int id = selectedItem->data(Qt::UserRole).toInt();
-        bool linkedGameDir = selectedItem->data(Qt::UserRole + 1).toBool();
+void TombRaiderLinuxLauncher::originalSelected(qint64 id) {
+    if (id != 0) {
         // the game directory was a symbolic link and it has a level directory
-        if ((linkedGameDir == true) && (controller.getItemState(id) == 1)) {
+        if ((controller.checkGameDirectory(id) == 2)
+                && (controller.getItemState(id) == 1)) {
             ui->pushButtonLink->setEnabled(true);
             ui->pushButtonDownload->setEnabled(false);
         } else {
@@ -374,9 +391,8 @@ void TombRaiderLinuxLauncher::originalSelected(QListWidgetItem *selectedItem) {
     }
 }
 
-void TombRaiderLinuxLauncher::levelDirSelected(QListWidgetItem *selectedItem) {
-    if (selectedItem != nullptr) {
-        int id = selectedItem->data(Qt::UserRole).toInt();
+void TombRaiderLinuxLauncher::levelDirSelected(qint64 id) {
+    if (id != 0) {
         int state = controller.getItemState(id);
         // Activate or deactivate pushbuttons based on the selected item
         qDebug() << id << Qt::endl;
@@ -405,14 +421,14 @@ void TombRaiderLinuxLauncher::levelDirSelected(QListWidgetItem *selectedItem) {
     }
 }
 
-void TombRaiderLinuxLauncher::onListItemSelected() {
-    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
-    if (selectedItem != nullptr) {
-        int id = selectedItem->data(Qt::UserRole).toInt();
+void TombRaiderLinuxLauncher::onCurrentItemChanged(
+        const QModelIndex &current, const QModelIndex &previous) {
+    if (current.isValid()) {
+        qint64 id = model->getLid(current);
         if (id < 0) {  // its the original game
-            originalSelected(selectedItem);
+            originalSelected(id);
         } else {
-            levelDirSelected(selectedItem);
+            levelDirSelected(id);
         }
         ui->lineEditCustomCommand->setEnabled(true);
         ui->lineEditCustomCommand->setText(
@@ -454,94 +470,99 @@ void TombRaiderLinuxLauncher::setOptionsClicked() {
 }
 
 void TombRaiderLinuxLauncher::linkClicked() {
-    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
-    int id = selectedItem->data(Qt::UserRole).toInt();
-    if (m_settings.value(QString("level%1/RunnerType").arg(id)) == 2) {
-        Model::getInstance().runWine(id);
-    } else {
-        bool status = false;
+    QModelIndex current = ui->listViewLevels->currentIndex();
+    if (current.isValid()) {
+        qint64 id = model->getLid(current);
         if (id != 0) {
-            status = controller.link(id);
-        } else {
-            qDebug() << "id error";
-        }
-        if (status == true) {
-            QApplication::quit();
-        } else {
-            qDebug() << "link error";
+            if (m_settings.value(QString("level%1/RunnerType").arg(id)) == 2) {
+                Model::getInstance().runWine(id);
+            } else {
+                if (!controller.link(id)) {
+                    qDebug() << "link error";
+                }
+                QApplication::quit();
+            }
         }
     }
 }
 
 void TombRaiderLinuxLauncher::downloadClicked() {
-    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
-    int id = selectedItem->data(Qt::UserRole).toInt();
-    if (id < 0) {
-        ui->listWidgetModds->setEnabled(false);
-        ui->progressBar->setValue(0);
-        ui->stackedWidgetBar->setCurrentWidget(
+    QModelIndex current = ui->listViewLevels->currentIndex();
+    if (current.isValid()) {
+        qint64 id = model->getLid(current);
+        if (id < 0) {
+            ui->listViewLevels->setEnabled(false);
+            ui->progressBar->setValue(0);
+            ui->stackedWidgetBar->setCurrentWidget(
             ui->stackedWidgetBar->findChild<QWidget*>("progress"));
-        // debugStop(QString("%1").arg(id*(-1)));
-        controller.setupGame(id*(-1));
-    } else if (id > 0) {
-        ui->listWidgetModds->setEnabled(false);
-        ui->progressBar->setValue(0);
-        ui->stackedWidgetBar->setCurrentWidget(
+            // debugStop(QString("%1").arg(id*(-1)));
+            controller.setupGame(id*(-1));
+        } else if (id > 0) {
+            ui->listViewLevels->setEnabled(false);
+            ui->progressBar->setValue(0);
+            ui->stackedWidgetBar->setCurrentWidget(
             ui->stackedWidgetBar->findChild<QWidget*>("progress"));
-        controller.setupLevel(id);
+            controller.setupLevel(id);
+        }
     }
 }
 
 void TombRaiderLinuxLauncher::infoClicked() {
-    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
-    int id = selectedItem->data(Qt::UserRole).toInt();
-    if (id != 0) {
-        InfoData info = controller.getInfo(id);
-        ui->infoWebEngineView->setHtml(info.m_body);
+    QModelIndex current = ui->listViewLevels->currentIndex();
+    if (current.isValid()) {
+        qint64 id = model->getLid(current);
+        if (id != 0) {
+            InfoData info = controller.getInfo(id);
+            ui->infoWebEngineView->setHtml(info.m_body);
 
-        // Get the vertical scrollbar size to center the images for all themes
-        int scrollbarWidth = ui->infoListWidget
-            ->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
-        QMargins margins = ui->infoListWidget->contentsMargins();
-        int left = margins.left();
-        int right = margins.right();
+            // Get the vertical scrollbar size
+            // to center the images for all themes
+            int scrollbarWidth = ui->infoListWidget
+                ->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+            QMargins margins = ui->infoListWidget->contentsMargins();
+            int left = margins.left();
+            int right = margins.right();
 
-        ui->infoListWidget->setMinimumWidth(left+502+scrollbarWidth+right);
-        ui->infoListWidget->setMaximumWidth(left+502+scrollbarWidth+right);
+            QListWidget *w = ui->infoListWidget;
+            w->setMinimumWidth(left+502+scrollbarWidth+right);
+            w->setMaximumWidth(left+502+scrollbarWidth+right);
 
-        ui->infoListWidget->setViewMode(QListView::IconMode);
-        ui->infoListWidget->setIconSize(QSize(502, 377));
-        ui->infoListWidget->setDragEnabled(false);
-        ui->infoListWidget->setAcceptDrops(false);
-        ui->infoListWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
-        ui->infoListWidget->setDefaultDropAction(Qt::IgnoreAction);
-        ui->infoListWidget->setSelectionMode(QAbstractItemView::NoSelection);
-        ui->infoListWidget->clear();
-        for (int i = 0; i < info.m_imageList.size(); ++i) {
-            const QIcon &icon = info.m_imageList.at(i);
-            QListWidgetItem *item = new QListWidgetItem(icon, "");
-            item->setSizeHint(QSize(502, 377));
-            ui->infoListWidget->addItem(item);
-        }
-        ui->infoWebEngineView->show();
-        ui->stackedWidget->setCurrentWidget(
-                ui->stackedWidget->findChild<QWidget*>("info"));
-        if (controller.getWalkthrough(id) != "") {
-            ui->pushButtonWalkthrough->setEnabled(true);
-        } else {
-            ui->pushButtonWalkthrough->setEnabled(false);
+            w->setViewMode(QListView::IconMode);
+            w->setIconSize(QSize(502, 377));
+            w->setDragEnabled(false);
+            w->setAcceptDrops(false);
+            w->setDragDropMode(QAbstractItemView::NoDragDrop);
+            w->setDefaultDropAction(Qt::IgnoreAction);
+            w->setSelectionMode(QAbstractItemView::NoSelection);
+            w->clear();
+            for (int i = 0; i < info.m_imageList.size(); ++i) {
+                const QIcon &icon = info.m_imageList.at(i);
+                QListWidgetItem *item = new QListWidgetItem(icon, "");
+                item->setSizeHint(QSize(502, 377));
+                ui->infoListWidget->addItem(item);
+            }
+            ui->infoWebEngineView->show();
+            ui->stackedWidget->setCurrentWidget(
+                    ui->stackedWidget->findChild<QWidget*>("info"));
+            if (controller.getWalkthrough(id) != "") {
+                ui->pushButtonWalkthrough->setEnabled(true);
+            } else {
+                ui->pushButtonWalkthrough->setEnabled(false);
+            }
         }
     }
 }
 
 void TombRaiderLinuxLauncher::walkthroughClicked() {
-    QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
-    int id = selectedItem->data(Qt::UserRole).toInt();
-    if (id != 0) {
-        ui->walkthroughWebEngineView->setHtml(controller.getWalkthrough(id));
-        ui->walkthroughWebEngineView->show();
-        ui->stackedWidget->setCurrentWidget(
+    QModelIndex current = ui->listViewLevels->currentIndex();
+    if (current.isValid()) {
+        qint64 id = model->getLid(current);
+        if (id != 0) {
+            ui->walkthroughWebEngineView->setHtml(controller.getWalkthrough(id));
+            ui->walkthroughWebEngineView->show();
+            ui->stackedWidget->setCurrentWidget(
                 ui->stackedWidget->findChild<QWidget*>("walkthrough"));
+        }
     }
 }
 
@@ -564,21 +585,22 @@ void TombRaiderLinuxLauncher::workTick() {
     ui->progressBar->setValue(value + 1);
     qDebug() << ui->progressBar->value() << "%";
     if (ui->progressBar->value() >= 100) {
-        QListWidgetItem *selectedItem = ui->listWidgetModds->currentItem();
-        int id = selectedItem->data(Qt::UserRole).toInt();
-        if (id < 0) {  // its the original game
-            ui->pushButtonLink->setEnabled(true);
-            ui->pushButtonInfo->setEnabled(false);
-            ui->pushButtonDownload->setEnabled(false);
-            selectedItem->setData(Qt::UserRole + 1, QVariant(true));
-        } else if (id > 0) {  // do not know what to do with 0
-            ui->pushButtonLink->setEnabled(true);
-            ui->pushButtonInfo->setEnabled(true);
-            ui->pushButtonDownload->setEnabled(false);
+        QModelIndex current = ui->listViewLevels->currentIndex();
+        if (current.isValid()) {
+            qint64 id = model->getLid(current);
+            if (id < 0) {  // its the original game
+                ui->pushButtonLink->setEnabled(true);
+                ui->pushButtonInfo->setEnabled(false);
+                ui->pushButtonDownload->setEnabled(false);
+            } else if (id > 0) {
+                ui->pushButtonLink->setEnabled(true);
+                ui->pushButtonInfo->setEnabled(true);
+                ui->pushButtonDownload->setEnabled(false);
+            }
+            ui->stackedWidgetBar->setCurrentWidget(
+                ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
+            ui->listViewLevels->setEnabled(true);
         }
-        ui->stackedWidgetBar->setCurrentWidget(
-            ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
-        ui->listWidgetModds->setEnabled(true);
     }
 }
 
@@ -589,7 +611,7 @@ void TombRaiderLinuxLauncher::downloadError(int status) {
     ui->pushButtonDownload->setEnabled(true);
     ui->stackedWidgetBar->setCurrentWidget(
         ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
-    ui->listWidgetModds->setEnabled(true);
+    ui->listViewLevels->setEnabled(true);
     QMessageBox msgBox;
     msgBox.setWindowTitle("Error");
     if (status == 1) {
@@ -626,17 +648,21 @@ void TombRaiderLinuxLauncher::GlobalResetClicked() {
 }
 
 void TombRaiderLinuxLauncher::LevelSaveClicked() {
-    int id = ui->listWidgetModds->currentItem()->data(Qt::UserRole).toInt();
+    QModelIndex current = ui->listViewLevels->currentIndex();
+    if (current.isValid()) {
+        qint64 id = model->getLid(current);
 
-    m_settings.setValue(QString("level%1/CustomCommand")
-        .arg(id), ui->lineEditCustomCommand->text());
+        m_settings.setValue(QString("level%1/CustomCommand")
+            .arg(id), ui->lineEditCustomCommand->text());
 
-    m_settings.setValue(QString("level%1/EnvironmentVariables")
-        .arg(id), ui->lineEditEnvironmentVariables->text());
+        m_settings.setValue(QString("level%1/EnvironmentVariables")
+            .arg(id), ui->lineEditEnvironmentVariables->text());
 
-    m_settings.setValue(QString("level%1/RunnerType")
-        .arg(id), ui->comboBoxRunnerType->currentIndex());
+        m_settings.setValue(QString("level%1/RunnerType")
+            .arg(id), ui->comboBoxRunnerType->currentIndex());
+    }
 }
+
 void TombRaiderLinuxLauncher::LevelResetClicked() {
 }
 

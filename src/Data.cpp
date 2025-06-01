@@ -41,38 +41,73 @@ QVector<ListItemData> Data::getListItems() {
     QSqlQuery query(db);
     QVector<ListItemData> items;
 
-    if (!query.prepare(
-            "SELECT Level.LevelID, Info.title, Author.value, Info.type, "
-            "Info.class, Info.release, Info.difficulty, "
-            "Info.duration, Picture.data "
+    status = query.prepare(
+            "SELECT Info.trleID, "
+            "Info.title, "
+            "GROUP_CONCAT(Author.value, ', ') AS authors, "
+            "Info.type, "
+            "Info.class, "
+            "Info.release, "
+            "Info.difficulty, "
+            "Info.duration "
             "FROM Level "
             "JOIN Info ON Level.infoID = Info.InfoID "
-            "JOIN Screens ON Level.LevelID = Screens.levelID "
-            "JOIN Picture ON Screens.pictureID = Picture.PictureID "
             "JOIN AuthorList ON Level.LevelID = AuthorList.levelID "
             "JOIN Author ON AuthorList.authorID = Author.AuthorID "
-            "GROUP BY Level.LevelID "
-            "ORDER BY MIN(Picture.PictureID) ASC")) {
-        qDebug() << "Error preparing query:" << query.lastError().text();
-        status = false;
+            "GROUP BY Info.trleID");
+    if (!status) {
+        qDebug() << "Error preparing query getListItems:" << query.lastError().text();
     }
 
     if (status) {
         if (query.exec()) {
             while (query.next()) {
                 items.append(ListItemData(
-                    query.value("Level.LevelID").toInt(),
+                    query.value("Info.trleID").toInt(),
                     query.value("Info.title").toString(),
-                    query.value("Author.value").toString(),
+                    query.value("authors").toString().split(", "),
                     query.value("Info.type").toInt(),
                     query.value("Info.class").toInt(),
                     query.value("Info.release").toString(),
                     query.value("Info.difficulty").toInt(),
-                    query.value("Info.duration").toInt(),
-                    query.value("Picture.data").toByteArray()));
+                    query.value("Info.duration").toInt()));
             }
         } else {
-            qDebug() << "Error executing query:" << query.lastError().text();
+            qDebug() << "Error executing query getListItems:" << query.lastError().text();
+        }
+    }
+
+    return items;
+}
+
+QVector<ListItemPicture> Data::getPictures(QList<qint64> trle_ids) {
+    bool status = true;
+    QSqlQuery query(db);
+    QVector<ListItemPicture> items;
+
+    foreach(const qint64 &id, trle_ids) {
+        status = query.prepare(
+            "SELECT Info.trleID, Picture.data "
+            "FROM Level "
+            "JOIN Info ON Level.infoID = Info.InfoID "
+            "JOIN Screens ON Level.LevelID = Screens.levelID "
+            "JOIN Picture ON Screens.pictureID = Picture.PictureID "
+            "WHERE Info.trleID = :id AND Screens.position = 0 ");
+        query.bindValue(":id", id);
+        if (!status) {
+            qDebug() << "Error preparing query getPictures:" << query.lastError().text();
+        }
+
+        if (status) {
+            if (query.exec()) {
+                if (query.next() == true) {
+                    items.append(ListItemPicture(
+                        query.value("Info.trleID").toInt(),
+                        query.value("Picture.data").toByteArray()));
+                }
+            } else {
+                qDebug() << "Error executing query getPictures:" << query.lastError().text();
+            }
         }
     }
 

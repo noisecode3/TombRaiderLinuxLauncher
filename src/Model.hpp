@@ -14,6 +14,7 @@
 #ifndef SRC_MODEL_HPP_
 #define SRC_MODEL_HPP_
 
+#include <QAbstractListModel>
 #include <QObject>
 #include <QMap>
 #include <QBitArray>
@@ -94,5 +95,8 @@ class Model : public QObject {
 
     Q_DISABLE_COPY(Model)
 };
+
+
+
 
 #endif  // SRC_MODEL_HPP_
