@@ -11,7 +11,6 @@
  * GNU General Public License for more details.
  */
 
-#include <algorithm>
 #include "../src/TombRaiderLinuxLauncher.hpp"
 #include "ui_TombRaiderLinuxLauncher.h"
 #include "../src/staticData.hpp"
@@ -123,6 +122,9 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         this,
         &TombRaiderLinuxLauncher::onCurrentItemChanged);
 
+    connect(ui->listViewLevels->verticalScrollBar(), &QScrollBar::valueChanged,
+            this, &TombRaiderLinuxLauncher::loadMoreLevels);
+
     // Read settings
     QString value = m_settings.value("setup").toString();
     if (value != "yes") {
@@ -136,6 +138,13 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
     model->setLevels();
 }
 
+void TombRaiderLinuxLauncher::loadMoreLevels(int value) {
+    QScrollBar *bar = ui->listViewLevels->verticalScrollBar();
+    if (value >= bar->maximum() - 5) {
+        qDebug() << "loadMoreLevels";
+        model->loadMoreLevels();
+    }
+}
 
 void TombRaiderLinuxLauncher::sortByTitle() {
     model->sortItems(model->compareTitles);

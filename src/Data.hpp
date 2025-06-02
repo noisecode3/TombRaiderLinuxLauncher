@@ -93,56 +93,6 @@ struct ZipData {
 };
 
 /**
- * @struct ListItemData
- * @brief Represents a Tomb Raider Level Entry Card Info.
- *
- * This struct is designed to store a single TRLE (Tomb Raider Level Editor) level record.
- * Each record contains metadata and a cover image displayed as a card in the application.
- * The struct includes properties to facilitate searching, filtering, and sorting without
- * the cover image.
- */
-struct ListItemData {
-    /**
-     * @brief Default constructor for `ListItemData`.
-     *
-     * Initializes an empty instance of `ListItemData`.
-     */
-    ListItemData() {}
-
-    /**
-     * @brief Parameterized constructor for `ListItemData`.
-     *
-     * This constructor initializes a `ListItemData` object with metadata.
-     *
-     * @param id The TRLE numeric level ID.
-     * @param title The TRLE title. Expected to contain a single name.
-     * @param author The TRLE author(s). Can be a single name or multiple names.
-     * @param type The TRLE type, represented by a numeric ID.
-     * @param classInput The TRLE class, represented by a numeric ID.
-     * @param releaseDate The release date in the format "YYYY-MM-DD" (e.g., "2000-01-01").
-     * @param difficulty The TRLE difficulty, represented by a numeric ID.
-     * @param duration The TRLE duration, represented by a numeric ID.
-     */
-    ListItemData(
-        qint64 id, const QString& title, const QStringList& authors, qint64 type,
-        qint64 classInput, const QString& releaseDate, qint64 difficulty,
-        qint64 duration) :
-        m_trle_id(id), m_title(title), m_authors(authors), m_type(type),
-        m_class(classInput), m_releaseDate(releaseDate),
-        m_difficulty(difficulty), m_duration(duration) {}
-
-    // Data members
-    qint64 m_trle_id;        ///< The TRLE level id.
-    QString m_title;         ///< The TRLE level title.
-    QStringList m_authors;     ///< The TRLE author(s), as a string list.
-    qint64 m_type;           ///< ID of the type of level.
-    qint64 m_class;          ///< ID of the class of the level.
-    QString m_releaseDate;   ///< The release date in "YYYY-MM-DD" format.
-    qint64 m_difficulty;     ///< ID of the difficulty of the level.
-    qint64 m_duration;       ///< ID of the estimated duration of the level.
-};
-
-/**
  * @struct ListItemPicture
  * @brief Represents a Tomb Raider Level Entry Card Picture.
  *
@@ -208,6 +158,60 @@ struct ListItemPicture {
     // Data members
     qint64 m_trle_id;        ///< The TRLE level id.
     QIcon m_picture;         ///< The cover image.
+};
+
+/**
+ * @struct ListItemData
+ * @brief Represents a Tomb Raider Level Entry Card Info.
+ *
+ * This struct is designed to store a single TRLE (Tomb Raider Level Editor) level record.
+ * Each record contains metadata and a cover image displayed as a card in the application.
+ * The struct includes properties to facilitate searching, filtering, and sorting without
+ * the cover image, just a pointer.
+ */
+struct ListItemData {
+    /**
+     * @brief Default constructor for `ListItemData`.
+     *
+     * Initializes an empty instance of `ListItemData`.
+     */
+    ListItemData() {}
+
+    /**
+     * @brief Parameterized constructor for `ListItemData`.
+     *
+     * This constructor initializes a `ListItemData` object with metadata.
+     *
+     * @param id The TRLE numeric level ID.
+     * @param title The TRLE title. Expected to contain a single name.
+     * @param author The TRLE author(s). Can be a single name or multiple names.
+     * @param type The TRLE type, represented by a numeric ID.
+     * @param classInput The TRLE class, represented by a numeric ID.
+     * @param releaseDate The release date in the format "YYYY-MM-DD" (e.g., "2000-01-01").
+     * @param difficulty The TRLE difficulty, represented by a numeric ID.
+     * @param duration The TRLE duration, represented by a numeric ID.
+     * @param m_cover The cover image as a `ListItemPicture*`.
+     */
+    ListItemData(
+        qint64 id, const QString& title, const QStringList& authors,
+        qint64 type, qint64 classInput, const QString& releaseDate,
+        qint64 difficulty, qint64 duration) :
+        m_trle_id(id), m_title(title), m_authors(authors), m_type(type),
+        m_class(classInput), m_releaseDate(releaseDate),
+        m_difficulty(difficulty), m_duration(duration) {
+            m_cover = nullptr;
+        }
+
+    // Data members
+    qint64 m_trle_id;        ///< The TRLE level id.
+    QString m_title;         ///< The TRLE level title.
+    QStringList m_authors;   ///< The TRLE author(s), as a string list.
+    qint64 m_type;           ///< ID of the type of level.
+    qint64 m_class;          ///< ID of the class of the level.
+    QString m_releaseDate;   ///< The release date in "YYYY-MM-DD" format.
+    qint64 m_difficulty;     ///< ID of the difficulty of the level.
+    qint64 m_duration;       ///< ID of the estimated duration of the level.
+    ListItemPicture* m_cover;   ///< The TRLE cover image pointer.
 };
 
 /**

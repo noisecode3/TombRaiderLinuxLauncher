@@ -31,19 +31,26 @@ class LevelListModel : public QAbstractListModel {
         beginResetModel();
         infoList.clear();
         controller.getList(&infoList);
+        if (infoList.count() > 100) {
+            m_loadedRows = 100;
+            m_stop = false;
+        } else {
+            m_loadedRows = infoList.count();
+            m_stop = true;
+        }
         endResetModel();
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
         Q_UNUSED(parent);
-        return infoList.count();
+        return m_loadedRows;
     }
 
     QVariant data(const QModelIndex &index, int role) const override {
         QVariant result;
         int row = index.row();
 
-        if (index.isValid() && row < infoList.size()) {
+        if (index.isValid() && row < infoList.count()) {
             const ListItemData &item = infoList.at(row);
             switch (role) {
                 case Qt::DisplayRole:
@@ -73,8 +80,20 @@ class LevelListModel : public QAbstractListModel {
         return item.m_trle_id;
     }
 
-    ListItemData getListItemData(const qint64 &index) {
-        return infoList.at(index);
+    void loadMoreLevels() {
+        if (!m_stop) {
+            // we stop to prevent extra call while in here.
+            m_stop = true;
+            beginResetModel();
+            if (infoList.count() > m_loadedRows + 100) {
+                m_loadedRows = m_loadedRows + 100;
+                m_stop = false;  // we have more
+            } else {
+                m_loadedRows = infoList.count();
+                m_stop = true;  // we have less or equal
+            }
+            endResetModel();
+        }
     }
 
     void sortItems(
@@ -115,6 +134,8 @@ class LevelListModel : public QAbstractListModel {
     QVector<ListItemData> infoList;
     QVector<ListItemPicture> pictureList;
     // QVector<ListOriginalData> originalInfoList;
+    bool m_stop = false;
+    qint64 m_loadedRows = 0;
     Controller& controller = Controller::getInstance();
 };
 

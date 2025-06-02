@@ -18,6 +18,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QVBoxLayout>
 #include <QStringList>
 #include <QSet>
@@ -90,6 +91,7 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     /**
      * Sorts the list by author.
      */
+    void loadMoreLevels(int value);
     void sortByAuthor();
     /**
      * Sorts the list by title.
