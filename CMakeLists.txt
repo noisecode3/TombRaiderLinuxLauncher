@@ -87,6 +87,7 @@ set(SOURCES_MC
     src/Runner.hpp
     src/binary.hpp
     src/binary.cpp
+    src/levelViewList.hpp
     src/main.cpp
     src/staticData.hpp
 )
