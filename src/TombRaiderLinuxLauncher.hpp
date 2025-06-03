@@ -89,10 +89,9 @@ class TombRaiderLinuxLauncher : public QMainWindow {
      */
     void generateList(const QList<int>& availableGames);
     /**
-     * Sorts the list by author.
+     * Load more levels when scrolled to the end of the list.
      */
     void loadMoreLevels(int value);
-    void sortByAuthor();
     /**
      * Sorts the list by title.
      */

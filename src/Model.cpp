@@ -103,6 +103,10 @@ void Model::getList(QVector<ListItemData>* list) {
     *list = data.getListItems();
 }
 
+void Model::getCoverList(QVector<ListItemData*>* list) {
+    data.getCoverPictures(list);
+}
+
 int Model::getItemState(int id) {
     int status = 0;
     if (id < 0) {

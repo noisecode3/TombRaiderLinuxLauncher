@@ -98,8 +98,6 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
     connect(ui->radioButtonLevelName, &QRadioButton::clicked,
             this, &TombRaiderLinuxLauncher::sortByTitle);
-    connect(ui->radioButtonAuthor, &QRadioButton::clicked,
-            this, &TombRaiderLinuxLauncher::sortByAuthor);
     connect(ui->radioButtonDifficulty, &QRadioButton::clicked,
             this, &TombRaiderLinuxLauncher::sortByDifficulty);
     connect(ui->radioButtonDuration, &QRadioButton::clicked,
@@ -148,10 +146,6 @@ void TombRaiderLinuxLauncher::loadMoreLevels(int value) {
 
 void TombRaiderLinuxLauncher::sortByTitle() {
     model->sortItems(model->compareTitles);
-}
-
-void TombRaiderLinuxLauncher::sortByAuthor() {
-    // sortItems(compareAuthors);
 }
 
 void TombRaiderLinuxLauncher::sortByDifficulty() {

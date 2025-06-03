@@ -20,11 +20,13 @@
 #include <QBitArray>
 #include <QDebug>
 #include <QtCore>
+
 #include <cassert>
-#include "Data.hpp"
-#include "FileManager.hpp"
-#include "Network.hpp"
-#include "Runner.hpp"
+
+#include "../src/Data.hpp"
+#include "../src/FileManager.hpp"
+#include "../src/Network.hpp"
+#include "../src/Runner.hpp"
 
 class InstructionManager : public QObject {
     Q_OBJECT
@@ -62,6 +64,7 @@ class Model : public QObject {
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
     void getList(QVector<ListItemData>* list);
+    void getCoverList(QVector<ListItemData*>* list);
     int getItemState(int id);
     bool runWine(const int id);
     bool setLink(int id);

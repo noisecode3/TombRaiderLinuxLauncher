@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "Controller.hpp"
+#include "../src/Controller.hpp"
 #include <QDebug>
 
 Controller::Controller() : controllerThread(new QThread()) {
@@ -97,6 +97,10 @@ int Controller::checkGameDirectory(int id) {
 
 void Controller::getList(QVector<ListItemData>* list) {
     model.getList(list);
+}
+
+void Controller::getCoverList(QVector<ListItemData*>* list) {
+    model.getCoverList(list);
 }
 
 const InfoData Controller::getInfo(int id) {

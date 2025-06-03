@@ -15,7 +15,7 @@
 #define SRC_CONTROLLER_HPP_
 #include <QObject>
 #include <QThread>
-#include "Model.hpp"
+#include "../src/Model.hpp"
 
 /**
  * The controller activate UI thread work or light instant work on the model
@@ -38,6 +38,7 @@ class Controller : public QObject {
     void setupLevel(int id);
 
     void getList(QVector<ListItemData>* list);
+    void getCoverList(QVector<ListItemData*>* list);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool link(int id);

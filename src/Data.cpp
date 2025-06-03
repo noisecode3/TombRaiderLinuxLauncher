@@ -1,5 +1,5 @@
 /* TombRaiderLinuxLauncher
- * Martin Bångens Copyright (C) 2024
+ * Martin Bångens Copyright (C) 2025
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -56,7 +56,8 @@ QVector<ListItemData> Data::getListItems() {
             "JOIN Author ON AuthorList.authorID = Author.AuthorID "
             "GROUP BY Info.trleID");
     if (!status) {
-        qDebug() << "Error preparing query getListItems:" << query.lastError().text();
+        qDebug() << "Error preparing query getListItems:"
+            << query.lastError().text();
     }
 
     if (status) {
@@ -73,51 +74,50 @@ QVector<ListItemData> Data::getListItems() {
                     query.value("Info.duration").toInt()));
             }
         } else {
-            qDebug() << "Error executing query getListItems:" << query.lastError().text();
+            qDebug() << "Error executing query getListItems:"
+                << query.lastError().text();
         }
     }
 
     return items;
 }
 
-QVector<ListItemPicture> Data::getPictures(QList<qint64> trle_ids) {
-    bool status = true;
+void Data::getCoverPictures(QVector<ListItemData*>* items) {
     QSqlQuery query(db);
-    QVector<ListItemPicture> items;
 
-    foreach(const qint64 &id, trle_ids) {
-        status = query.prepare(
-            "SELECT Info.trleID, Picture.data "
-            "FROM Level "
-            "JOIN Info ON Level.infoID = Info.InfoID "
-            "JOIN Screens ON Level.LevelID = Screens.levelID "
-            "JOIN Picture ON Screens.pictureID = Picture.PictureID "
-            "WHERE Info.trleID = :id AND Screens.position = 0 ");
-        query.bindValue(":id", id);
-        if (!status) {
-            qDebug() << "Error preparing query getPictures:" << query.lastError().text();
-        }
+    bool status = query.prepare(
+        "SELECT Info.trleID, Picture.data "
+        "FROM Level "
+        "JOIN Info ON Level.infoID = Info.InfoID "
+        "JOIN Screens ON Level.LevelID = Screens.levelID "
+        "JOIN Picture ON Screens.pictureID = Picture.PictureID "
+        "WHERE Info.trleID = :id AND Screens.position = 0 ");
+    if (!status) {
+        qDebug() << "Error preparing query getPictures:"
+            << query.lastError().text();
+    }
 
-        if (status) {
+    if (status) {
+        qint64 size = items->size();
+        for (qint64 i = size-100; i < size; i++) {
+            ListItemData* level = (*items)[i];
+            query.bindValue(":id", level->m_trle_id);
             if (query.exec()) {
                 if (query.next() == true) {
-                    items.append(ListItemPicture(
-                        query.value("Info.trleID").toInt(),
-                        query.value("Picture.data").toByteArray()));
+                    level->addPicture(
+                            query.value("Picture.data").toByteArray());
                 }
             } else {
-                qDebug() << "Error executing query getPictures:" << query.lastError().text();
+                qDebug() << "Error executing query getPictures:"
+                    << query.lastError().text();
             }
         }
     }
-
-    return items;
 }
 
 InfoData Data::getInfo(const int id) {
     QSqlQuery query(db);
     bool status = false;
-    QVector<QByteArray> imageList;
     InfoData result;
 
     status = query.prepare(
@@ -131,6 +131,7 @@ InfoData Data::getInfo(const int id) {
     if (status) {
         if (query.exec() == true) {
             if (query.next() == true) {
+                QVector<QByteArray> imageList;
                 QString body = query.value("body").toString();
                 // notice that we jump over the fist image
                 // the first image is the cover image

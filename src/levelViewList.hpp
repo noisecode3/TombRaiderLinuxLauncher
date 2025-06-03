@@ -31,13 +31,7 @@ class LevelListModel : public QAbstractListModel {
         beginResetModel();
         infoList.clear();
         controller.getList(&infoList);
-        if (infoList.count() > 100) {
-            m_loadedRows = 100;
-            m_stop = false;
-        } else {
-            m_loadedRows = infoList.count();
-            m_stop = true;
-        }
+        expandRange();
         endResetModel();
     }
 
@@ -67,6 +61,8 @@ class LevelListModel : public QAbstractListModel {
                     return item.m_releaseDate;
                 case Qt::UserRole + 6:
                     return item.m_duration;
+                case Qt::UserRole + 7:
+                    return item.m_cover;
                 default:
                     return QVariant();
             }
@@ -80,18 +76,37 @@ class LevelListModel : public QAbstractListModel {
         return item.m_trle_id;
     }
 
+    void expandRange() {
+        qint64 a = m_loadedRows;
+        qint64 b = m_loadedRows + 100;
+
+        // Set states
+        if (infoList.count() > b) {  // we have more then 100 extra
+            m_loadedRows = b;
+            m_stop = false;
+        } else {  // we have less or equal then 100 extra
+            m_loadedRows = infoList.count();
+            m_stop = true;
+            b = m_loadedRows;  // we adjust b
+        }
+        qDebug() << "expandRange a:" << a;
+        qDebug() << "expandRange b:" << b;
+        qDebug() << "expandRange m_loadedRows:" << m_loadedRows;
+
+        // Add the covers
+        QVector<ListItemData*> pictureList;
+        for (qint64 i = a; i < b; i++) {
+            pictureList.append(&infoList[i]);
+        }
+        controller.getCoverList(&pictureList);
+    }
+
     void loadMoreLevels() {
         if (!m_stop) {
             // we stop to prevent extra call while in here.
             m_stop = true;
             beginResetModel();
-            if (infoList.count() > m_loadedRows + 100) {
-                m_loadedRows = m_loadedRows + 100;
-                m_stop = false;  // we have more
-            } else {
-                m_loadedRows = infoList.count();
-                m_stop = true;  // we have less or equal
-            }
+            expandRange();
             endResetModel();
         }
     }
@@ -132,7 +147,6 @@ class LevelListModel : public QAbstractListModel {
 
  private:
     QVector<ListItemData> infoList;
-    QVector<ListItemPicture> pictureList;
     // QVector<ListOriginalData> originalInfoList;
     bool m_stop = false;
     qint64 m_loadedRows = 0;
@@ -159,6 +173,9 @@ class CardItemDelegate : public QStyledItemDelegate {
         QRect imageRect = QRect(cardRect.left() + 10, cardRect.top() + 10, 80, 60);
         painter->setBrush(QColor("#cccccc"));  // Placeholder color
         painter->drawRect(imageRect);
+        QPoint coverPoint(cardRect.left() + 10, cardRect.top() + 10);
+        QPixmap cover = index.data(Qt::UserRole + 7).value<QPixmap>();
+        painter->drawPixmap(coverPoint, cover);
 
         // Text section (right side of image)
         int textX = imageRect.right() + 10;

@@ -92,35 +92,47 @@ struct ZipData {
     QString release;
 };
 
+
 /**
- * @struct ListItemPicture
- * @brief Represents a Tomb Raider Level Entry Card Picture.
+ * @struct ListItemData
+ * @brief Represents a Tomb Raider Level Entry Card Info.
  *
- * This struct is designed to store a single TRLE (Tomb Raider Level Editor) level picture record.
- * Each record is a cover image displayed as a card in the application.
+ * This struct is designed to store a single TRLE (Tomb Raider Level Editor) level record.
+ * Each record contains metadata and a cover image displayed as a card in the application.
+ * The struct includes properties to facilitate searching, filtering, and sorting.
  */
-struct ListItemPicture {
+struct ListItemData {
     /**
-     * @brief Default constructor for `ListItemPicture`.
+     * @brief Default constructor for `ListItemData`.
      *
-     * Initializes an empty instance of `ListItemPicture`.
+     * Initializes an empty instance of `ListItemData`.
      */
-    ListItemPicture() {}
+    ListItemData() {}
 
     /**
-     * @brief Parameterized constructor for `ListItemPicture`.
+     * @brief Parameterized constructor for `ListItemData`.
      *
-     * This constructor initializes a `ListItemPicture` object with a cover image.
-     * The image is converted from raw `QByteArray` to a `QIcon` after scaling it to
-     * fit within 640x480 dimensions. The scaling maintains the aspect ratio and
-     * smooths out pixels using `Qt::SmoothTransformation`. The image is centered
-     * within a transparent background if its aspect ratio does not perfectly match the target.
+     * This constructor initializes a `ListItemData` object with metadata.
      *
      * @param id The TRLE numeric level ID.
-     * @param imageData The cover image as a `QByteArray`. Supported formats include JPEG, PNG, and WEBP.
+     * @param title The TRLE title. Expected to contain a single name.
+     * @param author The TRLE author(s). Can be a single name or multiple names.
+     * @param type The TRLE type, represented by a numeric ID.
+     * @param classInput The TRLE class, represented by a numeric ID.
+     * @param releaseDate The release date in the format "YYYY-MM-DD" (e.g., "2000-01-01").
+     * @param difficulty The TRLE difficulty, represented by a numeric ID.
+     * @param duration The TRLE duration, represented by a numeric ID.
+     * @param m_cover The cover image as a `m_cover`.
      */
-    ListItemPicture(
-        qint64 id, QByteArray imageData) : m_trle_id(id) {
+    ListItemData(
+            qint64 id, const QString& title, const QStringList& authors,
+            qint64 type, qint64 classInput, const QString& releaseDate,
+            qint64 difficulty, qint64 duration) :
+            m_trle_id(id), m_title(title), m_authors(authors), m_type(type),
+            m_class(classInput), m_releaseDate(releaseDate),
+            m_difficulty(difficulty), m_duration(duration) {}
+
+    void addPicture(const QByteArray& imageData) {
         // Load the image from the byte array
         QPixmap pixmap;
         pixmap.loadFromData(imageData, "WEBP");
@@ -151,57 +163,9 @@ struct ListItemPicture {
         painter.drawPixmap(xOffset, yOffset, scaledPixmap);
         painter.end();
 
-        // Store the resulting pixmap in a QIcon
-        m_picture.addPixmap(centeredPixmap);
+        // Store the resulting pixmap in m_picture
+        m_cover = centeredPixmap;
     }
-
-    // Data members
-    qint64 m_trle_id;        ///< The TRLE level id.
-    QIcon m_picture;         ///< The cover image.
-};
-
-/**
- * @struct ListItemData
- * @brief Represents a Tomb Raider Level Entry Card Info.
- *
- * This struct is designed to store a single TRLE (Tomb Raider Level Editor) level record.
- * Each record contains metadata and a cover image displayed as a card in the application.
- * The struct includes properties to facilitate searching, filtering, and sorting without
- * the cover image, just a pointer.
- */
-struct ListItemData {
-    /**
-     * @brief Default constructor for `ListItemData`.
-     *
-     * Initializes an empty instance of `ListItemData`.
-     */
-    ListItemData() {}
-
-    /**
-     * @brief Parameterized constructor for `ListItemData`.
-     *
-     * This constructor initializes a `ListItemData` object with metadata.
-     *
-     * @param id The TRLE numeric level ID.
-     * @param title The TRLE title. Expected to contain a single name.
-     * @param author The TRLE author(s). Can be a single name or multiple names.
-     * @param type The TRLE type, represented by a numeric ID.
-     * @param classInput The TRLE class, represented by a numeric ID.
-     * @param releaseDate The release date in the format "YYYY-MM-DD" (e.g., "2000-01-01").
-     * @param difficulty The TRLE difficulty, represented by a numeric ID.
-     * @param duration The TRLE duration, represented by a numeric ID.
-     * @param m_cover The cover image as a `ListItemPicture*`.
-     */
-    ListItemData(
-        qint64 id, const QString& title, const QStringList& authors,
-        qint64 type, qint64 classInput, const QString& releaseDate,
-        qint64 difficulty, qint64 duration) :
-        m_trle_id(id), m_title(title), m_authors(authors), m_type(type),
-        m_class(classInput), m_releaseDate(releaseDate),
-        m_difficulty(difficulty), m_duration(duration) {
-            m_cover = nullptr;
-        }
-
     // Data members
     qint64 m_trle_id;        ///< The TRLE level id.
     QString m_title;         ///< The TRLE level title.
@@ -211,7 +175,7 @@ struct ListItemData {
     QString m_releaseDate;   ///< The release date in "YYYY-MM-DD" format.
     qint64 m_difficulty;     ///< ID of the difficulty of the level.
     qint64 m_duration;       ///< ID of the estimated duration of the level.
-    ListItemPicture* m_cover;   ///< The TRLE cover image pointer.
+    QPixmap m_cover;         ///< The TRLE cover image pointer.
 };
 
 /**
@@ -243,19 +207,18 @@ struct InfoData {
         : m_body(body) {
         for (const QByteArray& image : imageList) {
             QPixmap pixmap;
-            QIcon finalIcon;
 
             // Load image data into a QPixmap and convert it to a QIcon
-            if (pixmap.loadFromData(image, "WEBP") == true) {
-                finalIcon.addPixmap(pixmap);
+            if (!pixmap.loadFromData(image, "WEBP")) {
+                qDebug() << "Could not load webp data to QPixmap.";
             }
 
-            m_imageList.push_back(finalIcon);
+            m_imageList.push_back(pixmap);
         }
     }
 
     QString m_body;  ///< The textual content associated with this object.
-    QVector<QIcon> m_imageList;  ///< A list of icons generated from image data.
+    QVector<QPixmap> m_imageList;  ///< A list of level large screen image data.
 };
 
 class Data : public QObject {
@@ -298,7 +261,7 @@ class Data : public QObject {
 
     qint64 getListRowCount();
     QVector<ListItemData> getListItems();
-    QVector<ListItemPicture> getPictures(QList<qint64> trle_ids);
+    void getCoverPictures(QVector<ListItemData*>* items);
     InfoData getInfo(int id);
     QString getWalkthrough(int id);
     int getType(int id);
