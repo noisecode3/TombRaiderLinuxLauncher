@@ -1,5 +1,5 @@
 /* TombRaiderLinuxLauncher
- * Martin Bångens Copyright (C) 2024
+ * Martin Bångens Copyright (C) 2025
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -38,7 +38,7 @@ class Controller : public QObject {
     void setupLevel(int id);
 
     void getList(QVector<ListItemData>* list);
-    void getCoverList(QVector<ListItemData*>* list);
+    void getCoverList(QVector<ListItemData*>* items);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool link(int id);
@@ -48,11 +48,13 @@ class Controller : public QObject {
     void controllerGenerateList(const QList<int>& availableGames);
     void controllerTickSignal();
     void controllerDownloadError(int status);
+    void controllerReloadLevelList();
 
     void checkCommonFilesThreadSignal();
     void setupThreadSignal(const QString& level, const QString& game);
     void setupGameThreadSignal(int id);
     void setupLevelThreadSignal(int id);
+    void getCoverListThreadSignal(QVector<ListItemData*>* items);
 
  private:
     Controller();

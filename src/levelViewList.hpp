@@ -28,11 +28,10 @@ class LevelListModel : public QAbstractListModel {
     explicit LevelListModel(QObject *parent): QAbstractListModel(parent) {}
 
     void setLevels() {
-        beginResetModel();
         infoList.clear();
         controller.getList(&infoList);
+        beginResetModel();
         expandRange();
-        endResetModel();
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
@@ -85,16 +84,17 @@ class LevelListModel : public QAbstractListModel {
             m_loadedRows = b;
             m_stop = false;
         } else {  // we have less or equal then 100 extra
-            m_loadedRows = infoList.count();
+            b = infoList.count() - 1;
+            m_loadedRows = b;
             m_stop = true;
-            b = m_loadedRows;  // we adjust b
+            endResetModel();
         }
         qDebug() << "expandRange a:" << a;
         qDebug() << "expandRange b:" << b;
         qDebug() << "expandRange m_loadedRows:" << m_loadedRows;
 
         // Add the covers
-        QVector<ListItemData*> pictureList;
+        pictureList.clear();
         for (qint64 i = a; i < b; i++) {
             pictureList.append(&infoList[i]);
         }
@@ -105,9 +105,9 @@ class LevelListModel : public QAbstractListModel {
         if (!m_stop) {
             // we stop to prevent extra call while in here.
             m_stop = true;
+            endResetModel();
             beginResetModel();
             expandRange();
-            endResetModel();
         }
     }
 
@@ -148,6 +148,7 @@ class LevelListModel : public QAbstractListModel {
  private:
     QVector<ListItemData> infoList;
     // QVector<ListOriginalData> originalInfoList;
+    QVector<ListItemData*> pictureList;
     bool m_stop = false;
     qint64 m_loadedRows = 0;
     Controller& controller = Controller::getInstance();

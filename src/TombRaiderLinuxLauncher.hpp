@@ -1,5 +1,5 @@
 /* TombRaiderLinuxLauncher
- * Martin Bångens Copyright (C) 2024
+ * Martin Bångens Copyright (C) 2025
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -34,7 +34,11 @@ namespace Ui { class TombRaiderLinuxLauncher; }
 QT_END_NAMESPACE
 
 /**
- * View component in the MVC pattern; Main UI class for the launcher.
+ * @class TombRaiderLinuxLauncher
+ * @brief View component in the MVC pattern; Main Window UI class.
+ *
+ *
+ *
  */
 class TombRaiderLinuxLauncher : public QMainWindow {
     Q_OBJECT
@@ -77,6 +81,10 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     void onCurrentItemChanged(
             const QModelIndex &current, const QModelIndex &previous);
     /**
+     *  Try loading 100 more levels cards by calling for more cover pictures.
+     */
+    void loadMoreLevels();
+    /**
      * Updates progress by 1% of total work steps.
      */
     void workTick();
@@ -88,10 +96,6 @@ class TombRaiderLinuxLauncher : public QMainWindow {
      * Generates the initial level list after file analysis.
      */
     void generateList(const QList<int>& availableGames);
-    /**
-     * Load more levels when scrolled to the end of the list.
-     */
-    void loadMoreLevels(int value);
     /**
      * Sorts the list by title.
      */

@@ -1,5 +1,5 @@
 /* TombRaiderLinuxLauncher
- * Martin Bångens Copyright (C) 2024
+ * Martin Bångens Copyright (C) 2025
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -30,12 +30,10 @@ void Controller::initializeThread() {
     controllerThread->start();
 
     //  Using the controller thread to start model work
-    /*
-    connect(this, &Controller::checkCommonFilesThreadSignal,
-            this, [this]() {
-        model.checkCommonFiles();
+    connect(this, &Controller::getCoverListThreadSignal,
+            this, [this](QVector<ListItemData*>* items) {
+        model.getCoverList(items);
     });
-    */
 
     connect(this, &Controller::setupThreadSignal,
             this, [this](const QString& level, const QString& game) {
@@ -72,6 +70,11 @@ void Controller::initializeThread() {
             this, [this](const QList<int>& availableGames) {
         emit controllerGenerateList(availableGames);
     }, Qt::QueuedConnection);
+
+    connect(&model, &Model::modelReloadLevelListSignal,
+            this, [this]() {
+        emit controllerReloadLevelList();
+    }, Qt::QueuedConnection);
 }
 
 void Controller::checkCommonFiles() {
@@ -80,6 +83,10 @@ void Controller::checkCommonFiles() {
 
 void Controller::setup(const QString& level, const QString& game) {
     emit setupThreadSignal(level, game);
+}
+
+void Controller::getCoverList(QVector<ListItemData*>* items) {
+    emit getCoverListThreadSignal(items);
 }
 
 void Controller::setupGame(int id) {
@@ -97,10 +104,6 @@ int Controller::checkGameDirectory(int id) {
 
 void Controller::getList(QVector<ListItemData>* list) {
     model.getList(list);
-}
-
-void Controller::getCoverList(QVector<ListItemData*>* list) {
-    model.getCoverList(list);
 }
 
 const InfoData Controller::getInfo(int id) {

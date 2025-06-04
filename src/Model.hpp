@@ -64,7 +64,7 @@ class Model : public QObject {
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
     void getList(QVector<ListItemData>* list);
-    void getCoverList(QVector<ListItemData*>* list);
+    void getCoverList(QVector<ListItemData*>* tiems);
     int getItemState(int id);
     bool runWine(const int id);
     bool setLink(int id);
@@ -80,6 +80,7 @@ class Model : public QObject {
  signals:
     void generateListSignal(QList<int> availableGames);
     void modelTickSignal();
+    void modelReloadLevelListSignal();
 
  private:
     bool getLevelHaveFile(

@@ -1,5 +1,5 @@
 /* TombRaiderLinuxLauncher
- * Martin Bångens Copyright (C) 2024
+ * Martin Bångens Copyright (C) 2025
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -24,7 +24,7 @@
  * and maybe other files. We compare/match and verify game files here.
  */
 
-#include "GameFileTree.hpp"
+#include "../src/GameFileTree.hpp"
 #include <QDir>
 #include <QFileInfo>
 #include <QQueue>

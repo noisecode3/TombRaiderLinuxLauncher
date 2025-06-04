@@ -1,5 +1,5 @@
 /* TombRaiderLinuxLauncher
- * Martin Bångens Copyright (C) 2024
+ * Martin Bångens Copyright (C) 2025
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -47,6 +47,10 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     // Progress bar signal connection
     connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()),
         this, SLOT(workTick()));
+
+    //
+    connect(&Controller::getInstance(), SIGNAL(controllerReloadLevelList()),
+        this, SLOT(loadMoreLevels()));
 
     // Thread work done signal connections
     connect(&Controller::getInstance(),
@@ -120,9 +124,6 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         this,
         &TombRaiderLinuxLauncher::onCurrentItemChanged);
 
-    connect(ui->listViewLevels->verticalScrollBar(), &QScrollBar::valueChanged,
-            this, &TombRaiderLinuxLauncher::loadMoreLevels);
-
     // Read settings
     QString value = m_settings.value("setup").toString();
     if (value != "yes") {
@@ -134,14 +135,6 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
     model->setLevels();
-}
-
-void TombRaiderLinuxLauncher::loadMoreLevels(int value) {
-    QScrollBar *bar = ui->listViewLevels->verticalScrollBar();
-    if (value >= bar->maximum() - 5) {
-        qDebug() << "loadMoreLevels";
-        model->loadMoreLevels();
-    }
 }
 
 void TombRaiderLinuxLauncher::sortByTitle() {
@@ -401,6 +394,10 @@ void TombRaiderLinuxLauncher::backClicked() {
         ui->stackedWidget->setCurrentWidget(
             ui->stackedWidget->findChild<QWidget*>("select"));
     }
+}
+
+void TombRaiderLinuxLauncher::loadMoreLevels() {
+    model->loadMoreLevels();
 }
 
 void TombRaiderLinuxLauncher::workTick() {

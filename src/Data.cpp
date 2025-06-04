@@ -98,13 +98,11 @@ void Data::getCoverPictures(QVector<ListItemData*>* items) {
     }
 
     if (status) {
-        qint64 size = items->size();
-        for (qint64 i = size-100; i < size; i++) {
-            ListItemData* level = (*items)[i];
-            query.bindValue(":id", level->m_trle_id);
+        for (ListItemData* item : *items) {
+            query.bindValue(":id", item->m_trle_id);
             if (query.exec()) {
                 if (query.next() == true) {
-                    level->addPicture(
+                    item->addPicture(
                             query.value("Picture.data").toByteArray());
                 }
             } else {
