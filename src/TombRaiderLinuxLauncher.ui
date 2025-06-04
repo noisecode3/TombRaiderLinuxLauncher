@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1334</width>
-    <height>749</height>
+    <width>939</width>
+    <height>709</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -85,7 +85,7 @@
                  <property name="layoutDirection">
                   <enum>Qt::LeftToRight</enum>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_11" stretch="0,0,0">
+                 <layout class="QVBoxLayout" name="verticalLayout_11" stretch="0,0">
                   <property name="spacing">
                    <number>0</number>
                   </property>
@@ -145,9 +145,15 @@
                      </item>
                      <item>
                       <widget class="QCommandLinkButton" name="commandLinkButton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>60</width>
+                         <height>0</height>
+                        </size>
+                       </property>
                        <property name="maximumSize">
                         <size>
-                         <width>100</width>
+                         <width>60</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -161,389 +167,437 @@
                        </property>
                       </widget>
                      </item>
-                    </layout>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QWidget" name="filterInput" native="true">
-                    <layout class="QHBoxLayout" name="horizontalLayout_9">
-                     <property name="leftMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="topMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="rightMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="bottomMargin">
-                      <number>0</number>
-                     </property>
                      <item>
-                      <widget class="QLabel" name="labelClass">
-                       <property name="minimumSize">
-                        <size>
-                         <width>80</width>
-                         <height>45</height>
-                        </size>
-                       </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>45</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Class&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QComboBox" name="comboBoxClass">
-                       <item>
-                        <property name="text">
-                         <string> - All -</string>
+                      <widget class="QWidget" name="filterInput" native="true">
+                       <layout class="QHBoxLayout" name="horizontalLayout_9">
+                        <property name="leftMargin">
+                         <number>0</number>
                         </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Alien/Space</string>
+                        <property name="topMargin">
+                         <number>0</number>
                         </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Atlantis</string>
+                        <property name="rightMargin">
+                         <number>0</number>
                         </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Base/Lab</string>
+                        <property name="bottomMargin">
+                         <number>0</number>
                         </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Cambodia</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Castle</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Cave/Cat</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>City</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Coastal</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Cold/Snowy</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Desert</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Easter</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Egypt</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Fantasy/Surreal</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Home</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Ireland</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Joke</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Jungle</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Kids</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Library</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Mystery/Horror</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>nc</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Nordic/Celtic</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Oriental</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Persia</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Pirates</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Remake</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Rome/Greece</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Ship</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Shooter</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>South America</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>South Pacific</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Steampunk</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Train</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Venice</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Wild West</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Xmas</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Young Lara</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="labelDifficulty">
-                       <property name="minimumSize">
-                        <size>
-                         <width>100</width>
-                         <height>45</height>
-                        </size>
-                       </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>61</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Difficulty&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QComboBox" name="comboBoxDifficulty">
-                       <item>
-                        <property name="text">
-                         <string> - All -</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>easy</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>medium</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>challenging</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>very challenging</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="labelType">
-                       <property name="minimumSize">
-                        <size>
-                         <width>80</width>
-                         <height>45</height>
-                        </size>
-                       </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>44</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QComboBox" name="comboBoxType">
-                       <item>
-                        <property name="text">
-                         <string> - All -</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>TR1</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>TR2</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>TR3</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>TR4</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>TR5</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>TEN</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="labelDuration">
-                       <property name="minimumSize">
-                        <size>
-                         <width>100</width>
-                         <height>45</height>
-                        </size>
-                       </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>61</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Duration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QComboBox" name="comboBoxDuration">
-                       <item>
-                        <property name="text">
-                         <string> - All -</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>short</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>medium</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>long</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>very long</string>
-                        </property>
-                       </item>
+                        <item>
+                         <widget class="QLabel" name="labelClass">
+                          <property name="minimumSize">
+                           <size>
+                            <width>45</width>
+                            <height>45</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>80</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Class&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBoxClass">
+                          <property name="minimumSize">
+                           <size>
+                            <width>120</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>120</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string> - All -</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Alien/Space</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Atlantis</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Base/Lab</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Cambodia</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Castle</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Cave/Cat</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>City</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Coastal</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Cold/Snowy</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Desert</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Easter</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Egypt</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Fantasy/Surreal</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Home</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Ireland</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Joke</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Jungle</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Kids</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Library</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Mystery/Horror</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>nc</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Nordic/Celtic</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Oriental</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Persia</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Pirates</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Remake</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Rome/Greece</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Ship</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Shooter</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>South America</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>South Pacific</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Steampunk</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Train</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Venice</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Wild West</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Xmas</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Young Lara</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QLabel" name="labelDifficulty">
+                          <property name="minimumSize">
+                           <size>
+                            <width>61</width>
+                            <height>45</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>100</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Difficulty&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBoxDifficulty">
+                          <property name="minimumSize">
+                           <size>
+                            <width>80</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>80</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string> - All -</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>easy</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>medium</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>challenging</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>very challenging</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QLabel" name="labelType">
+                          <property name="minimumSize">
+                           <size>
+                            <width>40</width>
+                            <height>45</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>80</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBoxType">
+                          <property name="minimumSize">
+                           <size>
+                            <width>60</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>60</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string> - All -</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR1</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR2</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR3</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR4</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR5</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TEN</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QLabel" name="labelDuration">
+                          <property name="minimumSize">
+                           <size>
+                            <width>70</width>
+                            <height>45</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>100</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Duration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBoxDuration">
+                          <property name="minimumSize">
+                           <size>
+                            <width>80</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>80</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string> - All -</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>short</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>medium</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>long</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>very long</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
+                       </layout>
                       </widget>
                      </item>
                     </layout>
@@ -565,29 +619,14 @@
                       <number>0</number>
                      </property>
                      <item>
-                      <widget class="QCheckBox" name="checkBoxOriginalFirst">
+                      <widget class="QRadioButton" name="radioButtonOriginal">
                        <property name="font">
                         <font>
                          <pointsize>12</pointsize>
                         </font>
                        </property>
                        <property name="text">
-                        <string>Original games first</string>
-                       </property>
-                       <property name="checked">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QRadioButton" name="radioButtonAuthor">
-                       <property name="font">
-                        <font>
-                         <pointsize>12</pointsize>
-                        </font>
-                       </property>
-                       <property name="text">
-                        <string>Author</string>
+                        <string>Origina Games</string>
                        </property>
                       </widget>
                      </item>
@@ -599,7 +638,7 @@
                         </font>
                        </property>
                        <property name="text">
-                        <string>Level name</string>
+                        <string>Level Name</string>
                        </property>
                        <property name="checked">
                         <bool>false</bool>
@@ -680,11 +719,8 @@
             </item>
             <item>
              <widget class="QListView" name="listViewLevels">
-              <property name="sizeAdjustPolicy">
-               <enum>QAbstractScrollArea::AdjustIgnored</enum>
-              </property>
               <property name="dragDropMode">
-               <enum>QAbstractItemView::NoDragDrop</enum>
+               <enum>QAbstractItemView::DragDrop</enum>
               </property>
               <property name="iconSize">
                <size>
@@ -696,10 +732,10 @@
                <enum>QAbstractItemView::ScrollPerItem</enum>
               </property>
               <property name="resizeMode">
-               <enum>QListView::Fixed</enum>
+               <enum>QListView::Adjust</enum>
               </property>
               <property name="viewMode">
-               <enum>QListView::ListMode</enum>
+               <enum>QListView::IconMode</enum>
               </property>
               <property name="uniformItemSizes">
                <bool>true</bool>
@@ -1204,6 +1240,9 @@
                      </item>
                      <item>
                       <spacer name="horizontalSpacerRunnerType">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
                        <property name="sizeHint" stdset="0">
                         <size>
                          <width>40</width>
@@ -1217,6 +1256,9 @@
                   </item>
                   <item>
                    <spacer name="verticalSpacerLevelSetup">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
                     <property name="sizeHint" stdset="0">
                      <size>
                       <width>20</width>
@@ -1365,6 +1407,9 @@
                </item>
                <item>
                 <spacer name="verticalSpacerSetupLara">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
@@ -1455,6 +1500,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                </item>
                <item>
                 <spacer name="verticalSpacerSetupOptions">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
