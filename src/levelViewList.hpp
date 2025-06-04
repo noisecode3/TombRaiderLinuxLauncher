@@ -30,6 +30,7 @@ class LevelListModel : public QAbstractListModel {
     void setLevels() {
         infoList.clear();
         controller.getList(&infoList);
+        sortItems(compareReleaseDates);
         beginResetModel();
         expandRange();
     }
@@ -171,12 +172,14 @@ class CardItemDelegate : public QStyledItemDelegate {
         painter->drawRoundedRect(cardRect, 10, 10);
 
         // Picture space (left side)
-        QRect imageRect = QRect(cardRect.left() + 10, cardRect.top() + 10, 80, 60);
+        QRect imageRect = QRect(cardRect.left() + 10, cardRect.top() + 10, 320, 240);
         painter->setBrush(QColor("#cccccc"));  // Placeholder color
-        painter->drawRect(imageRect);
-        QPoint coverPoint(cardRect.left() + 10, cardRect.top() + 10);
         QPixmap cover = index.data(Qt::UserRole + 7).value<QPixmap>();
-        painter->drawPixmap(coverPoint, cover);
+        if (!cover.isNull()) {
+            painter->drawPixmap(imageRect, cover);
+        } else {
+            painter->drawRect(imageRect);
+        }
 
         // Text section (right side of image)
         int textX = imageRect.right() + 10;
@@ -205,7 +208,7 @@ class CardItemDelegate : public QStyledItemDelegate {
     }
 
     QSize sizeHint(const QStyleOptionViewItem &, const QModelIndex &) const override {
-        return QSize(300, 80);  // Adjust size as needed
+        return QSize(600, 300);  // Adjust size as needed
     }
 };
 
