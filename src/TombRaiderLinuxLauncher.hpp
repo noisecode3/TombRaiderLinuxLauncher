@@ -33,6 +33,15 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
 QT_END_NAMESPACE
 
+/** @mainpage TombRaiderLinuxLauncher
+ *
+ * @section intro
+ *
+ * @section getting started
+ * @subsection step one
+ * @subsection step two
+ */
+
 /**
  * @class TombRaiderLinuxLauncher
  * @brief View component in the MVC pattern; Main Window UI class.

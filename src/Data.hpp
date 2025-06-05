@@ -25,6 +25,12 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+
+/**
+ * @struct FileList
+ * @brief Files object to keep track of files.
+ *
+ */
 struct FileList {
     QString path;
     QString md5sum;
@@ -32,7 +38,8 @@ struct FileList {
 
 /**
  * @struct FolderNames
- * @brief Folder names game used on Windows
+ * @brief Folder names game used on Windows.
+ *
  * These names are used by steam and installed in the common folder on Linux.
  * Except for `TombEngine (TEN)` I made that one up.
  */
@@ -48,6 +55,13 @@ struct FolderNames {
         };
 };
 
+/**
+ * @struct ExecutableNames
+ * @brief Executable game file names used on Windows used to start the games.
+ *
+ * These are searched for together with rootless tree patterns. Also used as a default
+ * starter by using a symbolic link to the executable that links to ddraw, directx11 or opengl.
+ */
 struct ExecutableNames {
     QMap<int, QString> data = {
             {0, "null"},
@@ -60,14 +74,33 @@ struct ExecutableNames {
         };
 };
 
+/**
+ * @struct ZipData
+ * @brief Holds download information for a Tomb Raider Level.
+ *
+ * This struct is designed to store a TRLE download file record for trle.net or trcustoms.org.
+ * Each file record contains data for downloading and file name etc for the application.
+ */
 struct ZipData {
     /**
-     * @struct ZipData
-     * @brief
-     * @param
-     * @details
+     * @brief Default constructor for `ZipData`.
+     *
+     * Initializes an empty instance of `ZipData`.
      */
     ZipData() {}
+    /**
+     * @brief Parameterized constructor for `ZipData`.
+     *
+     * This constructor initializes a `ZipData` object with metadata.
+     *
+     * @param zipName TRLE level zip file name.
+     * @param zipSize Size of the file form TRLE in MiB.
+     * @param md5sum checksum of the archive.
+     * @param url String of download address.
+     * @param version File version from trcustoms.org
+     * @param type Level type.
+     * @param release date of file release.
+     */
     ZipData(
         const QString& zipName,
         float zipSize,
@@ -77,21 +110,21 @@ struct ZipData {
         int type,
         const QString& release) :
         name(zipName),
-        megabyteSize(zipSize),
+        mebibyteSize(zipSize),
         md5sum(md5sum),
         url(url),
         version(version),
         type(type),
         release(release) {}
-    QString name;
-    float megabyteSize;
-    QString md5sum;
-    QString url;
-    int version;
-    int type;
-    QString release;
-};
 
+    QString name;        ///< The archive file name.
+    float mebibyteSize;  ///< The archive file size in MiB.
+    QString md5sum;      ///< The archive md5sum.
+    QString url;         ///< The URL of the TRLE level download.
+    int version;         ///< The Version of trcustoms archive file.
+    int type;            ///< The TRLE type used to identify a executable.
+    QString release;     ///< The The date of file release from trcustoms.
+};
 
 /**
  * @struct ListItemData
@@ -180,11 +213,11 @@ struct ListItemData {
 
 /**
  * @struct InfoData
- * @brief Store HTML data and a list of icons generated from image WEBP data.
+ * @brief Store HTML data and a list of level pictures generated from image WEBP data.
  *
  * This struct is designed to store a body of HTML and convert a list of image data 
- * (provided as `QByteArray`) into `QIcon` objects. The `QIcon` objects can then 
- * be used in Qt-based applications with QtWebEngine and QIcons in a split view manner.
+ * (provided as `QByteArray`) into `QPixmap` objects. The `QPixmap` objects can then 
+ * be used in Qt-based applications with QtWebEngine and QPixmap in a split view manner.
  */
 struct InfoData {
     /**
@@ -197,10 +230,10 @@ struct InfoData {
     /**
      * @brief Constructs an `InfoData` object with the given body and image list.
      *
-     * Converts each image in the provided `QVector<QByteArray>` to a `QIcon` object
+     * Converts each image in the provided `QVector<QByteArray>` to a `QPixmap` object
      * using the "WEBP" format and stores them in the icon list.
      *
-     * @param body A string representing the main textual content.
+     * @param body A string representing the main textual content in HTML.
      * @param imageList A vector of image data in `QByteArray` format.
      */
     InfoData(const QString& body, const QVector<QByteArray>& imageList)
@@ -208,7 +241,7 @@ struct InfoData {
         for (const QByteArray& image : imageList) {
             QPixmap pixmap;
 
-            // Load image data into a QPixmap and convert it to a QIcon
+            // Load image data into a QPixmap
             if (!pixmap.loadFromData(image, "WEBP")) {
                 qDebug() << "Could not load webp data to QPixmap.";
             }
@@ -221,16 +254,36 @@ struct InfoData {
     QVector<QPixmap> m_imageList;  ///< A list of level large screen image data.
 };
 
+/**
+ * @class Data
+ * @brief Data component connected to the Model in the MVC pattern.
+ *
+ * It handles database connection(s) and reads and write scraped data.
+ * Its a singlton in global space that packs data into struct's and passes them
+ * to and from the Model.
+ *
+ */
 class Data : public QObject {
     Q_OBJECT
 
  public:
+    /**
+     * Mayers thread safe singleton pattern.
+     */
     static Data& getInstance() {
         // cppcheck-suppress threadsafety-threadsafety
         static Data instance;
         return instance;
     }
 
+    /**
+     * @brief Connect to the main database.
+     *
+     * Once we setup camp in home, we can use the path to camp.
+     * That is usually in ~/.local/share/AppName
+     *
+     * @param path Full path to the datbase without the file name.
+     */
     bool initializeDatabase(const QString& path) {
         bool status = false;
         const QString filePath = QString("%1/%2").arg(path, "tombll.db");
@@ -244,7 +297,6 @@ class Data : public QObject {
         } else {
             db = QSqlDatabase::addDatabase("QSQLITE");
             db.setDatabaseName(QString("%1/tombll.db").arg(path));
-            // db.setConnectOptions("QSQLITE_OPEN_READONLY");
             if (db.open() == true) {  // flawfinder: ignore
                 status = true;
             } else {
@@ -255,19 +307,67 @@ class Data : public QObject {
         return status;
     }
 
+    /**
+     * @brief Close the connection to the main database.
+     *
+     * Dont need to be called before the application exit.
+     */
     void releaseDatabase() {
         db.close();
     }
 
+    /**
+     * @brief Count all the Level records in the database
+     * @return The number of Level records
+     */
     qint64 getListRowCount();
+    /**
+     * @brief Get the main list of levels, without the picture
+     * @return The QVector ListItemData is all the level metadata
+     */
     QVector<ListItemData> getListItems();
+    /**
+     * @brief Add Cover Pictures to ListItemData pointers
+     * @param Cache like used QVector for holding ListItemData pointers
+     */
     void getCoverPictures(QVector<ListItemData*>* items);
+    /**
+     * @brief Get the info page, this is HTML and picture data you see on trel.net
+     * @param 
+     * @return The InfoData is a struct of QString and QVector<QPixmap>
+     */
     InfoData getInfo(int id);
+    /**
+     * @brief Get the walkthrough HTML page
+     * @param  
+     * @return 
+     */
     QString getWalkthrough(int id);
+    /**
+     * @brief 
+     * @param 
+     * @return 
+     */
     int getType(int id);
 
+    /**
+     * @brief 
+     * @param 
+     * @return 
+     */
     QVector<FileList> getFileList(const int id);
+    /**
+     * @brief 
+     * @param 
+     * @return 
+     */
     ZipData getDownload(const int id);
+    /**
+     * @brief 
+     * @param 
+     * @param 
+     * @return 
+     */
     void setDownloadMd5(const int id, const QString& newMd5sum);
 
  private:

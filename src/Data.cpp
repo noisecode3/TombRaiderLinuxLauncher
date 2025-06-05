@@ -86,7 +86,7 @@ void Data::getCoverPictures(QVector<ListItemData*>* items) {
     QSqlQuery query(db);
 
     bool status = query.prepare(
-        "SELECT Info.trleID, Picture.data "
+        "SELECT Picture.data "
         "FROM Level "
         "JOIN Info ON Level.infoID = Info.InfoID "
         "JOIN Screens ON Level.LevelID = Screens.levelID "
@@ -121,9 +121,11 @@ InfoData Data::getInfo(const int id) {
     status = query.prepare(
         "SELECT Level.body, Picture.data "
         "FROM Level "
+        "JOIN Info ON Level.infoID = Info.InfoID "
         "JOIN Screens ON Level.LevelID = Screens.levelID "
         "JOIN Picture ON Screens.pictureID = Picture.PictureID "
-        "WHERE Level.LevelID = :id");
+        "WHERE Info.trleID = :id AND Screens.position > 0 "
+        "ORDER BY Screens.position ASC");
     query.bindValue(":id", id);
 
     if (status) {
@@ -131,8 +133,7 @@ InfoData Data::getInfo(const int id) {
             if (query.next() == true) {
                 QVector<QByteArray> imageList;
                 QString body = query.value("body").toString();
-                // notice that we jump over the fist image
-                // the first image is the cover image
+                imageList.push_back(query.value("Picture.data").toByteArray());
                 while (query.next() == true) {
                     imageList.push_back(
                         query.value("Picture.data").toByteArray());
@@ -154,7 +155,8 @@ QString Data::getWalkthrough(const int id) {
     status = query.prepare(
         "SELECT Level.walkthrough "
         "FROM Level "
-        "WHERE Level.LevelID = :id");
+        "JOIN Info ON Level.infoID = Info.InfoID "
+        "WHERE Info.trleID = :id");
     query.bindValue(":id", id);
 
     if (status) {
@@ -178,9 +180,8 @@ int Data::getType(const int id) {
 
     status = query.prepare(
         "SELECT Info.type "
-        "FROM Level "
-        "JOIN Info ON Level.infoID = Info.InfoID "
-        "WHERE Level.LevelID = :id");
+        "FROM Info "
+        "WHERE Info.trleID = :id");
     query.bindValue(":id", id);
 
     if (status) {
@@ -205,10 +206,10 @@ ZipData Data::getDownload(const int id) {
     status = query.prepare(
         "SELECT Zip.*, Info.type "
         "FROM Level "
+        "JOIN Info ON Level.infoID = Info.InfoID "
         "JOIN ZipList ON Level.LevelID = ZipList.levelID "
         "JOIN Zip ON ZipList.zipID = Zip.ZipID "
-        "JOIN Info ON Level.infoID = Info.InfoID "
-        "WHERE Level.LevelID = :id");
+        "WHERE Info.trleID = :id");
     query.bindValue(":id", id);
 
     if (status) {
