@@ -37,9 +37,6 @@ QT_END_NAMESPACE
  *
  * @section intro
  *
- * @section getting started
- * @subsection step one
- * @subsection step two
  */
 
 /**
