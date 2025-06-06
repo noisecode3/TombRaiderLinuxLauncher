@@ -28,41 +28,47 @@ class LevelListModel : public QAbstractListModel {
     explicit LevelListModel(QObject *parent): QAbstractListModel(parent) {}
 
     void setLevels() {
+        beginResetModel();
         infoList.clear();
         controller.getList(&infoList);
-        sortItems(compareReleaseDates);
-        beginResetModel();
-        expandRange();
+        for (ListItemData& item : infoList) {
+            filterList.append(&item);
+            list.append(&item);
+        }
+        endResetModel();
+        a = createIndex(0, 0);
+        b = createIndex(99, 0);
+        getMoreCovers();
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
         Q_UNUSED(parent);
-        return m_loadedRows;
+        return filterList.count();
     }
 
     QVariant data(const QModelIndex &index, int role) const override {
         QVariant result;
         int row = index.row();
 
-        if (index.isValid() && row < infoList.count()) {
-            const ListItemData &item = infoList.at(row);
+        if (index.isValid() && row < filterList.count()) {
+            const ListItemData* item = filterList.at(row);
             switch (role) {
                 case Qt::DisplayRole:
-                    return item.m_title;
+                    return item->m_title;
                 case Qt::UserRole + 1:
-                    return item.m_authors;
+                    return item->m_authors;
                 case Qt::UserRole + 2:
-                    return item.m_type;
+                    return item->m_type;
                 case Qt::UserRole + 3:
-                    return item.m_class;
+                    return item->m_class;
                 case Qt::UserRole + 4:
-                    return item.m_difficulty;
+                    return item->m_difficulty;
                 case Qt::UserRole + 5:
-                    return item.m_releaseDate;
+                    return item->m_releaseDate;
                 case Qt::UserRole + 6:
-                    return item.m_duration;
+                    return item->m_duration;
                 case Qt::UserRole + 7:
-                    return item.m_cover;
+                    return item->m_cover;
                 default:
                     return QVariant();
             }
@@ -72,86 +78,78 @@ class LevelListModel : public QAbstractListModel {
     }
 
     int getLid(const QModelIndex &index) const {
-        const ListItemData &item = infoList.at(index.row());
-        return item.m_trle_id;
+        const ListItemData* item = filterList.at(index.row());
+        return item->m_trle_id;
     }
 
-    void expandRange() {
-        qint64 a = m_loadedRows;
-        qint64 b = m_loadedRows + 100;
-
-        // Set states
-        if (infoList.count() > b) {  // we have more then 100 extra
-            m_loadedRows = b;
-            m_stop = false;
-        } else {  // we have less or equal then 100 extra
-            b = infoList.count() - 1;
-            m_loadedRows = b;
-            m_stop = true;
-            endResetModel();
+    void getMoreCovers() {
+        cache.clear();
+        for (qint64 i = a.row(); i <= b.row(); i++) {
+            cache.append(list[i]);
         }
-        qDebug() << "expandRange a:" << a;
-        qDebug() << "expandRange b:" << b;
-        qDebug() << "expandRange m_loadedRows:" << m_loadedRows;
-
-        // Add the covers
-        pictureList.clear();
-        for (qint64 i = a; i < b; i++) {
-            pictureList.append(&infoList[i]);
-        }
-        controller.getCoverList(&pictureList);
+        controller.getCoverList(&cache);
     }
 
-    void loadMoreLevels() {
-        if (!m_stop) {
-            // we stop to prevent extra call while in here.
-            m_stop = true;
-            endResetModel();
-            beginResetModel();
-            expandRange();
+    void loadMoreCovers() {
+        qDebug() << a;
+        qDebug() << b;
+        emit dataChanged(a, b, {Qt::DecorationRole});
+        if (!m_covers_loaded) {
+            a = createIndex(b.row() + 1, 0);
+            qint64 plus100 = b.row() + 100;
+            if (list.count() > plus100) {
+                b = createIndex(plus100, 0);
+            } else {
+                b = createIndex(list.count() - 1, 0);
+                m_covers_loaded = true;
+            }
+            getMoreCovers();
         }
     }
 
     void sortItems(
-        std::function<bool(ListItemData, ListItemData)> compare) {
+            std::function<bool(ListItemData*, ListItemData*)> compare) {
         beginResetModel();
-        std::sort(infoList.begin(), infoList.end(), compare);
+        std::sort(filterList.begin(), filterList.end(), compare);
         endResetModel();
     }
 
-    static bool compareTitles(const ListItemData &a, const ListItemData &b) {
-        return a.m_title.toLower() < b.m_title.toLower();
+    static bool compareTitles(const ListItemData* a, const ListItemData* b) {
+        return a->m_title.toLower() < b->m_title.toLower();
     }
 
     static bool compareDifficulties(
-            const ListItemData &a, const ListItemData &b) {
-        return a.m_difficulty > b.m_difficulty;
+            const ListItemData* a, const ListItemData* b) {
+        return a->m_difficulty > b->m_difficulty;
     }
 
-    static bool compareDurations(const ListItemData &a, const ListItemData &b) {
-        return a.m_duration > b.m_duration;
+    static bool compareDurations(const ListItemData* a, const ListItemData* b) {
+        return a->m_duration > b->m_duration;
     }
 
-    static bool compareClasses(const ListItemData &a, const ListItemData &b) {
-        return a.m_class > b.m_class;
+    static bool compareClasses(const ListItemData* a, const ListItemData* b) {
+        return a->m_class > b->m_class;
     }
 
-    static bool compareTypes(const ListItemData &a, const ListItemData &b) {
-        return a.m_type > b.m_type;
+    static bool compareTypes(const ListItemData* a, const ListItemData* b) {
+        return a->m_type > b->m_type;
     }
 
     static bool compareReleaseDates(
-            const ListItemData &a, const ListItemData &b) {
+            const ListItemData* a, const ListItemData* b) {
         // descending order
-        return a.m_releaseDate > b.m_releaseDate;
+        return a->m_releaseDate > b->m_releaseDate;
     }
 
  private:
     QVector<ListItemData> infoList;
+    QVector<ListItemData*> filterList;
+    QVector<ListItemData*> list;
+    QVector<ListItemData*> cache;
+    bool m_covers_loaded = false;
+    QModelIndex a;
+    QModelIndex b;
     // QVector<ListOriginalData> originalInfoList;
-    QVector<ListItemData*> pictureList;
-    bool m_stop = false;
-    qint64 m_loadedRows = 0;
     Controller& controller = Controller::getInstance();
 };
 

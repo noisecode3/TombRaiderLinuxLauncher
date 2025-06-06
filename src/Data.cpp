@@ -54,7 +54,8 @@ QVector<ListItemData> Data::getListItems() {
             "JOIN Info ON Level.infoID = Info.InfoID "
             "JOIN AuthorList ON Level.LevelID = AuthorList.levelID "
             "JOIN Author ON AuthorList.authorID = Author.AuthorID "
-            "GROUP BY Info.trleID");
+            "GROUP BY Info.trleID "
+            "ORDER BY Info.release DESC");
     if (!status) {
         qDebug() << "Error preparing query getListItems:"
             << query.lastError().text();
@@ -99,15 +100,17 @@ void Data::getCoverPictures(QVector<ListItemData*>* items) {
 
     if (status) {
         for (ListItemData* item : *items) {
-            query.bindValue(":id", item->m_trle_id);
-            if (query.exec()) {
-                if (query.next() == true) {
-                    item->addPicture(
-                            query.value("Picture.data").toByteArray());
+            if (item->m_cover.isNull()) {
+                query.bindValue(":id", item->m_trle_id);
+                if (query.exec()) {
+                    if (query.next() == true) {
+                        item->addPicture(
+                                query.value("Picture.data").toByteArray());
+                    }
+                } else {
+                    qDebug() << "Error executing query getPictures:"
+                        << query.lastError().text();
                 }
-            } else {
-                qDebug() << "Error executing query getPictures:"
-                    << query.lastError().text();
             }
         }
     }

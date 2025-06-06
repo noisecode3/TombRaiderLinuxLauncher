@@ -50,7 +50,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
     //
     connect(&Controller::getInstance(), SIGNAL(controllerReloadLevelList()),
-        this, SLOT(loadMoreLevels()));
+        this, SLOT(loadMoreCovers()));
 
     // Thread work done signal connections
     connect(&Controller::getInstance(),
@@ -396,8 +396,8 @@ void TombRaiderLinuxLauncher::backClicked() {
     }
 }
 
-void TombRaiderLinuxLauncher::loadMoreLevels() {
-    model->loadMoreLevels();
+void TombRaiderLinuxLauncher::loadMoreCovers() {
+    model->loadMoreCovers();
 }
 
 void TombRaiderLinuxLauncher::workTick() {

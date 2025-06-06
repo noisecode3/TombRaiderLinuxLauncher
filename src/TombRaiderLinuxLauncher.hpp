@@ -89,7 +89,7 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     /**
      *  Try loading 100 more levels cards by calling for more cover pictures.
      */
-    void loadMoreLevels();
+    void loadMoreCovers();
     /**
      * Updates progress by 1% of total work steps.
      */
