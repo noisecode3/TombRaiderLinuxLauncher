@@ -411,7 +411,7 @@
                          <widget class="QLabel" name="labelDifficulty">
                           <property name="minimumSize">
                            <size>
-                            <width>61</width>
+                            <width>70</width>
                             <height>45</height>
                            </size>
                           </property>
@@ -618,6 +618,18 @@
                      <property name="bottomMargin">
                       <number>0</number>
                      </property>
+                     <item>
+                      <widget class="QCheckBox" name="checkBoxInstalled">
+                       <property name="font">
+                        <font>
+                         <pointsize>12</pointsize>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Installed Only</string>
+                       </property>
+                      </widget>
+                     </item>
                      <item>
                       <widget class="QRadioButton" name="radioButtonOriginal">
                        <property name="font">

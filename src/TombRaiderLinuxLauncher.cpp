@@ -13,7 +13,6 @@
 
 #include "../src/TombRaiderLinuxLauncher.hpp"
 #include "ui_TombRaiderLinuxLauncher.h"
-#include "../src/staticData.hpp"
 
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
@@ -113,6 +112,9 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->radioButtonReleaseDate, &QRadioButton::clicked,
             this, &TombRaiderLinuxLauncher::sortByReleaseDate);
 
+    connect(ui->comboBoxType, &QComboBox::currentTextChanged,
+            this, &TombRaiderLinuxLauncher::filterByType);
+
     model = new LevelListModel(this);
     ui->listViewLevels->setModel(model);
     CardItemDelegate* delegate = new CardItemDelegate(ui->listViewLevels);
@@ -159,6 +161,10 @@ void TombRaiderLinuxLauncher::sortByType() {
 
 void TombRaiderLinuxLauncher::sortByReleaseDate() {
     model->sortItems(model->compareReleaseDates);
+}
+
+void TombRaiderLinuxLauncher::filterByType(const QString& type) {
+    model->filterType(type);
 }
 
 void TombRaiderLinuxLauncher::readSavedSettings() {

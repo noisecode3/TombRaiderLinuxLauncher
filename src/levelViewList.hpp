@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include "../src/Controller.hpp"
+#include "../src/staticData.hpp"
 
 class LevelListModel : public QAbstractListModel {
     Q_OBJECT
@@ -29,48 +30,54 @@ class LevelListModel : public QAbstractListModel {
 
     void setLevels() {
         beginResetModel();
-        infoList.clear();
-        controller.getList(&infoList);
-        for (ListItemData& item : infoList) {
-            filterList.append(&item);
-            list.append(&item);
+        m_mainList.clear();
+        controller.getList(&m_mainList);
+        for (ListItemData& item : m_mainList) {
+            m_filterList.append(&item);
+            m_sortList.append(&item);
         }
         endResetModel();
-        a = createIndex(0, 0);
-        b = createIndex(99, 0);
+        m_a = createIndex(0, 0);
+        m_b = createIndex(99, 0);
         getMoreCovers();
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
         Q_UNUSED(parent);
-        return filterList.count();
+        return m_filterList.count();
     }
 
     QVariant data(const QModelIndex &index, int role) const override {
         QVariant result;
         int row = index.row();
 
-        if (index.isValid() && row < filterList.count()) {
-            const ListItemData* item = filterList.at(row);
+        if ((index.isValid()) && (row < m_filterList.count())) {
+            const ListItemData* item = m_filterList.at(row);
             switch (role) {
                 case Qt::DisplayRole:
-                    return item->m_title;
+                    result = item->m_title;
+                    break;
                 case Qt::UserRole + 1:
-                    return item->m_authors;
+                    result = item->m_authors;
+                    break;
                 case Qt::UserRole + 2:
-                    return item->m_type;
+                    result = item->m_type;
+                    break;
                 case Qt::UserRole + 3:
-                    return item->m_class;
+                    result = item->m_class;
+                    break;
                 case Qt::UserRole + 4:
-                    return item->m_difficulty;
+                    result = item->m_difficulty;
+                    break;
                 case Qt::UserRole + 5:
-                    return item->m_releaseDate;
+                    result = item->m_releaseDate;
+                    break;
                 case Qt::UserRole + 6:
-                    return item->m_duration;
+                    result = item->m_duration;
+                    break;
                 case Qt::UserRole + 7:
-                    return item->m_cover;
-                default:
-                    return QVariant();
+                    result = item->m_cover;
+                    break;
             }
         }
 
@@ -78,29 +85,27 @@ class LevelListModel : public QAbstractListModel {
     }
 
     int getLid(const QModelIndex &index) const {
-        const ListItemData* item = filterList.at(index.row());
+        const ListItemData* item = m_filterList.at(index.row());
         return item->m_trle_id;
     }
 
     void getMoreCovers() {
-        cache.clear();
-        for (qint64 i = a.row(); i <= b.row(); i++) {
-            cache.append(list[i]);
+        m_cache.clear();
+        for (qint64 i = m_a.row(); i <= m_b.row(); i++) {
+            m_cache.append(&m_mainList[i]);
         }
-        controller.getCoverList(&cache);
+        controller.getCoverList(&m_cache);
     }
 
     void loadMoreCovers() {
-        qDebug() << a;
-        qDebug() << b;
-        emit dataChanged(a, b, {Qt::DecorationRole});
+        emit dataChanged(m_a, m_b, {Qt::DecorationRole});
         if (!m_covers_loaded) {
-            a = createIndex(b.row() + 1, 0);
-            qint64 plus100 = b.row() + 100;
-            if (list.count() > plus100) {
-                b = createIndex(plus100, 0);
+            m_a = createIndex(m_b.row() + 1, 0);
+            qint64 plus100 = m_b.row() + 100;
+            if (m_mainList.count() > plus100) {
+                m_b = createIndex(plus100, 0);
             } else {
-                b = createIndex(list.count() - 1, 0);
+                m_b = createIndex(m_mainList.count() - 1, 0);
                 m_covers_loaded = true;
             }
             getMoreCovers();
@@ -110,8 +115,9 @@ class LevelListModel : public QAbstractListModel {
     void sortItems(
             std::function<bool(ListItemData*, ListItemData*)> compare) {
         beginResetModel();
-        std::sort(filterList.begin(), filterList.end(), compare);
+        std::sort(m_sortList.begin(), m_sortList.end(), compare);
         endResetModel();
+        reFilter();
     }
 
     static bool compareTitles(const ListItemData* a, const ListItemData* b) {
@@ -141,14 +147,96 @@ class LevelListModel : public QAbstractListModel {
         return a->m_releaseDate > b->m_releaseDate;
     }
 
+    void filterClass(const QString &class_) {
+        beginResetModel();
+        m_filter = QString("class:%1").arg(class_);
+        m_filterList.clear();
+
+        for (ListItemData* item : m_sortList) {
+            if (StaticData().getClass()[item->m_class] == class_) {
+                m_filterList.append(item);
+            }
+        }
+
+        endResetModel();
+    }
+
+    void filterType(const QString &type) {
+        beginResetModel();
+        m_filter = QString("type:%1").arg(type);
+        m_filterList.clear();
+
+        for (ListItemData* item : m_sortList) {
+            if (StaticData().getType()[item->m_type] == type) {
+                m_filterList.append(item);
+            }
+        }
+
+        endResetModel();
+    }
+
+    void filterDifficulty(const QString &difficulty) {
+        beginResetModel();
+        m_filter = QString("difficulty:%1").arg(difficulty);
+        m_filterList.clear();
+
+        for (ListItemData* item : m_sortList) {
+            if (StaticData()
+                    .getDifficulty()[item->m_difficulty] == difficulty) {
+                m_filterList.append(item);
+            }
+        }
+
+        endResetModel();
+    }
+
+    void filterDuration(const QString &duration) {
+        beginResetModel();
+        m_filter = QString("duration:%1").arg(duration);
+        m_filterList.clear();
+
+        for (ListItemData* item : m_sortList) {
+            if (StaticData().getType()[item->m_duration] == duration) {
+                m_filterList.append(item);
+            }
+        }
+
+        endResetModel();
+    }
+
+    void reFilter() {
+        if (m_filter.startsWith("class:")) {
+            QString const class_ = m_filter.mid(6);
+            filterClass(class_);
+        } else if (m_filter.startsWith("type:")) {
+            QString const type = m_filter.mid(5);
+            filterType(type);
+        } else if (m_filter.startsWith("difficulty:")) {
+            QString const difficulty = m_filter.mid(11);
+            filterDifficulty(difficulty);
+        } else if (m_filter.startsWith("duration:")) {
+            QString const duration = m_filter.mid(9);
+            filterDuration(duration);
+        } else {
+            beginResetModel();
+            m_filterList.clear();
+            for (ListItemData* item : m_sortList) {
+                m_filterList.append(item);
+            }
+            endResetModel();
+        }
+    }
+
  private:
-    QVector<ListItemData> infoList;
-    QVector<ListItemData*> filterList;
-    QVector<ListItemData*> list;
-    QVector<ListItemData*> cache;
+    QVector<ListItemData> m_mainList;
+    QVector<ListItemData*> m_sortList;
+    QVector<ListItemData*> m_filterList;
+    QString m_filter;
+    QString m_search;
+    QVector<ListItemData*> m_cache;
     bool m_covers_loaded = false;
-    QModelIndex a;
-    QModelIndex b;
+    QModelIndex m_a;
+    QModelIndex m_b;
     // QVector<ListOriginalData> originalInfoList;
     Controller& controller = Controller::getInstance();
 };
@@ -160,18 +248,21 @@ class CardItemDelegate : public QStyledItemDelegate {
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override {
         painter->save();
+        const bool selected = option.state & QStyle::State_Selected;
 
         // Card background
         painter->setRenderHint(QPainter::Antialiasing);
         QRectF cardRect = option.rect.adjusted(4, 4, -4, -4);
-        QColor bgColor = option.state & QStyle::State_Selected ? QColor("#e0f7fa") : QColor("#ffffff");
+        QColor bgColor = selected ? QColor("#e0f7fa") : QColor("#ffffff");
         painter->setBrush(bgColor);
         painter->setPen(Qt::NoPen);
         painter->drawRoundedRect(cardRect, 10, 10);
 
         // Picture space (left side)
-        QRect imageRect = QRect(cardRect.left() + 10, cardRect.top() + 10, 320, 240);
-        painter->setBrush(QColor("#cccccc"));  // Placeholder color
+        qint64 x = cardRect.left() + 10;
+        qint64 y = cardRect.top() + 10;
+        QRect imageRect = QRect(x, y, 320, 240);
+        painter->setBrush(QColor("#cccccc"));
         QPixmap cover = index.data(Qt::UserRole + 7).value<QPixmap>();
         if (!cover.isNull()) {
             painter->drawPixmap(imageRect, cover);
@@ -184,8 +275,14 @@ class CardItemDelegate : public QStyledItemDelegate {
         int textY = cardRect.top() + 10;
 
         QString title = index.data(Qt::DisplayRole).toString();
-        QString authors = index.data(Qt::UserRole + 1).toStringList().join(", ");
-        QString type = index.data(Qt::UserRole + 2).toString();
+        QStringList authorsList = index.data(Qt::UserRole + 1).toStringList();
+        QString authors = authorsList.join(", ");
+        if (authors.size() > 100) {
+            authors = "Various";
+        }
+
+        qint64 typeId = index.data(Qt::UserRole + 2).toInt();
+        QString type = StaticData().getType()[typeId];
         QString release = index.data(Qt::UserRole + 5).toString();
 
         QFont boldFont = option.font;
@@ -201,12 +298,14 @@ class CardItemDelegate : public QStyledItemDelegate {
         painter->drawText(QPoint(textX, textY + 35), "By: " + authors);
         painter->drawText(QPoint(textX, textY + 50), "Type: " + type);
         painter->drawText(QPoint(textX, textY + 65), "Released: " + release);
+        painter->drawText(QPoint(textX, textY + 65), "Released: " + release);
 
         painter->restore();
     }
 
-    QSize sizeHint(const QStyleOptionViewItem &, const QModelIndex &) const override {
-        return QSize(600, 300);  // Adjust size as needed
+    QSize sizeHint(
+            const QStyleOptionViewItem&, const QModelIndex&) const override {
+        return QSize(600, 300);
     }
 };
 
