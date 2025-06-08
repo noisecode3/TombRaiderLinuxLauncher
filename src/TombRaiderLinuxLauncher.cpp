@@ -121,8 +121,8 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->comboBoxDuration, &QComboBox::currentTextChanged,
             this, &TombRaiderLinuxLauncher::filterByDuration);
 
-    model = new LevelListModel(this);
-    ui->listViewLevels->setModel(model);
+    levelListModel = new LevelListModel(this);
+    ui->listViewLevels->setModel(levelListModel);
     CardItemDelegate* delegate = new CardItemDelegate(ui->listViewLevels);
     ui->listViewLevels->setItemDelegate(delegate);
     ui->listViewLevels->setSpacing(8);
@@ -131,6 +131,13 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         &QItemSelectionModel::currentChanged,
         this,
         &TombRaiderLinuxLauncher::onCurrentItemChanged);
+
+
+    connect(ui->commandLinkButton, &QCommandLinkButton::clicked, this, [=]() {
+        QString searchText = ui->lineEditSearch->text();
+        qDebug() << "You searched for:" << searchText;
+        levelListModel->filterSearch(searchText);
+    });
 
     // Read settings
     QString value = m_settings.value("setup").toString();
@@ -142,47 +149,47 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 }
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
-    model->setLevels();
+    levelListModel->setLevels();
 }
 
 void TombRaiderLinuxLauncher::sortByTitle() {
-    model->sortItems(model->compareTitles);
+    levelListModel->sortItems(levelListModel->compareTitles);
 }
 
 void TombRaiderLinuxLauncher::sortByDifficulty() {
-    model->sortItems(model->compareDifficulties);
+    levelListModel->sortItems(levelListModel->compareDifficulties);
 }
 
 void TombRaiderLinuxLauncher::sortByDuration() {
-    model->sortItems(model->compareDurations);
+    levelListModel->sortItems(levelListModel->compareDurations);
 }
 
 void TombRaiderLinuxLauncher::sortByClass() {
-    model->sortItems(model->compareClasses);
+    levelListModel->sortItems(levelListModel->compareClasses);
 }
 
 void TombRaiderLinuxLauncher::sortByType() {
-    model->sortItems(model->compareTypes);
+    levelListModel->sortItems(levelListModel->compareTypes);
 }
 
 void TombRaiderLinuxLauncher::sortByReleaseDate() {
-    model->sortItems(model->compareReleaseDates);
+    levelListModel->sortItems(levelListModel->compareReleaseDates);
 }
 
 void TombRaiderLinuxLauncher::filterByClass(const QString& class_) {
-    model->filterClass(class_);
+    levelListModel->filterClass(class_);
 }
 
 void TombRaiderLinuxLauncher::filterByType(const QString& type) {
-    model->filterType(type);
+    levelListModel->filterType(type);
 }
 
 void TombRaiderLinuxLauncher::filterByDifficulty(const QString& difficulty) {
-    model->filterDifficulty(difficulty);
+    levelListModel->filterDifficulty(difficulty);
 }
 
 void TombRaiderLinuxLauncher::filterByDuration(const QString& duration) {
-    model->filterDuration(duration);
+    levelListModel->filterDuration(duration);
 }
 
 void TombRaiderLinuxLauncher::readSavedSettings() {
@@ -263,7 +270,7 @@ void TombRaiderLinuxLauncher::levelDirSelected(qint64 id) {
 void TombRaiderLinuxLauncher::onCurrentItemChanged(
         const QModelIndex &current, const QModelIndex &previous) {
     if (current.isValid()) {
-        qint64 id = model->getLid(current);
+        qint64 id = levelListModel->getLid(current);
         if (id < 0) {  // its the original game
             originalSelected(id);
         } else {
@@ -311,7 +318,7 @@ void TombRaiderLinuxLauncher::setOptionsClicked() {
 void TombRaiderLinuxLauncher::linkClicked() {
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
-        qint64 id = model->getLid(current);
+        qint64 id = levelListModel->getLid(current);
         if (id != 0) {
             if (m_settings.value(QString("level%1/RunnerType").arg(id)) == 2) {
                 Model::getInstance().runWine(id);
@@ -328,7 +335,7 @@ void TombRaiderLinuxLauncher::linkClicked() {
 void TombRaiderLinuxLauncher::downloadClicked() {
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
-        qint64 id = model->getLid(current);
+        qint64 id = levelListModel->getLid(current);
         if (id < 0) {
             ui->listViewLevels->setEnabled(false);
             ui->progressBar->setValue(0);
@@ -349,7 +356,7 @@ void TombRaiderLinuxLauncher::downloadClicked() {
 void TombRaiderLinuxLauncher::infoClicked() {
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
-        qint64 id = model->getLid(current);
+        qint64 id = levelListModel->getLid(current);
         if (id != 0) {
             InfoData info = controller.getInfo(id);
             ui->infoWebEngineView->setHtml(info.m_body);
@@ -395,7 +402,7 @@ void TombRaiderLinuxLauncher::infoClicked() {
 void TombRaiderLinuxLauncher::walkthroughClicked() {
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
-        qint64 id = model->getLid(current);
+        qint64 id = levelListModel->getLid(current);
         if (id != 0) {
             QWebEngineView* w = ui->walkthroughWebEngineView;
             w->setHtml(controller.getWalkthrough(id));
@@ -421,7 +428,7 @@ void TombRaiderLinuxLauncher::backClicked() {
 }
 
 void TombRaiderLinuxLauncher::loadMoreCovers() {
-    model->loadMoreCovers();
+    levelListModel->loadMoreCovers();
 }
 
 void TombRaiderLinuxLauncher::workTick() {
@@ -431,7 +438,7 @@ void TombRaiderLinuxLauncher::workTick() {
     if (ui->progressBar->value() >= 100) {
         QModelIndex current = ui->listViewLevels->currentIndex();
         if (current.isValid()) {
-            qint64 id = model->getLid(current);
+            qint64 id = levelListModel->getLid(current);
             if (id < 0) {  // its the original game
                 ui->pushButtonLink->setEnabled(true);
                 ui->pushButtonInfo->setEnabled(false);
@@ -494,7 +501,7 @@ void TombRaiderLinuxLauncher::GlobalResetClicked() {
 void TombRaiderLinuxLauncher::LevelSaveClicked() {
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
-        qint64 id = model->getLid(current);
+        qint64 id = levelListModel->getLid(current);
 
         m_settings.setValue(QString("level%1/CustomCommand")
             .arg(id), ui->lineEditCustomCommand->text());

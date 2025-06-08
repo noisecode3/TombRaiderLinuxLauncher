@@ -162,7 +162,7 @@ class TombRaiderLinuxLauncher : public QMainWindow {
 
     QSet<QListWidgetItem*> originalGamesSet_m;
     QList<QListWidgetItem*> originalGamesList_m;
-    LevelListModel *model;
+    LevelListModel *levelListModel;
     Controller& controller = Controller::getInstance();
     QSettings m_settings;
     Ui::TombRaiderLinuxLauncher *ui;
