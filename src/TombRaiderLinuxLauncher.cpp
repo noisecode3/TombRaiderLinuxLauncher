@@ -112,8 +112,14 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(ui->radioButtonReleaseDate, &QRadioButton::clicked,
             this, &TombRaiderLinuxLauncher::sortByReleaseDate);
 
+    connect(ui->comboBoxClass, &QComboBox::currentTextChanged,
+            this, &TombRaiderLinuxLauncher::filterByClass);
     connect(ui->comboBoxType, &QComboBox::currentTextChanged,
             this, &TombRaiderLinuxLauncher::filterByType);
+    connect(ui->comboBoxDifficulty, &QComboBox::currentTextChanged,
+            this, &TombRaiderLinuxLauncher::filterByDifficulty);
+    connect(ui->comboBoxDuration, &QComboBox::currentTextChanged,
+            this, &TombRaiderLinuxLauncher::filterByDuration);
 
     model = new LevelListModel(this);
     ui->listViewLevels->setModel(model);
@@ -163,8 +169,20 @@ void TombRaiderLinuxLauncher::sortByReleaseDate() {
     model->sortItems(model->compareReleaseDates);
 }
 
+void TombRaiderLinuxLauncher::filterByClass(const QString& class_) {
+    model->filterClass(class_);
+}
+
 void TombRaiderLinuxLauncher::filterByType(const QString& type) {
     model->filterType(type);
+}
+
+void TombRaiderLinuxLauncher::filterByDifficulty(const QString& difficulty) {
+    model->filterDifficulty(difficulty);
+}
+
+void TombRaiderLinuxLauncher::filterByDuration(const QString& duration) {
+    model->filterDuration(duration);
 }
 
 void TombRaiderLinuxLauncher::readSavedSettings() {

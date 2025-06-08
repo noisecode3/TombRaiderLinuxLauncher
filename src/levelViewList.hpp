@@ -116,6 +116,10 @@ class LevelListModel : public QAbstractListModel {
             std::function<bool(ListItemData*, ListItemData*)> compare) {
         beginResetModel();
         std::sort(m_sortList.begin(), m_sortList.end(), compare);
+        m_filterList.clear();
+        for (ListItemData* item : m_sortList) {
+            m_filterList.append(item);
+        }
         endResetModel();
         reFilter();
     }
@@ -147,91 +151,103 @@ class LevelListModel : public QAbstractListModel {
         return a->m_releaseDate > b->m_releaseDate;
     }
 
-    void filterClass(const QString &class_) {
-        beginResetModel();
-        m_filter = QString("class:%1").arg(class_);
-        m_filterList.clear();
-
-        for (ListItemData* item : m_sortList) {
-            if (StaticData().getClass()[item->m_class] == class_) {
-                m_filterList.append(item);
-            }
+    void filterClass(const QString& class_) {
+        qDebug() << "filterClass " << class_;
+        if (class_ == " - All -") {
+            m_filter.class_.clear();
+            qDebug() << "reset class";
+        } else {
+            m_filter.class_ = class_;
         }
-
-        endResetModel();
+        reFilter();
     }
 
-    void filterType(const QString &type) {
-        beginResetModel();
-        m_filter = QString("type:%1").arg(type);
-        m_filterList.clear();
-
-        for (ListItemData* item : m_sortList) {
-            if (StaticData().getType()[item->m_type] == type) {
-                m_filterList.append(item);
-            }
+    void filterType(const QString& type) {
+        qDebug() << "filterType " << type;
+        if (type == " - All -") {
+            m_filter.type.clear();
+            qDebug() << "reset type";
+        } else {
+            m_filter.type = type;
         }
-
-        endResetModel();
+        reFilter();
     }
 
     void filterDifficulty(const QString &difficulty) {
-        beginResetModel();
-        m_filter = QString("difficulty:%1").arg(difficulty);
-        m_filterList.clear();
-
-        for (ListItemData* item : m_sortList) {
-            if (StaticData()
-                    .getDifficulty()[item->m_difficulty] == difficulty) {
-                m_filterList.append(item);
-            }
+        qDebug() << "filterDifficulty " << difficulty;
+        if (difficulty == " - All -") {
+            m_filter.difficulty.clear();
+            qDebug() << "reset difficulty";
+        } else {
+            m_filter.difficulty = difficulty;
         }
-
-        endResetModel();
+        reFilter();
     }
 
-    void filterDuration(const QString &duration) {
-        beginResetModel();
-        m_filter = QString("duration:%1").arg(duration);
-        m_filterList.clear();
-
-        for (ListItemData* item : m_sortList) {
-            if (StaticData().getType()[item->m_duration] == duration) {
-                m_filterList.append(item);
-            }
+    void filterDuration(const QString& duration) {
+        qDebug() << "filterDuration " << duration;
+        if (duration == " - All -") {
+            m_filter.duration.clear();
+            qDebug() << "reset duration";
+        } else {
+            m_filter.duration = duration;
         }
-
-        endResetModel();
+        reFilter();
     }
 
     void reFilter() {
-        if (m_filter.startsWith("class:")) {
-            QString const class_ = m_filter.mid(6);
-            filterClass(class_);
-        } else if (m_filter.startsWith("type:")) {
-            QString const type = m_filter.mid(5);
-            filterType(type);
-        } else if (m_filter.startsWith("difficulty:")) {
-            QString const difficulty = m_filter.mid(11);
-            filterDifficulty(difficulty);
-        } else if (m_filter.startsWith("duration:")) {
-            QString const duration = m_filter.mid(9);
-            filterDuration(duration);
-        } else {
-            beginResetModel();
-            m_filterList.clear();
-            for (ListItemData* item : m_sortList) {
-                m_filterList.append(item);
+        qDebug() << "reFilter";
+        beginResetModel();
+        m_filterList.clear();
+
+        for (ListItemData* item : m_sortList) {
+            bool keep = true;
+
+            if (!m_filter.class_.isEmpty()) {
+                const QString itemString =
+                    StaticData().getClass()[item->m_class];
+                if (itemString != m_filter.class_)
+                    keep = false;
             }
-            endResetModel();
+
+            if (!m_filter.type.isEmpty()) {
+                const QString itemString =
+                    StaticData().getType()[item->m_type];
+                if (itemString != m_filter.type)
+                    keep = false;
+            }
+
+            if (!m_filter.difficulty.isEmpty()) {
+                const QString itemString =
+                    StaticData().getDifficulty()[item->m_difficulty];
+                if (itemString != m_filter.difficulty)
+                    keep = false;
+            }
+
+            if (!m_filter.duration.isEmpty()) {
+                const QString itemString =
+                    StaticData().getDuration()[item->m_duration];
+                if (itemString != m_filter.duration)
+                    keep = false;
+            }
+
+            if (keep)
+                m_filterList.append(item);
         }
+
+        endResetModel();
     }
 
  private:
     QVector<ListItemData> m_mainList;
     QVector<ListItemData*> m_sortList;
     QVector<ListItemData*> m_filterList;
-    QString m_filter;
+    struct Filter {
+        QString class_;
+        QString type;
+        QString difficulty;
+        QString duration;
+    } m_filter;
     QString m_search;
     QVector<ListItemData*> m_cache;
     bool m_covers_loaded = false;
@@ -283,6 +299,16 @@ class CardItemDelegate : public QStyledItemDelegate {
 
         qint64 typeId = index.data(Qt::UserRole + 2).toInt();
         QString type = StaticData().getType()[typeId];
+
+        qint64 classId = index.data(Qt::UserRole + 3).toInt();
+        QString class_ = StaticData().getClass()[classId];
+
+        qint64 durationId = index.data(Qt::UserRole + 6).toInt();
+        QString duration = StaticData().getDuration()[durationId];
+
+        qint64 difficultyId = index.data(Qt::UserRole + 4).toInt();
+        QString difficulty = StaticData().getDifficulty()[difficultyId];
+
         QString release = index.data(Qt::UserRole + 5).toString();
 
         QFont boldFont = option.font;
@@ -298,7 +324,10 @@ class CardItemDelegate : public QStyledItemDelegate {
         painter->drawText(QPoint(textX, textY + 35), "By: " + authors);
         painter->drawText(QPoint(textX, textY + 50), "Type: " + type);
         painter->drawText(QPoint(textX, textY + 65), "Released: " + release);
-        painter->drawText(QPoint(textX, textY + 65), "Released: " + release);
+        painter->drawText(QPoint(textX, textY + 80), "class: " + class_);
+        painter->drawText(QPoint(textX, textY + 95), "Duration: " + duration);
+        painter->drawText(
+                QPoint(textX, textY + 110), "Difficulty: " + difficulty);
 
         painter->restore();
     }

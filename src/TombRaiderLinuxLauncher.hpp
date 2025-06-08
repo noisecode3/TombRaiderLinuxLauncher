@@ -127,7 +127,10 @@ class TombRaiderLinuxLauncher : public QMainWindow {
      */
     void sortByReleaseDate();
 
+    void filterByClass(const QString& class_);
     void filterByType(const QString& type);
+    void filterByDifficulty(const QString& difficulty);
+    void filterByDuration(const QString& duration);
     void GlobalSaveClicked();
     void GlobalResetClicked();
     void LevelSaveClicked();
