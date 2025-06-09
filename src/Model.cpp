@@ -163,7 +163,7 @@ bool Model::setLink(int id) {
 }
 
 void Model::setupGame(int id) {
-    QVector<FileList> list = data.getFileList(id);
+    QVector<File> list = data.getFileList(id);
     const size_t s = list.size();
     assert(s != (unsigned int)0);
 

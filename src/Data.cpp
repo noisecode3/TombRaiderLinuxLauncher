@@ -246,8 +246,9 @@ void Data::setDownloadMd5(const int id, const QString& newMd5sum) {
         "WHERE Zip.ZipID IN ("
         "    SELECT ZipList.zipID"
         "    FROM Level"
+        "    JOIN Info ON Level.infoID = Info.InfoID"
         "    JOIN ZipList ON Level.LevelID = ZipList.levelID"
-        "    WHERE Level.LevelID = :id)");
+        "    WHERE Info.trleID = :id)");
 
     if (status) {
         query.bindValue(":newMd5sum", newMd5sum);
@@ -263,9 +264,9 @@ void Data::setDownloadMd5(const int id, const QString& newMd5sum) {
     }
 }
 
-QVector<FileList> Data::getFileList(const int id) {
+QVector<File> Data::getFileList(const int id) {
     QSqlQuery query(db);
-    QVector<FileList> list;
+    QVector<File> list;
 
     if (!query.prepare(
             "SELECT File.path, File.md5sum "

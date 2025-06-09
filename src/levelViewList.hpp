@@ -217,29 +217,33 @@ class LevelListModel : public QAbstractListModel {
             if (!m_filter.class_.isEmpty()) {
                 const QString itemString =
                     StaticData().getClass()[item->m_class];
-                if (itemString != m_filter.class_)
+                if (itemString != m_filter.class_) {
                     keep = false;
+                }
             }
 
             if (!m_filter.type.isEmpty()) {
                 const QString itemString =
                     StaticData().getType()[item->m_type];
-                if (itemString != m_filter.type)
+                if (itemString != m_filter.type) {
                     keep = false;
+                }
             }
 
             if (!m_filter.difficulty.isEmpty()) {
                 const QString itemString =
                     StaticData().getDifficulty()[item->m_difficulty];
-                if (itemString != m_filter.difficulty)
+                if (itemString != m_filter.difficulty) {
                     keep = false;
+                }
             }
 
             if (!m_filter.duration.isEmpty()) {
                 const QString itemString =
                     StaticData().getDuration()[item->m_duration];
-                if (itemString != m_filter.duration)
+                if (itemString != m_filter.duration) {
                     keep = false;
+                }
             }
 
             if (!m_search.isEmpty()) {
@@ -309,6 +313,7 @@ class CardItemDelegate : public QStyledItemDelegate {
         // Text section (right side of image)
         int textX = imageRect.right() + 10;
         int textY = cardRect.top() + 10;
+        QPoint point;
 
         QString title = index.data(Qt::DisplayRole).toString();
         QStringList authorsList = index.data(Qt::UserRole + 1).toStringList();
@@ -335,29 +340,38 @@ class CardItemDelegate : public QStyledItemDelegate {
         boldFont.setBold(true);
         painter->setFont(boldFont);
         painter->setPen(Qt::black);
-        painter->drawText(QPoint(textX, textY + 15), title);
+
+        point.setX(textX);
+        point.setY(textY + 15);
+        painter->drawText(point, title);
 
         QFont normalFont = option.font;
         normalFont.setPointSizeF(option.font.pointSizeF() - 1);
         painter->setFont(normalFont);
 
+        point.setY(textY + 35);
         QString authorsText = QString("By: %1").arg(authors);
-        painter->drawText(QPoint(textX, textY + 35), authorsText);
+        painter->drawText(point, authorsText);
 
+        point.setY(textY + 50);
         QString typeText = QString("Type: %1").arg(type);
-        painter->drawText(QPoint(textX, textY + 50), typeText);
+        painter->drawText(point, typeText);
 
+        point.setY(textY + 65);
         QString releaseText = QString("Released: %1").arg(release);
-        painter->drawText(QPoint(textX, textY + 65), releaseText);
+        painter->drawText(point, releaseText);
 
+        point.setY(textY + 80);
         QString classText = QString("class: %1").arg(class_);
-        painter->drawText(QPoint(textX, textY + 80), classText);
+        painter->drawText(point, classText);
 
+        point.setY(textY + 95);
         QString durationText = QString("Duration: %1").arg(duration);
-        painter->drawText(QPoint(textX, textY + 95), durationText);
+        painter->drawText(point, durationText);
 
+        point.setY(textY + 110);
         QString difficultyText = QString("Difficulty: %1").arg(difficulty);
-        painter->drawText(QPoint(textX, textY + 110), difficultyText);
+        painter->drawText(point, difficultyText);
 
         painter->restore();
     }

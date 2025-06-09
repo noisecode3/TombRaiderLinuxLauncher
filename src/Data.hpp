@@ -27,11 +27,11 @@
 
 
 /**
- * @struct FileList
+ * @struct File
  * @brief Files object to keep track of files.
  *
  */
-struct FileList {
+struct File {
     QString path;
     QString md5sum;
 };
@@ -333,40 +333,39 @@ class Data : public QObject {
     void getCoverPictures(QVector<ListItemData*>* items);
     /**
      * @brief Get the info page, this is HTML and picture data you see on trel.net
-     * @param 
+     * @param trle.net lid
      * @return The InfoData is a struct of QString and QVector<QPixmap>
      */
     InfoData getInfo(int id);
     /**
      * @brief Get the walkthrough HTML page
-     * @param  
-     * @return 
+     * @param trle.net lid
+     * @return HTML and Qt picture data
      */
     QString getWalkthrough(int id);
     /**
-     * @brief 
-     * @param 
-     * @return 
+     * @brief Get the type of a level
+     * @param trle.net lid
+     * @return Id number of type
      */
     int getType(int id);
 
     /**
-     * @brief 
-     * @param 
-     * @return 
+     * @brief Get a filelist for the original games
+     * @param Id number for original game
+     * @return File vector list (path and md5sum)
      */
-    QVector<FileList> getFileList(const int id);
+    QVector<File> getFileList(const int id);
     /**
-     * @brief 
-     * @param 
-     * @return 
+     * @brief Get download info for a level
+     * @param trle.net lid
+     * @return zip data, url, filename, size, etc...
      */
     ZipData getDownload(const int id);
     /**
-     * @brief 
-     * @param 
-     * @param 
-     * @return 
+     * @brief Record new md5sum to database.
+     * @param trle.net lid
+     * @param New zip file md5sum
      */
     void setDownloadMd5(const int id, const QString& newMd5sum);
 
