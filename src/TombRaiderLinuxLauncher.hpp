@@ -131,6 +131,7 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     void filterByType(const QString& type);
     void filterByDifficulty(const QString& difficulty);
     void filterByDuration(const QString& duration);
+    void showtOriginal();
     void GlobalSaveClicked();
     void GlobalResetClicked();
     void LevelSaveClicked();
@@ -160,30 +161,10 @@ class TombRaiderLinuxLauncher : public QMainWindow {
         QListWidgetItem*,
         QListWidgetItem*)> compare);
 
-    QSet<QListWidgetItem*> originalGamesSet_m;
-    QList<QListWidgetItem*> originalGamesList_m;
     LevelListModel *levelListModel;
     Controller& controller = Controller::getInstance();
     QSettings m_settings;
     Ui::TombRaiderLinuxLauncher *ui;
-};
-
-struct OriginalGameData {
-    QMap<int, QString> romanNumerals = {
-            {0, "null"},
-            {1, "I"},
-            {2, "II"},
-            {3, "III"},
-            {4, "IV"},
-            {5, "V"},
-            {6, "VI"},
-            {7, "IUB"},
-            {8, "IIGM"},
-            {9, "IIILM"},
-    };
-    const QString getPicture(int id) {
-        return QString ("Tomb_Raider_%1.jpg").arg(romanNumerals[id]);
-    }
 };
 
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_

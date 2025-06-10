@@ -16,7 +16,7 @@
 Model::Model() {}
 Model::~Model() {}
 
-bool Model::setDirectory(const QString& level, const QString& game) {
+bool Model::setupDirectories(const QString& level, const QString& game) {
     bool status = false;
     if (fileManager.setUpCamp(level, game) &&
             downloader.setUpCamp(level) &&
@@ -27,7 +27,7 @@ bool Model::setDirectory(const QString& level, const QString& game) {
 }
 
 void Model::setup(const QString& level, const QString& game) {
-    if (setDirectory(level, game) == true) {
+    if (setupDirectories(level, game) == true) {
         QList<int> commonFiles;
         checkCommonFiles(&commonFiles);
         // Iterate backward to avoid index shifting
@@ -46,7 +46,7 @@ void Model::setup(const QString& level, const QString& game) {
         QCoreApplication::processEvents();
     } else {
         // send signal to gui with error about setup fail
-        qDebug() << "setDirectory setup failed";
+        qDebug() << "setupDirectories setup failed";
     }
 }
 

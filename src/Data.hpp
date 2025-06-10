@@ -88,6 +88,56 @@ struct ZipData {
      * Initializes an empty instance of `ZipData`.
      */
     ZipData() {}
+
+    /**
+     * @brief This sets the file name metadata.
+     * @param fileName TRLE level zip file name.
+     */
+    inline void setFileName(const QString& fileName) {
+    }
+
+    /**
+     * @brief This sets the file size metadata.
+     * @param size Size in MiB.
+     */
+    inline void setZise(const float size) {
+    }
+
+    /**
+     * @brief This sets the file md5sum metadata.
+     * @param md5sum Checksum of the archive.
+     */
+    inline void setMd5sum(const QString& md5sum) {
+    }
+
+    /**
+     * @brief This sets the URL for the file.
+     * @param url String of download address.
+     */
+    inline void setURL(const QString& url) {
+    }
+
+    /**
+     * @brief This sets the zip file name metadata.
+     * @param version File version from trcustoms.org
+     */
+    inline void setVersion(const qint64 version) {
+    }
+
+    /**
+     * @brief This sets the zip file name metadata.
+     * @param type Level type.
+     */
+    inline void setType(const qint64 type) {
+    }
+
+    /**
+     * @brief This sets the zip file name metadata.
+     * @param release date of file release.
+     */
+    inline void setRelease(const QString& release) {
+    }
+
     /**
      * @brief Parameterized constructor for `ZipData`.
      *
@@ -124,6 +174,77 @@ struct ZipData {
     int version;         ///< The Version of trcustoms archive file.
     int type;            ///< The TRLE type used to identify a executable.
     QString release;     ///< The The date of file release from trcustoms.
+};
+
+/**
+ * @struct OriginalGameData
+ * @brief Represents a Tomb Raider Game Entry Card Info.
+ *
+ * This struct is designed to store a Game data record.
+ * Each record contains basic game data and a cover image displayed as a card in the application.
+ */
+struct OriginalGameData {
+    /**
+     * @brief Default constructor for `OriginalGameData`.
+     *
+     * Initializes an empty instance of `OriginalGameData`.
+     */
+    OriginalGameData() {}
+
+    /**
+     * @brief Parameterized constructor for `OriginalGameData`.
+     *
+     * This constructor initializes a `OriginalGameData` object with game metadata.
+     *
+     * @param id The numeric game datbase ID.
+     * @param title The TRLE title. Expected to contain a single name.
+     * @param shortBody some short game info text.
+     * @param type The TRLE type, represented by a numeric ID.
+     * @param releaseDate The release date in the format "YYYY-MM-DD" (e.g., "2000-01-01").
+     * @param m_cover The cover image as a `m_cover`.
+     */
+    OriginalGameData(
+            qint64 id, const QString& title, const QString& shortBody,
+            qint64 type, const QString& releaseDate, const QPixmap& cover) :
+            m_game_id(id), m_title(title), m_shortBody(shortBody), m_type(type),
+            m_releaseDate(releaseDate) {
+        // Define target dimensions and maintain aspect ratio
+        QSize targetSize(640, 480);
+        QSize newSize = cover.size().scaled(targetSize, Qt::KeepAspectRatio);
+
+        // Scale the pixmap
+        QPixmap scaledPixmap = cover.scaled(
+            newSize,
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation);
+
+        // Create a centered pixmap with a transparent background
+        QPixmap centeredPixmap(targetSize);
+        // Ensure a transparent background
+        centeredPixmap.fill(Qt::transparent);
+
+        // Calculate offsets for centering the scaled image
+        qint64 xOffset = (targetSize.width() - newSize.width()) / 2;
+        qint64 yOffset = (targetSize.height() - newSize.height()) / 2;
+
+        // Draw the scaled image onto the centered pixmap
+        QPainter painter(&centeredPixmap);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        painter.drawPixmap(xOffset, yOffset, scaledPixmap);
+        painter.end();
+
+        // Store the resulting pixmap in m_picture
+        m_cover = centeredPixmap;
+    }
+
+    // Data members
+    qint64 m_game_id;        ///< The Game id.
+    QString m_title;         ///< The Game title.
+    QString m_shortBody;     ///< The Game info text.
+    qint64 m_type;           ///< ID of the type of game.
+    QString m_releaseDate;   ///< The release date in "YYYY-MM-DD" format.
+    QPixmap m_cover;         ///< The Game cover image.
 };
 
 /**
@@ -175,7 +296,7 @@ struct ListItemData {
         QSize newSize = pixmap.size().scaled(targetSize, Qt::KeepAspectRatio);
 
         // Scale the pixmap
-        QPixmap scaledPixmap = pixmap.scaled(
+        QPixmap scaledCover = pixmap.scaled(
             newSize,
             Qt::KeepAspectRatio,
             Qt::SmoothTransformation);
@@ -193,7 +314,7 @@ struct ListItemData {
         QPainter painter(&centeredPixmap);
         painter.setRenderHint(QPainter::Antialiasing, true);
         painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-        painter.drawPixmap(xOffset, yOffset, scaledPixmap);
+        painter.drawPixmap(xOffset, yOffset, scaledCover);
         painter.end();
 
         // Store the resulting pixmap in m_picture
@@ -208,7 +329,7 @@ struct ListItemData {
     QString m_releaseDate;   ///< The release date in "YYYY-MM-DD" format.
     qint64 m_difficulty;     ///< ID of the difficulty of the level.
     qint64 m_duration;       ///< ID of the estimated duration of the level.
-    QPixmap m_cover;         ///< The TRLE cover image pointer.
+    QPixmap m_cover;         ///< The TRLE cover image.
 };
 
 /**

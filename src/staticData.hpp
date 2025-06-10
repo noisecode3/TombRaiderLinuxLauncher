@@ -16,6 +16,84 @@
 #include <QString>
 #include <unordered_map>
 
+struct OriginalGameStaticData {
+    QMap<qint64, QString> romanNumerals = {
+            {0, "null"},
+            {1, "I"},
+            {2, "II"},
+            {3, "III"},
+            {4, "IV"},
+            {5, "V"},
+            {6, "VI"},
+            {7, "I_UB"},
+            {8, "II_GM"},
+            {9, "III_LM"},
+            {10, "IV_TT"},
+    };
+
+    const QString getCoverJPEG(qint64 id) {
+        return QString ("Tomb_Raider_%1.jpg").arg(romanNumerals[id]);
+    }
+
+    QMap<qint64, qint64> type = {
+            {0, 0},
+            {1, 1},
+            {2, 2},
+            {3, 3},
+            {4, 4},
+            {5, 5},
+            {6, 6},
+            {7, 1},
+            {8, 2},
+            {9, 3},
+            {10, 4},
+    };
+
+    const qint64 getType(qint64 id) {
+        return type[id];
+    }
+
+    QMap<qint64, QString> release = {
+            {0, ""},
+            {1, "2002"},
+            {2, ""},
+            {3, ""},
+            {4, ""},
+            {5, ""},
+            {6, ""},
+            {7, ""},
+            {8, ""},
+            {9, ""},
+            {10, ""},
+    };
+
+    const QString getRelease(qint64 id) {
+        return release[id];
+    }
+
+    QMap<qint64, QString> shortBody = {
+            {0, QString("%1%2%3").arg(
+                "",
+                "",
+                "")
+            },
+            {1, ""},
+            {2, ""},
+            {3, ""},
+            {4, ""},
+            {5, ""},
+            {6, ""},
+            {7, ""},
+            {8, ""},
+            {9, ""},
+            {10, ""},
+    };
+
+    const QString getShortBody(qint64 id) {
+        return shortBody[id];
+    }
+};
+
 struct StaticData {
     std::unordered_map<qint64, QString> getDifficulty() const {
         return {

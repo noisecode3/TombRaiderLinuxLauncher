@@ -28,7 +28,7 @@ class LevelListModel : public QAbstractListModel {
  public:
     explicit LevelListModel(QObject *parent): QAbstractListModel(parent) {}
 
-    void setLevels() {
+    void setLevels(const QList<int>& availableGames) {
         beginResetModel();
         m_mainList.clear();
         controller.getList(&m_mainList);
@@ -36,49 +36,118 @@ class LevelListModel : public QAbstractListModel {
             m_filterList.append(&item);
             m_sortList.append(&item);
         }
+        setOriginalGames(availableGames);
         endResetModel();
         m_a = createIndex(0, 0);
         m_b = createIndex(99, 0);
         getMoreCovers();
     }
 
+    void setOriginalGames(const QList<int>& availableGames) {
+        const QString pictures = ":/pictures/";
+        OriginalGameStaticData data;
+
+        foreach(const int &id, availableGames) {
+            int IdPositive;
+            if (id < 0) {
+                IdPositive = id*(-1);
+            } else {
+                IdPositive = id;
+            }
+
+            // Picture and title
+            QString fileName = data.getCoverJPEG(IdPositive);
+            QString coverPath = QString("%1%2").arg(pictures, fileName);
+            QString title =
+                QString("Tomb Raider %1 Original")
+                    .arg(data.romanNumerals[IdPositive]);
+            QString release = data.getRelease(IdPositive);
+            qint64 type = data.getType(IdPositive);
+            QString shortBody = data.getShortBody(IdPositive);
+
+            qDebug() << "coverPath :" << coverPath;
+            qDebug() << "title :" << title;
+
+            m_originalMainList.append(OriginalGameData(
+                IdPositive, title, shortBody,
+                type, release, QPixmap(coverPath)));
+        }
+    }
+
     int rowCount(const QModelIndex&) const override {
-        return m_filterList.count();
+        int rows = 0;
+        if (m_original == true) {
+            rows = m_originalMainList.count();
+        } else {
+            rows = m_filterList.count();
+        }
+        return rows;
     }
 
     QVariant data(const QModelIndex &index, int role) const override {
         QVariant result;
         int row = index.row();
 
-        if ((index.isValid()) && (row < m_filterList.count())) {
-            const ListItemData* item = m_filterList.at(row);
-            switch (role) {
-                case Qt::DisplayRole:
-                    result = item->m_title;
-                    break;
-                case Qt::UserRole + 1:
-                    result = item->m_authors;
-                    break;
-                case Qt::UserRole + 2:
-                    result = item->m_type;
-                    break;
-                case Qt::UserRole + 3:
-                    result = item->m_class;
-                    break;
-                case Qt::UserRole + 4:
-                    result = item->m_difficulty;
-                    break;
-                case Qt::UserRole + 5:
-                    result = item->m_releaseDate;
-                    break;
-                case Qt::UserRole + 6:
-                    result = item->m_duration;
-                    break;
-                case Qt::UserRole + 7:
-                    result = item->m_cover;
-                    break;
+        if (m_original == true) {
+            if ((index.isValid()) && (row < m_originalMainList.count())) {
+                const OriginalGameData item = m_originalMainList.at(row);
+                switch (role) {
+                    case Qt::DisplayRole:
+                        result = item.m_title;
+                        break;
+                    case Qt::UserRole + 1:
+                        result = item.m_shortBody;
+                        break;
+                    case Qt::UserRole + 2:
+                        result = item.m_type;
+                        break;
+                    case Qt::UserRole + 5:
+                        result = item.m_releaseDate;
+                        break;
+                    case Qt::UserRole + 7:
+                        result = item.m_cover;
+                        break;
+                    case Qt::UserRole + 10:
+                        result = true;
+                        break;
+                }
+            }
+
+        } else {
+            if ((index.isValid()) && (row < m_filterList.count())) {
+                const ListItemData* item = m_filterList.at(row);
+                switch (role) {
+                    case Qt::DisplayRole:
+                        result = item->m_title;
+                        break;
+                    case Qt::UserRole + 1:
+                        result = item->m_authors;
+                        break;
+                    case Qt::UserRole + 2:
+                        result = item->m_type;
+                        break;
+                    case Qt::UserRole + 3:
+                        result = item->m_class;
+                        break;
+                    case Qt::UserRole + 4:
+                        result = item->m_difficulty;
+                        break;
+                    case Qt::UserRole + 5:
+                        result = item->m_releaseDate;
+                        break;
+                    case Qt::UserRole + 6:
+                        result = item->m_duration;
+                        break;
+                    case Qt::UserRole + 7:
+                        result = item->m_cover;
+                        break;
+                    case Qt::UserRole + 10:
+                        result = false;
+                        break;
+                }
             }
         }
+
 
         return result;
     }
@@ -209,6 +278,7 @@ class LevelListModel : public QAbstractListModel {
     void reFilter() {
         qDebug() << "reFilter";
         beginResetModel();
+        m_original = false;
         m_filterList.clear();
 
         for (ListItemData* item : m_sortList) {
@@ -262,6 +332,12 @@ class LevelListModel : public QAbstractListModel {
         endResetModel();
     }
 
+    void showOriginal() {
+        beginResetModel();
+        m_original = true;
+        endResetModel();
+    }
+
  private:
     QVector<ListItemData> m_mainList;
     QVector<ListItemData*> m_sortList;
@@ -275,9 +351,10 @@ class LevelListModel : public QAbstractListModel {
     QString m_search;
     QVector<ListItemData*> m_cache;
     bool m_covers_loaded = false;
+    bool m_original = false;
     QModelIndex m_a;
     QModelIndex m_b;
-    // QVector<ListOriginalData> originalInfoList;
+    QVector<OriginalGameData> m_originalMainList;
     Controller& controller = Controller::getInstance();
 };
 
@@ -304,6 +381,7 @@ class CardItemDelegate : public QStyledItemDelegate {
         QRect imageRect = QRect(x, y, 320, 240);
         painter->setBrush(QColor("#cccccc"));
         QPixmap cover = index.data(Qt::UserRole + 7).value<QPixmap>();
+
         if (!cover.isNull()) {
             painter->drawPixmap(imageRect, cover);
         } else {
@@ -315,32 +393,12 @@ class CardItemDelegate : public QStyledItemDelegate {
         int textY = cardRect.top() + 10;
         QPoint point;
 
-        QString title = index.data(Qt::DisplayRole).toString();
-        QStringList authorsList = index.data(Qt::UserRole + 1).toStringList();
-        QString authors = authorsList.join(", ");
-        if (authors.size() > 100) {
-            authors = "Various";
-        }
-
-        qint64 typeId = index.data(Qt::UserRole + 2).toInt();
-        QString type = StaticData().getType()[typeId];
-
-        qint64 classId = index.data(Qt::UserRole + 3).toInt();
-        QString class_ = StaticData().getClass()[classId];
-
-        qint64 durationId = index.data(Qt::UserRole + 6).toInt();
-        QString duration = StaticData().getDuration()[durationId];
-
-        qint64 difficultyId = index.data(Qt::UserRole + 4).toInt();
-        QString difficulty = StaticData().getDifficulty()[difficultyId];
-
-        QString release = index.data(Qt::UserRole + 5).toString();
-
         QFont boldFont = option.font;
         boldFont.setBold(true);
         painter->setFont(boldFont);
         painter->setPen(Qt::black);
 
+        QString title = index.data(Qt::DisplayRole).toString();
         point.setX(textX);
         point.setY(textY + 15);
         painter->drawText(point, title);
@@ -349,29 +407,49 @@ class CardItemDelegate : public QStyledItemDelegate {
         normalFont.setPointSizeF(option.font.pointSizeF() - 1);
         painter->setFont(normalFont);
 
-        point.setY(textY + 35);
-        QString authorsText = QString("By: %1").arg(authors);
-        painter->drawText(point, authorsText);
-
+        qint64 typeId = index.data(Qt::UserRole + 2).toInt();
+        QString type = StaticData().getType()[typeId];
         point.setY(textY + 50);
         QString typeText = QString("Type: %1").arg(type);
         painter->drawText(point, typeText);
 
+        if (index.data(Qt::DisplayRole + 10).toBool()) {
+            QStringList authorsl = index.data(Qt::UserRole + 1).toStringList();
+            QString authors = authorsl.join(", ");
+            if (authors.size() > 100) {
+                authors = "Various";
+            }
+            point.setY(textY + 35);
+            QString authorsText = QString("By: %1").arg(authors);
+            painter->drawText(point, authorsText);
+
+            qint64 classId = index.data(Qt::UserRole + 3).toInt();
+            QString class_ = StaticData().getClass()[classId];
+            point.setY(textY + 80);
+            QString classText = QString("class: %1").arg(class_);
+            painter->drawText(point, classText);
+
+            qint64 durationId = index.data(Qt::UserRole + 6).toInt();
+            QString duration = StaticData().getDuration()[durationId];
+            point.setY(textY + 95);
+            QString durationText = QString("Duration: %1").arg(duration);
+            painter->drawText(point, durationText);
+
+            qint64 difficultyId = index.data(Qt::UserRole + 4).toInt();
+            QString difficulty = StaticData().getDifficulty()[difficultyId];
+            point.setY(textY + 110);
+            QString difficultyText = QString("Difficulty: %1").arg(difficulty);
+            painter->drawText(point, difficultyText);
+        } else {
+            QString shortBody = index.data(Qt::UserRole + 1).toString();
+            point.setY(textY + 80);
+            painter->drawText(point, shortBody);
+        }
+
+        QString release = index.data(Qt::UserRole + 5).toString();
         point.setY(textY + 65);
         QString releaseText = QString("Released: %1").arg(release);
         painter->drawText(point, releaseText);
-
-        point.setY(textY + 80);
-        QString classText = QString("class: %1").arg(class_);
-        painter->drawText(point, classText);
-
-        point.setY(textY + 95);
-        QString durationText = QString("Duration: %1").arg(duration);
-        painter->drawText(point, durationText);
-
-        point.setY(textY + 110);
-        QString difficultyText = QString("Difficulty: %1").arg(difficulty);
-        painter->drawText(point, difficultyText);
 
         painter->restore();
     }

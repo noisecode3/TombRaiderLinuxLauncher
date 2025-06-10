@@ -111,6 +111,8 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
             this, &TombRaiderLinuxLauncher::sortByType);
     connect(ui->radioButtonReleaseDate, &QRadioButton::clicked,
             this, &TombRaiderLinuxLauncher::sortByReleaseDate);
+    connect(ui->radioButtonOriginal, &QRadioButton::clicked,
+            this, &TombRaiderLinuxLauncher::showtOriginal);
 
     connect(ui->comboBoxClass, &QComboBox::currentTextChanged,
             this, &TombRaiderLinuxLauncher::filterByClass);
@@ -149,7 +151,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 }
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
-    levelListModel->setLevels();
+    levelListModel->setLevels(availableGames);
 }
 
 void TombRaiderLinuxLauncher::sortByTitle() {
@@ -174,6 +176,10 @@ void TombRaiderLinuxLauncher::sortByType() {
 
 void TombRaiderLinuxLauncher::sortByReleaseDate() {
     levelListModel->sortItems(levelListModel->compareReleaseDates);
+}
+
+void TombRaiderLinuxLauncher::showtOriginal() {
+    levelListModel->showOriginal();
 }
 
 void TombRaiderLinuxLauncher::filterByClass(const QString& class_) {

@@ -74,7 +74,7 @@ class Model : public QObject {
     void getLevel(int id);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
-    bool setDirectory(const QString& level, const QString& game);
+    bool setupDirectories(const QString& level, const QString& game);
     void setup(const QString& level, const QString& game);
 
  signals:
