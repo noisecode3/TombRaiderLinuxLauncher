@@ -218,14 +218,13 @@ ZipData Data::getDownload(const int id) {
     if (status) {
         if (query.exec() == true) {
             if (query.next() == true) {
-                result = ZipData(
-                    query.value("Zip.name").toString(),
-                    query.value("Zip.size").toFloat(),
-                    query.value("Zip.md5sum").toString(),
-                    query.value("Zip.url").toString(),
-                    query.value("Zip.version").toInt(),
-                    query.value("Info.type").toInt(),
-                    query.value("Zip.release").toString());
+                result.setFileName(query.value("Zip.name").toString());
+                result.setMebibyteSize(query.value("Zip.size").toFloat());
+                result.setMD5sum(query.value("Zip.md5sum").toString());
+                result.setURL(query.value("Zip.url").toString());
+                result.setVersion(query.value("Zip.version").toInt());
+                result.setType(query.value("Info.type").toInt());
+                result.setRelease(query.value("Zip.release").toString());
             } else {
                 qDebug() << "No results found for Level ID:" << id;
             }

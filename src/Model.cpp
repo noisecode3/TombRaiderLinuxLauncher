@@ -71,7 +71,7 @@ QString Model::getGameDirectory(int id) {
     QString value;
     FolderNames folder;
     if (folder.data.contains(id)) {
-        value = folder.data[id];
+        value = folder.data[id][0];
     } else {
         qDebug() << "Id number:" << id << " is not a game.";
     }
@@ -255,21 +255,22 @@ void Model::getLevel(int id) {
     if (id > 0) {
         bool status = false;
         ZipData zipData = data.getDownload(id);
-        downloader.setUrl(zipData.url);
-        downloader.setSaveFile(zipData.name);
+        downloader.setUrl(zipData.m_URL);
+        downloader.setSaveFile(zipData.m_fileName);
         // this if just slips up execution but has nothing to do with the error
-        if (fileManager.checkFile(zipData.name, false)) {
-            qWarning() << "File exists:" << zipData.name;
-            status = getLevelHaveFile(id, zipData.md5sum, zipData.name);
+        if (fileManager.checkFile(zipData.m_fileName, false)) {
+            qWarning() << "File exists:" << zipData.m_fileName;
+            status = getLevelHaveFile(id, zipData.m_MD5sum, zipData.m_fileName);
         } else {
-            qDebug() << "File does not exist:" << zipData.name;
-            status = getLevelDontHaveFile(id, zipData.md5sum, zipData.name);
+            qDebug() << "File does not exist:" << zipData.m_fileName;
+            status = getLevelDontHaveFile(
+                    id, zipData.m_MD5sum, zipData.m_fileName);
         }
         if (status == true) {
             if (!unpackLevel(
                 id,
-                zipData.name,
-                getExecutableName(zipData.type))) {
+                zipData.m_fileName,
+                getExecutableName(zipData.m_type))) {
                 qDebug() << "unpackLevel failed";
             }
         }

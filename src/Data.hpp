@@ -41,17 +41,42 @@ struct File {
  * @brief Folder names game used on Windows.
  *
  * These names are used by steam and installed in the common folder on Linux.
- * Except for `TombEngine (TEN)` I made that one up.
+ * 1-6 first folder name are used by steam
+ *
  */
 struct FolderNames {
-    QMap<int, QString> data = {
-            {0, "null"},
-            {1, "Tomb Raider (I)"},
-            {2, "Tomb Raider (II)"},
-            {3, "TombRaider (III)"},
-            {4, "Tomb Raider (IV) The Last Revelation"},
-            {5, "Tomb Raider (V) Chronicles"},
-            {6, "TombEngine (TEN)"},
+    QMap<int, QStringList> data = {
+            {0, {"null"}},
+            {1, {
+                    "Tomb Raider (I)",
+                    "Tomb Raider 1",
+                    "Tomb Raider I"
+                }},
+            {2, {
+                    "Tomb Raider (II)",
+                    "Tomb Raider 2",
+                    "Tomb Raider II"
+                }},
+            {3, {
+                    "TombRaider (III)",
+                    "Tomb Raider 3",
+                    "Tomb Raider III"
+                }},
+            {4, {
+                    "Tomb Raider (IV) The Last Revelation",
+                    "Tomb Raider 4",
+                    "Tomb Raider - The Last Revelation"
+                }},
+            {5, {
+                    "Tomb Raider (V) Chronicles",
+                    "Tomb Raider 5",
+                    "Tomb Raider - Chronicles"
+                }},
+            {6, {"Tomb Raider (VI) The Angel of Darkness"}},
+            {7, {"Tomb Raider I Unfinished Business"}},
+            {8, {"Tomb Raider II Gold"}},
+            {9, {"Tomb Raider - The Lost Artifact"}},
+            {10, {"The Times - Exclusive Tomb Raider Level"}},
         };
 };
 
@@ -65,12 +90,59 @@ struct FolderNames {
 struct ExecutableNames {
     QMap<int, QString> data = {
             {0, "null"},
-            {1, "tomb.exe"},
+            {1, "dosbox.exe"},
             {2, "Tomb2.exe"},
             {3, "tomb3.exe"},
             {4, "tomb4.exe"},
             {5, "PCTOMB5.EXE"},
-            {6, "TombEngine.exe"},
+            {6, "Launcher.exe"},
+            {7, "tombub.exe"},
+            {8, "tomb2.EXE"},
+            {9, "tr3gold.exe"},
+            {10, "tomb4.exe"},
+        };
+};
+
+struct GameRelease {
+    QMap<int, QString> data = {
+            {0, "null"},
+            {1, "1996-11-14"},
+            {2, "1997-11-21"},
+            {3, "1998-11-20"},
+            {4, "1999-11-24"},
+            {5, "2000-11-17"},
+            {6, "2003-07-01"},
+            {7, "1998-12-31"},
+            {8, "1999-06-04"},
+            {9, "2000-03-00"},
+            {10, "1999-12"},
+        };
+};
+
+/**
+ * @struct MoodFolderNames
+ * @brief Folder names moods used on Windows.
+ *
+ * These made up names that are used installed in the common folder on Linux.
+ */
+struct MoodFolderNames {
+    QMap<int, QString> data = {
+            {0, "null"},
+            {1, "TombEngine (TEN)"}
+        };
+};
+
+/**
+ * @struct MoodExecutableNames
+ * @brief Executable game file names used by unofficial moods.
+ *
+ * These are used as a default starter by using a symbolic link to the executable
+ * It can help simplify running it from steam or lutris.
+ */
+struct MoodExecutableNames {
+    QMap<int, QString> data = {
+            {0, "null"},
+            {1, "TombEngine.exe"},
         };
 };
 
@@ -87,34 +159,42 @@ struct ZipData {
      *
      * Initializes an empty instance of `ZipData`.
      */
-    ZipData() {}
+    ZipData() {
+        m_mebibyteSize = 0.0;
+        m_version = 0;
+        m_type = 0;
+    }
 
     /**
      * @brief This sets the file name metadata.
      * @param fileName TRLE level zip file name.
      */
     inline void setFileName(const QString& fileName) {
+        m_fileName = fileName;
     }
 
     /**
      * @brief This sets the file size metadata.
      * @param size Size in MiB.
      */
-    inline void setZise(const float size) {
+    inline void setMebibyteSize(const float size) {
+        m_mebibyteSize = size;
     }
 
     /**
      * @brief This sets the file md5sum metadata.
      * @param md5sum Checksum of the archive.
      */
-    inline void setMd5sum(const QString& md5sum) {
+    inline void setMD5sum(const QString& MD5sum) {
+        m_MD5sum = MD5sum;
     }
 
     /**
      * @brief This sets the URL for the file.
      * @param url String of download address.
      */
-    inline void setURL(const QString& url) {
+    inline void setURL(const QString& URL) {
+        m_URL = URL;
     }
 
     /**
@@ -122,6 +202,7 @@ struct ZipData {
      * @param version File version from trcustoms.org
      */
     inline void setVersion(const qint64 version) {
+        m_version = version;
     }
 
     /**
@@ -129,6 +210,7 @@ struct ZipData {
      * @param type Level type.
      */
     inline void setType(const qint64 type) {
+        m_type = type;
     }
 
     /**
@@ -136,44 +218,16 @@ struct ZipData {
      * @param release date of file release.
      */
     inline void setRelease(const QString& release) {
+        m_release = m_release;
     }
 
-    /**
-     * @brief Parameterized constructor for `ZipData`.
-     *
-     * This constructor initializes a `ZipData` object with metadata.
-     *
-     * @param zipName TRLE level zip file name.
-     * @param zipSize Size of the file form TRLE in MiB.
-     * @param md5sum checksum of the archive.
-     * @param url String of download address.
-     * @param version File version from trcustoms.org
-     * @param type Level type.
-     * @param release date of file release.
-     */
-    ZipData(
-        const QString& zipName,
-        float zipSize,
-        const QString& md5sum,
-        const QString& url,
-        int version,
-        int type,
-        const QString& release) :
-        name(zipName),
-        mebibyteSize(zipSize),
-        md5sum(md5sum),
-        url(url),
-        version(version),
-        type(type),
-        release(release) {}
-
-    QString name;        ///< The archive file name.
-    float mebibyteSize;  ///< The archive file size in MiB.
-    QString md5sum;      ///< The archive md5sum.
-    QString url;         ///< The URL of the TRLE level download.
-    int version;         ///< The Version of trcustoms archive file.
-    int type;            ///< The TRLE type used to identify a executable.
-    QString release;     ///< The The date of file release from trcustoms.
+    QString m_fileName;    ///< The archive file name.
+    float m_mebibyteSize;  ///< The archive file size in MiB.
+    QString m_MD5sum;      ///< The archive md5sum.
+    QString m_URL;         ///< The URL of the TRLE level download.
+    int m_version;         ///< The Version of trcustoms archive file.
+    int m_type;            ///< The TRLE type used to identify a executable.
+    QString m_release;     ///< The The date of file release from trcustoms.
 };
 
 /**
@@ -196,7 +250,7 @@ struct OriginalGameData {
      *
      * This constructor initializes a `OriginalGameData` object with game metadata.
      *
-     * @param id The numeric game datbase ID.
+     * @param id The numeric game database ID.
      * @param title The TRLE title. Expected to contain a single name.
      * @param shortBody some short game info text.
      * @param type The TRLE type, represented by a numeric ID.

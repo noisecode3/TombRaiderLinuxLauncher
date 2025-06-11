@@ -277,7 +277,7 @@ void TombRaiderLinuxLauncher::onCurrentItemChanged(
         const QModelIndex &current, const QModelIndex &previous) {
     if (current.isValid()) {
         qint64 id = levelListModel->getLid(current);
-        if (id < 0) {  // its the original game
+        if (levelListModel->getListType()) {  // its the original game
             originalSelected(id);
         } else {
             levelDirSelected(id);
@@ -342,14 +342,14 @@ void TombRaiderLinuxLauncher::downloadClicked() {
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
         qint64 id = levelListModel->getLid(current);
-        if (id < 0) {
+        if (levelListModel->getListType()) {
+            qDebug() << "controller.setupGame(" << id << ")";
             ui->listViewLevels->setEnabled(false);
             ui->progressBar->setValue(0);
             ui->stackedWidgetBar->setCurrentWidget(
             ui->stackedWidgetBar->findChild<QWidget*>("progress"));
-            // debugStop(QString("%1").arg(id*(-1)));
-            controller.setupGame(id*(-1));
-        } else if (id > 0) {
+            controller.setupGame(id);
+        } else {
             ui->listViewLevels->setEnabled(false);
             ui->progressBar->setValue(0);
             ui->stackedWidgetBar->setCurrentWidget(

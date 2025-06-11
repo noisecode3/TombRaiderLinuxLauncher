@@ -90,22 +90,22 @@ class LevelListModel : public QAbstractListModel {
 
         if (m_original == true) {
             if ((index.isValid()) && (row < m_originalMainList.count())) {
-                const OriginalGameData item = m_originalMainList.at(row);
+                const OriginalGameData* item = &m_originalMainList.at(row);
                 switch (role) {
                     case Qt::DisplayRole:
-                        result = item.m_title;
+                        result = item->m_title;
                         break;
                     case Qt::UserRole + 1:
-                        result = item.m_shortBody;
+                        result = item->m_shortBody;
                         break;
                     case Qt::UserRole + 2:
-                        result = item.m_type;
+                        result = item->m_type;
                         break;
                     case Qt::UserRole + 5:
-                        result = item.m_releaseDate;
+                        result = item->m_releaseDate;
                         break;
                     case Qt::UserRole + 7:
-                        result = item.m_cover;
+                        result = item->m_cover;
                         break;
                     case Qt::UserRole + 10:
                         result = true;
@@ -153,8 +153,19 @@ class LevelListModel : public QAbstractListModel {
     }
 
     int getLid(const QModelIndex &index) const {
-        const ListItemData* item = m_filterList.at(index.row());
-        return item->m_trle_id;
+        qint64 id = 0;
+        if (m_original) {
+            const OriginalGameData* item = &m_originalMainList.at(index.row());
+            id =  item->m_game_id;
+        } else {
+            const ListItemData* item = m_filterList.at(index.row());
+            id =  item->m_trle_id;
+        }
+        return id;
+    }
+
+    bool getListType() const {
+        return m_original;
     }
 
     void getMoreCovers() {
