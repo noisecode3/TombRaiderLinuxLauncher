@@ -112,7 +112,6 @@ class LevelListModel : public QAbstractListModel {
                         break;
                 }
             }
-
         } else {
             if ((index.isValid()) && (row < m_filterList.count())) {
                 const ListItemData* item = m_filterList.at(row);
@@ -148,20 +147,7 @@ class LevelListModel : public QAbstractListModel {
             }
         }
 
-
         return result;
-    }
-
-    int getLid(const QModelIndex &index) const {
-        qint64 id = 0;
-        if (m_original) {
-            const OriginalGameData* item = &m_originalMainList.at(index.row());
-            id =  item->m_game_id;
-        } else {
-            const ListItemData* item = m_filterList.at(index.row());
-            id =  item->m_trle_id;
-        }
-        return id;
     }
 
     bool getListType() const {
@@ -349,6 +335,56 @@ class LevelListModel : public QAbstractListModel {
         endResetModel();
     }
 
+    void setInstalledListOriginal(const QHash<int, bool> installed) {
+        m_installedOriginal = installed;
+    }
+    void setInstalledList(const QHash<int, bool> installed) {
+        m_installed = installed;
+    }
+
+    int getLid(const QModelIndex &index) const {
+        qint64 id = 0;
+        if (m_original) {
+            const OriginalGameData* item = &m_originalMainList.at(index.row());
+            id =  item->m_game_id;
+        } else {
+            const ListItemData* item = m_filterList.at(index.row());
+            id =  item->m_trle_id;
+        }
+        return id;
+    }
+
+    void setInstalled(const QModelIndex &index) {
+        int id = 0;
+        if (m_original) {
+            const OriginalGameData* item = &m_originalMainList.at(index.row());
+            id =  item->m_game_id;
+            m_installedOriginal.insert(id, true);
+        } else {
+            const ListItemData* item = m_filterList.at(index.row());
+            id =  item->m_trle_id;
+            m_installed.insert(id, true);
+        }
+    }
+
+    bool getInstalled(const qint64 id) {
+        bool result;
+        if (m_original) {
+            if (m_installedOriginal.contains(id)) {
+                result = m_installedOriginal.value(id);
+            } else {
+                result = false;
+            }
+        } else {
+            if (m_installed.contains(id)) {
+                result = m_installed.value(id);
+            } else {
+                result = false;
+            }
+        }
+        return result;
+    }
+
  private:
     QVector<ListItemData> m_mainList;
     QVector<ListItemData*> m_sortList;
@@ -359,6 +395,8 @@ class LevelListModel : public QAbstractListModel {
         QString difficulty;
         QString duration;
     } m_filter;
+    QHash<int, bool> m_installedOriginal;
+    QHash<int, bool> m_installed;
     QString m_search;
     QVector<ListItemData*> m_cache;
     bool m_covers_loaded = false;

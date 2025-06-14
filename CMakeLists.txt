@@ -37,6 +37,14 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
     file(WRITE "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" "${my_cmake}")
 endif()
 
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/database/tombll.db")
+    message(STATUS "Database not found, running get_trle.sh...")
+    execute_process(
+        COMMAND bash "${CMAKE_SOURCE_DIR}/database/get_trle.sh"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
+endif()
+
 add_subdirectory(libs/miniz)
 
 # Add LIEF as a subdirectory
@@ -51,7 +59,7 @@ set(LIEF_MACHO OFF)
 set(LIEF_DEX OFF)
 set(LIEF_ART OFF)
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt")
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt" AND NOT NO_DATABASE)
     message(STATUS "Submodule 'libs/LIEF' not found. Updating submodules...")
     execute_process(
         COMMAND git submodule update --init --recursive

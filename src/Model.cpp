@@ -111,7 +111,12 @@ void Model::getCoverList(QVector<ListItemData*>* items) {
 int Model::getItemState(int id) {
     int status = 0;
     if (id < 0) {
-        status = 1;
+        QString dir = QString("Original.TR%1").arg(id);
+        if (fileManager.checkDir(dir, false)) {
+            status = 2;
+        } else {
+            status = 1;
+        }
     } else if (id > 0) {
         QString dir = QString("%1.TRLE").arg(id);
         if (fileManager.checkDir(dir, false)) {

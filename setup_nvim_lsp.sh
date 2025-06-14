@@ -14,6 +14,6 @@ cmake \
     "$@" ..
 
 cd ..
-ln -s build/compile_commands.json compile_commands.json
+# ln -s build/compile_commands.json compile_commands.json
 
 git config submodule.libs/miniz.ignore all

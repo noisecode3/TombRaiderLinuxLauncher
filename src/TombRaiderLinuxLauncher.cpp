@@ -151,7 +151,25 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 }
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
+    setInstalled();
     levelListModel->setLevels(availableGames);
+}
+
+void TombRaiderLinuxLauncher::setInstalled() {
+    QStringList keys = m_settings.allKeys();
+    QHash<int, bool> installedLevel;
+    QHash<int, bool> installedGame;
+    for (const QString &key : keys) {
+        if (key.startsWith("installed/game")) {
+            qint64 id = key.mid(QString("installed/game").length()).toInt();
+            installedGame.insert(id, m_settings.value(key).toBool());
+        } else if (key.startsWith("installed/level")) {
+            qint64 id = key.mid(QString("installed/level").length()).toInt();
+            installedLevel.insert(id, m_settings.value(key).toBool());
+        }
+    }
+    levelListModel->setInstalledListOriginal(installedGame);
+    levelListModel->setInstalledList(installedLevel);
 }
 
 void TombRaiderLinuxLauncher::sortByTitle() {
@@ -222,7 +240,7 @@ void TombRaiderLinuxLauncher::setup() {
     const QString homeDir =
         QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     qDebug() << "Home Directory:" << homeDir;
-    const QString s = "/.steam/root/steamapps/common/";
+    const QString s = "/.steam/steam/steamapps/common/";
     const QString l = "/.local/share/TombRaiderLinuxLauncher";
     ui->gamePathEdit->setText(homeDir + s);
     ui->levelPathEdit->setText(homeDir + l);
@@ -231,8 +249,7 @@ void TombRaiderLinuxLauncher::setup() {
 void TombRaiderLinuxLauncher::originalSelected(qint64 id) {
     if (id != 0) {
         // the game directory was a symbolic link and it has a level directory
-        if ((controller.checkGameDirectory(id) == 2)
-                && (controller.getItemState(id) == 1)) {
+        if (levelListModel->getInstalled(id)) {
             ui->pushButtonLink->setEnabled(true);
             ui->pushButtonDownload->setEnabled(false);
         } else {
@@ -247,7 +264,7 @@ void TombRaiderLinuxLauncher::levelDirSelected(qint64 id) {
     if (id != 0) {
         int state = controller.getItemState(id);
         // Activate or deactivate pushbuttons based on the selected item
-        qDebug() << id << Qt::endl;
+        qDebug() << "Selected: " << id << Qt::endl;
         // if state == 1 then only activate link button
         // if state == 2 then only activate link and info button
         // if state == 0 then only activate download button
@@ -329,6 +346,9 @@ void TombRaiderLinuxLauncher::linkClicked() {
             if (m_settings.value(QString("level%1/RunnerType").arg(id)) == 2) {
                 Model::getInstance().runWine(id);
             } else {
+                if (levelListModel->getListType()) {
+                    id = (-1)*id;
+                }
                 if (!controller.link(id)) {
                     qDebug() << "link error";
                 }
@@ -343,7 +363,6 @@ void TombRaiderLinuxLauncher::downloadClicked() {
     if (current.isValid()) {
         qint64 id = levelListModel->getLid(current);
         if (levelListModel->getListType()) {
-            qDebug() << "controller.setupGame(" << id << ")";
             ui->listViewLevels->setEnabled(false);
             ui->progressBar->setValue(0);
             ui->stackedWidgetBar->setCurrentWidget(
@@ -445,11 +464,18 @@ void TombRaiderLinuxLauncher::workTick() {
         QModelIndex current = ui->listViewLevels->currentIndex();
         if (current.isValid()) {
             qint64 id = levelListModel->getLid(current);
-            if (id < 0) {  // its the original game
+            levelListModel->setInstalled(current);
+            if (levelListModel->getListType()) {  // its the original game
+                m_settings.setValue(
+                        QString("installed/game%1").arg(id),
+                        "true");
                 ui->pushButtonLink->setEnabled(true);
                 ui->pushButtonInfo->setEnabled(false);
                 ui->pushButtonDownload->setEnabled(false);
-            } else if (id > 0) {
+            } else {
+                m_settings.setValue(
+                        QString("installed/level%1").arg(id),
+                        "true");
                 ui->pushButtonLink->setEnabled(true);
                 ui->pushButtonInfo->setEnabled(true);
                 ui->pushButtonDownload->setEnabled(false);
@@ -497,6 +523,7 @@ void TombRaiderLinuxLauncher::GlobalSaveClicked() {
         controller.setup(newLevelPath, newGamePath);
     }
 }
+
 void TombRaiderLinuxLauncher::GlobalResetClicked() {
     ui->tableWidgetSetup->item(0, 0)->setText(
         m_settings.value("gamePath").toString());
