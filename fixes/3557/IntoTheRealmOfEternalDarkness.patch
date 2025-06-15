@@ -1,0 +1,234 @@
+diff --git a/data/tr1/ship/cfg/TR1X_gameflow.json5 b/data/tr1/ship/cfg/TR1X_gameflow.json5
+index 936949413..0521ea9b7 100644
+--- a/data/tr1/ship/cfg/TR1X_gameflow.json5
++++ b/data/tr1/ship/cfg/TR1X_gameflow.json5
+@@ -4,10 +4,10 @@
+     // Refer to https://github.com/LostArtefacts/TRX/blob/stable/docs/GAME_FLOW.md
+     // for usage.
+ 
+-    "main_menu_picture": "data/images/title.webp",
++    "main_menu_picture": "pictures/title.png",
+     "savegame_fmt_legacy": "saveati.%d",
+     "savegame_fmt_bson": "save_tr1_%02d.dat",
+-    "demo_delay": 16,
++    "demo_delay": 6,
+     "injections": [
+         "data/injections/backpack.bin",
+         "data/injections/braid.bin",
+@@ -30,9 +30,6 @@
+         "inherit_injections": false,
+         "sequence": [
+             {"type": "display_picture", "path": "data/images/eidos.webp", "legal": true, "display_time": 1, "fade_in_time": 1.0, "fade_out_time": 1.0},
+-            {"type": "play_fmv", "fmv_id": 0},
+-            {"type": "play_fmv", "fmv_id": 1},
+-            {"type": "play_fmv", "fmv_id": 2},
+             {"type": "exit_to_title"},
+         ],
+         "injections": [
+@@ -42,38 +39,12 @@
+     },
+ 
+     "levels": [
+-        // Level 0: Lara's Home
+-        {
+-            "path": "data/gym.phd",
+-            "type": "gym",
+-            "music_track": 0,
+-            "inherit_injections": false,
+-            "sequence": [
+-                {"type": "play_fmv", "fmv_id": 3},
+-                {"type": "loading_screen", "path": "data/images/gym.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
+-                {"type": "loop_game"},
+-                {"type": "level_stats"},
+-                {"type": "exit_to_title"},
+-            ],
+-            "injections": [
+-                "data/injections/lara_gym_guns.bin",
+-                "data/injections/braid.bin",
+-                "data/injections/bubbles.bin",
+-                "data/injections/gym_textures.bin",
+-                "data/injections/lara_animations.bin",
+-                "data/injections/uzi_sfx.bin",
+-                "data/injections/explosion.bin",
+-                "data/injections/font.bin",
+-            ],
+-        },
+-
+         // Level 1: Caves
+         {
+-            "path": "data/level1.phd",
+-            "music_track": 57,
++            "path": "data/Manor.phd",
++            "music_track": 60,
+             "sequence": [
+                 {"type": "play_fmv", "fmv_id": 4},
+-                {"type": "loading_screen", "path": "data/images/peru.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
+                 {"type": "level_complete"},
+@@ -143,7 +114,6 @@
+             "path": "data/level4.phd",
+             "music_track": 59,
+             "sequence": [
+-                {"type": "play_fmv", "fmv_id": 5},
+                 {"type": "loading_screen", "path": "data/images/greece.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
+@@ -238,7 +208,6 @@
+             "path": "data/level8a.phd",
+             "music_track": 59,
+             "sequence": [
+-                {"type": "play_fmv", "fmv_id": 6},
+                 {"type": "loading_screen", "path": "data/images/egypt.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
+@@ -294,7 +263,6 @@
+             "path": "data/level10a.phd",
+             "music_track": 58,
+             "sequence": [
+-                {"type": "play_fmv", "fmv_id": 7},
+                 {"type": "loading_screen", "path": "data/images/atlantis.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
+                 {"type": "remove_weapons"},
+                 {"type": "remove_scions"},
+@@ -324,12 +292,10 @@
+             "path": "data/level10b.phd",
+             "music_track": 60,
+             "sequence": [
+-                {"type": "play_fmv", "fmv_id": 8},
+                 {"type": "loading_screen", "path": "data/images/atlantis.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
+                 {"type": "give_item", "object_id": "pistols", "quantity": 1},
+                 {"type": "setup_bacon_lara", "anchor_room": 10},
+                 {"type": "loop_game"},
+-                {"type": "play_fmv", "fmv_id": 9},
+                 {"type": "play_cutscene", "cutscene_id": 3},
+                 {"type": "level_stats"},
+                 {"type": "level_complete"},
+@@ -349,7 +315,6 @@
+                 {"type": "loading_screen", "path": "data/images/atlantis.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
+-                {"type": "play_fmv", "fmv_id": 10},
+                 {"type": "play_music", "music_track": 19},
+                 {"type": "level_complete"},
+                 {"type": "display_picture", "path": "data/images/end.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
+@@ -510,14 +475,10 @@
+     "fmvs": [
+         {"path": "fmv/core.avi", "legal": true},
+         {"path": "fmv/escape.avi", "legal": true},
+-        {"path": "fmv/cafe.avi"},
+-        {"path": "fmv/mansion.avi"},
+-        {"path": "fmv/snow.avi"},
+-        {"path": "fmv/lift.avi"},
+-        {"path": "fmv/vision.avi"},
+-        {"path": "fmv/canyon.avi"},
+-        {"path": "fmv/pyramid.avi"},
+-        {"path": "fmv/prison.avi"},
+-        {"path": "fmv/end.avi"},
++        {"path": "fmv/none.avi"},
++        {"path": "fmv/none.avi"},
++        {"path": "fmv/fmv1.avi"},
++        {"path": "fmv/fmv2.avi"},
++        {"path": "fmv/fmv3.avi"},
+     ],
+ }
+diff --git a/data/tr1/ship/cfg/TR1X_strings.json5 b/data/tr1/ship/cfg/TR1X_strings.json5
+index b5e88b6af..0644a8266 100644
+--- a/data/tr1/ship/cfg/TR1X_strings.json5
++++ b/data/tr1/ship/cfg/TR1X_strings.json5
+@@ -3,14 +3,19 @@
+     // https://github.com/LostArtefacts/TRX/blob/stable/docs/GAME_STRINGS.md
+ 
+     "levels": [
+-        // Level 0: Lara's Home
++        // Level 1: Croft Manor
+         {
+-            "title": "Lara's Home",
+-        },
++            "title": "Croft Manor",
++            "objects": {
++                "key_1": {"name": "Basement Key"},
++                "key_2": {"name": "Closet Key"},
++                "key_3": {"name": "Storage Room Key"},
++                "key_4": {"name": "Tomb Key"},
++                "puzzle_1": {"name": "Thistle Stone"},
++                "puzzle_2": {"name": "Cogwheel"},
++                "puzzle_3": {"name": "Gold Bar"},
++            },
+ 
+-        // Level 1: Caves
+-        {
+-            "title": "Caves",
+         },
+ 
+         // Level 2: City of Vilcabamba
+diff --git a/src/libtrx/include/libtrx/game/const.h b/src/libtrx/include/libtrx/game/const.h
+index 2928947b5..54c0d2ea3 100644
+--- a/src/libtrx/include/libtrx/game/const.h
++++ b/src/libtrx/include/libtrx/game/const.h
+@@ -14,5 +14,5 @@
+ #define GRAVITY 6
+ #define FAST_FALL_SPEED 128
+ 
+-#define MAX_STATIC_OBJECTS_2D 50
++#define MAX_STATIC_OBJECTS_2D 100
+ #define MAX_STATIC_OBJECTS_3D 256
+diff --git a/src/tr1/game/option/option_passport.c b/src/tr1/game/option/option_passport.c
+index 1eefa6cef..9826dba12 100644
+--- a/src/tr1/game/option/option_passport.c
++++ b/src/tr1/game/option/option_passport.c
+@@ -363,50 +363,15 @@ static void M_SaveGame(void)
+ 
+ static void M_NewGame(void)
+ {
+-    M_ChangePageTextContent(GS(PASSPORT_NEW_GAME));
++     M_ChangePageTextContent(GS(PASSPORT_NEW_GAME));
+     if (m_State.mode == PASSPORT_MODE_BROWSE) {
+-        if (g_InputDB.menu_confirm
+-            && (g_Config.gameplay.enable_game_modes
+-                || g_Config.profile.new_game_plus_unlock)) {
+-            g_Input = (INPUT_STATE) {};
+-            g_InputDB = (INPUT_STATE) {};
+-            m_State.mode = PASSPORT_MODE_NEW_GAME;
+-            m_State.new_game.is_ready = true;
+-        } else {
+             Savegame_SetInitialVersion(SAVEGAME_CURRENT_VERSION);
+             g_GameInfo.passport_selection = PASSPORT_MODE_NEW_GAME;
+-        }
++    
+     } else if (m_State.mode == PASSPORT_MODE_NEW_GAME) {
+-        const int32_t choice = UI_NewGame_Control(&m_State.new_game.state);
+-        if (choice == UI_REQUESTER_NO_CHOICE) {
+-            g_Input = (INPUT_STATE) {};
+-            g_InputDB = (INPUT_STATE) {};
+-        } else if (choice == UI_REQUESTER_CANCEL) {
+-            m_State.new_game.is_ready = false;
+-            m_State.mode = PASSPORT_MODE_BROWSE;
+-            g_Input = (INPUT_STATE) {};
+-            g_InputDB = (INPUT_STATE) {};
+-        } else {
+-            switch (choice) {
+-            case 0:
+-                Game_SetBonusFlag(GBF_NONE);
+-                break;
+-            case 1:
+-                Game_SetBonusFlag(GBF_NGPLUS);
+-                break;
+-            case 2:
+-                Game_SetBonusFlag(GBF_JAPANESE);
+-                break;
+-            case 3:
+-                Game_SetBonusFlag(GBF_JAPANESE | GBF_NGPLUS);
+-                break;
+-            default:
+-                Game_SetBonusFlag(GBF_NONE);
+-                break;
+-            }
+-            g_GameInfo.passport_selection = PASSPORT_MODE_NEW_GAME;
+-            Savegame_SetInitialVersion(SAVEGAME_CURRENT_VERSION);
+-        }
++        Game_SetBonusFlag(GBF_NONE);
++        g_GameInfo.passport_selection = PASSPORT_MODE_NEW_GAME;
++        Savegame_SetInitialVersion(SAVEGAME_CURRENT_VERSION);
+     }
+ }
+ 
