@@ -111,7 +111,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
             this, &TombRaiderLinuxLauncher::sortByType);
     connect(ui->radioButtonReleaseDate, &QRadioButton::clicked,
             this, &TombRaiderLinuxLauncher::sortByReleaseDate);
-    connect(ui->radioButtonOriginal, &QRadioButton::clicked,
+    connect(ui->checkBoxOriginal, &QRadioButton::clicked,
             this, &TombRaiderLinuxLauncher::showtOriginal);
 
     connect(ui->comboBoxClass, &QComboBox::currentTextChanged,
@@ -141,6 +141,10 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         levelListModel->filterSearch(searchText);
     });
 
+    connect(ui->checkBoxInstalled, &QCheckBox::clicked, this, [=]() {
+        levelListModel->filterInstalled();
+    });
+
     // Read settings
     QString value = m_settings.value("setup").toString();
     if (value != "yes") {
@@ -151,8 +155,8 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 }
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
-    setInstalled();
     levelListModel->setLevels(availableGames);
+    setInstalled();
 }
 
 void TombRaiderLinuxLauncher::setInstalled() {
@@ -246,20 +250,6 @@ void TombRaiderLinuxLauncher::setup() {
     ui->levelPathEdit->setText(homeDir + l);
 }
 
-void TombRaiderLinuxLauncher::originalSelected(qint64 id) {
-    if (id != 0) {
-        // the game directory was a symbolic link and it has a level directory
-        if (levelListModel->getInstalled(id)) {
-            ui->pushButtonLink->setEnabled(true);
-            ui->pushButtonDownload->setEnabled(false);
-        } else {
-            ui->pushButtonLink->setEnabled(false);
-            ui->pushButtonDownload->setEnabled(true);
-        }
-        ui->pushButtonInfo->setEnabled(false);
-    }
-}
-
 void TombRaiderLinuxLauncher::levelDirSelected(qint64 id) {
     if (id != 0) {
         int state = controller.getItemState(id);
@@ -295,7 +285,14 @@ void TombRaiderLinuxLauncher::onCurrentItemChanged(
     if (current.isValid()) {
         qint64 id = levelListModel->getLid(current);
         if (levelListModel->getListType()) {  // its the original game
-            originalSelected(id);
+            if (levelListModel->getInstalled(current)) {
+                ui->pushButtonLink->setEnabled(true);
+                ui->pushButtonDownload->setEnabled(false);
+            } else {
+                ui->pushButtonLink->setEnabled(false);
+                ui->pushButtonDownload->setEnabled(true);
+            }
+            ui->pushButtonInfo->setEnabled(false);
         } else {
             levelDirSelected(id);
         }
@@ -552,4 +549,5 @@ void TombRaiderLinuxLauncher::LevelResetClicked() {
 
 TombRaiderLinuxLauncher::~TombRaiderLinuxLauncher() {
     delete ui;
+    QApplication::quit();
 }

@@ -115,7 +115,7 @@ struct GameRelease {
             {7, "1998-12-31"},
             {8, "1999-06-04"},
             {9, "2000-03-00"},
-            {10, "1999-12"},
+            {10, "1999-12-00"},
         };
 };
 
@@ -218,7 +218,7 @@ struct ZipData {
      * @param release date of file release.
      */
     inline void setRelease(const QString& release) {
-        m_release = m_release;
+        m_release = release;
     }
 
     QString m_fileName;    ///< The archive file name.
@@ -228,77 +228,6 @@ struct ZipData {
     int m_version;         ///< The Version of trcustoms archive file.
     int m_type;            ///< The TRLE type used to identify a executable.
     QString m_release;     ///< The The date of file release from trcustoms.
-};
-
-/**
- * @struct OriginalGameData
- * @brief Represents a Tomb Raider Game Entry Card Info.
- *
- * This struct is designed to store a Game data record.
- * Each record contains basic game data and a cover image displayed as a card in the application.
- */
-struct OriginalGameData {
-    /**
-     * @brief Default constructor for `OriginalGameData`.
-     *
-     * Initializes an empty instance of `OriginalGameData`.
-     */
-    OriginalGameData() {}
-
-    /**
-     * @brief Parameterized constructor for `OriginalGameData`.
-     *
-     * This constructor initializes a `OriginalGameData` object with game metadata.
-     *
-     * @param id The numeric game database ID.
-     * @param title The TRLE title. Expected to contain a single name.
-     * @param shortBody some short game info text.
-     * @param type The TRLE type, represented by a numeric ID.
-     * @param releaseDate The release date in the format "YYYY-MM-DD" (e.g., "2000-01-01").
-     * @param m_cover The cover image as a `m_cover`.
-     */
-    OriginalGameData(
-            qint64 id, const QString& title, const QString& shortBody,
-            qint64 type, const QString& releaseDate, const QPixmap& cover) :
-            m_game_id(id), m_title(title), m_shortBody(shortBody), m_type(type),
-            m_releaseDate(releaseDate) {
-        // Define target dimensions and maintain aspect ratio
-        QSize targetSize(640, 480);
-        QSize newSize = cover.size().scaled(targetSize, Qt::KeepAspectRatio);
-
-        // Scale the pixmap
-        QPixmap scaledPixmap = cover.scaled(
-            newSize,
-            Qt::KeepAspectRatio,
-            Qt::SmoothTransformation);
-
-        // Create a centered pixmap with a transparent background
-        QPixmap centeredPixmap(targetSize);
-        // Ensure a transparent background
-        centeredPixmap.fill(Qt::transparent);
-
-        // Calculate offsets for centering the scaled image
-        qint64 xOffset = (targetSize.width() - newSize.width()) / 2;
-        qint64 yOffset = (targetSize.height() - newSize.height()) / 2;
-
-        // Draw the scaled image onto the centered pixmap
-        QPainter painter(&centeredPixmap);
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-        painter.drawPixmap(xOffset, yOffset, scaledPixmap);
-        painter.end();
-
-        // Store the resulting pixmap in m_picture
-        m_cover = centeredPixmap;
-    }
-
-    // Data members
-    qint64 m_game_id;        ///< The Game id.
-    QString m_title;         ///< The Game title.
-    QString m_shortBody;     ///< The Game info text.
-    qint64 m_type;           ///< ID of the type of game.
-    QString m_releaseDate;   ///< The release date in "YYYY-MM-DD" format.
-    QPixmap m_cover;         ///< The Game cover image.
 };
 
 /**
@@ -315,36 +244,84 @@ struct ListItemData {
      *
      * Initializes an empty instance of `ListItemData`.
      */
-    ListItemData() {}
+    ListItemData() {
+        m_game_id = 0;
+        m_trle_id = 0;
+        m_type = 0;
+        m_class = 0;
+        m_difficulty = 0;
+        m_duration = 0;
+        m_installed = false;
+    }
 
-    /**
-     * @brief Parameterized constructor for `ListItemData`.
-     *
-     * This constructor initializes a `ListItemData` object with metadata.
-     *
-     * @param id The TRLE numeric level ID.
-     * @param title The TRLE title. Expected to contain a single name.
-     * @param author The TRLE author(s). Can be a single name or multiple names.
-     * @param type The TRLE type, represented by a numeric ID.
-     * @param classInput The TRLE class, represented by a numeric ID.
-     * @param releaseDate The release date in the format "YYYY-MM-DD" (e.g., "2000-01-01").
-     * @param difficulty The TRLE difficulty, represented by a numeric ID.
-     * @param duration The TRLE duration, represented by a numeric ID.
-     * @param m_cover The cover image as a `m_cover`.
-     */
-    ListItemData(
-            qint64 id, const QString& title, const QStringList& authors,
-            qint64 type, qint64 classInput, const QString& releaseDate,
-            qint64 difficulty, qint64 duration) :
-            m_trle_id(id), m_title(title), m_authors(authors), m_type(type),
-            m_class(classInput), m_releaseDate(releaseDate),
-            m_difficulty(difficulty), m_duration(duration) {}
 
-    void addPicture(const QByteArray& imageData) {
+    void setGameId(const qint64 id) {
+        m_game_id = id;
+    }
+
+    void setLid(const qint64 id) {
+        m_trle_id = id;
+    }
+
+    void setTitle(const QString& title) {
+        m_title = title;
+    }
+
+    void setAuthors(const QStringList& authors) {
+        m_authors = authors;
+    }
+
+    void setShortBody(const QString& shortBody) {
+        m_shortBody = shortBody;
+    }
+
+    void setType(const qint64 type) {
+        m_type = type;
+    }
+
+    void setClass(const qint64 _class) {
+        m_class = _class;
+    }
+
+    void setDifficulty(const qint64 difficulty) {
+        m_difficulty = difficulty;
+    }
+
+    void setDuration(const qint64 duration) {
+        m_duration = duration;
+    }
+
+    void setReleaseDate(const QString& releaseDate) {
+        m_releaseDate = releaseDate;
+    }
+
+    void setPicture(const QByteArray& imageData) {
         // Load the image from the byte array
         QPixmap pixmap;
         pixmap.loadFromData(imageData, "WEBP");
 
+        centerPixmap(pixmap);
+    }
+
+    void setPicture(const QPixmap& pixmap) {
+        centerPixmap(pixmap);
+    }
+    // Data members
+    qint64 m_game_id;        ///< The Game id.
+    qint64 m_trle_id;        ///< The TRLE level id.
+    QString m_shortBody;     ///< The Game info text.
+    QString m_title;         ///< The TRLE level title.
+    QStringList m_authors;   ///< The TRLE author(s), as a string list.
+    qint64 m_type;           ///< ID of the type of level.
+    qint64 m_class;          ///< ID of the class of the level.
+    QString m_releaseDate;   ///< The release date in "YYYY-MM-DD" format.
+    qint64 m_difficulty;     ///< ID of the difficulty of the level.
+    qint64 m_duration;       ///< ID of the estimated duration of the level.
+    QPixmap m_cover;         ///< The TRLE cover image.
+    bool m_installed;
+
+ private:
+    void centerPixmap(QPixmap pixmap) {
         // Define target dimensions and maintain aspect ratio
         QSize targetSize(640, 480);
         QSize newSize = pixmap.size().scaled(targetSize, Qt::KeepAspectRatio);
@@ -374,16 +351,6 @@ struct ListItemData {
         // Store the resulting pixmap in m_picture
         m_cover = centeredPixmap;
     }
-    // Data members
-    qint64 m_trle_id;        ///< The TRLE level id.
-    QString m_title;         ///< The TRLE level title.
-    QStringList m_authors;   ///< The TRLE author(s), as a string list.
-    qint64 m_type;           ///< ID of the type of level.
-    qint64 m_class;          ///< ID of the class of the level.
-    QString m_releaseDate;   ///< The release date in "YYYY-MM-DD" format.
-    qint64 m_difficulty;     ///< ID of the difficulty of the level.
-    qint64 m_duration;       ///< ID of the estimated duration of the level.
-    QPixmap m_cover;         ///< The TRLE cover image.
 };
 
 /**

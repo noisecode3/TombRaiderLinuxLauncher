@@ -22,6 +22,299 @@
 #include "../src/Controller.hpp"
 #include "../src/staticData.hpp"
 
+class LevelListBuffer {
+ public:
+    LevelListBuffer() {
+        m_coversLoaded = false;
+        m_original = false;
+        m_a = 0;
+        m_b = 0;
+        m_sortList = nullptr;
+    }
+
+    void setLevelList(const QVector<ListItemData> &levelList) {
+        m_levelList = levelList;
+    }
+
+    void setGameList(const QVector<ListItemData> &gameList) {
+        m_gameList = gameList;
+    }
+
+    QVector<ListItemData>* getLevelList() {
+        return &m_levelList;
+    }
+
+    QVector<ListItemData>* getGameList() {
+        return &m_gameList;
+    }
+
+    void setInstalledListOriginal(const QHash<int, bool> installed) {
+        for (ListItemData& item : m_gameList) {
+            if (installed.contains(item.m_game_id)) {
+                if (installed.value(item.m_game_id) == true) {
+                    item.m_installed = true;
+                }
+            }
+        }
+    }
+
+    void setInstalledList(const QHash<int, bool> installed) {
+        for (ListItemData& item : m_levelList) {
+            if (installed.contains(item.m_trle_id)) {
+                if (installed.value(item.m_trle_id) == true) {
+                    item.m_installed = true;
+                }
+            }
+        }
+    }
+
+    void toogelList() {
+        if (m_original) {
+            m_original =  false;
+        } else {
+            m_original =  true;
+        }
+    }
+
+    bool getCoversLoaded() {
+        return m_coversLoaded;
+    }
+
+    bool getOriginal() {
+        return m_original;
+    }
+
+    qint64 getRowCount() const {
+        int rows = 0;
+        if (m_original == true) {
+            rows = m_gameList.count();
+        } else {
+            rows = m_levelList.count();
+        }
+        return rows;
+    }
+
+    qint64 getA() const {return m_a;}
+    qint64 getB() const {return m_b;}
+
+    ListItemData* getItem(qint64 index) {
+        ListItemData* card;
+        if (m_original == true) {
+            card = &m_gameList[index];
+        } else {
+            card = &m_levelList[index];
+        }
+        return card;
+    }
+
+    QVector<ListItemData*>* getNextBuffer() {
+        m_cache.clear();
+        if (!m_coversLoaded) {
+            m_a = m_b;
+            const qint64 count = m_levelList.count();
+            if (count > m_b+100) {
+                m_b += 100;
+            } else {
+                m_b = count;
+                m_coversLoaded = true;
+            }
+            for (qint64 i = m_a ; i < m_b; i++) {
+                m_cache.append(&m_levelList[i]);
+            }
+        }
+    return &m_cache;
+    }
+
+    void setSortFilter(QVector<ListItemData*>* sortList) {
+        m_sortList = sortList;
+        reloadSorted();
+    }
+
+    void reloadSorted() {
+        m_sortList->clear();
+        if (m_original == true) {
+            for (ListItemData& item : m_gameList) {
+                m_sortList->append(&item);
+            }
+        } else {
+            for (ListItemData& item : m_levelList) {
+                m_sortList->append(&item);
+            }
+        }
+    }
+
+ private:
+    QVector<ListItemData> m_levelList;
+    QVector<ListItemData> m_gameList;
+    QVector<ListItemData*>* m_sortList;
+    QVector<ListItemData*> m_cache;
+    bool m_coversLoaded;
+    bool m_original;
+    qint64 m_a;
+    qint64 m_b;
+};
+
+class LevelListFilter {
+ public:
+    LevelListFilter() {
+        m_installed = false;
+        m_author = false;
+        m_sortList = nullptr;
+    }
+
+    void setSortFilter(QVector<ListItemData*>* sortList) {
+        m_sortList = sortList;
+    }
+
+    int getRowCount() const {
+        return m_filterList.count();
+    }
+
+    ListItemData* getAtIndex(qint64 id) const {
+        return m_filterList[id];
+    }
+
+    void filterClass(const QString& class_) {
+        qDebug() << "filterClass " << class_;
+        if (class_ == " - All -") {
+            m_class.clear();
+            qDebug() << "reset class";
+        } else {
+            m_class = class_;
+        }
+        reFilter();
+    }
+
+    void filterType(const QString& type) {
+        qDebug() << "filterType " << type;
+        if (type == " - All -") {
+            m_type.clear();
+            qDebug() << "reset type";
+        } else {
+            m_type = type;
+        }
+        reFilter();
+    }
+
+    void filterDifficulty(const QString &difficulty) {
+        qDebug() << "filterDifficulty " << difficulty;
+        if (difficulty == " - All -") {
+            m_difficulty.clear();
+            qDebug() << "reset difficulty";
+        } else {
+            m_difficulty = difficulty;
+        }
+        reFilter();
+    }
+
+    void filterDuration(const QString& duration) {
+        qDebug() << "filterDuration " << duration;
+        if (duration == " - All -") {
+            m_duration.clear();
+            qDebug() << "reset duration";
+        } else {
+            m_duration = duration;
+        }
+        reFilter();
+    }
+
+    void filterSearch(const QString& search) {
+        qDebug() << "filterSearch " << search;
+        if (search == "") {
+            m_search.clear();
+            qDebug() << "reset search";
+        } else {
+            m_search.clear();
+            m_search = search;
+        }
+        reFilter();
+    }
+
+    void filterInstalled() {
+        qDebug() << "filterInstalled";
+        if (m_installed == true) {
+            m_installed = false;
+            qDebug() << "reset installed";
+        } else {
+            m_installed = true;
+        }
+        reFilter();
+    }
+
+    void reFilter() {
+        qDebug() << "reFilter";
+        if (m_sortList != nullptr) {
+            m_filterList.clear();
+
+            for (ListItemData* item : *m_sortList) {
+                bool keep = true;
+
+                if (!m_class.isEmpty()) {
+                    const QString itemString =
+                        StaticData().getClass()[item->m_class];
+                    if (itemString != m_class) {
+                        keep = false;
+                    }
+                }
+
+                if (!m_type.isEmpty()) {
+                    const QString itemString =
+                        StaticData().getType()[item->m_type];
+                    if (itemString != m_type) {
+                        keep = false;
+                    }
+                }
+
+                if (!m_difficulty.isEmpty()) {
+                    const QString itemString =
+                        StaticData().getDifficulty()[item->m_difficulty];
+                    if (itemString != m_difficulty) {
+                        keep = false;
+                    }
+                }
+
+                if (!m_duration.isEmpty()) {
+                    const QString itemString =
+                        StaticData().getDuration()[item->m_duration];
+                    if (itemString != m_duration) {
+                        keep = false;
+                    }
+                }
+
+                if (!m_search.isEmpty()) {
+                    QRegularExpression regex(
+                            QRegularExpression::escape(m_search),
+                            QRegularExpression::CaseInsensitiveOption);
+                    if (!regex.match(item->m_title).hasMatch()) {
+                        keep = false;
+                    }
+                }
+
+                if (m_installed) {
+                    if (!item->m_installed) {
+                        keep = false;
+                    }
+                }
+
+                if (keep)
+                    m_filterList.append(item);
+            }
+        }
+    }
+
+ private:
+    QVector<ListItemData*>* m_sortList;
+    QVector<ListItemData*> m_filterList;
+    QString m_class;
+    QString m_type;
+    QString m_difficulty;
+    QString m_duration;
+    bool m_installed;
+    QString m_search;
+    bool m_author;
+};
+
+
 class LevelListModel : public QAbstractListModel {
     Q_OBJECT
 
@@ -30,22 +323,21 @@ class LevelListModel : public QAbstractListModel {
 
     void setLevels(const QList<int>& availableGames) {
         beginResetModel();
-        m_mainList.clear();
-        controller.getList(&m_mainList);
-        for (ListItemData& item : m_mainList) {
-            m_filterList.append(&item);
-            m_sortList.append(&item);
-        }
+        QVector<ListItemData> list;
+        controller.getList(&list);
+        m_buffer.setLevelList(list);
         setOriginalGames(availableGames);
+        m_buffer.setSortFilter(&m_sortList);
+        m_filter.setSortFilter(&m_sortList);
+        m_filter.reFilter();
         endResetModel();
-        m_a = createIndex(0, 0);
-        m_b = createIndex(99, 0);
         getMoreCovers();
     }
 
     void setOriginalGames(const QList<int>& availableGames) {
         const QString pictures = ":/pictures/";
         OriginalGameStaticData data;
+        QVector<ListItemData> list;
 
         foreach(const int &id, availableGames) {
             int IdPositive;
@@ -68,125 +360,90 @@ class LevelListModel : public QAbstractListModel {
             qDebug() << "coverPath :" << coverPath;
             qDebug() << "title :" << title;
 
-            m_originalMainList.append(OriginalGameData(
-                IdPositive, title, shortBody,
-                type, release, QPixmap(coverPath)));
+            ListItemData item;
+            item.setGameId(IdPositive);
+            item.setTitle(title);
+            item.setShortBody(shortBody);
+            item.setType(type);
+            item.setReleaseDate(release);
+            item.setPicture(QPixmap(coverPath));
+
+            list.append(ListItemData(item));
         }
+
+        m_buffer.setGameList(list);
     }
 
     int rowCount(const QModelIndex&) const override {
-        int rows = 0;
-        if (m_original == true) {
-            rows = m_originalMainList.count();
-        } else {
-            rows = m_filterList.count();
-        }
-        return rows;
+        return m_filter.getRowCount();
     }
 
     QVariant data(const QModelIndex &index, int role) const override {
         QVariant result;
         int row = index.row();
 
-        if (m_original == true) {
-            if ((index.isValid()) && (row < m_originalMainList.count())) {
-                const OriginalGameData* item = &m_originalMainList.at(row);
-                switch (role) {
-                    case Qt::DisplayRole:
-                        result = item->m_title;
-                        break;
-                    case Qt::UserRole + 1:
-                        result = item->m_shortBody;
-                        break;
-                    case Qt::UserRole + 2:
-                        result = item->m_type;
-                        break;
-                    case Qt::UserRole + 5:
-                        result = item->m_releaseDate;
-                        break;
-                    case Qt::UserRole + 7:
-                        result = item->m_cover;
-                        break;
-                    case Qt::UserRole + 10:
-                        result = true;
-                        break;
-                }
-            }
-        } else {
-            if ((index.isValid()) && (row < m_filterList.count())) {
-                const ListItemData* item = m_filterList.at(row);
-                switch (role) {
-                    case Qt::DisplayRole:
-                        result = item->m_title;
-                        break;
-                    case Qt::UserRole + 1:
-                        result = item->m_authors;
-                        break;
-                    case Qt::UserRole + 2:
-                        result = item->m_type;
-                        break;
-                    case Qt::UserRole + 3:
-                        result = item->m_class;
-                        break;
-                    case Qt::UserRole + 4:
-                        result = item->m_difficulty;
-                        break;
-                    case Qt::UserRole + 5:
-                        result = item->m_releaseDate;
-                        break;
-                    case Qt::UserRole + 6:
-                        result = item->m_duration;
-                        break;
-                    case Qt::UserRole + 7:
-                        result = item->m_cover;
-                        break;
-                    case Qt::UserRole + 10:
-                        result = false;
-                        break;
-                }
+        if ((index.isValid()) && (row < m_filter.getRowCount())) {
+            const ListItemData* item = m_filter.getAtIndex(row);
+            switch (role) {
+                case Qt::DisplayRole:
+                    result = item->m_title;
+                    break;
+                case Qt::UserRole + 1:
+                    result = item->m_game_id;
+                    break;
+                case Qt::UserRole + 2:
+                    result = item->m_type;
+                    break;
+                case Qt::UserRole + 3:
+                    result = item->m_releaseDate;
+                    break;
+                case Qt::UserRole + 4:
+                    result = item->m_cover;
+                    break;
+                case Qt::UserRole + 5:
+                    result = item->m_shortBody;
+                    break;
+                case Qt::UserRole + 6:
+                    result = item->m_authors;
+                    break;
+                case Qt::UserRole + 7:
+                    result = item->m_class;
+                    break;
+                case Qt::UserRole + 8:
+                    result = item->m_difficulty;
+                    break;
+                case Qt::UserRole + 9:
+                    result = item->m_duration;
+                    break;
+                case Qt::UserRole + 10:
+                    result = item->m_trle_id;
+                    break;
             }
         }
 
         return result;
     }
 
-    bool getListType() const {
-        return m_original;
-    }
-
     void getMoreCovers() {
-        m_cache.clear();
-        for (qint64 i = m_a.row(); i <= m_b.row(); i++) {
-            m_cache.append(&m_mainList[i]);
+        QVector<ListItemData*>* cache = m_buffer.getNextBuffer();
+        if (!cache->isEmpty()) {
+            controller.getCoverList(cache);
         }
-        controller.getCoverList(&m_cache);
     }
 
     void loadMoreCovers() {
-        emit dataChanged(m_a, m_b, {Qt::DecorationRole});
-        if (!m_covers_loaded) {
-            m_a = createIndex(m_b.row() + 1, 0);
-            qint64 plus100 = m_b.row() + 100;
-            if (m_mainList.count() > plus100) {
-                m_b = createIndex(plus100, 0);
-            } else {
-                m_b = createIndex(m_mainList.count() - 1, 0);
-                m_covers_loaded = true;
-            }
-            getMoreCovers();
-        }
+        QModelIndex indexA = createIndex(m_buffer.getA(), 0);
+        QModelIndex indexB = createIndex(m_buffer.getB(), 0);
+        emit dataChanged(indexA, indexB, {Qt::DecorationRole});
+        getMoreCovers();
     }
 
     void sortItems(
             std::function<bool(ListItemData*, ListItemData*)> compare) {
         beginResetModel();
         std::sort(m_sortList.begin(), m_sortList.end(), compare);
-        m_filterList.clear();
-        for (ListItemData* item : m_sortList) {
-            m_filterList.append(item);
-        }
+        m_filter.reFilter();
         endResetModel();
-        reFilter();
     }
 
     static bool compareTitles(const ListItemData* a, const ListItemData* b) {
@@ -217,193 +474,79 @@ class LevelListModel : public QAbstractListModel {
     }
 
     void filterClass(const QString& class_) {
-        qDebug() << "filterClass " << class_;
-        if (class_ == " - All -") {
-            m_filter.class_.clear();
-            qDebug() << "reset class";
-        } else {
-            m_filter.class_ = class_;
-        }
-        reFilter();
+        beginResetModel();
+        m_filter.filterClass(class_);
+        endResetModel();
     }
 
     void filterType(const QString& type) {
-        qDebug() << "filterType " << type;
-        if (type == " - All -") {
-            m_filter.type.clear();
-            qDebug() << "reset type";
-        } else {
-            m_filter.type = type;
-        }
-        reFilter();
+        beginResetModel();
+        m_filter.filterType(type);
+        endResetModel();
     }
 
-    void filterDifficulty(const QString &difficulty) {
-        qDebug() << "filterDifficulty " << difficulty;
-        if (difficulty == " - All -") {
-            m_filter.difficulty.clear();
-            qDebug() << "reset difficulty";
-        } else {
-            m_filter.difficulty = difficulty;
-        }
-        reFilter();
+    void filterDifficulty(const QString& difficulty) {
+        beginResetModel();
+        m_filter.filterDifficulty(difficulty);
+        endResetModel();
     }
 
     void filterDuration(const QString& duration) {
-        qDebug() << "filterDuration " << duration;
-        if (duration == " - All -") {
-            m_filter.duration.clear();
-            qDebug() << "reset duration";
-        } else {
-            m_filter.duration = duration;
-        }
-        reFilter();
+        beginResetModel();
+        m_filter.filterDuration(duration);
+        endResetModel();
     }
 
     void filterSearch(const QString& search) {
-        qDebug() << "filterSearch " << search;
-        if (search == "") {
-            m_search.clear();
-            qDebug() << "reset search";
-        } else {
-            m_search.clear();
-            m_search = search;
-        }
-        reFilter();
+        beginResetModel();
+        m_filter.filterSearch(search);
+        endResetModel();
     }
 
-    void reFilter() {
-        qDebug() << "reFilter";
+    void filterInstalled() {
         beginResetModel();
-        m_original = false;
-        m_filterList.clear();
-
-        for (ListItemData* item : m_sortList) {
-            bool keep = true;
-
-            if (!m_filter.class_.isEmpty()) {
-                const QString itemString =
-                    StaticData().getClass()[item->m_class];
-                if (itemString != m_filter.class_) {
-                    keep = false;
-                }
-            }
-
-            if (!m_filter.type.isEmpty()) {
-                const QString itemString =
-                    StaticData().getType()[item->m_type];
-                if (itemString != m_filter.type) {
-                    keep = false;
-                }
-            }
-
-            if (!m_filter.difficulty.isEmpty()) {
-                const QString itemString =
-                    StaticData().getDifficulty()[item->m_difficulty];
-                if (itemString != m_filter.difficulty) {
-                    keep = false;
-                }
-            }
-
-            if (!m_filter.duration.isEmpty()) {
-                const QString itemString =
-                    StaticData().getDuration()[item->m_duration];
-                if (itemString != m_filter.duration) {
-                    keep = false;
-                }
-            }
-
-            if (!m_search.isEmpty()) {
-                QRegularExpression regex(
-                        QRegularExpression::escape(m_search),
-                        QRegularExpression::CaseInsensitiveOption);
-                if (!regex.match(item->m_title).hasMatch()) {
-                    keep = false;
-                }
-            }
-
-            if (keep)
-                m_filterList.append(item);
-        }
-
+        m_filter.filterInstalled();
         endResetModel();
+    }
+
+    int getLid(const QModelIndex &index) const {
+        const ListItemData* item = m_filter.getAtIndex(index.row());
+        return item->m_trle_id;
+    }
+
+    void setInstalled(const QModelIndex &index) {
+        ListItemData* item = m_filter.getAtIndex(index.row());
+        item->m_installed = true;
+    }
+
+    void setInstalledListOriginal(const QHash<int, bool> installed) {
+        m_buffer.setInstalledListOriginal(installed);
+    }
+
+    void setInstalledList(const QHash<int, bool> installed) {
+        m_buffer.setInstalledList(installed);
     }
 
     void showOriginal() {
         beginResetModel();
-        m_original = true;
+        m_buffer.toogelList();
+        m_buffer.reloadSorted();
+        m_filter.reFilter();
         endResetModel();
     }
 
-    void setInstalledListOriginal(const QHash<int, bool> installed) {
-        m_installedOriginal = installed;
-    }
-    void setInstalledList(const QHash<int, bool> installed) {
-        m_installed = installed;
+    bool getListType() {
+        return m_buffer.getOriginal();
     }
 
-    int getLid(const QModelIndex &index) const {
-        qint64 id = 0;
-        if (m_original) {
-            const OriginalGameData* item = &m_originalMainList.at(index.row());
-            id =  item->m_game_id;
-        } else {
-            const ListItemData* item = m_filterList.at(index.row());
-            id =  item->m_trle_id;
-        }
-        return id;
-    }
-
-    void setInstalled(const QModelIndex &index) {
-        int id = 0;
-        if (m_original) {
-            const OriginalGameData* item = &m_originalMainList.at(index.row());
-            id =  item->m_game_id;
-            m_installedOriginal.insert(id, true);
-        } else {
-            const ListItemData* item = m_filterList.at(index.row());
-            id =  item->m_trle_id;
-            m_installed.insert(id, true);
-        }
-    }
-
-    bool getInstalled(const qint64 id) {
-        bool result;
-        if (m_original) {
-            if (m_installedOriginal.contains(id)) {
-                result = m_installedOriginal.value(id);
-            } else {
-                result = false;
-            }
-        } else {
-            if (m_installed.contains(id)) {
-                result = m_installed.value(id);
-            } else {
-                result = false;
-            }
-        }
-        return result;
+    bool getInstalled(const QModelIndex &index) {
+        return m_filter.getAtIndex(index.row())->m_installed;
     }
 
  private:
-    QVector<ListItemData> m_mainList;
+    LevelListBuffer m_buffer;
     QVector<ListItemData*> m_sortList;
-    QVector<ListItemData*> m_filterList;
-    struct Filter {
-        QString class_;
-        QString type;
-        QString difficulty;
-        QString duration;
-    } m_filter;
-    QHash<int, bool> m_installedOriginal;
-    QHash<int, bool> m_installed;
-    QString m_search;
-    QVector<ListItemData*> m_cache;
-    bool m_covers_loaded = false;
-    bool m_original = false;
-    QModelIndex m_a;
-    QModelIndex m_b;
-    QVector<OriginalGameData> m_originalMainList;
+    LevelListFilter m_filter;
     Controller& controller = Controller::getInstance();
 };
 
@@ -429,7 +572,7 @@ class CardItemDelegate : public QStyledItemDelegate {
         qint64 y = cardRect.top() + 10;
         QRect imageRect = QRect(x, y, 320, 240);
         painter->setBrush(QColor("#cccccc"));
-        QPixmap cover = index.data(Qt::UserRole + 7).value<QPixmap>();
+        QPixmap cover = index.data(Qt::UserRole + 4).value<QPixmap>();
 
         if (!cover.isNull()) {
             painter->drawPixmap(imageRect, cover);
@@ -462,8 +605,8 @@ class CardItemDelegate : public QStyledItemDelegate {
         QString typeText = QString("Type: %1").arg(type);
         painter->drawText(point, typeText);
 
-        if (index.data(Qt::DisplayRole + 10).toBool()) {
-            QStringList authorsl = index.data(Qt::UserRole + 1).toStringList();
+        if (index.data(Qt::UserRole + 1).toInt() == 0) {
+            QStringList authorsl = index.data(Qt::UserRole + 6).toStringList();
             QString authors = authorsl.join(", ");
             if (authors.size() > 100) {
                 authors = "Various";
@@ -472,33 +615,33 @@ class CardItemDelegate : public QStyledItemDelegate {
             QString authorsText = QString("By: %1").arg(authors);
             painter->drawText(point, authorsText);
 
-            qint64 classId = index.data(Qt::UserRole + 3).toInt();
+            qint64 classId = index.data(Qt::UserRole + 7).toInt();
             QString class_ = StaticData().getClass()[classId];
             point.setY(textY + 80);
             QString classText = QString("class: %1").arg(class_);
             painter->drawText(point, classText);
 
-            qint64 durationId = index.data(Qt::UserRole + 6).toInt();
-            QString duration = StaticData().getDuration()[durationId];
-            point.setY(textY + 95);
-            QString durationText = QString("Duration: %1").arg(duration);
-            painter->drawText(point, durationText);
-
-            qint64 difficultyId = index.data(Qt::UserRole + 4).toInt();
+            qint64 difficultyId = index.data(Qt::UserRole + 8).toInt();
             QString difficulty = StaticData().getDifficulty()[difficultyId];
             point.setY(textY + 110);
             QString difficultyText = QString("Difficulty: %1").arg(difficulty);
             painter->drawText(point, difficultyText);
+
+            qint64 durationId = index.data(Qt::UserRole + 9).toInt();
+            QString duration = StaticData().getDuration()[durationId];
+            point.setY(textY + 95);
+            QString durationText = QString("Duration: %1").arg(duration);
+            painter->drawText(point, durationText);
         } else {
-            QString shortBody = index.data(Qt::UserRole + 1).toString();
+            QString shortBody = index.data(Qt::UserRole + 5).toString();
             point.setY(textY + 80);
             painter->drawText(point, shortBody);
         }
-
-        QString release = index.data(Qt::UserRole + 5).toString();
+        QString release = index.data(Qt::UserRole + 3).toString();
         point.setY(textY + 65);
         QString releaseText = QString("Released: %1").arg(release);
         painter->drawText(point, releaseText);
+
 
         painter->restore();
     }

@@ -64,15 +64,19 @@ QVector<ListItemData> Data::getListItems() {
     if (status) {
         if (query.exec()) {
             while (query.next()) {
-                items.append(ListItemData(
-                    query.value("Info.trleID").toInt(),
-                    query.value("Info.title").toString(),
-                    query.value("authors").toString().split(", "),
-                    query.value("Info.type").toInt(),
-                    query.value("Info.class").toInt(),
-                    query.value("Info.release").toString(),
-                    query.value("Info.difficulty").toInt(),
-                    query.value("Info.duration").toInt()));
+                ListItemData item;
+                // item.setGameId();
+                item.setLid(query.value("Info.trleID").toInt());
+                item.setTitle(query.value("Info.title").toString());
+                item.setAuthors(query.value("authors").toString().split(", "));
+                // item.setShortBody(),
+                item.setType(query.value("Info.type").toInt());
+                item.setClass(query.value("Info.class").toInt());
+                item.setDifficulty(query.value("Info.difficulty").toInt());
+                item.setDuration(query.value("Info.duration").toInt());
+                item.setReleaseDate(query.value("Info.release").toString());
+                // item.setPicture(const QByteArray& imageData),
+                items.append(item);
             }
         } else {
             qDebug() << "Error executing query getListItems:"
@@ -104,7 +108,7 @@ void Data::getCoverPictures(QVector<ListItemData*>* items) {
                 query.bindValue(":id", item->m_trle_id);
                 if (query.exec()) {
                     if (query.next() == true) {
-                        item->addPicture(
+                        item->setPicture(
                                 query.value("Picture.data").toByteArray());
                     }
                 } else {

@@ -146,11 +146,6 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     /**
      * 
      */
-     void originalSelected(qint64 id);
-
-    /**
-     * 
-     */
     void levelDirSelected(qint64 id);
 
     /**

@@ -16,3 +16,4 @@ build
 .vscode
 .mypy_cache
 database/*.db-journal
+TombRaiderLinuxLauncher.kdev4

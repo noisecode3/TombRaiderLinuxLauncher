@@ -83,14 +83,14 @@
                   </sizepolicy>
                  </property>
                  <property name="layoutDirection">
-                  <enum>Qt::LeftToRight</enum>
+                  <enum>Qt::LayoutDirection::LeftToRight</enum>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_11" stretch="0,0">
                   <property name="spacing">
                    <number>0</number>
                   </property>
                   <property name="sizeConstraint">
-                   <enum>QLayout::SetDefaultConstraint</enum>
+                   <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
                   </property>
                   <property name="leftMargin">
                    <number>0</number>
@@ -631,7 +631,7 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QRadioButton" name="radioButtonOriginal">
+                      <widget class="QCheckBox" name="checkBoxOriginal">
                        <property name="font">
                         <font>
                          <pointsize>12</pointsize>
@@ -732,7 +732,7 @@
             <item>
              <widget class="QListView" name="listViewLevels">
               <property name="dragDropMode">
-               <enum>QAbstractItemView::DragDrop</enum>
+               <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
               </property>
               <property name="iconSize">
                <size>
@@ -741,13 +741,13 @@
                </size>
               </property>
               <property name="verticalScrollMode">
-               <enum>QAbstractItemView::ScrollPerItem</enum>
+               <enum>QAbstractItemView::ScrollMode::ScrollPerItem</enum>
               </property>
               <property name="resizeMode">
-               <enum>QListView::Adjust</enum>
+               <enum>QListView::ResizeMode::Adjust</enum>
               </property>
               <property name="viewMode">
-               <enum>QListView::IconMode</enum>
+               <enum>QListView::ViewMode::IconMode</enum>
               </property>
               <property name="uniformItemSizes">
                <bool>true</bool>
@@ -1140,7 +1140,7 @@
             <item>
              <widget class="QFrame" name="frameLevelSetup">
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_13">
                <item>
@@ -1159,7 +1159,7 @@
                   </sizepolicy>
                  </property>
                  <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                  <enum>QFrame::Shape::NoFrame</enum>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_14">
                   <item>
@@ -1253,7 +1253,7 @@
                      <item>
                       <spacer name="horizontalSpacerRunnerType">
                        <property name="orientation">
-                        <enum>Qt::Vertical</enum>
+                        <enum>Qt::Orientation::Vertical</enum>
                        </property>
                        <property name="sizeHint" stdset="0">
                         <size>
@@ -1269,7 +1269,7 @@
                   <item>
                    <spacer name="verticalSpacerLevelSetup">
                     <property name="orientation">
-                     <enum>Qt::Vertical</enum>
+                     <enum>Qt::Orientation::Vertical</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -1314,7 +1314,7 @@
             <item>
              <widget class="QFrame" name="frameGlobalSetup">
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
@@ -1420,7 +1420,7 @@
                <item>
                 <spacer name="verticalSpacerSetupLara">
                  <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                  <enum>Qt::Orientation::Vertical</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -1513,7 +1513,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                <item>
                 <spacer name="verticalSpacerSetupOptions">
                  <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                  <enum>Qt::Orientation::Vertical</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -1552,7 +1552,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <item row="0" column="0">
          <widget class="QFrame" name="frameAbout">
           <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
+           <enum>QFrame::Shape::NoFrame</enum>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
@@ -1564,8 +1564,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </property>
              <property name="html">
               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;About&lt;/span&gt;&lt;/h3&gt;
 &lt;h4 style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:medium; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;&lt;/h4&gt;
