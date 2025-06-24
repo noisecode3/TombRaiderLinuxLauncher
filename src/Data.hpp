@@ -103,22 +103,6 @@ struct ExecutableNames {
         };
 };
 
-struct GameRelease {
-    QMap<int, QString> data = {
-            {0, "null"},
-            {1, "1996-11-14"},
-            {2, "1997-11-21"},
-            {3, "1998-11-20"},
-            {4, "1999-11-24"},
-            {5, "2000-11-17"},
-            {6, "2003-07-01"},
-            {7, "1998-12-31"},
-            {8, "1999-06-04"},
-            {9, "2000-03-00"},
-            {10, "1999-12-00"},
-        };
-};
-
 /**
  * @struct MoodFolderNames
  * @brief Folder names moods used on Windows.

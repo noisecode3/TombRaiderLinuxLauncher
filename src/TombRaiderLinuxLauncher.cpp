@@ -84,15 +84,6 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
             filterButton_p->setIconSize(QSize(16, 16));
         });
 
-    // Get the system palette
-    QPalette systemPalette = ui->filterButton->palette();
-
-    // Get system colors for different roles
-    QColor normalColor = systemPalette.color(QPalette::Button);
-    QColor hoverColor = systemPalette.color(QPalette::Highlight);
-    QColor textColor = systemPalette.color(QPalette::ButtonText);
-    QColor borderColor = systemPalette.color(QPalette::Mid);
-
     QIcon arrowDownIcon(":/icons/down-arrow.svg");
     QIcon arrowUpIcon(":/icons/up-arrow.svg");
 
@@ -128,6 +119,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     CardItemDelegate* delegate = new CardItemDelegate(ui->listViewLevels);
     ui->listViewLevels->setItemDelegate(delegate);
     ui->listViewLevels->setSpacing(8);
+    ui->listViewLevels->setMouseTracking(true);
     connect(
         ui->listViewLevels->selectionModel(),
         &QItemSelectionModel::currentChanged,

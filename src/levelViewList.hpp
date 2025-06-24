@@ -558,19 +558,28 @@ class CardItemDelegate : public QStyledItemDelegate {
                const QModelIndex &index) const override {
         painter->save();
         const bool selected = option.state & QStyle::State_Selected;
+        const bool hovered = option.state & QStyle::State_MouseOver;
+        const QPalette &palette = option.palette;
 
         // Card background
         painter->setRenderHint(QPainter::Antialiasing);
         QRectF cardRect = option.rect.adjusted(4, 4, -4, -4);
-        QColor bgColor = selected ? QColor("#e0f7fa") : QColor("#ffffff");
+        QColor bgColor;
+        if (selected) {
+            bgColor = palette.color(QPalette::Highlight);
+        } else if (hovered) {
+            bgColor = palette.color(QPalette::AlternateBase);
+        } else {
+            bgColor = palette.color(QPalette::Base);
+        }
         painter->setBrush(bgColor);
         painter->setPen(Qt::NoPen);
-        painter->drawRoundedRect(cardRect, 10, 10);
+        painter->drawRoundedRect(cardRect, 0, 0);
 
         // Picture space (left side)
         qint64 x = cardRect.left() + 10;
-        qint64 y = cardRect.top() + 10;
-        QRect imageRect = QRect(x, y, 320, 240);
+        qint64 y = cardRect.top() + 40;
+        QRect imageRect = QRect(x, y, 160, 120);
         painter->setBrush(QColor("#cccccc"));
         QPixmap cover = index.data(Qt::UserRole + 4).value<QPixmap>();
 
@@ -591,7 +600,7 @@ class CardItemDelegate : public QStyledItemDelegate {
         painter->setPen(Qt::black);
 
         QString title = index.data(Qt::DisplayRole).toString();
-        point.setX(textX);
+        point.setX(imageRect.left());
         point.setY(textY + 15);
         painter->drawText(point, title);
 
@@ -601,7 +610,8 @@ class CardItemDelegate : public QStyledItemDelegate {
 
         qint64 typeId = index.data(Qt::UserRole + 2).toInt();
         QString type = StaticData().getType()[typeId];
-        point.setY(textY + 50);
+        point.setX(textX);
+        point.setY(textY + 60);
         QString typeText = QString("Type: %1").arg(type);
         painter->drawText(point, typeText);
 
@@ -611,34 +621,34 @@ class CardItemDelegate : public QStyledItemDelegate {
             if (authors.size() > 100) {
                 authors = "Various";
             }
-            point.setY(textY + 35);
+            point.setY(textY + 45);
             QString authorsText = QString("By: %1").arg(authors);
             painter->drawText(point, authorsText);
 
             qint64 classId = index.data(Qt::UserRole + 7).toInt();
             QString class_ = StaticData().getClass()[classId];
-            point.setY(textY + 80);
+            point.setY(textY + 90);
             QString classText = QString("class: %1").arg(class_);
             painter->drawText(point, classText);
 
             qint64 difficultyId = index.data(Qt::UserRole + 8).toInt();
             QString difficulty = StaticData().getDifficulty()[difficultyId];
-            point.setY(textY + 110);
+            point.setY(textY + 120);
             QString difficultyText = QString("Difficulty: %1").arg(difficulty);
             painter->drawText(point, difficultyText);
 
             qint64 durationId = index.data(Qt::UserRole + 9).toInt();
             QString duration = StaticData().getDuration()[durationId];
-            point.setY(textY + 95);
+            point.setY(textY + 105);
             QString durationText = QString("Duration: %1").arg(duration);
             painter->drawText(point, durationText);
         } else {
             QString shortBody = index.data(Qt::UserRole + 5).toString();
-            point.setY(textY + 80);
+            point.setY(textY + 90);
             painter->drawText(point, shortBody);
         }
         QString release = index.data(Qt::UserRole + 3).toString();
-        point.setY(textY + 65);
+        point.setY(textY + 75);
         QString releaseText = QString("Released: %1").arg(release);
         painter->drawText(point, releaseText);
 
@@ -648,7 +658,7 @@ class CardItemDelegate : public QStyledItemDelegate {
 
     QSize sizeHint(
             const QStyleOptionViewItem&, const QModelIndex&) const override {
-        return QSize(600, 300);
+        return QSize(600, 180);
     }
 };
 

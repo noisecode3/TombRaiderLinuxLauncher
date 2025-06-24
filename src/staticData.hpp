@@ -14,6 +14,7 @@
 #ifndef SRC_STATICDATA_HPP_
 #define SRC_STATICDATA_HPP_
 #include <QString>
+#include <QMap>
 #include <unordered_map>
 
 struct OriginalGameStaticData {
@@ -54,17 +55,17 @@ struct OriginalGameStaticData {
     }
 
     QMap<qint64, QString> release = {
-            {0, ""},
-            {1, "2002"},
-            {2, ""},
-            {3, ""},
-            {4, ""},
-            {5, ""},
-            {6, ""},
-            {7, ""},
-            {8, ""},
-            {9, ""},
-            {10, ""},
+            {0, "null"},
+            {1, "1996-11-14"},
+            {2, "1997-11-21"},
+            {3, "1998-11-20"},
+            {4, "1999-11-24"},
+            {5, "2000-11-17"},
+            {6, "2003-07-01"},
+            {7, "1998-12-31"},
+            {8, "1999-06-04"},
+            {9, "2000-03-00"},
+            {10, "1999-12-00"},
     };
 
     const QString getRelease(qint64 id) {
