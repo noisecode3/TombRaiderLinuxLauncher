@@ -206,6 +206,10 @@ class RequestHandler:
                     if not self.leaf_cert:
                         sys.exit(1)
                     temp_cert_path = self.set_leaf(curl)
+                    curl.setopt(pycurl.SSL_VERIFYPEER, 1)
+                    curl.setopt(pycurl.SSL_VERIFYHOST, 2)
+                    pinned_key = "sha256//7WRPcNY2QpOjWiQSLbiBu/9Og69JmzccPAdfj2RT5Vw="
+                    curl.setopt(pycurl.PINNEDPUBLICKEY, pinned_key)
 
                 headers_list = [
                     'User-Agent: Wget/1.21.1 (linux-gnu)',

@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
         analyzeImportTable(parser.value("binary").toStdString());
     } else {
         // Pass remaining arguments to QTest
-        TestTombRaiderLinuxLauncher test;
+        PyRunnerTest test;
         QStringList testArgs = app.arguments();
         status =  QTest::qExec(&test, testArgs);
     }

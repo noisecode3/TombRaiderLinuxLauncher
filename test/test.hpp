@@ -16,18 +16,26 @@
 
 #include <QtCore>
 #include <QtTest/QtTest>
+#include "../src/PyRunner.hpp"
 
-class TestTombRaiderLinuxLauncher : public QObject {
+class PyRunnerTest : public QObject {
     Q_OBJECT
 
  private slots:
-    void test1() {
-        QVERIFY(true);
+    void ListTest() {
+        // QStringList arguments;
+        // arguments << "tombll_manage_data.py" << "-l";
+        // pyrunner.run(arguments);
+        // QVERIFY(pyrunner.getStatus() == 0);
+        // qDebug() << "\npyrunner.getStatus(): " << pyrunner.getStatus();
     }
 
     void test2() {
         QVERIFY(1 + 1 == 2);
     }
+ private:
+    PyRunner pyrunner =
+        PyRunner("tester_root/usr/share/TombRaiderLinuxLauncher");
 };
 
 #endif  // TEST_TEST_HPP_

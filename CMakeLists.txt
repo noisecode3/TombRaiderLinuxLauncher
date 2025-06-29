@@ -59,7 +59,9 @@ set(LIEF_MACHO OFF)
 set(LIEF_DEX OFF)
 set(LIEF_ART OFF)
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt" AND NOT NO_DATABASE)
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt"
+        AND NOT NO_DATABASE
+    )
     message(STATUS "Submodule 'libs/LIEF' not found. Updating submodules...")
     execute_process(
         COMMAND git submodule update --init --recursive
@@ -91,6 +93,8 @@ set(SOURCES_MC
     src/Model.cpp
     src/Network.hpp
     src/Network.cpp
+    src/PyRunner.cpp
+    src/PyRunner.hpp
     src/Runner.cpp
     src/Runner.hpp
     src/binary.hpp
@@ -147,6 +151,19 @@ if(TEST)
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
     )
+    message(STATUS "Setup test files")
+    execute_process(
+        COMMAND bash set_up_files.sh "${CMAKE_SOURCE_DIR}/build"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test"
+        RESULT_VARIABLE SETUP_RESULT
+    )
+
+    if(NOT SETUP_RESULT EQUAL 0)
+        message(
+            FATAL_ERROR
+            "set_up_files.sh failed with exit code ${SETUP_RESULT}"
+        )
+    endif()
 else()
     set(SOURCES ${SOURCES_MC} ${SOURCES_VIEW})
     add_executable(${PROJECT_NAME} ${SOURCES})

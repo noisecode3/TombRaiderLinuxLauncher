@@ -1,9 +1,10 @@
 """PS4 controller input handler to map controller events to keyboard keys using evdev and UInput."""
 import sys
+import argparse
 import evdev
 from evdev import InputDevice, UInput, ecodes as e
 
-controller_names = (
+CONTROLLER_NAMES = (
     "Wireless Controller",
     "Sony Interactive Entertainment Wireless Controller"
 )
@@ -25,7 +26,7 @@ class DeviceManager:
         """Return list of input devices as (name, path) tuples."""
         return [(evdev.InputDevice(path).name, path) for path in evdev.list_devices()]
 
-    def set_device(self):
+    def set_device(self, controller_names=CONTROLLER_NAMES):
         """Search and select a supported controller device."""
         for name, path in self.list_devices():
             if name in controller_names:
@@ -33,8 +34,10 @@ class DeviceManager:
                 self.device = InputDevice(path)
                 return self.device
 
-        print("No supported controller found.")
-        return None
+        print("No supported controller found. Available devices:")
+        for name, path in self.list_devices():
+            print(f" - {name} at {path}")
+        sys.exit(1)
 
 
 class Dpad:
@@ -48,12 +51,17 @@ class Dpad:
             ui: The uinput device.
         """
         self.ui = ui
-        self.last = {'left_x': False, 'right_x': False, 'up_y': False, 'down_y': False}
+        self.last = {
+            'left_x': False,
+            'right_x': False,
+            'up_y': False,
+            'down_y': False
+        }
         self.event_x = e.ABS_HAT0X
         self.event_y = e.ABS_HAT0Y
 
     def handle_x(self, value):
-        """Handle x valeus."""
+        """Handle x values."""
         if value == 0:
             if self.last['left_x']:
                 self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
@@ -76,7 +84,7 @@ class Dpad:
         self.ui.syn()
 
     def handle_y(self, value):
-        """Handle y valeus."""
+        """Handle y values."""
         if value == 0:
             if self.last['up_y']:
                 self.ui.write(e.EV_KEY, e.KEY_UP, 0)
@@ -106,7 +114,58 @@ class Dpad:
             self.handle_y(event.value)
 
 
-class Stick:
+class StickAxis:  # pylint: disable=too-few-public-methods
+    """Handles one analog stick axis."""
+
+    def __init__(self, ui, threshold, output_key):
+        """
+        Initialize analog Stick handler.
+
+        Args:
+            ui: The uinput device.
+            threshold: Tuple of (low_threshold, high_threshold).
+            output_key: Tuple of (negative_key, positive_key), e.g. (KEY_LEFT, KEY_RIGHT).
+        """
+        self.ui = ui
+        self.last_state = 0
+        self.threshold = threshold
+        self.output_key = output_key
+
+    def handle(self, value):
+        """Handle axis values."""
+        tr1, tr2 = self.threshold
+        neg_key, pos_key = self.output_key
+
+        if value < tr1:
+            if self.last_state == -1:
+                return
+            if self.last_state == 1:
+                self.ui.write(e.EV_KEY, pos_key, 0)
+            self.ui.write(e.EV_KEY, neg_key, 1)
+            self.last_state = -1
+            self.ui.syn()
+
+        elif value > tr2:
+            if self.last_state == 1:
+                return
+            if self.last_state == -1:
+                self.ui.write(e.EV_KEY, neg_key, 0)
+            self.ui.write(e.EV_KEY, pos_key, 1)
+            self.last_state = 1
+            self.ui.syn()
+
+        else:
+            if self.last_state == -1:
+                self.ui.write(e.EV_KEY, neg_key, 0)
+                self.last_state = 0
+                self.ui.syn()
+            elif self.last_state == 1:
+                self.ui.write(e.EV_KEY, pos_key, 0)
+                self.last_state = 0
+                self.ui.syn()
+
+
+class Stick:  # pylint: disable=too-few-public-methods
     """Handles analog stick input."""
 
     def __init__(self, ui):
@@ -117,58 +176,25 @@ class Stick:
             ui: The uinput device.
         """
         self.ui = ui
-        self.last_x = 0
-        self.last_y = 0
         self.event_x = e.ABS_X
         self.event_y = e.ABS_Y
-        self.threshold = {'left': 53, 'right': 202, 'up': 63, 'down': 192}
 
-    def handle_x(self, value):
-        """Handle x valeus."""
-        if value < self.threshold['left']:
-            if self.last_x == 1:
-                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-            self.ui.write(e.EV_KEY, e.KEY_LEFT, 1)
-            self.last_x = -1
-        elif value > self.threshold['right']:
-            if self.last_x == -1:
-                self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-            self.ui.write(e.EV_KEY, e.KEY_RIGHT, 1)
-            self.last_x = 1
-        else:
-            if self.last_x == -1:
-                self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-            elif self.last_x == 1:
-                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-            self.last_x = 0
-        self.ui.syn()
-
-    def handle_y(self, value):
-        """Handle y valeus."""
-        if value < self.threshold['up']:
-            if self.last_y == 1:
-                self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
-            self.ui.write(e.EV_KEY, e.KEY_UP, 1)
-            self.last_y = -1
-        elif value > self.threshold['down']:
-            if self.last_y == -1:
-                self.ui.write(e.EV_KEY, e.KEY_UP, 0)
-            self.ui.write(e.EV_KEY, e.KEY_DOWN, 1)
-            self.last_y = 1
-        else:
-            if self.last_y == -1:
-                self.ui.write(e.EV_KEY, e.KEY_UP, 0)
-            elif self.last_y == 1:
-                self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
-            self.last_y = 0
-        self.ui.syn()
+        self.x_axis = StickAxis(
+            ui,
+            threshold=(53, 202),
+            output_key=(e.KEY_LEFT, e.KEY_RIGHT)
+        )
+        self.y_axis = StickAxis(
+            ui, threshold=(63, 192),
+            output_key=(e.KEY_UP, e.KEY_DOWN)
+        )
 
     def handle_event(self, event):
         """Handle the events."""
         if event.code == self.event_x:
-            self.handle_x(event.value)
+            self.x_axis.handle(event.value)
         elif event.code == self.event_y:
-            self.handle_y(event.value)
+            self.y_axis.handle(event.value)
 
 
 class Trigger:  # pylint: disable=too-few-public-methods
@@ -260,7 +286,7 @@ class Controller:
         """
         Add analog trigger handler.
 
-        Usally call R2/L2 or ZR/ZL. They have an range
+        Usually called R2/L2 or ZR/ZL. They have a range
         from 0 to 255 and are not buttons.
 
         Args:
@@ -327,19 +353,6 @@ class Preset:
             print("\nExiting.")
 
 
-def print_info():
-    """Print help info."""
-    help_text = """
-Usage: python3 controller.py [options]
-  Options:
-      -ps4             Start ps4 preset
-      -only-ps4-share  Start ps4 share only preset (Tomb Raider I-III remaster)
-      -only-left-stick Start ps4 stick only preset (TRX1)
-
-"""
-    print(help_text.strip())
-
-
 def _ps4():
     preset = Preset()
     controller = preset.get_controller()
@@ -373,20 +386,28 @@ def _only_left_stick():
     preset.read_loop()
 
 
-if __name__ == "__main__":
-    number_of_argument = len(sys.argv)
-    if (number_of_argument == 1 or number_of_argument >= 3):
-        print_info()
-        sys.exit(1)
+def _main():
+    parser = argparse.ArgumentParser(
+        description="PS4 Controller Mapper using evdev + uinput"
+    )
 
-    elif (sys.argv[1] == "-h" and number_of_argument == 2):
-        print_info()
+    parser.add_argument(
+        "mode",
+        type=str,
+        choices=["ps4", "only-ps4-share", "only-left-stick"],
+        help="Select input mapping mode",
+    )
+    parser.add_argument('--version', action='version', version='%(prog)s 1.0')
 
-    elif (sys.argv[1] == "-ps4" and number_of_argument == 2):
+    args = parser.parse_args()
+
+    if args.mode == "ps4":
         _ps4()
-    elif (sys.argv[1] == "-only-ps4-share" and number_of_argument == 2):
+    elif args.mode == "only-ps4-share":
         _only_ps4_share()
-    elif (sys.argv[1] == "-only-left-stick" and number_of_argument == 2):
+    elif args.mode == "only-left-stick":
         _only_left_stick()
-    else:
-        print_info()
+
+
+if __name__ == "__main__":
+    _main()
