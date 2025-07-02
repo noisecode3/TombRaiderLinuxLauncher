@@ -239,7 +239,7 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
             LEFT JOIN InfoDuration ON (InfoDuration.InfoDurationID = Info.duration)
             INNER JOIN InfoType ON (InfoType.InfoTypeID = Info.type)
             LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
-            ORDER BY Info.release DESC
+            ORDER BY Info.release DESC, Info.trleID DESC
             LIMIT ? OFFSET ?
             """, (limit, offset), con)
     else:
@@ -261,7 +261,7 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
             LEFT JOIN InfoDuration ON (InfoDuration.InfoDurationID = Info.duration)
             INNER JOIN InfoType ON (InfoType.InfoTypeID = Info.type)
             LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
-            ORDER BY Info.release ASC
+            ORDER BY Info.release ASC, Info.trleID ASC
             LIMIT ? OFFSET ?
             """, (limit, offset), con)
 

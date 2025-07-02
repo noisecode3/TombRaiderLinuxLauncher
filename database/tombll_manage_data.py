@@ -196,6 +196,95 @@ def list_downloads(lid):
         print(row)
 
 
+def sync_cards():
+    """Lazy tail sync of cards."""
+    index = match_tails()
+    print(f"{index}")
+
+
+def match_tails(match_size=5, max_pages=100):
+    """Find a tail match between local and trle databases based ids."""
+    local = []
+    trle = []
+
+    local_offset = 0
+    trle_offset = 0
+
+    def get_local_page_and_extend(offset):
+        con = database_make_connection()
+        page = get_local_page(offset, con)['levels']
+        con.close()
+        local.extend(page)
+        return len(page)
+
+    def get_trle_page_and_extend(offset):
+        page = get_trle_page(offset)['levels']
+        trle.extend(page)
+        return len(page)
+
+    def ensure_data(index_local, index_trle):
+        """Ensure enough items are available from each database."""
+        nonlocal local_offset, trle_offset
+
+        # Load local pages if needed
+        while index_local + match_size > len(local):
+            local_offset += 1
+            print(f"Loading local page at offset {local_offset}")
+            if local_offset >= max_pages or get_local_page_and_extend(local_offset) == 0:
+                return False
+
+        # Load trle pages if needed
+        while index_trle + match_size > len(trle):
+            trle_offset += 1
+            print(f"Loading trle page at offset {trle_offset}")
+            if trle_offset >= max_pages or get_trle_page_and_extend(trle_offset) == 0:
+                return False
+
+        return True
+
+    def ids_match(offset_local, offset_trle):
+        """Compare sequences of trle_ids from both lists."""
+        if not ensure_data(offset_local, offset_trle):
+            return False
+
+        for i in range(match_size):
+            try:
+                local_id = int(local[offset_local + i]['trle_id'])
+                trle_id = int(trle[offset_trle + i]['trle_id'])
+                if local_id != trle_id:
+                    return False
+            except IndexError:
+                return False
+        return True
+
+    # Load initial data
+    get_local_page_and_extend(local_offset)
+    get_trle_page_and_extend(trle_offset)
+
+    i = 0
+    while True:
+        if i + match_size > len(local):
+            # Try to load more local data
+            if not ensure_data(i, 0):
+                break
+
+        for j in range(len(trle) - match_size + 1):
+            if ids_match(i, j):
+                print(f"Match found at local[{i}] and trle[{j}]")
+                return (i, j)
+        i += 1
+
+        # If we run out of trle data, load more
+        if len(trle) - match_size < 1:
+            added = get_trle_page_and_extend(trle_offset + 1)
+            trle_offset += 1
+            if added == 0 or trle_offset >= max_pages:
+                break
+
+    print("❌ No match found after paging.")
+    return None
+
+
 def get_local_page(offset, con):
     """Pass down API to get a TRLE page from the database."""
     return tombll_read.trle_page(offset, con, sort_latest_first=True)
@@ -490,6 +579,9 @@ if __name__ == "__main__":
 
     elif (sys.argv[1] == "-u" and number_of_argument == 3):
         update_level(sys.argv[2])
+
+    elif (sys.argv[1] == "-sc" and number_of_argument == 2):
+        sync_cards()
 
     elif (sys.argv[1] == "-ld" and number_of_argument == 3):
         list_downloads(sys.argv[2])

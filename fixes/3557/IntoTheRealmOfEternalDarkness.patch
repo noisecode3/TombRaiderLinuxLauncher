@@ -119,7 +119,7 @@ index 936949413..7acd55da5 100644
 -            "path": "data/level3b.phd",
 -            "music_track": 57,
 +            "path": "data/Fortress.phd",
-+            "music": 59,
++            "music_track": 59,
 +            "water_color": [0.4, 0.4, 0.4],
              "sequence": [
 -                {"type": "loading_screen", "path": "data/images/peru.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
@@ -142,7 +142,7 @@ index 936949413..7acd55da5 100644
 -            "path": "data/level4.phd",
 -            "music_track": 59,
 +            "path": "data/Chambers.phd",
-+            "music": 58,
++            "music_track": 58,
              "sequence": [
 -                {"type": "play_fmv", "fmv_id": 5},
 -                {"type": "loading_screen", "path": "data/images/greece.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
@@ -164,7 +164,7 @@ index 936949413..7acd55da5 100644
 -            "path": "data/level5.phd",
 -            "music_track": 59,
 +            "path": "data/Palace.phd",
-+            "music": 56,
++            "music_track": 56,
              "sequence": [
 -                {"type": "loading_screen", "path": "data/images/greece.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
 +                {"type": "setup_bacon_lara", "anchor_room": 95},
@@ -187,7 +187,7 @@ index 936949413..7acd55da5 100644
 -            "path": "data/level6.phd",
 -            "music_track": 59,
 +            "path": "data/Sanctuary.phd",
-+            "music": 58,
++            "music_track": 58,
 +            "water_color": [0.4, 0.4, 0.4],
              "sequence": [
 -                {"type": "loading_screen", "path": "data/images/greece.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
