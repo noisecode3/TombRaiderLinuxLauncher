@@ -1,5 +1,5 @@
 diff --git a/data/tr1/ship/cfg/TR1X_gameflow.json5 b/data/tr1/ship/cfg/TR1X_gameflow.json5
-index 936949413..7acd55da5 100644
+index 28807173c..779ac9d85 100644
 --- a/data/tr1/ship/cfg/TR1X_gameflow.json5
 +++ b/data/tr1/ship/cfg/TR1X_gameflow.json5
 @@ -4,10 +4,10 @@
@@ -15,7 +15,7 @@ index 936949413..7acd55da5 100644
      "injections": [
          "data/injections/backpack.bin",
          "data/injections/braid.bin",
-@@ -29,10 +29,7 @@
+@@ -30,10 +30,7 @@
          "music_track": 2,
          "inherit_injections": false,
          "sequence": [
@@ -27,7 +27,7 @@ index 936949413..7acd55da5 100644
              {"type": "exit_to_title"},
          ],
          "injections": [
-@@ -42,38 +39,13 @@
+@@ -43,328 +40,98 @@
      },
  
      "levels": [
@@ -52,39 +52,39 @@ index 936949413..7acd55da5 100644
 -                "data/injections/lara_animations.bin",
 -                "data/injections/uzi_sfx.bin",
 -                "data/injections/explosion.bin",
+-                "data/injections/pda_model.bin",
 -                "data/injections/font.bin",
 -            ],
 -        },
--
-         // Level 1: Caves
+ 
+-        // Level 1: Caves
++        // Level 1
          {
 -            "path": "data/level1.phd",
 -            "music_track": 57,
-+            "path": "data/Manor.phd",
-+            "music_track": 60,
-             "sequence": [
+-            "sequence": [
 -                {"type": "play_fmv", "fmv_id": 4},
 -                {"type": "loading_screen", "path": "data/images/peru.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "play_fmv", "fmv_id": 2},
-+                {"type": "remove_weapons"},
-                 {"type": "loop_game"},
-                 {"type": "level_stats"},
-                 {"type": "level_complete"},
-@@ -85,292 +57,95 @@
-             ],
-         },
- 
+-                {"type": "loop_game"},
+-                {"type": "level_stats"},
+-                {"type": "level_complete"},
+-            ],
+-            "injections": [
+-                "data/injections/caves_fd.bin",
+-                "data/injections/caves_itemrots.bin",
+-                "data/injections/caves_textures.bin",
+-            ],
+-        },
+-
 -        // Level 2: City of Vilcabamba
-+        // Level 2
-         {
+-        {
 -            "path": "data/level2.phd",
-+            "path": "data/Underground.phd",
-             "music_track": 57,
-             "sequence": [
+-            "music_track": 57,
+-            "sequence": [
 -                {"type": "loading_screen", "path": "data/images/peru.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
-                 {"type": "loop_game"},
-                 {"type": "level_stats"},
-                 {"type": "level_complete"},
+-                {"type": "loop_game"},
+-                {"type": "level_stats"},
+-                {"type": "level_complete"},
 -            ],
 -            "injections": [
 -                "data/injections/vilcabamba_itemrots.bin",
@@ -96,12 +96,16 @@ index 936949413..7acd55da5 100644
 -        {
 -            "path": "data/level3a.phd",
 -            "music_track": 57,
--            "sequence": [
++            "path": "data/Manor.phd",
++            "music_track": 60,
+             "sequence": [
 -                {"type": "loading_screen", "path": "data/images/peru.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
--                {"type": "loop_game"},
--                {"type": "level_stats"},
--                {"type": "level_complete"},
--            ],
++                {"type": "play_fmv", "fmv_id": 1},
++                {"type": "remove_weapons"},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
+                 {"type": "level_complete"},
+             ],
 -            "injections": [
 -                "data/injections/braid_valley.bin",
 -                "data/injections/valley_fd.bin",
@@ -109,69 +113,57 @@ index 936949413..7acd55da5 100644
 -                "data/injections/valley_skybox.bin",
 -                "data/injections/valley_textures.bin",
 -            ],
--        },
-+             ],
-+         },
+         },
  
 -        // Level 4: Tomb of Qualopec
-+        // Level 3
++        // Level 2
          {
 -            "path": "data/level3b.phd",
--            "music_track": 57,
-+            "path": "data/Fortress.phd",
-+            "music_track": 59,
-+            "water_color": [0.4, 0.4, 0.4],
++            "path": "data/Underground.phd",
+             "music_track": 57,
              "sequence": [
 -                {"type": "loading_screen", "path": "data/images/peru.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "play_fmv", "fmv_id": 4},
-                 {"type": "loop_game"},
+-                {"type": "loop_game"},
 -                {"type": "play_cutscene", "cutscene_id": 0},
-                 {"type": "level_stats"},
-                 {"type": "level_complete"},
-             ],
+-                {"type": "level_stats"},
+-                {"type": "level_complete"},
+-            ],
 -            "injections": [
 -                "data/injections/qualopec_fd.bin",
 -                "data/injections/qualopec_itemrots.bin",
 -                "data/injections/qualopec_textures.bin",
 -            ],
-         },
- 
+-        },
+-
 -        // Level 5: St. Francis' Folly
-+        // Level 4
-         {
+-        {
 -            "path": "data/level4.phd",
 -            "music_track": 59,
-+            "path": "data/Chambers.phd",
-+            "music_track": 58,
-             "sequence": [
+-            "sequence": [
 -                {"type": "play_fmv", "fmv_id": 5},
 -                {"type": "loading_screen", "path": "data/images/greece.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
-                 {"type": "loop_game"},
-                 {"type": "level_stats"},
-                 {"type": "level_complete"},
-             ],
+-                {"type": "loop_game"},
+-                {"type": "level_stats"},
+-                {"type": "level_complete"},
+-            ],
 -            "injections": [
 -                "data/injections/folly_fd.bin",
 -                "data/injections/folly_itemrots.bin",
 -                "data/injections/folly_pickup_meshes.bin",
 -                "data/injections/folly_textures.bin",
 -            ],
-         },
- 
+-        },
+-
 -        // Level 6: Colosseum
-+        // Level 5
-         {
+-        {
 -            "path": "data/level5.phd",
 -            "music_track": 59,
-+            "path": "data/Palace.phd",
-+            "music_track": 56,
-             "sequence": [
+-            "sequence": [
 -                {"type": "loading_screen", "path": "data/images/greece.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "setup_bacon_lara", "anchor_room": 95},
-                 {"type": "loop_game"},
-                 {"type": "level_stats"},
-                 {"type": "level_complete"},
-             ],
+-                {"type": "loop_game"},
+-                {"type": "level_stats"},
+-                {"type": "level_complete"},
+-            ],
 -            "injections": [
 -                "data/injections/colosseum_door.bin",
 -                "data/injections/colosseum_fd.bin",
@@ -179,45 +171,25 @@ index 936949413..7acd55da5 100644
 -                "data/injections/colosseum_skybox.bin",
 -                "data/injections/colosseum_textures.bin",
 -            ],
-         },
- 
+-        },
+-
 -        // Level 7: Palace Midas
-+        // Level 6
-         {
+-        {
 -            "path": "data/level6.phd",
 -            "music_track": 59,
-+            "path": "data/Sanctuary.phd",
-+            "music_track": 58,
-+            "water_color": [0.4, 0.4, 0.4],
-             "sequence": [
+-            "sequence": [
 -                {"type": "loading_screen", "path": "data/images/greece.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
-                 {"type": "loop_game"},
-                 {"type": "level_stats"},
+-                {"type": "loop_game"},
+-                {"type": "level_stats"},
 -                {"type": "level_complete"},
 -            ],
 -            "injections": [
 -                "data/injections/midas_itemrots.bin",
 -                "data/injections/midas_textures.bin",
 -            ],
-+                {"type": "play_fmv", "fmv_id": 3},
-+                {"type": "play_music", "music_track": 23},
-+                {"type": "display_picture", "picture_path": "pictures/end1.png", "display_time": 15, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end2.png", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end3.png", "display_time": 8, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end4.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end5.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end6.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end7.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end8.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end12.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end11.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "display_picture", "picture_path": "pictures/end9.png", "display_time": 15, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+                {"type": "total_stats", "background_path": "pictures/end10.png"},
-+                {"type": "display_picture", "picture_path": "pictures/intro.png", "display_time": 15, "fade_in_time": 1.0, "fade_out_time": 1.0},
-+             ],
-             "unobtainable_pickups": 1,
-         },
- 
+-            "unobtainable_pickups": 1,
+-        },
+-
 -        // Level 8: The Cistern
 -        {
 -            "path": "data/level7a.phd",
@@ -265,23 +237,29 @@ index 936949413..7acd55da5 100644
 -            "sequence": [
 -                {"type": "play_fmv", "fmv_id": 6},
 -                {"type": "loading_screen", "path": "data/images/egypt.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
--                {"type": "loop_game"},
--                {"type": "level_stats"},
--                {"type": "level_complete"},
--            ],
++                {"type": "give_item", "object_id": 84, "quantity": 1},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
+                 {"type": "level_complete"},
+             ],
 -            "injections": [
 -                "data/injections/khamoon_fd.bin",
 -                "data/injections/khamoon_mummy.bin",
 -                "data/injections/khamoon_textures.bin",
 -                "data/injections/panther_sfx.bin",
 -            ],
--        },
--
+         },
+ 
 -        // Level 11: Obelisk of Khamoon
--        {
++        // Level 3
+         {
 -            "path": "data/level8b.phd",
--            "music_track": 59,
--            "sequence": [
++            "path": "data/Fortress.phd",
+             "music_track": 59,
++            "water_color": [0.4, 0.4, 0.4],
++            "draw_distance_fade": 14.0,
++            "draw_distance_max": 18.0,
+             "sequence": [
 -                {"type": "loading_screen", "path": "data/images/egypt.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
 -                {"type": "loop_game"},
 -                {"type": "level_stats"},
@@ -303,31 +281,35 @@ index 936949413..7acd55da5 100644
 -            "music_track": 59,
 -            "sequence": [
 -                {"type": "loading_screen", "path": "data/images/egypt.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
--                {"type": "loop_game"},
--                {"type": "level_stats"},
--                {"type": "level_complete"},
--            ],
++                {"type": "play_fmv", "fmv_id": 3},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
+                 {"type": "level_complete"},
+             ],
 -            "injections": [
 -                "data/injections/sanctuary_fd.bin",
 -                "data/injections/sanctuary_itemrots.bin",
 -                "data/injections/sanctuary_textures.bin",
 -            ],
--        },
--
+         },
+ 
 -        // Level 13: Natla's Mines
--        {
++        // Level 4
+         {
 -            "path": "data/level10a.phd",
--            "music_track": 58,
--            "sequence": [
++            "path": "data/Chambers.phd",
+             "music_track": 58,
++            "water_color": [0.4, 0.4, 0.4],
+             "sequence": [
 -                {"type": "play_fmv", "fmv_id": 7},
 -                {"type": "loading_screen", "path": "data/images/atlantis.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
 -                {"type": "remove_weapons"},
 -                {"type": "remove_scions"},
--                {"type": "loop_game"},
--                {"type": "level_stats"},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
 -                {"type": "play_cutscene", "cutscene_id": 2},
--                {"type": "level_complete"},
--            ],
+                 {"type": "level_complete"},
+             ],
 -            "injections": [
 -                "data/injections/mines_cameras.bin",
 -                "data/injections/mines_fd.bin",
@@ -342,57 +324,81 @@ index 936949413..7acd55da5 100644
 -                {"enemy_num": 50, "object_ids": [87]},
 -                {"enemy_num": 75, "object_ids": [85]},
 -            ],
--        },
--
+         },
+ 
 -        // Level 14: Atlantis
--        {
++        // Level 5
+         {
 -            "path": "data/level10b.phd",
 -            "music_track": 60,
--            "sequence": [
++            "path": "data/Palace.phd",
++            "music_track": 56,
++            "water_color": [0.4, 0.4, 0.4],
+             "sequence": [
 -                {"type": "play_fmv", "fmv_id": 8},
 -                {"type": "loading_screen", "path": "data/images/atlantis.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
 -                {"type": "give_item", "object_id": "pistols", "quantity": 1},
 -                {"type": "setup_bacon_lara", "anchor_room": 10},
--                {"type": "loop_game"},
++                {"type": "setup_bacon_lara", "anchor_room": 95},
+                 {"type": "loop_game"},
 -                {"type": "play_fmv", "fmv_id": 9},
 -                {"type": "play_cutscene", "cutscene_id": 3},
--                {"type": "level_stats"},
--                {"type": "level_complete"},
--            ],
+                 {"type": "level_stats"},
+                 {"type": "level_complete"},
+             ],
 -            "injections": [
 -                "data/injections/atlantis_fd.bin",
 -                "data/injections/atlantis_textures.bin",
 -            ],
 -            "unobtainable_pickups": 3,
--        },
--
+         },
+ 
 -        // Level 15: The Great Pyramid
--        {
++        // Level 6
+         {
 -            "path": "data/level10c.phd",
 -            "music_track": 60,
--            "sequence": [
++            "path": "data/Sanctuary.phd",
++            "musi_trackc": 58,
++            "water_color": [0.4, 0.4, 0.4],
+             "sequence": [
 -                {"type": "loading_screen", "path": "data/images/atlantis.webp", "fade_in_time": 1.0, "fade_out_time": 1.0},
--                {"type": "loop_game"},
--                {"type": "level_stats"},
+                 {"type": "loop_game"},
+                 {"type": "level_stats"},
 -                {"type": "play_fmv", "fmv_id": 10},
 -                {"type": "play_music", "music_track": 19},
--                {"type": "level_complete"},
--                {"type": "display_picture", "path": "data/images/end.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
--                {"type": "display_picture", "path": "data/images/credits_1.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
--                {"type": "display_picture", "path": "data/images/credits_2.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
--                {"type": "display_picture", "path": "data/images/credits_3.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "play_fmv", "fmv_id": 2},
++                {"type": "play_music", "music_track": 23},
+                 {"type": "level_complete"},
+-                {"type": "display_picture", "credit": true, "path": "data/images/end.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
+-                {"type": "display_picture", "credit": true, "path": "data/images/credits_1.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
+-                {"type": "display_picture", "credit": true, "path": "data/images/credits_2.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
+-                {"type": "display_picture", "credit": true, "path": "data/images/credits_3.webp", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
 -                {"type": "total_stats", "background_path": "data/images/install.webp"},
 -            ],
 -            "injections": [
 -                "data/injections/pyramid_fd.bin",
 -                "data/injections/pyramid_textures.bin",
 -                "data/injections/scion_collision.bin",
--            ],
--        },
--
++                {"type": "display_picture", "picture_path": "pictures/end1.png", "display_time": 15, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end2.png", "display_time": 7.5, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end3.png", "display_time": 8, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end4.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end5.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end6.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end7.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end8.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end12.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end11.png", "display_time": 10, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "display_picture", "picture_path": "pictures/end9.png", "display_time": 15, "fade_in_time": 1.0, "fade_out_time": 1.0},
++                {"type": "total_stats", "background_path": "pictures/end10.png"},
++                {"type": "display_picture", "picture_path": "pictures/intro.png", "display_time": 15, "fade_in_time": 1.0, "fade_out_time": 1.0},
+             ],
++             "unobtainable_pickups": 1,
+         },
+ 
          // Level 16-20: Legacy savegame placeholders
-         {"type": "dummy"},
-         {"type": "dummy"},
+@@ -373,6 +140,15 @@
          {"type": "dummy"},
          {"type": "dummy"},
          {"type": "dummy"},
@@ -408,7 +414,7 @@ index 936949413..7acd55da5 100644
  
          // Level 21: Current Position
          // This level is necessary to read TombATI's save files!
-@@ -389,41 +164,6 @@
+@@ -391,140 +167,12 @@
          },
      ],
  
@@ -447,13 +453,96 @@ index 936949413..7acd55da5 100644
 -
 -    ],
 -
-     "cutscenes": [
-         // Cutscene 1
-         {
-@@ -510,14 +250,8 @@
+-    "cutscenes": [
+-        // Cutscene 1
+-        {
+-            "path": "data/cut1.phd",
+-            "music_track": 23,
+-            "lara_type": "player_1",
+-            "inherit_injections": false,
+-            "injections": [
+-                "data/injections/backpack_cut.bin",
+-                "data/injections/braid_cut1.bin",
+-                "data/injections/photo.bin",
+-                "data/injections/pda_model.bin",
+-                "data/injections/font.bin",
+-            ],
+-            "sequence": [
+-                {"type": "set_cutscene_pos", "x": 36668, "z": 63180},
+-                {"type": "set_cutscene_angle", "value": -23312},
+-                {"type": "loop_game"},
+-            ],
+-        },
+-
+-        // Cutscene 2
+-        {
+-            "path": "data/cut2.phd",
+-            "music_track": 25,
+-            "lara_type": "player_1",
+-            "inherit_injections": false,
+-            "injections": [
+-                "data/injections/backpack_cut.bin",
+-                "data/injections/braid_cut2_cut4.bin",
+-                "data/injections/photo.bin",
+-                "data/injections/pda_model.bin",
+-                "data/injections/font.bin",
+-            ],
+-            "sequence": [
+-                {"type": "set_cutscene_pos", "x": 51962, "z": 53760},
+-                {"type": "set_cutscene_angle", "value": 16380},
+-                {"type": "mesh_swap", "object1_id": "player_1", "object2_id": "lara_pistols", "mesh_id": 1},
+-                {"type": "mesh_swap", "object1_id": "player_1", "object2_id": "lara_pistols", "mesh_id": 4},
+-                {"type": "loop_game"},
+-            ],
+-        },
+-
+-        // Cutscene 3
+-        {
+-            "path": "data/cut3.phd",
+-            "music_track": 24,
+-            "inherit_injections": false,
+-            "injections": [
+-                "data/injections/cut3_textures.bin",
+-                "data/injections/photo.bin",
+-                "data/injections/pda_model.bin",
+-                "data/injections/font.bin",
+-            ],
+-            "sequence": [
+-                {"type": "flip_map"},
+-                {"type": "set_cutscene_angle", "value": 16384},
+-                {"type": "loop_game"},
+-            ],
+-        },
+-
+-        // Cutscene 4
+-        {
+-            "path": "data/cut4.phd",
+-            "music_track": 22,
+-            "fog_start": 12.0,
+-            "fog_end": 18.0,
+-            "lara_type": "player_1",
+-            "inherit_injections": false,
+-            "injections": [
+-                "data/injections/backpack_cut.bin",
+-                "data/injections/braid_cut2_cut4.bin",
+-                "data/injections/cut4_textures.bin",
+-                "data/injections/photo.bin",
+-                "data/injections/pda_model.bin",
+-                "data/injections/font.bin",
+-            ],
+-            "sequence": [
+-                {"type": "set_cutscene_angle", "value": 16384},
+-                {"type": "mesh_swap", "object1_id": "player_1", "object2_id": "lara_pistols", "mesh_id": 1},
+-                {"type": "mesh_swap", "object1_id": "player_1", "object2_id": "lara_pistols", "mesh_id": 4},
+-                {"type": "loop_game"},
+-            ],
+-        },
+-    ],
+-
+     // FMVs
      "fmvs": [
          {"path": "fmv/core.avi", "legal": true},
-         {"path": "fmv/escape.avi", "legal": true},
+-        {"path": "fmv/escape.avi", "legal": true},
 -        {"path": "fmv/cafe.avi"},
 -        {"path": "fmv/mansion.avi"},
 -        {"path": "fmv/snow.avi"},
@@ -467,246 +556,332 @@ index 936949413..7acd55da5 100644
 +        {"path": "fmv/fmv2.avi"},
 +        {"path": "fmv/fmv3.avi"},
      ],
- }
+ 
+     "hidden_config": [
 diff --git a/data/tr1/ship/cfg/TR1X_strings.json5 b/data/tr1/ship/cfg/TR1X_strings.json5
-index b5e88b6af..2f3a953c1 100644
+index 4f089941b..3021fa1a5 100644
 --- a/data/tr1/ship/cfg/TR1X_strings.json5
 +++ b/data/tr1/ship/cfg/TR1X_strings.json5
-@@ -3,135 +3,95 @@
+@@ -3,68 +3,53 @@
      // https://github.com/LostArtefacts/TRX/blob/stable/docs/GAME_STRINGS.md
- 
      "levels": [
--        // Level 0: Lara's Home
-+        // Level 1: Croft Manor
          {
 -            "title": "Lara's Home",
 -        },
--
--        // Level 1: Caves
 -        {
 -            "title": "Caves",
 -        },
--
--        // Level 2: City of Vilcabamba
 -        {
 -            "title": "City of Vilcabamba",
--            "objects": {
--                "key_1": {"name": "Silver Key"},
--                "puzzle_1": {"name": "Gold Idol"},
--            },
++            "title": "Croft Manor",
+             "objects": {
+                 "key_1": {
+-                    "name": "Silver Key",
+-                },
+-                "puzzle_1": {
+-                    "name": "Gold Idol",
+-                }
+-            }
 -        },
--
--        // Level 3: Lost Valley
 -        {
 -            "title": "Lost Valley",
 -            "objects": {
--                "puzzle_1": {"name": "Machine Cog"},
--            },
+-                "puzzle_1": {
+-                    "name": "Machine Cog",
+-                }
+-            }
 -        },
--
--        // Level 4: Tomb of Qualopec
 -        {
 -            "title": "Tomb of Qualopec",
 -        },
--
--        // Level 5: St. Francis' Folly
 -        {
 -            "title": "St. Francis' Folly",
-+            "title": "Croft Manor",
-             "objects": {
--                "key_1": {"name": "Neptune Key"},
--                "key_2": {"name": "Atlas Key"},
--                "key_3": {"name": "Damocles Key"},
--                "key_4": {"name": "Thor Key"},
-+                "key_1": {"name": "Basement Key"},
-+                "key_2": {"name": "Closet Key"},
-+                "key_3": {"name": "Storage Room Key"},
-+                "key_4": {"name": "Tomb Key"},
-+                "puzzle_1": {"name": "Thistle Stone"},
-+                "puzzle_2": {"name": "Cogwheel"},
-+                "puzzle_3": {"name": "Gold Bar"},
-             },
--        },
- 
--        // Level 6: Colosseum
--        {
--            "title": "Colosseum",
 -            "objects": {
--                "key_1": {"name": "Rusty Key"},
--            },
+-                "key_1": {
+-                    "name": "Neptune Key",
++                    "name": "Basement Key",
+                 },
+                 "key_2": {
+-                    "name": "Atlas Key",
++                    "name": "Closet Key",
+                 },
+                 "key_3": {
+-                    "name": "Damocles Key",
++                    "name": "Storage Room Key",
+                 },
+                 "key_4": {
+-                    "name": "Thor Key",
++                    "name": "Tomb Key",
++                },
++                "puzzle_1": {
++                    "name": "Thistle Stone",
++                },
++                "puzzle_2": {
++                    "name": "Cogwheel",
++                },
++                "puzzle_3": {
++                    "name": "Gold Bar",
+                 }
+             }
          },
- 
--        // Level 7: Palace Midas
-+        // Level 2: Manor Underground
          {
--            "title": "Palace Midas",
+-            "title": "Colosseum",
 +            "title": "Manor Underground",
              "objects": {
--                "puzzle_1": {"name": "Gold Bar"},
-+                "key_1": {"name": "Storeroom Key"},
-+                "key_2": {"name": "Rusty Key"},
-+                "key_4": {"name": "Detonator Key"},
-+                "puzzle_1": {"name": "Fuse"},
-+                "puzzle_2": {"name": "Circuit Board"},
-             },
+                 "key_1": {
++                    "name": "Storeroom Key",
++                },
++                "key_2": {
+                     "name": "Rusty Key",
+-                }
+-            }
+-        },
+-        {
+-            "title": "Palace Midas",
+-            "objects": {
++                },
++                "key_4": {
++                    "name": "Detonator Key",
++                },
+                 "puzzle_1": {
+-                    "name": "Gold Bar",
++                    "name": "Fuse",
++                },
++                "puzzle_2": {
++                    "name": "Circuit Board",
+                 }
+             }
          },
- 
--        // Level 8: The Cistern
-+        // Level 3: Dark Fortress
          {
 -            "title": "The Cistern",
 +            "title": "Dark Fortress",
              "objects": {
-                 "key_1": {"name": "Gold Key"},
-                 "key_2": {"name": "Silver Key"},
--                "key_3": {"name": "Rusty Key"},
-+                "key_3": {"name": "Dungeon Key"},
-+                "key_4": {"name": "Underground Key"},
-+                "puzzle_1": {"name": "Violet Gem"},
-+                "puzzle_2": {"name": "Bucket of Black Water"},
-+                "puzzle_3": {"name": "Knight's Diary"},
-             },
+                 "key_1": {
+                     "name": "Gold Key",
+@@ -73,82 +58,90 @@
+                     "name": "Silver Key",
+                 },
+                 "key_3": {
+-                    "name": "Rusty Key",
++                    "name": "Dungeon Key",
++                },
++                "key_4": {
++                    "name": "Underground Key",
++                },
++                "puzzle_1": {
++                    "name": "Violet Gem",
++                },
++                "puzzle_2": {
++                    "name": "Bucket of Black Water",
++                },
++                "puzzle_3": {
++                    "name": "Knight's Diary",
+                 }
+             }
          },
- 
--        // Level 9: Tomb of Tihocan
-+        // Level 4: Chambers of Torture
          {
 -            "title": "Tomb of Tihocan",
 +            "title": "Chambers of Torture",
              "objects": {
-                 "key_1": {"name": "Gold Key"},
--                "key_2": {"name": "Rusty Key"},
--                "key_3": {"name": "Rusty Key"},
-+                "key_2": {"name": "Bronze Key"},
-+                "puzzle_1": {"name": "Unholy Plaque"},
-+                "puzzle_2": {"name": "Unknown's Diary"},
-+                "puzzle_3": {"name": "North - 3, South - 1, West - 4, East - 2"},
-+                "puzzle_4": {"name": "Use your compass to reveal the plaque. Remember, it ALWAYS points towards North!"},
-             },
-         },
- 
--        // Level 10: City of Khamoon
-+        // Level 5: Black Palace
-         {
+                 "key_1": {
+                     "name": "Gold Key",
+                 },
+                 "key_2": {
+-                    "name": "Rusty Key",
+-                },
+-                "key_3": {
+-                    "name": "Rusty Key",
+-                }
+-            }
+-        },
+-        {
 -            "title": "City of Khamoon",
+-            "objects": {
+-                "key_1": {
+-                    "name": "Sapphire Key",
+-                }
+-            }
+-        },
+-        {
+-            "title": "Obelisk of Khamoon",
+-            "objects": {
+-                "key_1": {
+-                    "name": "Sapphire Key",
++                    "name": "Bronze Key",
+                 },
+                 "puzzle_1": {
+-                    "name": "Eye of Horus",
++                    "name": "Unholy Plaque",
+                 },
+                 "puzzle_2": {
+-                    "name": "Scarab",
++                    "name": "Unknown's Diary",
+                 },
+                 "puzzle_3": {
+-                    "name": "Seal of Anubis",
++                    "name": "North - 3, South - 1, West - 4, East - 2",
+                 },
+                 "puzzle_4": {
+-                    "name": "Ankh",
++                    "name": "Use your compass to reveal the plaque. Remember, it ALWAYS points towards North!",
+                 }
+             }
+         },
+         {
+-            "title": "Sanctuary of the Scion",
 +            "title": "Black Palace",
              "objects": {
--                "key_1": {"name": "Sapphire Key"},
-+                "key_1": {"name": "Stone Key"},
-+                "key_2": {"name": "Labyrinth Key"},
-+                "key_3": {"name": "The Moon is born of black. Switch is to be used only once. Save the game."},
-+                "key_4": {"name": "Rooftop key"},
-+                "puzzle_1": {"name": "Amethyst Bar"},
-+                "puzzle_2": {"name": "Survivor's Diary"},
-+                "puzzle_3": {"name": "Crowbar"},
-+                "puzzle_4": {"name": "Knife"},
-             },
+                 "key_1": {
+-                    "name": "Gold Key",
++                    "name": "Stone Key",
++                },
++                "key_2": {
++                    "name": "Labyrinth Key",
++                },
++                "key_3": {
++                    "name": "The Moon is born of black. Switch is to be used only once. Save the game.",
++                },
++                "key_4": {
++                    "name": "Rooftop key",
+                 },
+                 "puzzle_1": {
+-                    "name": "Ankh",
++                    "name": "Amethyst Bar",
+                 },
+                 "puzzle_2": {
+-                    "name": "Scarab",
++                    "name": "Survivor's Diary",
++                },
++                "puzzle_3": {
++                    "name": "Crowbar",
++                },
++                "puzzle_4": {
++                    "name": "Knife",
+                 }
+             }
          },
- 
--        // Level 11: Obelisk of Khamoon
-+        // Level 6: Sanctuary of the Crystal
          {
--            "title": "Obelisk of Khamoon",
+-            "title": "Natla's Mines",
 +            "title": "Sanctuary of the Crystal",
              "objects": {
--                "key_1": {"name": "Sapphire Key"},
--                "puzzle_1": {"name": "Eye of Horus"},
--                "puzzle_2": {"name": "Scarab"},
--                "puzzle_3": {"name": "Seal of Anubis"},
--                "puzzle_4": {"name": "Ankh"},
-+                "puzzle_1": {"name": "Dark Crystal"},
-+                "puzzle_2": {"name": "Beware of him..."},
-             },
+                 "puzzle_1": {
+-                    "name": "Fuse",
++                    "name": "Dark Crystal",
+                 },
+-                "puzzle_2": {
+-                    "name": "Pyramid Key",
++                "puzzle_3": {
++                    "name": "Beware of him...",
+                 }
+             }
          },
- 
--        // Level 12: Sanctuary of the Scion
--        {
--            "title": "Sanctuary of the Scion",
--            "objects": {
--                "key_1": {"name": "Gold Key"},
--                "puzzle_1": {"name": "Ankh"},
--                "puzzle_2": {"name": "Scarab"},
--            },
--        },
- 
--        // Level 13: Natla's Mines
--        {
--            "title": "Natla's Mines",
--            "objects": {
--                "puzzle_1": {"name": "Fuse"},
--                "puzzle_2": {"name": "Pyramid Key"},
--            },
--        },
--
--        // Level 14: Atlantis
--        {
+         {
 -            "title": "Atlantis",
--        },
--
--        // Level 15: The Great Pyramid
--        {
++            "title": "Dummy",
+         },
+         {
 -            "title": "The Great Pyramid",
--        },
--
--        // Level 16-19: Legacy savegame placeholders
-+        // Level 7-19: Legacy savegame placeholders
-+        {"title": "Dummy"},
-+        {"title": "Dummy"},
-+        {"title": "Dummy"},
-+        {"title": "Dummy"},
-+        {"title": "Dummy"},
-+        {"title": "Dummy"},
-+        {"title": "Dummy"},
-+        {"title": "Dummy"},
-+        {"title": "Dummy"},
-         {"title": "Dummy"},
-         {"title": "Dummy"},
-         {"title": "Dummy"},
-@@ -155,23 +115,6 @@
-         {"title": "Cutscene 4"},
-     ],
- 
++            "title": "Dummy",
+         },
+         {
+             "title": "Dummy",
+@@ -163,45 +156,31 @@
+             "title": "Dummy",
+         },
+         {
+-            "title": "Title",
++            "title": "Dummy",
+         },
+         {
+-            "title": "Current Position",
+-        }
+-    ],
+-    "cutscenes": [
++            "title": "Dummy",
++        },
+         {
+-            "title": "Cutscene 1",
++            "title": "Dummy",
+         },
+         {
+-            "title": "Cutscene 2",
++            "title": "Dummy",
+         },
+         {
+-            "title": "Cutscene 3",
++            "title": "Dummy",
+         },
+         {
+-            "title": "Cutscene 4",
+-        }
+-    ],
 -    "demos": [
--        {
++            "title": "Dummy",
++        },
+         {
 -            "title": "City of Vilcabamba",
 -            "objects": {
--                "key_1": {"name": "Silver Key"},
--                "puzzle_1": {"name": "Gold Idol"},
--            },
--        },
--
--        {
+-                "key_1": {
+-                    "name": "Silver Key",
+-                },
+-                "puzzle_1": {
+-                    "name": "Gold Idol",
+-                }
+-            }
++            "title": "Dummy",
+         },
+         {
 -            "title": "Lost Valley",
 -            "objects": {
--                "puzzle_1": {"name": "Machine Cog"},
--            },
--        },
--    ],
--
+-                "puzzle_1": {
+-                    "name": "Machine Cog",
+-                }
+-            }
++            "title": "Title",
++        },
++        {
++            "title": "Current Position",
+         }
+     ],
      "objects": {
-         "small_medipack":    {"name": "Small Medi Pack"},
-         "large_medipack":    {"name": "Large Medi Pack"},
-diff --git a/src/libtrx/include/libtrx/game/const.h b/src/libtrx/include/libtrx/game/const.h
-index 2928947b5..54c0d2ea3 100644
---- a/src/libtrx/include/libtrx/game/const.h
-+++ b/src/libtrx/include/libtrx/game/const.h
-@@ -14,5 +14,5 @@
- #define GRAVITY 6
- #define FAST_FALL_SPEED 128
+diff --git a/src/libtrx/game/clock/common.c b/src/libtrx/game/clock/common.c
+index d145ac47e..12e2a38ef 100644
+--- a/src/libtrx/game/clock/common.c
++++ b/src/libtrx/game/clock/common.c
+@@ -86,10 +86,15 @@ int32_t Clock_WaitTick(void)
  
--#define MAX_STATIC_OBJECTS_2D 50
-+#define MAX_STATIC_OBJECTS_2D 100
- #define MAX_STATIC_OBJECTS_3D 256
+         // Calculate how long we should wait (in ms) to hit the frame boundary
+         double needed = frame_ticks - m_Accumulator;
+-        double delay_ms = (needed / m_Frequency) * 1000.0;
+ 
+-        if (delay_ms > 0) {
+-            SDL_Delay((Uint32)delay_ms);
++        // Convert needed ticks to seconds
++        double delay_seconds = needed / m_Frequency;
++
++        if (delay_seconds > 0) {
++            struct timespec ts;
++            ts.tv_sec = (time_t)floor(delay_seconds);
++            ts.tv_nsec = (long)((delay_seconds - ts.tv_sec) * 1e9);
++            nanosleep(&ts, NULL);
+         }
+ 
+         // After waiting, measure again to be accurate
+@@ -106,7 +111,6 @@ int32_t Clock_WaitTick(void)
+             frames = 1;
+         }
+     }
+-
+     // Consume the frames from the m_Accumulator
+     m_Accumulator -= frames * frame_ticks;
+ 
 diff --git a/src/tr1/game/option/option_passport.c b/src/tr1/game/option/option_passport.c
-index 1eefa6cef..9826dba12 100644
+index c0dcb4e1b..e90bf9158 100644
 --- a/src/tr1/game/option/option_passport.c
 +++ b/src/tr1/game/option/option_passport.c
-@@ -363,50 +363,15 @@ static void M_SaveGame(void)
- 
- static void M_NewGame(void)
+@@ -363,48 +363,12 @@ static void M_NewGame(void)
  {
--    M_ChangePageTextContent(GS(PASSPORT_NEW_GAME));
-+     M_ChangePageTextContent(GS(PASSPORT_NEW_GAME));
+     M_ChangePageTextContent(GS(PASSPORT_NEW_GAME));
      if (m_State.mode == PASSPORT_MODE_BROWSE) {
 -        if (g_InputDB.menu_confirm
 -            && (g_Config.gameplay.enable_game_modes
@@ -716,10 +891,11 @@ index 1eefa6cef..9826dba12 100644
 -            m_State.mode = PASSPORT_MODE_NEW_GAME;
 -            m_State.new_game.is_ready = true;
 -        } else {
-             Savegame_SetInitialVersion(SAVEGAME_CURRENT_VERSION);
-             g_GameInfo.passport_selection = PASSPORT_MODE_NEW_GAME;
+-            Savegame_SetInitialVersion(SAVEGAME_CURRENT_VERSION);
+-            g_GameInfo.passport_selection = PASSPORT_MODE_NEW_GAME;
 -        }
-+    
++        Savegame_SetInitialVersion(SAVEGAME_CURRENT_VERSION);
++        g_GameInfo.passport_selection = PASSPORT_MODE_NEW_GAME;
      } else if (m_State.mode == PASSPORT_MODE_NEW_GAME) {
 -        const int32_t choice = UI_NewGame_Control(&m_State.new_game.state);
 -        if (choice == UI_REQUESTER_NO_CHOICE) {

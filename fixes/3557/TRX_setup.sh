@@ -21,11 +21,11 @@ if [[ $md5sum == "$md5sum_file" ]]
 fi
    git clone --recurse-submodules https://github.com/LostArtefacts/TRX
    cd TRX || exit 1
-   git checkout c1a9933
+   git checkout 17521e9
    patch -p1 < ../IntoTheRealmOfEternalDarkness.patch
    just tr1-package-linux release
    cd ..
    mkdir IntoTheRealmOfEternalDarkness
    cd IntoTheRealmOfEternalDarkness || exit 1
    unzip ../BlackWolfTR-IntoTheRealmOfEternalDarkness.zip
-   unzip ../TRX/TR1X-4.11.2-dirty-Linux.zip
+   unzip ../TRX/TR1X-4.12.3-248-g17521e9-dirty-Linux.zip
