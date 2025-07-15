@@ -11,55 +11,95 @@
  * GNU General Public License for more details.
  */
 
-
 #include "../src/PyRunner.hpp"
-#include <QFileInfo>
+#include <Python.h>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <filesystem>
+#include <cstdio>
 
-PyRunner::PyRunner(const QString& cwd)
-        : m_env(QProcessEnvironment::systemEnvironment()) {
-    m_status = 0;
-    if (QFileInfo("/usr/bin/python3").exists()) {
-        m_command = "/usr/bin/python3";
-    } else if (QFileInfo("/usr/bin/python").exists()) {
-        m_command = "/usr/bin/python";
-    }
-    m_process.setWorkingDirectory(cwd);
-    m_process.setProcessEnvironment(m_env);
+namespace fs = std::filesystem;
+
+PyRunner::PyRunner() : m_status(0) {
+    Py_Initialize();
 }
 
-void PyRunner::run(const QStringList& arguments) {
-    m_process.setProgram(m_command);
-    m_process.setArguments(arguments);
-    qDebug() << m_command << arguments;
-    m_process.start();
+PyRunner::PyRunner(const std::string& cwd) : m_cwd(cwd), m_status(0) {
+    Py_Initialize();
+}
 
-    if (m_process.waitForStarted() == true) {
-        m_process.waitForFinished();
-        qDebug().noquote() << "\n"
-            << m_process.readAllStandardOutput();
-        qDebug().noquote()
-            << m_process.readAllStandardError();
-        qDebug().noquote() << "\nExit status :" << m_process.exitStatus();
-        m_status = m_process.exitCode();
+PyRunner::~PyRunner() {
+    Py_Finalize();
+}
+
+bool PyRunner::setUpCamp(const std::string& level) {
+    if (!fs::exists(level)) return false;
+    m_cwd = level;
+    return true;
+}
+
+void PyRunner::run(const std::string& script,
+        const std::vector<std::string>& args) {
+    if (!Py_IsInitialized()) {
+        std::cerr << "Python not initialized!" << std::endl;
+        m_status = 1;
+        return;
+    }
+
+    std::cerr << "[PyRunner] Executing script file: " << script << std::endl;
+
+    // Add working dir to sys.path
+    if (!m_cwd.empty()) {
+        PyObject *sysPath = PySys_GetObject("path");
+        PyObject *cwdPath = PyUnicode_FromString(m_cwd.c_str());
+        PyList_Insert(sysPath, 0, cwdPath);
+        Py_DECREF(cwdPath);
+    }
+
+    // Set sys.argv
+    PyObject *argvList = PyList_New(args.size());
+    for (size_t i = 0; i < args.size(); ++i) {
+        PyObject *arg = PyUnicode_FromString(args[i].c_str());
+        PyList_SET_ITEM(argvList, i, arg);  // steals ref
+    }
+    PySys_SetObject("argv", argvList);
+    Py_DECREF(argvList);
+
+    std::string fullpath =
+        m_cwd.empty() ? script : (m_cwd + "/" + script + ".py");
+    FILE* fp = fopen(fullpath.c_str(), "r");
+    if (!fp) {
+        std::cerr << "[PyRunner] Failed to open script file: "
+            << fullpath << std::endl;
+        m_status = 1;
+        return;
+    }
+
+    int result = PyRun_SimpleFile(fp, fullpath.c_str());
+    fclose(fp);
+
+    if (result != 0) {
+        std::cerr << "[PyRunner] Python script returned error.\n";
+        m_status = 1;
     } else {
-        qWarning() << "Failed to start python process!";
+        std::cerr << "[PyRunner] Script executed successfully.\n";
+        m_status = 0;
     }
 }
 
-qint64 PyRunner::updateLevel(qint64 lid) {
-    QStringList arguments;
-    arguments << "tombll_manage_data.py" << "-u" << QString::number(lid);
-    run(arguments);
-    return getStatus();
-}
-
-qint64 PyRunner::syncCards(qint64 lid ) {
-    QStringList arguments;
-    arguments << "tombll_manage_data.py" << "-sc";
-    run(arguments);
-    return getStatus();
-}
-
-qint64 PyRunner::getStatus() {
+int64_t PyRunner::updateLevel(int64_t lid) {
+    run("tombll_manage_data",
+            {"tombll_manage_data.py", "-u", std::to_string(lid)});
     return m_status;
 }
+
+int64_t PyRunner::syncCards(int64_t lid) {
+    run("tombll_manage_data", {"tombll_manage_data.py", "-sc"});
+    return m_status;
+}
+
+int64_t PyRunner::getStatus() const {
+    return m_status;
+}
+

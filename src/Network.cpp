@@ -175,7 +175,7 @@ void Downloader::connect(QFile *file, const std::string& url) {
         if (status == CURLE_OK) {
             if (url.compare(0, trle_domain.size(), trle_domain) == 0) {
                 status = curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY,
-                    "sha256//7WRPcNY2QpOjWiQSLbiBu/9Og69JmzccPAdfj2RT5Vw=");
+                    "sha256//87UOkLPD3rxuss0AWbDbdDI0NPZvT6xpQHkQGxHpWE8=");
             } else if (url.compare(
                     0, trcustoms_domain.size(), trcustoms_domain) == 0) {
                 qDebug() << "trcustoms dont pinn key.";

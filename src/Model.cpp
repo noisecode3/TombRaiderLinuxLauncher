@@ -20,7 +20,8 @@ bool Model::setupDirectories(const QString& level, const QString& game) {
     bool status = false;
     if (fileManager.setUpCamp(level, game) &&
             downloader.setUpCamp(level) &&
-            data.initializeDatabase(level)) {
+            data.initializeDatabase(level) &&
+            m_pyRunner.setUpCamp(level.toStdString())) {
         status = true;
     }
     return status;
@@ -203,6 +204,10 @@ void Model::setupGame(int id) {
         emit this->modelTickSignal();
         QCoreApplication::processEvents();
     }
+}
+
+bool Model::updateLevel(const int id) {
+    return m_pyRunner.updateLevel(id);
 }
 
 bool Model::unpackLevel(const int id, const QString& name, const QString& exe) {

@@ -27,6 +27,7 @@
 #include "../src/FileManager.hpp"
 #include "../src/Network.hpp"
 #include "../src/Runner.hpp"
+#include "../src/PyRunner.hpp"
 
 class InstructionManager : public QObject {
     Q_OBJECT
@@ -76,6 +77,7 @@ class Model : public QObject {
     const QString getWalkthrough(int id);
     bool setupDirectories(const QString& level, const QString& game);
     void setup(const QString& level, const QString& game);
+    bool updateLevel(const int id);
 
  signals:
     void generateListSignal(QList<int> availableGames);
@@ -90,6 +92,7 @@ class Model : public QObject {
     bool unpackLevel(const int id, const QString& name, const QString& exe);
 
     Runner m_wineRunner = Runner("/usr/bin/wine");
+    PyRunner m_pyRunner;
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
     Downloader& downloader = Downloader::getInstance();

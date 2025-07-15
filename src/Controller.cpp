@@ -114,6 +114,10 @@ const QString Controller::getWalkthrough(int id) {
     return model.getWalkthrough(id);
 }
 
+bool Controller::updateLevel(int id) {
+    return model.updateLevel(id);
+}
+
 bool Controller::link(int id) {
     return model.setLink(id);
 }
@@ -121,4 +125,6 @@ bool Controller::link(int id) {
 int Controller::getItemState(int id) {
     return model.getItemState(id);
 }
+
+
 

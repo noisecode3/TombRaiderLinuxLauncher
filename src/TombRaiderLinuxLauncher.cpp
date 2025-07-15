@@ -373,6 +373,10 @@ void TombRaiderLinuxLauncher::infoClicked() {
         qint64 id = levelListModel->getLid(current);
         if (id != 0) {
             InfoData info = controller.getInfo(id);
+            if (info.m_body == "" && info.m_imageList.size() == 0) {
+                controller.updateLevel(id);
+            }
+
             ui->infoWebEngineView->setHtml(info.m_body);
 
             // Get the vertical scrollbar size

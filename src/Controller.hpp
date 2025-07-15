@@ -42,6 +42,7 @@ class Controller : public QObject {
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool link(int id);
+    bool updateLevel(int id);
     int getItemState(int id);
 
  signals:
