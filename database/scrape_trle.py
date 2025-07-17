@@ -132,6 +132,7 @@ def trle_page_table(table):
                     field_name, extractor = field_mapping[idx]
                     level[field_name] = extractor(cell)
 
+        level['trle_id'] = int(level['trle_id'])
         levels.append(level)
 
     return levels

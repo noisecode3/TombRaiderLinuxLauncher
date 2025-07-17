@@ -375,6 +375,7 @@ void TombRaiderLinuxLauncher::infoClicked() {
             InfoData info = controller.getInfo(id);
             if (info.m_body == "" && info.m_imageList.size() == 0) {
                 controller.updateLevel(id);
+                info = controller.getInfo(id);
             }
 
             ui->infoWebEngineView->setHtml(info.m_body);

@@ -33,6 +33,7 @@ Usage: python3 tombll_manage_data.py [options]
       -ac   [lid] Add a level card record without info and walkthrough
       -acr  [lid lid] Add a range of level card records
       -rm   [lid] Remove one level record
+      -sc   Sync cards
       -u    [lid] Update a level record
 
       -ld   [lid] List download files records
@@ -196,93 +197,141 @@ def list_downloads(lid):
         print(row)
 
 
+class TailSync:
+    """Match sync 5 records tails and add new records."""
+
+    def __init__(self):
+        """Set default member variables."""
+        self.local = []
+        self.trle = []
+
+        self.local_offset = 0
+        self.trle_offset = 0
+
+    def match_record(self, a, b):
+        """trle.net record data matching."""
+        keys = ['trle_id', 'author', 'title', 'difficulty', 'duration', 'class', 'type', 'release']
+        return all(a.get(k) == b.get(k) for k in keys)
+
+    def match_tails(self, match_size=5, max_pages=100):
+        """Find a tail match between local and trle databases based ids."""
+
+        def get_local_page_and_extend(offset):
+            con = database_make_connection()
+            page = get_local_page(offset, con)['levels']
+            con.close()
+            self.local.extend(page)
+            return len(page)
+
+        def get_trle_page_and_extend(offset):
+            page = get_trle_page(offset)['levels']
+            self.trle.extend(page)
+            return len(page)
+
+        def ensure_data(index_local, index_trle):
+            """Ensure enough items are available from each database."""
+            # Load local pages if needed
+            while index_local + match_size > len(self.local):
+                self.local_offset += 1
+                print(f"Loading local page at offset {self.local_offset}")
+                if self.local_offset >= max_pages or \
+                        get_local_page_and_extend(self.local_offset) == 0:
+                    return False
+
+            # Load trle pages if needed
+            while index_trle + match_size > len(self.trle):
+                self.trle_offset += 1
+                print(f"Loading trle page at offset {self.trle_offset}")
+                if self.trle_offset >= max_pages or get_trle_page_and_extend(self.trle_offset) == 0:
+                    return False
+
+            return True
+
+        def ids_match(offset_local, offset_trle):
+            """Compare sequences of trle_ids from both lists."""
+            if not ensure_data(offset_local, offset_trle):
+                return False
+
+            for i in range(match_size):
+                try:
+                    local_id = int(self.local[offset_local + i]['trle_id'])
+                    trle_id = int(self.trle[offset_trle + i]['trle_id'])
+                    if local_id != trle_id:
+                        return False
+                except IndexError:
+                    return False
+            return True
+
+        # Load initial data
+        get_local_page_and_extend(self.local_offset)
+        get_trle_page_and_extend(self.trle_offset)
+
+        i = 0
+        while True:
+            if i + match_size > len(self.local):
+                # Try to load more local data
+                if not ensure_data(i, 0):
+                    break
+
+            for j in range(len(self.trle) - match_size + 1):
+                if ids_match(i, j):
+                    print(f"Match found at local[{i}] and trle[{j}]")
+                    return (i, j)
+            i += 1
+
+            # If we run out of trle data, load more
+            if len(self.trle) - match_size < 1:
+                added = get_trle_page_and_extend(self.trle_offset + 1)
+                self.trle_offset += 1
+                if added == 0 or self.trle_offset >= max_pages:
+                    break
+
+        print("❌ No match found after paging.")
+        return None
+
+    def run(self):
+        """
+        Tail-sync in 3 simple stages.
+
+        1. Update the last 5 matching records if their attributes differ.
+        2. Add new records from remote page after the match.
+        3. Update or delete unmatched local records after the match.
+        """
+        local_start, remote_start = self.match_tails()
+        tail_count = 5
+
+        # Stage 1: Check and update mismatched records
+        for i in range(tail_count):
+            try:
+                local = self.local[local_start + i]
+                remote = self.trle[remote_start + i]
+            except IndexError:
+                print(f"IndexError self.local[{local_start + i}] self.trle[{remote_start + i}]")
+                sys.exit(1)
+
+            if not self.match_record(local, remote):
+                update_level(local['trle_id'])
+
+        # Stage 2: Add new remote records
+        existing_ids = {ids['trle_id'] for ids in self.local}
+        for remote in self.trle[:remote_start]:
+            if remote['trle_id'] not in existing_ids:
+                add_level_card(remote['trle_id'])
+
+        # Stage 3: Check unmatched local records
+        for local in self.local[:local_start]:
+            exists = any(r['trle_id'] == local['trle_id'] for r in self.trle)
+            if exists:
+                update_level(local['trle_id'])
+            else:
+                remove_level(local['trle_id'])
+
+
+
 def sync_cards():
     """Lazy tail sync of cards."""
-    index = match_tails()
-    print(f"{index}")
-
-
-def match_tails(match_size=5, max_pages=100):
-    """Find a tail match between local and trle databases based ids."""
-    local = []
-    trle = []
-
-    local_offset = 0
-    trle_offset = 0
-
-    def get_local_page_and_extend(offset):
-        con = database_make_connection()
-        page = get_local_page(offset, con)['levels']
-        con.close()
-        local.extend(page)
-        return len(page)
-
-    def get_trle_page_and_extend(offset):
-        page = get_trle_page(offset)['levels']
-        trle.extend(page)
-        return len(page)
-
-    def ensure_data(index_local, index_trle):
-        """Ensure enough items are available from each database."""
-        nonlocal local_offset, trle_offset
-
-        # Load local pages if needed
-        while index_local + match_size > len(local):
-            local_offset += 1
-            print(f"Loading local page at offset {local_offset}")
-            if local_offset >= max_pages or get_local_page_and_extend(local_offset) == 0:
-                return False
-
-        # Load trle pages if needed
-        while index_trle + match_size > len(trle):
-            trle_offset += 1
-            print(f"Loading trle page at offset {trle_offset}")
-            if trle_offset >= max_pages or get_trle_page_and_extend(trle_offset) == 0:
-                return False
-
-        return True
-
-    def ids_match(offset_local, offset_trle):
-        """Compare sequences of trle_ids from both lists."""
-        if not ensure_data(offset_local, offset_trle):
-            return False
-
-        for i in range(match_size):
-            try:
-                local_id = int(local[offset_local + i]['trle_id'])
-                trle_id = int(trle[offset_trle + i]['trle_id'])
-                if local_id != trle_id:
-                    return False
-            except IndexError:
-                return False
-        return True
-
-    # Load initial data
-    get_local_page_and_extend(local_offset)
-    get_trle_page_and_extend(trle_offset)
-
-    i = 0
-    while True:
-        if i + match_size > len(local):
-            # Try to load more local data
-            if not ensure_data(i, 0):
-                break
-
-        for j in range(len(trle) - match_size + 1):
-            if ids_match(i, j):
-                print(f"Match found at local[{i}] and trle[{j}]")
-                return (i, j)
-        i += 1
-
-        # If we run out of trle data, load more
-        if len(trle) - match_size < 1:
-            added = get_trle_page_and_extend(trle_offset + 1)
-            trle_offset += 1
-            if added == 0 or trle_offset >= max_pages:
-                break
-
-    print("❌ No match found after paging.")
-    return None
+    tailsync = TailSync()
+    tailsync.run()
 
 
 def get_local_page(offset, con):

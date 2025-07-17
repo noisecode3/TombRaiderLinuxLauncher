@@ -100,32 +100,11 @@ sudo zypper install python3-pycurl python3-tqdm python3-cryptography python3-bea
 ```shell
 sudo apk add py3-pycurl py3-tqdm py3-cryptography py3-beautifulsoup4 py3-pillow
 ```
-
-Some levels wont be added because they use external or different download URL's
-You can add levels to the database if you cd into where you installed you're database.
-From you're browser copy the number from level page <https://www.trle.net/sc/levelfeatures.php?lid=3684>
-
-If you did just follow the command above you can use:
+Use the -sc flag to sync to trle
 
 ```shell
 python tombll_manage_data.py -h
-python3 tombll_manage_data.py -a 3684
-
-```
-
-Now that you have an data.json file you get a chance to edit it.
-Sometimes you need or want to edit those but right now I allow only trle.net
-You can add you're own local file with its md5sum and it should not try to download it.
-But it has to be a zip file at this point.
-
-```text
-  "zipFileName": "",
-  "zipFileMd5": "",
-  "download_url": ""
-```
-
-```shell
-python3 tombll_manage_data.py -af data.json
+python3 tombll_manage_data.py -sc
 
 ```
 
