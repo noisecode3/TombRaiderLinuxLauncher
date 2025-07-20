@@ -77,12 +77,14 @@ class Model : public QObject {
     const QString getWalkthrough(int id);
     bool setupDirectories(const QString& level, const QString& game);
     void setup(const QString& level, const QString& game);
-    bool updateLevel(const int id);
+    void updateLevel(const int id);
+    void syncLevels();
 
  signals:
     void generateListSignal(QList<int> availableGames);
     void modelTickSignal();
     void modelReloadLevelListSignal();
+    void modelLoadingDoneSignal();
 
  private:
     bool getLevelHaveFile(

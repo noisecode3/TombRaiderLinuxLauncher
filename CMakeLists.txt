@@ -91,6 +91,8 @@ set(SOURCES_MC
     src/FileManager.cpp
     src/GameFileTree.hpp
     src/GameFileTree.cpp
+    src/LoadingIndicator.hpp
+    src/LoadingIndicator.cpp
     src/Model.hpp
     src/Model.cpp
     src/Network.hpp

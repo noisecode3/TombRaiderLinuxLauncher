@@ -22,12 +22,14 @@
 #include <QVBoxLayout>
 #include <QStringList>
 #include <QSet>
+#include <QDateTime>
 #include <QDebug>
 #include <QVector>
 #include <QString>
 
 #include "../src/Controller.hpp"
 #include "../src/levelViewList.hpp"
+#include "../src/LoadingIndicator.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
@@ -99,6 +101,10 @@ class TombRaiderLinuxLauncher : public QMainWindow {
      */
     void downloadError(int status);
     /**
+     * Switch back to level list or info page after network/python work.
+     */
+    void UpdateLevelDone();
+    /**
      * Generates the initial level list after file analysis.
      */
     void generateList(const QList<int>& availableGames);
@@ -169,6 +175,9 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     Controller& controller = Controller::getInstance();
     QSettings m_settings;
     Ui::TombRaiderLinuxLauncher *ui;
+    LoadingIndicator* loader;
+    QString UpdateLevelDoneTo;
+    QList<int> m_availableGames;
 };
 
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_

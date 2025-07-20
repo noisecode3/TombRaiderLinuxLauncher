@@ -652,7 +652,6 @@ class CardItemDelegate : public QStyledItemDelegate {
         QString releaseText = QString("Released: %1").arg(release);
         painter->drawText(point, releaseText);
 
-
         painter->restore();
     }
 

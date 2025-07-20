@@ -12,47 +12,56 @@
  */
 
 #include "../src/PyRunner.hpp"
-#include <Python.h>
-#include <vector>
-#include <string>
-#include <iostream>
-#include <filesystem>
+#include <QDebug>
+#include <QString>
+#include <QVector>
+#include <QFile>
 #include <cstdio>
 
-namespace fs = std::filesystem;
+#undef slots
+#undef signals
+#include <Python.h>
+PyThreadState *g_mainState = nullptr;
 
 PyRunner::PyRunner() : m_status(0) {
     Py_Initialize();
+    g_mainState = PyEval_SaveThread();
 }
 
-PyRunner::PyRunner(const std::string& cwd) : m_cwd(cwd), m_status(0) {
+PyRunner::PyRunner(const QString& cwd) : m_cwd(cwd), m_status(0) {
     Py_Initialize();
+    g_mainState = PyEval_SaveThread();
 }
 
 PyRunner::~PyRunner() {
-    Py_Finalize();
+    PyEval_RestoreThread(g_mainState);
+    Py_FinalizeEx();
 }
 
-bool PyRunner::setUpCamp(const std::string& level) {
-    if (!fs::exists(level)) return false;
+bool PyRunner::setUpCamp(const QString& level) {
+    bool status = true;
+    if (!QFile::exists(level)) {
+        status = false;
+    }
     m_cwd = level;
-    return true;
+    return status;
 }
 
-void PyRunner::run(const std::string& script,
-        const std::vector<std::string>& args) {
+void PyRunner::run(const QString& script,
+        const QVector<QString>& args) {
     if (!Py_IsInitialized()) {
-        std::cerr << "Python not initialized!" << std::endl;
+        qDebug() << "Python not initialized!";
         m_status = 1;
         return;
     }
 
-    std::cerr << "[PyRunner] Executing script file: " << script << std::endl;
+    PyGILState_STATE gil = PyGILState_Ensure();
+    qDebug() << "[PyRunner] Executing script file: " << script << Qt::endl;
 
     // Add working dir to sys.path
-    if (!m_cwd.empty()) {
+    if (!m_cwd.isEmpty()) {
         PyObject *sysPath = PySys_GetObject("path");
-        PyObject *cwdPath = PyUnicode_FromString(m_cwd.c_str());
+        PyObject *cwdPath = PyUnicode_FromString(m_cwd.toStdString().c_str());
         PyList_Insert(sysPath, 0, cwdPath);
         Py_DECREF(cwdPath);
     }
@@ -60,46 +69,47 @@ void PyRunner::run(const std::string& script,
     // Set sys.argv
     PyObject *argvList = PyList_New(args.size());
     for (size_t i = 0; i < args.size(); ++i) {
-        PyObject *arg = PyUnicode_FromString(args[i].c_str());
+        PyObject *arg = PyUnicode_FromString(args[i].toStdString().c_str());
         PyList_SET_ITEM(argvList, i, arg);  // steals ref
     }
     PySys_SetObject("argv", argvList);
     Py_DECREF(argvList);
 
-    std::string fullpath =
-        m_cwd.empty() ? script : (m_cwd + "/" + script + ".py");
-    FILE* fp = fopen(fullpath.c_str(), "r");
+    QString fullpath =
+        m_cwd.isEmpty() ? script : (m_cwd + "/" + script + ".py");
+    FILE* fp = fopen(fullpath.toStdString().c_str(), "r");
     if (!fp) {
-        std::cerr << "[PyRunner] Failed to open script file: "
-            << fullpath << std::endl;
+        qDebug() << "[PyRunner] Failed to open script file: "
+            << fullpath << Qt::endl;
         m_status = 1;
         return;
     }
 
-    int result = PyRun_SimpleFile(fp, fullpath.c_str());
+    int result = PyRun_SimpleFile(fp, fullpath.toStdString().c_str());
     fclose(fp);
+    PyGILState_Release(gil);
 
     if (result != 0) {
-        std::cerr << "[PyRunner] Python script returned error.\n";
+        qDebug() << "[PyRunner] Python script returned error.\n";
         m_status = 1;
     } else {
-        std::cerr << "[PyRunner] Script executed successfully.\n";
+        qDebug() << "[PyRunner] Script executed successfully.\n";
         m_status = 0;
     }
 }
 
-int64_t PyRunner::updateLevel(int64_t lid) {
+qint64 PyRunner::updateLevel(qint64 lid) {
     run("tombll_manage_data",
-            {"tombll_manage_data.py", "-u", std::to_string(lid)});
+            {"tombll_manage_data.py", "-u", QString("%1").arg(lid)});
     return m_status;
 }
 
-int64_t PyRunner::syncCards(int64_t lid) {
+qint64 PyRunner::syncCards() {
     run("tombll_manage_data", {"tombll_manage_data.py", "-sc"});
     return m_status;
 }
 
-int64_t PyRunner::getStatus() const {
+qint64 PyRunner::getStatus() const {
     return m_status;
 }
 

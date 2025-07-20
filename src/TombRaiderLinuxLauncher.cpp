@@ -47,7 +47,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()),
         this, SLOT(workTick()));
 
-    //
+    // Arrive with next batch of level icons
     connect(&Controller::getInstance(), SIGNAL(controllerReloadLevelList()),
         this, SLOT(loadMoreCovers()));
 
@@ -59,6 +59,10 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     // Error signal connections
     connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
         this, SLOT(downloadError(int)));
+
+    // Loading done signal connections
+    connect(&Controller::getInstance(), SIGNAL(controllerLoadingDone()),
+        this, SLOT(UpdateLevelDone()));
 
     // Set init state
     ui->pushButtonLink->setEnabled(false);
@@ -137,6 +141,14 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         levelListModel->filterInstalled();
     });
 
+    loader = new LoadingIndicator(ui->loading);
+    loader->setFixedSize(64, 64);
+    ui->verticalLayout_15->addWidget(loader, 0, Qt::AlignCenter);
+    loader->show();
+    ui->stackedWidget->setCurrentWidget(
+        ui->stackedWidget->findChild<QWidget*>("loading"));
+    UpdateLevelDoneTo = "select";
+
     // Read settings
     QString value = m_settings.value("setup").toString();
     if (value != "yes") {
@@ -147,8 +159,34 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 }
 
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
-    levelListModel->setLevels(availableGames);
-    setInstalled();
+    // Update list only when 24 hours past
+    QDateTime now = QDateTime::currentDateTime();
+    QString lastUpdatedStr = m_settings.value("lastUpdated").toString();
+    QDateTime lastUpdated = QDateTime::fromString(lastUpdatedStr, Qt::ISODate);
+
+    // Define today's noon
+    QDateTime todayNoon = QDateTime(QDate::currentDate(), QTime(12, 0));
+    // Define the next valid time after noon
+    QDateTime targetTime;
+
+    if (now < todayNoon) {
+        // It's before today's noon -> check against yesterday's noon
+        targetTime = todayNoon.addDays(-1);
+    } else {
+        // It's after today's noon -> check against today's noon
+        targetTime = todayNoon;
+    }
+
+    if (!lastUpdated.isValid() || lastUpdated < targetTime) {
+        controller.syncLevels();
+        m_settings.setValue("lastUpdated", now.toString(Qt::ISODate));
+        m_availableGames = availableGames;
+    } else {
+        levelListModel->setLevels(availableGames);
+        setInstalled();
+        ui->stackedWidget->setCurrentWidget(
+            ui->stackedWidget->findChild<QWidget*>("select"));
+    }
 }
 
 void TombRaiderLinuxLauncher::setInstalled() {
@@ -374,8 +412,12 @@ void TombRaiderLinuxLauncher::infoClicked() {
         if (id != 0) {
             InfoData info = controller.getInfo(id);
             if (info.m_body == "" && info.m_imageList.size() == 0) {
+                loader->show();
+                ui->stackedWidget->setCurrentWidget(
+                    ui->stackedWidget->findChild<QWidget*>("loading"));
                 controller.updateLevel(id);
-                info = controller.getInfo(id);
+                UpdateLevelDoneTo = "info";
+                return;
             }
 
             ui->infoWebEngineView->setHtml(info.m_body);
@@ -501,6 +543,22 @@ void TombRaiderLinuxLauncher::downloadError(int status) {
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
     msgBox.exec();
+}
+
+void TombRaiderLinuxLauncher::UpdateLevelDone() {
+    loader->hide();
+    if (UpdateLevelDoneTo == "select") {
+            levelListModel->setLevels(m_availableGames);
+            setInstalled();
+        ui->stackedWidget->setCurrentWidget(
+            ui->stackedWidget->findChild<QWidget*>("select"));
+    } else if (UpdateLevelDoneTo == "info") {
+        ui->stackedWidget->setCurrentWidget(
+            ui->stackedWidget->findChild<QWidget*>("info"));
+        infoClicked();
+    } else {
+        qDebug() << "Forgot to get UpdateLeveDoneTo maybe?";
+    }
 }
 
 void TombRaiderLinuxLauncher::GlobalSaveClicked() {

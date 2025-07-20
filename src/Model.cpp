@@ -21,7 +21,7 @@ bool Model::setupDirectories(const QString& level, const QString& game) {
     if (fileManager.setUpCamp(level, game) &&
             downloader.setUpCamp(level) &&
             data.initializeDatabase(level) &&
-            m_pyRunner.setUpCamp(level.toStdString())) {
+            m_pyRunner.setUpCamp(level)) {
         status = true;
     }
     return status;
@@ -206,8 +206,16 @@ void Model::setupGame(int id) {
     }
 }
 
-bool Model::updateLevel(const int id) {
-    return m_pyRunner.updateLevel(id);
+void Model::updateLevel(const int id) {
+    // qint64 status = m_pyRunner.updateLevel(id);
+    (void)m_pyRunner.updateLevel(id);
+    emit this->modelLoadingDoneSignal();
+}
+
+void Model::syncLevels() {
+    // qint64 status = m_pyRunner.syncCards();
+    (void)m_pyRunner.syncCards();
+    emit this->modelLoadingDoneSignal();
 }
 
 bool Model::unpackLevel(const int id, const QString& name, const QString& exe) {

@@ -32,17 +32,18 @@ class Controller : public QObject {
     }
 
     int checkGameDirectory(int id);
-    void checkCommonFiles();
+    // void checkCommonFiles();
     void setup(const QString& level, const QString& game);
     void setupGame(int id);
     void setupLevel(int id);
+    void updateLevel(int id);
+    void syncLevels();
 
     void getList(QVector<ListItemData>* list);
     void getCoverList(QVector<ListItemData*>* items);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool link(int id);
-    bool updateLevel(int id);
     int getItemState(int id);
 
  signals:
@@ -50,8 +51,10 @@ class Controller : public QObject {
     void controllerTickSignal();
     void controllerDownloadError(int status);
     void controllerReloadLevelList();
+    void controllerLoadingDone();
 
-    void checkCommonFilesThreadSignal();
+    void updateLevelThreadSignal(int id);
+    void syncLevelsThreadSignal();
     void setupThreadSignal(const QString& level, const QString& game);
     void setupGameThreadSignal(int id);
     void setupLevelThreadSignal(int id);

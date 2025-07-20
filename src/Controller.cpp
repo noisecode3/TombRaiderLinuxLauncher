@@ -50,6 +50,16 @@ void Controller::initializeThread() {
         model.setupGame(id);
     });
 
+    connect(this, &Controller::updateLevelThreadSignal,
+            this, [this](int id) {
+        model.updateLevel(id);
+    });
+
+    connect(this, &Controller::syncLevelsThreadSignal,
+            this, [this]() {
+        model.syncLevels();
+    });
+
     //  Comming back from model or other model objects
     auto tickSignal = [this](){ emit controllerTickSignal(); };
     connect(&model, &Model::modelTickSignal,
@@ -75,10 +85,11 @@ void Controller::initializeThread() {
             this, [this]() {
         emit controllerReloadLevelList();
     }, Qt::QueuedConnection);
-}
 
-void Controller::checkCommonFiles() {
-    emit checkCommonFilesThreadSignal();
+    connect(&model, &Model::modelLoadingDoneSignal,
+            this, [this]() {
+        emit controllerLoadingDone();
+    }, Qt::QueuedConnection);
 }
 
 void Controller::setup(const QString& level, const QString& game) {
@@ -97,6 +108,15 @@ void Controller::setupLevel(int id) {
     emit setupLevelThreadSignal(id);
 }
 
+void Controller::updateLevel(int id) {
+    emit updateLevelThreadSignal(id);
+}
+
+void Controller::syncLevels() {
+    emit syncLevelsThreadSignal();
+}
+
+
 // Using the GUI Threads
 int Controller::checkGameDirectory(int id) {
     return model.checkGameDirectory(id);
@@ -112,10 +132,6 @@ const InfoData Controller::getInfo(int id) {
 
 const QString Controller::getWalkthrough(int id) {
     return model.getWalkthrough(id);
-}
-
-bool Controller::updateLevel(int id) {
-    return model.updateLevel(id);
 }
 
 bool Controller::link(int id) {

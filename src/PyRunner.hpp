@@ -14,24 +14,24 @@
 #ifndef SRC_PYRUNNER_HPP_
 #define SRC_PYRUNNER_HPP_
 
-#include <string>
-#include <vector>
+#include <QString>
+#include <QVector>
 
 class PyRunner {
  public:
     PyRunner();
-    explicit PyRunner(const std::string& cwd);
+    explicit PyRunner(const QString& cwd);
     ~PyRunner();
 
-    bool setUpCamp(const std::string& level);
-    void run(const std::string& script, const std::vector<std::string>& args);
-    int64_t updateLevel(int64_t lid);
-    int64_t syncCards(int64_t lid);
-    int64_t getStatus() const;
+    bool setUpCamp(const QString& level);
+    void run(const QString& script, const QVector<QString>& args);
+    qint64 updateLevel(qint64 lid);
+    qint64 syncCards();
+    qint64 getStatus() const;
 
  private:
-    std::string m_cwd;
-    int64_t m_status;
+    QString m_cwd;
+    qint64 m_status;
 };
 
 #endif  // SRC_PYRUNNER_HPP_
