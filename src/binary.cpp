@@ -26,21 +26,28 @@ QString decideExe(const QDir& dir) {
     QStringList exeFiles = dir.entryList(filters, QDir::Files);
 
     for (const QString& file : exeFiles) {
+        QString path = dir.filePath(file);
+        std::string pathStr = path.toStdString();
+
+        if (!LIEF::PE::is_pe(pathStr))
+            continue;
+
         try {
             std::unique_ptr<LIEF::PE::Binary> binary =
-                LIEF::PE::Parser::parse(dir.filePath(file).toStdString());
+                LIEF::PE::Parser::parse(pathStr);
 
             bool found = std::any_of(binary->imports().begin(),
-                    binary->imports().end(), [](const LIEF::PE::Import& imp) {
-                return imp.name() == "DDRAW.dll" ||  imp.name() == "d3d11.dll";
-            });
+                binary->imports().end(), [](const LIEF::PE::Import& imp) {
+                    return imp.name() == "DDRAW.dll" ||
+                            imp.name() == "d3d11.dll";
+                });
 
             if (found) {
                 fileName = file;
                 break;
             }
         } catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
+            std::cerr << "LIEF parse error: " << e.what() << std::endl;
         }
     }
 

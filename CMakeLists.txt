@@ -25,8 +25,6 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 
 find_package(OpenSSL REQUIRED)
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
     message(STATUS "Submodule 'libs/miniz' not found. Updating submodules...")
     execute_process(
@@ -126,7 +124,6 @@ set(LINK_COMMON
     OpenSSL::SSL
     Boost::system
     Boost::filesystem
-    Python3::Python
 )
 
 set(LINK_GUI
@@ -136,7 +133,6 @@ set(LINK_GUI
 set(INCLUDE_DIR
     ${CURL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
-    ${Python3_INCLUDE_DIRS}
     libs/miniz
     libs/LIEF/include
     src
