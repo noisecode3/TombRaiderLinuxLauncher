@@ -31,16 +31,15 @@ class Controller : public QObject {
         return instance;
     }
 
-    int checkGameDirectory(int id);
-    // void checkCommonFiles();
     void setup(const QString& level, const QString& game);
     void setupGame(int id);
     void setupLevel(int id);
     void updateLevel(int id);
     void syncLevels();
-
-    void getList(QVector<ListItemData>* list);
     void getCoverList(QVector<ListItemData*>* items);
+
+    int checkGameDirectory(int id);
+    void getList(QVector<ListItemData>* list);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool link(int id);
@@ -53,23 +52,23 @@ class Controller : public QObject {
     void controllerReloadLevelList();
     void controllerLoadingDone();
 
-    void updateLevelThreadSignal(int id);
-    void syncLevelsThreadSignal();
-    void setupThreadSignal(const QString& level, const QString& game);
-    void setupGameThreadSignal(int id);
-    void setupLevelThreadSignal(int id);
-    void getCoverListThreadSignal(QVector<ListItemData*>* items);
-
  private:
     Controller();
-    void initializeThread();
     ~Controller();
+    void initThreads();
+
+    void runOnThreadA(std::function<void()> func);
+    void runOnThreadB(std::function<void()> func);
+
+    QScopedPointer<QThread> threadA;
+    QScopedPointer<QThread> threadB;
+    QScopedPointer<QObject> workerA;
+    QScopedPointer<QObject> workerB;
 
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
     Model& model = Model::getInstance();
     Downloader& downloader = Downloader::getInstance();
-    QScopedPointer<QThread> controllerThread;
 
     Q_DISABLE_COPY(Controller)
 };

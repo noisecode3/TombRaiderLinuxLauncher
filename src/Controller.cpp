@@ -12,112 +12,92 @@
  */
 
 #include "../src/Controller.hpp"
-#include <QDebug>
+#include <QMetaObject>
 
-Controller::Controller() : controllerThread(new QThread()) {
-    initializeThread();
+Controller::Controller() {
+    threadA.reset(new QThread());
+    threadB.reset(new QThread());
+    workerA.reset(new QObject());
+    workerB.reset(new QObject());
+
+    workerA->moveToThread(threadA.data());
+    workerB->moveToThread(threadB.data());
+
+    threadA->start();
+    threadB->start();
+
+    connect(&model, &Model::modelTickSignal,
+            this,   &Controller::controllerTickSignal,
+        Qt::QueuedConnection);
+
+    connect(&fileManager, &FileManager::fileWorkTickSignal,
+            this,         &Controller::controllerTickSignal,
+        Qt::QueuedConnection);
+
+    connect(&downloader, &Downloader::networkWorkTickSignal,
+            this,        &Controller::controllerTickSignal,
+        Qt::QueuedConnection);
+
+    connect(&downloader, &Downloader::networkWorkErrorSignal,
+            this,        &Controller::controllerDownloadError,
+        Qt::QueuedConnection);
+
+    connect(&model, &Model::generateListSignal,
+            this,   &Controller::controllerGenerateList,
+        Qt::QueuedConnection);
+
+    connect(&model, &Model::modelReloadLevelListSignal,
+            this,   &Controller::controllerReloadLevelList,
+        Qt::QueuedConnection);
+
+    connect(&model, &Model::modelLoadingDoneSignal,
+            this,   &Controller::controllerLoadingDone,
+        Qt::QueuedConnection);
 }
 
 Controller::~Controller() {
-    controllerThread->quit();
-    controllerThread->wait();
+    threadA->quit();
+    threadB->quit();
+    threadA->wait();
+    threadB->wait();
 }
 
-void Controller::initializeThread() {
-    this->moveToThread(controllerThread.data());
-    connect(controllerThread.data(), &QThread::finished,
-            controllerThread.data(), &QThread::deleteLater);
-    controllerThread->start();
-
-    //  Using the controller thread to start model work
-    connect(this, &Controller::getCoverListThreadSignal,
-            this, [this](QVector<ListItemData*>* items) {
-        model.getCoverList(items);
-    });
-
-    connect(this, &Controller::setupThreadSignal,
-            this, [this](const QString& level, const QString& game) {
-        model.setup(level, game);
-    });
-
-    connect(this, &Controller::setupLevelThreadSignal,
-            this, [this](int id) {
-        model.getLevel(id);
-    });
-
-    connect(this, &Controller::setupGameThreadSignal,
-            this, [this](int id) {
-        model.setupGame(id);
-    });
-
-    connect(this, &Controller::updateLevelThreadSignal,
-            this, [this](int id) {
-        model.updateLevel(id);
-    });
-
-    connect(this, &Controller::syncLevelsThreadSignal,
-            this, [this]() {
-        model.syncLevels();
-    });
-
-    //  Comming back from model or other model objects
-    auto tickSignal = [this](){ emit controllerTickSignal(); };
-    connect(&model, &Model::modelTickSignal,
-            this, tickSignal, Qt::QueuedConnection);
-
-    connect(&fileManager, &FileManager::fileWorkTickSignal,
-            this, tickSignal, Qt::QueuedConnection);
-
-    connect(&downloader, &Downloader::networkWorkTickSignal,
-            this, tickSignal, Qt::QueuedConnection);
-
-    connect(&downloader, &Downloader::networkWorkErrorSignal,
-            this, [this](int status) {
-        emit controllerDownloadError(status);
-    }, Qt::QueuedConnection);
-
-    connect(&model, &Model::generateListSignal,
-            this, [this](const QList<int>& availableGames) {
-        emit controllerGenerateList(availableGames);
-    }, Qt::QueuedConnection);
-
-    connect(&model, &Model::modelReloadLevelListSignal,
-            this, [this]() {
-        emit controllerReloadLevelList();
-    }, Qt::QueuedConnection);
-
-    connect(&model, &Model::modelLoadingDoneSignal,
-            this, [this]() {
-        emit controllerLoadingDone();
-    }, Qt::QueuedConnection);
+void Controller::runOnThreadA(std::function<void()> func) {
+    QMetaObject::invokeMethod(
+            workerA.data(), [func]() { func(); }, Qt::QueuedConnection);
 }
 
+void Controller::runOnThreadB(std::function<void()> func) {
+    QMetaObject::invokeMethod(
+            workerB.data(), [func]() { func(); }, Qt::QueuedConnection);
+}
+
+// Threaded work
 void Controller::setup(const QString& level, const QString& game) {
-    emit setupThreadSignal(level, game);
-}
-
-void Controller::getCoverList(QVector<ListItemData*>* items) {
-    emit getCoverListThreadSignal(items);
+    runOnThreadA([=]() { model.setup(level, game); });
 }
 
 void Controller::setupGame(int id) {
-    emit setupGameThreadSignal(id);
+    runOnThreadA([=]() { model.setupGame(id); });
 }
 
 void Controller::setupLevel(int id) {
-    emit setupLevelThreadSignal(id);
+    runOnThreadA([=]() { model.getLevel(id); });
 }
 
 void Controller::updateLevel(int id) {
-    emit updateLevelThreadSignal(id);
+    runOnThreadA([=]() { model.updateLevel(id); });
 }
 
 void Controller::syncLevels() {
-    emit syncLevelsThreadSignal();
+    runOnThreadA([=]() { model.syncLevels(); });
 }
 
+void Controller::getCoverList(QVector<ListItemData*>* items) {
+    runOnThreadB([=]() { model.getCoverList(items); });
+}
 
-// Using the GUI Threads
+// UI/main thread work
 int Controller::checkGameDirectory(int id) {
     return model.checkGameDirectory(id);
 }
@@ -141,6 +121,3 @@ bool Controller::link(int id) {
 int Controller::getItemState(int id) {
     return model.getItemState(id);
 }
-
-
-

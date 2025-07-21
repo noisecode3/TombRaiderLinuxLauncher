@@ -553,9 +553,19 @@ void TombRaiderLinuxLauncher::UpdateLevelDone() {
         ui->stackedWidget->setCurrentWidget(
             ui->stackedWidget->findChild<QWidget*>("select"));
     } else if (UpdateLevelDoneTo == "info") {
-        ui->stackedWidget->setCurrentWidget(
-            ui->stackedWidget->findChild<QWidget*>("info"));
-        infoClicked();
+        QModelIndex current = ui->listViewLevels->currentIndex();
+        if (current.isValid()) {
+            qint64 id = levelListModel->getLid(current);
+            if (id != 0) {
+                InfoData info = controller.getInfo(id);
+                if (!(info.m_body == "" && info.m_imageList.size() == 0)) {
+                    infoClicked();
+                } else {
+                    ui->stackedWidget->setCurrentWidget(
+                        ui->stackedWidget->findChild<QWidget*>("select"));
+                }
+            }
+        }
     } else {
         qDebug() << "Forgot to get UpdateLeveDoneTo maybe?";
     }

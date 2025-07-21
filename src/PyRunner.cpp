@@ -13,103 +13,76 @@
 
 #include "../src/PyRunner.hpp"
 #include <QDebug>
-#include <QString>
-#include <QVector>
 #include <QFile>
-#include <cstdio>
-
-#undef slots
-#undef signals
-#include <Python.h>
-PyThreadState *g_mainState = nullptr;
-
-PyRunner::PyRunner() : m_status(0) {
-    Py_Initialize();
-    g_mainState = PyEval_SaveThread();
-}
-
-PyRunner::PyRunner(const QString& cwd) : m_cwd(cwd), m_status(0) {
-    Py_Initialize();
-    g_mainState = PyEval_SaveThread();
-}
-
-PyRunner::~PyRunner() {
-    PyEval_RestoreThread(g_mainState);
-    Py_FinalizeEx();
-}
+#include <QProcess>
 
 bool PyRunner::setUpCamp(const QString& level) {
-    bool status = true;
-    if (!QFile::exists(level)) {
-        status = false;
-    }
+    if (!QFile::exists(level)) return false;
     m_cwd = level;
-    return status;
+    m_isRunning = false;
+    return true;
 }
 
-void PyRunner::run(const QString& script,
-        const QVector<QString>& args) {
-    if (!Py_IsInitialized()) {
-        qDebug() << "Python not initialized!";
-        m_status = 1;
+void PyRunner::run(const QString& script, const QVector<QString>& args) {
+    if (m_isRunning) {
+        qWarning() << "[PyRunner] Already running!";
         return;
     }
+    m_isRunning = true;
+    QProcess process;
+    QString program = "python3";
 
-    PyGILState_STATE gil = PyGILState_Ensure();
-    qDebug() << "[PyRunner] Executing script file: " << script << Qt::endl;
-
-    // Add working dir to sys.path
-    if (!m_cwd.isEmpty()) {
-        PyObject *sysPath = PySys_GetObject("path");
-        PyObject *cwdPath = PyUnicode_FromString(m_cwd.toStdString().c_str());
-        PyList_Insert(sysPath, 0, cwdPath);
-        Py_DECREF(cwdPath);
-    }
-
-    // Set sys.argv
-    PyObject *argvList = PyList_New(args.size());
-    for (size_t i = 0; i < args.size(); ++i) {
-        PyObject *arg = PyUnicode_FromString(args[i].toStdString().c_str());
-        PyList_SET_ITEM(argvList, i, arg);  // steals ref
-    }
-    PySys_SetObject("argv", argvList);
-    Py_DECREF(argvList);
-
-    QString fullpath =
+    // Build full path to script if cwd is set
+    QString fullScript =
         m_cwd.isEmpty() ? script : (m_cwd + "/" + script + ".py");
-    FILE* fp = fopen(fullpath.toStdString().c_str(), "r");
-    if (!fp) {
-        qDebug() << "[PyRunner] Failed to open script file: "
-            << fullpath << Qt::endl;
+
+    QStringList arguments;
+    arguments << fullScript;
+    for (const QString& arg : args) {
+        arguments << arg;
+    }
+
+    if (!m_cwd.isEmpty())
+        process.setWorkingDirectory(m_cwd);
+
+    process.setProcessChannelMode(QProcess::MergedChannels);
+
+    QObject::connect(&process, &QProcess::readyReadStandardOutput, [&]() {
+        QByteArray output = process.readAllStandardOutput();
+        qDebug().noquote() << QString::fromUtf8(output);
+    });
+
+    qDebug() << "[PyRunner] Starting Python script:" << fullScript;
+    process.start(program, arguments);
+
+    if (!process.waitForStarted()) {
+        qWarning() << "[PyRunner] Failed to start Python process.";
         m_status = 1;
         return;
     }
 
-    int result = PyRun_SimpleFile(fp, fullpath.toStdString().c_str());
-    fclose(fp);
-    PyGILState_Release(gil);
-
-    if (result != 0) {
-        qDebug() << "[PyRunner] Python script returned error.\n";
-        m_status = 1;
-    } else {
-        qDebug() << "[PyRunner] Script executed successfully.\n";
-        m_status = 0;
+    while (process.state() != QProcess::NotRunning) {
+        process.waitForReadyRead(50);
     }
+
+    int exitCode = process.exitCode();
+    m_status = (exitCode == 0) ? 0 : 1;
+
+    qDebug() << "[PyRunner] Script finished with code:" << exitCode;
+
+    m_isRunning = false;
 }
 
 qint64 PyRunner::updateLevel(qint64 lid) {
-    run("tombll_manage_data",
-            {"tombll_manage_data.py", "-u", QString("%1").arg(lid)});
+    run("tombll_manage_data", {"-u", QString::number(lid)});
     return m_status;
 }
 
 qint64 PyRunner::syncCards() {
-    run("tombll_manage_data", {"tombll_manage_data.py", "-sc"});
+    run("tombll_manage_data", {"-sc"});
     return m_status;
 }
 
 qint64 PyRunner::getStatus() const {
     return m_status;
 }
-

@@ -19,9 +19,8 @@
 
 class PyRunner {
  public:
-    PyRunner();
-    explicit PyRunner(const QString& cwd);
-    ~PyRunner();
+    PyRunner() : m_status(0) { m_isRunning = false; }
+    ~PyRunner() {}
 
     bool setUpCamp(const QString& level);
     void run(const QString& script, const QVector<QString>& args);
@@ -32,6 +31,7 @@ class PyRunner {
  private:
     QString m_cwd;
     qint64 m_status;
+    bool m_isRunning;
 };
 
 #endif  // SRC_PYRUNNER_HPP_

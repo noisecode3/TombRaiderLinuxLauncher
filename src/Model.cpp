@@ -207,14 +207,12 @@ void Model::setupGame(int id) {
 }
 
 void Model::updateLevel(const int id) {
-    // qint64 status = m_pyRunner.updateLevel(id);
-    (void)m_pyRunner.updateLevel(id);
+    qint64 status = m_pyRunner.updateLevel(id);
     emit this->modelLoadingDoneSignal();
 }
 
 void Model::syncLevels() {
-    // qint64 status = m_pyRunner.syncCards();
-    (void)m_pyRunner.syncCards();
+    qint64 status = m_pyRunner.syncCards();
     emit this->modelLoadingDoneSignal();
 }
 

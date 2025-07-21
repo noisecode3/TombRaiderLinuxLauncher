@@ -352,7 +352,7 @@ def database_make_connection():
         (sqlite3.Connection): An open SQLite database connection.
 
     """
-    return sqlite3.connect(os.path.dirname(os.path.abspath(__file__)) + '/tombll.db')
+    return sqlite3.connect(os.path.dirname(os.path.abspath(__file__)) + '/tombll.db', timeout=10)
 
 
 def database_begin_write(con):
