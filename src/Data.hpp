@@ -307,7 +307,7 @@ struct ListItemData {
  private:
     void centerPixmap(QPixmap pixmap) {
         // Define target dimensions and maintain aspect ratio
-        QSize targetSize(640, 480);
+        QSize targetSize(160, 120);
         QSize newSize = pixmap.size().scaled(targetSize, Qt::KeepAspectRatio);
 
         // Scale the pixmap

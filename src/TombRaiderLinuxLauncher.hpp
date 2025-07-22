@@ -27,6 +27,7 @@
 #include <QVector>
 #include <QString>
 
+#include "../src/settings.hpp"
 #include "../src/Controller.hpp"
 #include "../src/levelViewList.hpp"
 #include "../src/LoadingIndicator.hpp"
@@ -173,10 +174,10 @@ class TombRaiderLinuxLauncher : public QMainWindow {
 
     LevelListModel *levelListModel;
     Controller& controller = Controller::getInstance();
-    QSettings m_settings;
+    QSettings& settings = getSettingsInstance();
     Ui::TombRaiderLinuxLauncher *ui;
-    LoadingIndicator* loader;
-    QString UpdateLevelDoneTo;
+    LoadingIndicator* m_loadingIndicatorWidget;
+    QString m_loadingDoneGoTo;
     QList<int> m_availableGames;
 };
 

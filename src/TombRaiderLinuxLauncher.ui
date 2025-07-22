@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1067</width>
+    <width>1095</width>
     <height>749</height>
    </rect>
   </property>
@@ -17,6 +17,9 @@
    <layout class="QGridLayout" name="gridLayoutCentalGrid">
     <item row="1" column="0">
      <widget class="QTabWidget" name="Tabs">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -1098,6 +1101,9 @@
        </layout>
       </widget>
       <widget class="QWidget" name="Modding">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <attribute name="title">
         <string>Modding</string>
        </attribute>
@@ -1175,7 +1181,7 @@
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_14">
                   <item>
-                   <widget class="QWidget" name="widgetCustomCommand" native="true">
+                   <widget class="QWidget" name="widgetEnvironmentVariables" native="true">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -1188,35 +1194,15 @@
                       <height>42</height>
                      </size>
                     </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_17">
-                     <item>
-                      <widget class="QLabel" name="labelCustomCommand">
-                       <property name="text">
-                        <string>Custom Command</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="lineEditCustomCommand">
-                       <property name="enabled">
-                        <bool>false</bool>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QWidget" name="widgetEnvironmentVariables" native="true">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>42</height>
-                     </size>
-                    </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_12">
                      <item>
                       <widget class="QLabel" name="labelEnvironmentVariables">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>22</height>
+                        </size>
+                       </property>
                        <property name="maximumSize">
                         <size>
                          <width>16777215</width>
@@ -1224,7 +1210,7 @@
                         </size>
                        </property>
                        <property name="text">
-                        <string>Environment Variables</string>
+                        <string>Environment Variables/Options</string>
                        </property>
                       </widget>
                      </item>
@@ -1285,16 +1271,6 @@
                        </property>
                        <item>
                         <property name="text">
-                         <string>Link and exit</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Just link</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
                          <string>Wine</string>
                         </property>
                        </item>
@@ -1305,12 +1281,81 @@
                        </item>
                        <item>
                         <property name="text">
-                         <string>Steam</string>
+                         <string>Link and launch Steam</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Link and exit</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Just link</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Umu-launcher</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Bash</string>
                         </property>
                        </item>
                       </widget>
                      </item>
+                     <item>
+                      <spacer name="horizontalSpacer">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
                     </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="widgetLevelID" native="true">
+                    <layout class="QHBoxLayout" name="horizontalLayout_17">
+                     <item>
+                      <widget class="QLabel" name="labelLevelID">
+                       <property name="text">
+                        <string>Level ID (lid)</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLCDNumber" name="lcdNumberLevelID"/>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_2">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label">
+                    <property name="text">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Info&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Runs system Wine/Proton from RESOURCEDIR/lid.TREL&lt;br/&gt;Set environment variables like:&lt;br/&gt;WINEDLLOVERRIDES=&amp;quot;winmm=n,b;ddraw=n,b&amp;quot; WINEFSYNC=&amp;quot;1&amp;quot;&lt;br/&gt;&lt;br/&gt;With Umu-launcher:&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'monospace'; font-size:12pt;&quot;&gt;WINEPREFIX=&amp;quot;~/.tombfix&amp;quot; PROTONPATH=&amp;quot;~/GE-Proton8-27/proton&amp;quot;&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;&lt;br/&gt;With Lutris (check &lt;/span&gt;&lt;span style=&quot; font-family:'monospace'; font-size:12pt;&quot;&gt;lutris -h&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;):&lt;br/&gt;Use game ID, e.g., &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;tomb-raider-2&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;&lt;br/&gt;With Bash:&lt;br/&gt;Executes RESOURCEDIR/lid.TREL/start.sh&lt;br/&gt;&lt;br/&gt;With Link:&lt;br/&gt;Creates symlink to RESOURCEDIR/lid.TREL/game.exe in GAMEDIR&lt;br/&gt;Choose correct game type&lt;br/&gt;&lt;br/&gt;Link and Exit: links then exits&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;Link and Launch Steam: also launches Steam game based on level type &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -1619,7 +1664,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;About&lt;/span&gt;&lt;/h3&gt;
 &lt;h4 style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:medium; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;&lt;/h4&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Welcome to the &lt;span style=&quot; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;! This application is designed to provide a streamlined and convenient way to launch your favorite Tomb Raider games on Linux. Currently, the launcher supports Tomb Raider 1-5 and trle.net but not TEN at the moment.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Welcome to the &lt;span style=&quot; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;! This application is designed to provide a streamlined and convenient way to launch your favorite Tomb Raider games on Linux. Currently, the launcher supports Tomb Raider 1-5, trle.net and TEN at the moment.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Our aim is to enhance your gaming experience by offering a user-friendly interface that simplifies game management and launching. The launcher is still a work in progress, and we are actively working on adding support for more games and improving functionality.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Stay tuned for updates and new features as we continue to develop and refine the Tomb Raider Linux Launcher. Your feedback and suggestions are always welcome to help us create the best possible tool for Tomb Raider fans.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Thank you for using the Tomb Raider Linux Launcher!&lt;/p&gt;
