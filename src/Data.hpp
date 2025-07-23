@@ -80,6 +80,18 @@ struct FolderNames {
         };
 };
 
+struct SteamAppIds {
+    QMap<int, int> data = {
+            {0, 0},
+            {1, 224960},
+            {2, 225300},
+            {3, 225320},
+            {4, 224980},
+            {5, 225000},
+            {6, 225020},
+        };
+};
+
 /**
  * @struct ExecutableNames
  * @brief Executable game file names used on Windows used to start the games.

@@ -16,7 +16,6 @@
 
 #include <QProcess>
 #include <QProcessEnvironment>
-#include <QDebug>
 
 
 class Runner : public QObject {
@@ -30,15 +29,20 @@ class Runner : public QObject {
     int getCommand();
     bool setCommand(const QString& cmd);
     void setWorkingDirectory(const QString& cwd);
+    void insertProcessEnvironment(const QString& name, const QString& value);
+    void clearProcessEnvironment();
+    void insertArguments(const QStringList& value);
+    void clearArguments();
 
  signals:
     void started();
     void stopped();
 
  private:
-    QProcessEnvironment m_env;
     QProcess m_process;
+    QProcessEnvironment m_env;
     QString m_command;
+    QStringList m_arguments;
     qint64 m_status;
 };
 

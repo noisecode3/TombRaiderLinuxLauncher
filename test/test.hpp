@@ -34,8 +34,7 @@ class PyRunnerTest : public QObject {
         QVERIFY(1 + 1 == 2);
     }
  private:
-    PyRunner pyrunner =
-        PyRunner("tester_root/usr/share/TombRaiderLinuxLauncher");
+    PyRunner pyrunner = PyRunner();
 };
 
 #endif  // TEST_TEST_HPP_

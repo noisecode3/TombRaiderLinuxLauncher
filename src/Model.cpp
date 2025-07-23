@@ -131,16 +131,54 @@ int Model::getItemState(int id) {
     return status;
 }
 
+bool Model::runBash(const int id) {
+    bool status = true;
+    // m_bashRunner
+    return status;
+}
+
+bool Model::runUmu(const int id) {
+    bool status = true;
+    // m_umuRunner
+    return status;
+}
+
+bool Model::runSteam(const int id) {
+    bool status = true;
+    QStringList arg;
+    const qint64 appid =  SteamAppIds().data[data.getType(id)];
+    arg << QString("steam://run/%1").arg(appid);
+    m_steamRunner.clearArguments();
+    m_steamRunner.insertArguments(arg);
+    m_steamRunner.run();
+    return status;
+}
+
+bool Model::runLutris(const QStringList& arg) {
+    bool status = true;
+    m_lutrisRunner.clearArguments();
+    m_lutrisRunner.insertArguments(arg);
+    m_lutrisRunner.run();
+    return status;
+}
+
 bool Model::runWine(const int id) {
     bool status = true;
+
+    QString s;
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
-        const QString s = QString("/Original.TR%1").arg(orgId);
-        m_wineRunner.setWorkingDirectory(fileManager.getExtraPathToExe(s));
+        s = QString("Original.TR%1").arg(orgId);
     } else {
-        const QString s = QString("/%1.TRLE").arg(id);
-        m_wineRunner.setWorkingDirectory(fileManager.getExtraPathToExe(s));
+        s = QString("%1.TRLE").arg(id);
     }
+    const QString e = fileManager.getExtraPathToExe(s);
+    const QString a = fileManager.getFullPath(e, false);
+    const QString b =  ExecutableNames().data[data.getType(id)];
+
+    m_wineRunner.setWorkingDirectory(a);
+    m_wineRunner.insertArguments(QStringList() << QString("%1/%2").arg(a, b));
+    // m_wineRunner.insertProcessEnvironment()
     m_wineRunner.run();
     return status;
 }

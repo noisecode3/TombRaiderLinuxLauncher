@@ -12,21 +12,35 @@
  */
 
 #include "../src/Runner.hpp"
+#include <QDebug>
+#include <QTextStream>
+#include <QObject>
 
 Runner::Runner() : m_env(QProcessEnvironment::systemEnvironment()) {
     m_status = 0;
-    // You can modify the environment of the process if needed
-    // m_env.insert("WINEPREFIX", "/path/to/wineprefix");
-    // m_process.setProcessEnvironment(m_env);
 }
 
 Runner::Runner(const QString& cmd)
     : m_env(QProcessEnvironment::systemEnvironment()) {
-    m_env.insert("WINEDLLOVERRIDES", "winmm=n,b;ddraw=n,b");
-    m_env.insert("WINEFSYNC", "1");
-    m_process.setProcessEnvironment(m_env);
     m_status = 0;
     m_command = cmd;
+}
+
+void Runner::insertArguments(const QStringList& value) {
+    m_arguments << value;
+}
+
+void Runner::clearArguments() {
+    m_arguments.clear();
+}
+
+void Runner::insertProcessEnvironment(
+        const QString& name, const QString& value) {
+    m_env.insert(name, value);
+}
+
+void Runner::clearProcessEnvironment() {
+    m_env.clear();
 }
 
 void Runner::setWorkingDirectory(const QString& cwd) {
@@ -35,7 +49,8 @@ void Runner::setWorkingDirectory(const QString& cwd) {
 
 void Runner::run() {
     // Start Wine with the application as an argument
-    m_process.start(m_command, QStringList() << "tomb4.exe");
+    m_process.setProcessEnvironment(m_env);
+    m_process.start(m_command, m_arguments);
     QObject::connect(&m_process, &QProcess::readyReadStandardOutput, [&]() {
         // Read and print the output to standard output
         QTextStream(stdout) << m_process.readAllStandardOutput();

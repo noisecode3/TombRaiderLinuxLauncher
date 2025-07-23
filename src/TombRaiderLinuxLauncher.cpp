@@ -370,13 +370,32 @@ void TombRaiderLinuxLauncher::setOptionsClicked() {
 }
 
 void TombRaiderLinuxLauncher::linkClicked() {
+    qDebug() << "linkClicked()";
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
         qint64 id = levelListModel->getLid(current);
         if (id != 0) {
-            if (settings.value(QString("level%1/RunnerType").arg(id)) == 2) {
+            qint64 type = settings.value(
+                    QString("level%1/RunnerType").arg(id)).toInt();
+            qDebug() << "Type was: " << type;
+            if (type == 0) {
                 Model::getInstance().runWine(id);
-            } else {
+            } else if (type == 1) {
+                const QString arg = ui->lineEditEnvironmentVariables->text();
+                QStringList argList = arg.split(
+                        QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+                Model::getInstance().runLutris(argList);
+            } else if (type == 2) {
+                if (!controller.link(id)) {
+                    qDebug() << "link error";
+                }
+                const QString arg = ui->lineEditEnvironmentVariables->text();
+                QStringList argList = arg.split(
+                        QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+                Model::getInstance().runLutris(argList);
+            } else if (type == 3) {
+                Model::getInstance().runSteam(id);
+            } else if (type == 4) {
                 if (levelListModel->getListType()) {
                     id = (-1)*id;
                 }
@@ -384,6 +403,21 @@ void TombRaiderLinuxLauncher::linkClicked() {
                     qDebug() << "link error";
                 }
                 QApplication::quit();
+            } else if (type == 5) {
+                if (levelListModel->getListType()) {
+                    id = (-1)*id;
+                }
+                if (!controller.link(id)) {
+                    qDebug() << "link error";
+                }
+            } else if (type == 6) {
+                const QString arg = ui->lineEditEnvironmentVariables->text();
+                QStringList argList = arg.split(
+                        QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+                qDebug() << "args was: " << argList[0];
+                Model::getInstance().runUmu(id);
+            } else if (type == 7) {
+                Model::getInstance().runBash(id);
             }
         }
     }

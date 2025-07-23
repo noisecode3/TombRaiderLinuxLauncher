@@ -68,6 +68,10 @@ class Model : public QObject {
     void getCoverList(QVector<ListItemData*>* tiems);
     int getItemState(int id);
     bool runWine(const int id);
+    bool runLutris(const QStringList& arg);
+    bool runSteam(const int id);
+    bool runUmu(const int id);
+    bool runBash(const int id);
     bool setLink(int id);
     QString getGameDirectory(int id);
     QString getExecutableName(int id);
@@ -93,7 +97,12 @@ class Model : public QObject {
         const int id, const QString& md5sum, const QString& name);
     bool unpackLevel(const int id, const QString& name, const QString& exe);
 
-    Runner m_wineRunner = Runner("/usr/bin/wine");
+    Runner m_wineRunner   = Runner("wine");
+    Runner m_lutrisRunner = Runner("lutris");
+    Runner m_steamRunner  = Runner("steam");
+    Runner m_umuRunner    = Runner("umu-launcher");
+    Runner m_bashRunner   = Runner("bash");
+
     PyRunner m_pyRunner;
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
