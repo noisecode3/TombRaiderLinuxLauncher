@@ -67,10 +67,14 @@ class Model : public QObject {
     void getList(QVector<ListItemData>* list);
     void getCoverList(QVector<ListItemData*>* tiems);
     int getItemState(int id);
-    bool runWine(const int id);
+    bool runUmu(const int id);
+    void setUmuEnv(const QVector<QPair<QString, QString>>& env);
+    void setUmuSetup();
+    bool runWine(const qint64 id);
+    void setWineEnv(const QVector<QPair<QString, QString>>& env);
+    void setWineSetup();
     bool runLutris(const QStringList& arg);
     bool runSteam(const int id);
-    bool runUmu(const int id);
     bool runBash(const int id);
     bool setLink(int id);
     QString getGameDirectory(int id);
@@ -100,7 +104,7 @@ class Model : public QObject {
     Runner m_wineRunner   = Runner("wine");
     Runner m_lutrisRunner = Runner("lutris");
     Runner m_steamRunner  = Runner("steam");
-    Runner m_umuRunner    = Runner("umu-launcher");
+    Runner m_umuRunner    = Runner("umu-run");
     Runner m_bashRunner   = Runner("bash");
 
     PyRunner m_pyRunner;

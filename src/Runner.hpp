@@ -29,21 +29,24 @@ class Runner : public QObject {
     int getCommand();
     bool setCommand(const QString& cmd);
     void setWorkingDirectory(const QString& cwd);
-    void insertProcessEnvironment(const QString& name, const QString& value);
+    void insertProcessEnvironment(const QPair<QString, QString> env);
     void clearProcessEnvironment();
     void insertArguments(const QStringList& value);
     void clearArguments();
+    void toggleSetupFlag();
 
  signals:
     void started();
     void stopped();
 
  private:
+    void handleOutput();
     QProcess m_process;
     QProcessEnvironment m_env;
     QString m_command;
     QStringList m_arguments;
     qint64 m_status;
+    bool m_setupFlag;
 };
 
 #endif  // SRC_RUNNER_HPP_

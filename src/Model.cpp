@@ -133,38 +133,6 @@ int Model::getItemState(int id) {
 
 bool Model::runBash(const int id) {
     bool status = true;
-    // m_bashRunner
-    return status;
-}
-
-bool Model::runUmu(const int id) {
-    bool status = true;
-    // m_umuRunner
-    return status;
-}
-
-bool Model::runSteam(const int id) {
-    bool status = true;
-    QStringList arg;
-    const qint64 appid =  SteamAppIds().data[data.getType(id)];
-    arg << QString("steam://run/%1").arg(appid);
-    m_steamRunner.clearArguments();
-    m_steamRunner.insertArguments(arg);
-    m_steamRunner.run();
-    return status;
-}
-
-bool Model::runLutris(const QStringList& arg) {
-    bool status = true;
-    m_lutrisRunner.clearArguments();
-    m_lutrisRunner.insertArguments(arg);
-    m_lutrisRunner.run();
-    return status;
-}
-
-bool Model::runWine(const int id) {
-    bool status = true;
-
     QString s;
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
@@ -172,15 +140,98 @@ bool Model::runWine(const int id) {
     } else {
         s = QString("%1.TRLE").arg(id);
     }
-    const QString e = fileManager.getExtraPathToExe(s);
-    const QString a = fileManager.getFullPath(e, false);
+    const QString a = fileManager.getFullPath(s, false);
     const QString b =  ExecutableNames().data[data.getType(id)];
 
-    m_wineRunner.setWorkingDirectory(a);
-    m_wineRunner.insertArguments(QStringList() << QString("%1/%2").arg(a, b));
-    // m_wineRunner.insertProcessEnvironment()
+    m_bashRunner.setWorkingDirectory(a);
+    m_bashRunner.insertArguments(QStringList()
+            << QString("%1/%2/start.sh").arg(a, b));
+    m_bashRunner.run();
+
+    return status;
+}
+
+bool Model::runUmu(const int id) {
+    bool status = true;
+
+    QString a;
+    if (id < 0) {  // we use original game id as negative number
+        int orgId = (-1)*id;
+        QString s = QString("Original.TR%1").arg(orgId);
+        a = fileManager.getFullPath(s, false);
+    } else {
+        QString s = QString("%1.TRLE").arg(id);
+        a = fileManager.getFullPath(s, false);
+    }
+
+    const QString b = fileManager.getExtraPathToExe(a);
+    const QString c =  ExecutableNames().data[data.getType(id)];
+
+    m_umuRunner.setWorkingDirectory(b);
+    m_umuRunner.insertArguments(QStringList() << QString("%1/%2").arg(b, c));
+    m_umuRunner.run();
+
+    return status;
+}
+
+
+void Model::setUmuEnv(const QVector<QPair<QString, QString>>& env) {
+    for (const QPair<QString, QString>& e : env) {
+        m_umuRunner.insertProcessEnvironment(e);
+    }
+}
+
+void Model::setUmuSetup() {
+    m_umuRunner.toggleSetupFlag();
+}
+
+bool Model::runSteam(const int id) {
+    bool status = true;
+    QStringList arg;
+    const qint64 appid =  SteamAppIds().data[data.getType(id)];
+    arg << QString("steam://run/%1").arg(appid);
+    m_steamRunner.insertArguments(arg);
+    m_steamRunner.run();
+    return status;
+}
+
+bool Model::runLutris(const QStringList& arg) {
+    bool status = true;
+    m_lutrisRunner.insertArguments(arg);
+    m_lutrisRunner.run();
+    return status;
+}
+
+bool Model::runWine(const qint64 id) {
+    bool status = true;
+
+    QString a;
+    if (id < 0) {  // we use original game id as negative number
+        int orgId = (-1)*id;
+        QString s = QString("Original.TR%1").arg(orgId);
+        a = fileManager.getFullPath(s, false);
+    } else {
+        QString s = QString("%1.TRLE").arg(id);
+        a = fileManager.getFullPath(s, false);
+    }
+
+    const QString b = fileManager.getExtraPathToExe(a);
+    const QString c =  ExecutableNames().data[data.getType(id)];
+
+    m_wineRunner.setWorkingDirectory(b);
+    m_wineRunner.insertArguments(QStringList() << QString("%1/%2").arg(b, c));
     m_wineRunner.run();
     return status;
+}
+
+void Model::setWineEnv(const QVector<QPair<QString, QString>>& env) {
+    for (const QPair<QString, QString>& e : env) {
+        m_wineRunner.insertProcessEnvironment(e);
+    }
+}
+
+void Model::setWineSetup() {
+    m_umuRunner.toggleSetupFlag();
 }
 
 bool Model::setLink(int id) {

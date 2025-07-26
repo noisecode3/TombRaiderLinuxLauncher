@@ -18,12 +18,13 @@
 
 Runner::Runner() : m_env(QProcessEnvironment::systemEnvironment()) {
     m_status = 0;
+    m_setupFlag = false;
 }
 
 Runner::Runner(const QString& cmd)
-    : m_env(QProcessEnvironment::systemEnvironment()) {
+    : m_env(QProcessEnvironment::systemEnvironment()), m_command(cmd) {
     m_status = 0;
-    m_command = cmd;
+    m_setupFlag = false;
 }
 
 void Runner::insertArguments(const QStringList& value) {
@@ -34,9 +35,8 @@ void Runner::clearArguments() {
     m_arguments.clear();
 }
 
-void Runner::insertProcessEnvironment(
-        const QString& name, const QString& value) {
-    m_env.insert(name, value);
+void Runner::insertProcessEnvironment(const QPair<QString, QString> env) {
+    m_env.insert(env.first, env.second);
 }
 
 void Runner::clearProcessEnvironment() {
@@ -47,20 +47,51 @@ void Runner::setWorkingDirectory(const QString& cwd) {
     m_process.setWorkingDirectory(cwd);
 }
 
-void Runner::run() {
-    // Start Wine with the application as an argument
-    m_process.setProcessEnvironment(m_env);
-    m_process.start(m_command, m_arguments);
-    QObject::connect(&m_process, &QProcess::readyReadStandardOutput, [&]() {
-        // Read and print the output to standard output
-        QTextStream(stdout) << m_process.readAllStandardOutput();
-    });
 
-    if (m_process.waitForStarted() == true) {
-        m_process.waitForFinished();
-        m_status = 0;
-    } else {
-        m_status = 1;
-        qWarning() << "Failed to start Wine process!";
+void Runner::toggleSetupFlag() {
+    m_setupFlag = !m_setupFlag;
+}
+
+void Runner::run() {
+    int status = 1;
+
+    m_process.setProcessEnvironment(m_env);
+    m_process.setProgram(m_command);
+    if (m_setupFlag) {
+        m_arguments << "-setup";
     }
+    m_process.setArguments(m_arguments);
+
+    // Merge stderr into stdout
+    m_process.setProcessChannelMode(QProcess::MergedChannels);
+
+    // Connect single output handler
+    QObject::connect(&m_process, &QProcess::readyReadStandardOutput,
+                     this,       &Runner::handleOutput);
+
+    m_process.start();
+    bool hasStarted = m_process.waitForStarted();
+
+    if (hasStarted) {
+        bool finished = false;
+        finished = m_process.waitForFinished();
+        if (finished) {
+            status = 0;
+        }
+    }
+
+    if (status != 0) {
+        qWarning() << "Failed to start or finish process!";
+    }
+
+    m_env.clear();
+    m_arguments.clear();
+    m_setupFlag = false;
+    m_status = status;
+}
+
+void Runner::handleOutput() {
+    QByteArray output = m_process.readAllStandardOutput();
+    QTextStream outStream(stdout);
+    outStream << output;
 }

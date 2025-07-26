@@ -166,11 +166,14 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     void readSavedSettings();
 
     /**
-     * Executes the sorting algorithm.
+     * Pars input string to string list.
      */
-    void sortItems(std::function<bool(
-        QListWidgetItem*,
-        QListWidgetItem*)> compare);
+    QStringList parsToArg(const QString& str);
+
+    /**
+     * Pars input string to list of environment variables.
+     */
+    QVector<QPair<QString, QString>> parsToEnv(const QString& str);
 
     LevelListModel *levelListModel;
     Controller& controller = Controller::getInstance();
