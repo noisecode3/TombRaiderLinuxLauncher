@@ -6,11 +6,14 @@ This project is my passion for Tomb Raider classics combined with learning C++, 
 
 ## Features
 
-- Integrates with Linux launchers (Steam, Lutris, etc.)
-- Controller mapper support (e.g., qjoypad, antimicrox)
-- Save file and configuration backups
+- Run level wine/proton from app
+- Search trle.net with a fast offline indexing
+- Lazy loading trle.net level info (runtime scraping)
+- Integrates with Linux other launchers (Steam, Lutris, etc.)
+- Controller mapper support using uinput
+- Game save and configuration file backups
 - Workarounds for Linux/Wine compatibility issues
-- Modding support for executable-based mods
+- Modding support for executable-based mods(Download and applying open source modes)
 - Level download and installation from trle.net
 - Pool level files to save disk space, need NTFS on Windows for hard links
 - Respectful scraping and filtering of data from trle.net (with site owner permission)
@@ -125,16 +128,27 @@ and trle.net part is implemented.
 
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot1.jpg)
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot2.jpg)
-![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot3.jpg)
 
 ## Guide
 
-The game uses old API and old optimizations, but you can play basically on a potato laptop.
-It depends on drivers quality, but with proton you can try `PROTON_USE_WINED3D=1`
-or using [dgvoodoo2] with `PROTON_USE_WINED3D=0` usually you get the best performance with (DXVK/dgvoodoo2).
-The easiest way to get this setup it using Lutris. Some levels can be lagging even on
-a computer with a strong video card.
-[dgvoodoo2]: <https://github.com/lutris/dgvoodoo2/releases>
+The game uses an old API with legacy instructions, timers, and single-threaded code, which means it can run on very low-end hardware — even a "potato" laptop.
+
+On Linux, technologies like NTSYNC, GE-Proton, and sometimes dgVoodoo2 can significantly improve performance. However, dgVoodoo2 only works with specific Proton versions and may introduce new problems such as input lag or crashes. Therefore, it's recommended to try running the game without dgVoodoo2 first and use it only as a last resort.
+
+I tested the original, unpatched Tomb Raider III on an i7-4800MQ using its integrated GPU, and launched it like this:
+
+```shell
+WINEPREFIX="/home/noisecode3/.newtombprefix" PROTONPATH="/home/noisecode3/.steam/steam/compatibilitytools.d/GE-Proton10-10" GAMEID="225320" MESA_SHADER_CACHE="true"
+```
+It ran nearly perfectly — only a tiny framedrop once per hour, or sometimes not at all. Timing jitter caused by Wine’s threading system is largely eliminated under NTSync.
+NTSync can help DDraw, DirectSound other I/O thread workers in wine. On Arch Linux (or other distros with a modular kernel), you’ll need to manually load the ntsync driver to enable proper synchronization support:
+
+```shell
+sudo modprobe ntsync
+
+```
+
+I listed some open source modes that work well with proton/wine.
 
 ### TR1
 
@@ -159,9 +173,8 @@ a computer with a strong video card.
 ## Targets
 
 I program mostly on Slackware-current and Arch, I gonna try target and test SteamOS for second release.
-I don't use Windows but it should build on both Windows and Linux with MinGw. I will test with Wine/VM.
+I don't use Windows but it should build on both Windows and Linux with MinGw.
 It's recommended as a standard to use Arch Linux or MSYS2 on Windows, with qt-creator.
-Its possible to set it up with neovim or vscode or any other but its more work.
 
 ## License
 

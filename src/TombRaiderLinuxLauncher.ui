@@ -795,7 +795,7 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QPushButton" name="pushButtonLink">
+                 <widget class="QPushButton" name="pushButtonRun">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -803,7 +803,7 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>Link</string>
+                   <string>Run</string>
                   </property>
                  </widget>
                 </item>

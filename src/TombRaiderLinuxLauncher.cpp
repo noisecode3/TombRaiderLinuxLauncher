@@ -23,7 +23,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
     // Button signal connections
     // List tab
-    connect(ui->pushButtonLink, SIGNAL(clicked()), this, SLOT(linkClicked()));
+    connect(ui->pushButtonRun, SIGNAL(clicked()), this, SLOT(linkClicked()));
     connect(ui->pushButtonDownload, SIGNAL(clicked()),
         this, SLOT(downloadClicked()));
     connect(ui->pushButtonInfo, SIGNAL(clicked()), this, SLOT(infoClicked()));
@@ -66,7 +66,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         this, SLOT(UpdateLevelDone()));
 
     // Set init state
-    ui->pushButtonLink->setEnabled(false);
+    ui->pushButtonRun->setEnabled(false);
     ui->pushButtonInfo->setEnabled(false);
     ui->pushButtonDownload->setEnabled(false);
     QWidget* filter_p = ui->filter;
@@ -296,19 +296,19 @@ void TombRaiderLinuxLauncher::levelDirSelected(qint64 id) {
         // if state == -1 then de-activate all buttons
 
         if (state == 1) {
-            ui->pushButtonLink->setEnabled(true);
+            ui->pushButtonRun->setEnabled(true);
             ui->pushButtonInfo->setEnabled(false);
             ui->pushButtonDownload->setEnabled(false);
         } else if (state == 2) {
-            ui->pushButtonLink->setEnabled(true);
+            ui->pushButtonRun->setEnabled(true);
             ui->pushButtonInfo->setEnabled(true);
             ui->pushButtonDownload->setEnabled(false);
         } else if (state == 0) {
-            ui->pushButtonLink->setEnabled(false);
+            ui->pushButtonRun->setEnabled(false);
             ui->pushButtonInfo->setEnabled(true);
             ui->pushButtonDownload->setEnabled(true);
         } else {
-            ui->pushButtonLink->setEnabled(false);
+            ui->pushButtonRun->setEnabled(false);
             ui->pushButtonInfo->setEnabled(false);
             ui->pushButtonDownload->setEnabled(false);
         }
@@ -319,22 +319,22 @@ void TombRaiderLinuxLauncher::onCurrentItemChanged(
         const QModelIndex &current, const QModelIndex &previous) {
     if (current.isValid()) {
         qint64 id = levelListModel->getLid(current);
+        ui->lcdNumberLevelID->display(QString::number(id));
         if (levelListModel->getListType()) {  // its the original game
             if (levelListModel->getInstalled(current)) {
-                ui->pushButtonLink->setEnabled(true);
+                ui->pushButtonRun->setEnabled(true);
                 ui->pushButtonDownload->setEnabled(false);
+                ui->pushButtonDownload->setText("Remove");
+
             } else {
-                ui->pushButtonLink->setEnabled(false);
+                ui->pushButtonRun->setEnabled(false);
+                ui->pushButtonDownload->setText("Download and install");
                 ui->pushButtonDownload->setEnabled(true);
             }
             ui->pushButtonInfo->setEnabled(false);
         } else {
             levelDirSelected(id);
         }
-        // ui->lineEditCustomCommand->setEnabled(true);
-        // ui->lineEditCustomCommand->setText(
-        //     m_settings.value(QString("level%1/CustomCommand")
-        //         .arg(id)).toString());
         ui->lineEditEnvironmentVariables->setEnabled(true);
         ui->lineEditEnvironmentVariables->setText(
             settings.value(QString("level%1/EnvironmentVariables")
@@ -343,6 +343,7 @@ void TombRaiderLinuxLauncher::onCurrentItemChanged(
         ui->comboBoxRunnerType->setCurrentIndex(
             settings.value(QString("level%1/RunnerType")
                 .arg(id)).toInt());
+        ui->pushButtonRun->setText(ui->comboBoxRunnerType->currentText());
         ui->commandLinkButtonLSSave->setEnabled(true);
         ui->commandLinkButtonLSReset->setEnabled(true);
     }
@@ -392,7 +393,6 @@ QVector<QPair<QString, QString>>
 }
 
 void TombRaiderLinuxLauncher::linkClicked() {
-    qDebug() << "linkClicked()";
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
         qint64 id = levelListModel->getLid(current);
@@ -578,14 +578,14 @@ void TombRaiderLinuxLauncher::workTick() {
                 settings.setValue(
                         QString("installed/game%1").arg(id),
                         "true");
-                ui->pushButtonLink->setEnabled(true);
+                ui->pushButtonRun->setEnabled(true);
                 ui->pushButtonInfo->setEnabled(false);
                 ui->pushButtonDownload->setEnabled(false);
             } else {
                 settings.setValue(
                         QString("installed/level%1").arg(id),
                         "true");
-                ui->pushButtonLink->setEnabled(true);
+                ui->pushButtonRun->setEnabled(true);
                 ui->pushButtonInfo->setEnabled(true);
                 ui->pushButtonDownload->setEnabled(false);
             }
@@ -598,7 +598,7 @@ void TombRaiderLinuxLauncher::workTick() {
 
 void TombRaiderLinuxLauncher::downloadError(int status) {
     ui->progressBar->setValue(0);
-    ui->pushButtonLink->setEnabled(true);
+    ui->pushButtonRun->setEnabled(true);
     ui->pushButtonInfo->setEnabled(true);
     ui->pushButtonDownload->setEnabled(true);
     ui->stackedWidgetBar->setCurrentWidget(
