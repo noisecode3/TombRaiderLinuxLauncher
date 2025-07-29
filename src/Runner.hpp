@@ -35,9 +35,8 @@ class Runner : public QObject {
     void clearArguments();
     void toggleSetupFlag();
 
- signals:
-    void started();
-    void stopped();
+ private slots:
+    void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
  private:
     void handleOutput();

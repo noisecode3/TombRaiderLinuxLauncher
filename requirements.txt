@@ -3,4 +3,3 @@ pillow
 cryptography
 pycurl
 tqdm
-git+https://github.com/ueber-devel/ueberzug.git

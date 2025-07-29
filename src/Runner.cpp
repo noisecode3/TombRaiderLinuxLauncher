@@ -19,6 +19,21 @@
 Runner::Runner() : m_env(QProcessEnvironment::systemEnvironment()) {
     m_status = 0;
     m_setupFlag = false;
+
+    // Merge stderr into stdout
+    m_process.setProcessChannelMode(QProcess::MergedChannels);
+
+    // Connect single output handler
+    QObject::connect(&m_process, &QProcess::readyReadStandardOutput,
+                     this,       &Runner::handleOutput);
+
+
+    // Connect to clean up and singnal View function
+    QObject::connect(
+            &m_process,
+            QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this,
+            &Runner::onProcessFinished);
 }
 
 Runner::Runner(const QString& cmd)
@@ -47,47 +62,41 @@ void Runner::setWorkingDirectory(const QString& cwd) {
     m_process.setWorkingDirectory(cwd);
 }
 
-
 void Runner::toggleSetupFlag() {
     m_setupFlag = !m_setupFlag;
 }
 
 void Runner::run() {
-    int status = 1;
-
     m_process.setProcessEnvironment(m_env);
     m_process.setProgram(m_command);
+
     if (m_setupFlag) {
         m_arguments << "-setup";
     }
     m_process.setArguments(m_arguments);
 
-    // Merge stderr into stdout
-    m_process.setProcessChannelMode(QProcess::MergedChannels);
-
-    // Connect single output handler
-    QObject::connect(&m_process, &QProcess::readyReadStandardOutput,
-                     this,       &Runner::handleOutput);
-
     m_process.start();
-    bool hasStarted = m_process.waitForStarted();
-
-    if (hasStarted) {
-        bool finished = false;
-        finished = m_process.waitForFinished();
-        if (finished) {
-            status = 0;
-        }
+    if (!m_process.waitForStarted()) {
+        qWarning() << "Process failed to start!";
+        qWarning() << "Error: " << m_process.errorString();
+        m_status = 1;
     }
+}
 
-    if (status != 0) {
-        qWarning() << "Failed to start or finish process!";
+void Runner::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+    if (exitStatus == QProcess::NormalExit) {
+        qDebug() << "Process exited normally with code:" << exitCode;
+        m_status = exitCode;
+    } else {
+        qWarning() << "Process crashed or was killed!";
+        m_status = 1;
     }
 
     m_env.clear();
+    m_env.insert(QProcessEnvironment::systemEnvironment());
+
     m_arguments.clear();
     m_setupFlag = false;
-    m_status = status;
 }
 
 void Runner::handleOutput() {

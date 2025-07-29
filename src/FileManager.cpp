@@ -20,7 +20,7 @@
 #include <QByteArray>
 #include <QDataStream>
 #include "../src/GameFileTree.hpp"
-#include "../miniz/miniz.h"
+#include "../miniz/miniz.h"  // IWYU pragma: keep
 #include "../miniz/miniz_zip.h"
 #include "../src/gameFileTreeData.hpp"
 #include "../src/binary.hpp"
