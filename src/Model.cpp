@@ -12,16 +12,21 @@
  */
 
 #include "../src/Model.hpp"
+#include "../src/Data.hpp"
+#include "../src/Path.hpp"
 
 Model::Model() {}
 Model::~Model() {}
 
 bool Model::setupDirectories(const QString& level, const QString& game) {
     bool status = false;
+
     if (fileManager.setUpCamp(level, game) &&
             downloader.setUpCamp(level) &&
             data.initializeDatabase(level) &&
             m_pyRunner.setUpCamp(level)) {
+        Path::setProgramFilesPath();
+        Path::setResourcePath();
         status = true;
     }
     return status;
@@ -34,8 +39,10 @@ void Model::setup(const QString& level, const QString& game) {
         // Iterate backward to avoid index shifting
         for (int i = 4; i >= 0; i--) {
             int dirStatus = commonFiles[i];
-            if (fileManager.checkDir(
-                QString("/Original.TR%1").arg(i + 1), false) == true) {
+
+            Path p(Path::resource);
+            p << QString("Original.TR%1").arg(i + 1);
+            if (p.isDir()) {
                 commonFiles[i] = i + 1;
             } else if (dirStatus == 2) {
                 commonFiles[i] = -(i + 1);
@@ -111,16 +118,19 @@ void Model::getCoverList(QVector<ListItemData*>* items) {
 
 int Model::getItemState(int id) {
     int status = 0;
+
+    Path path(Path::resource);
     if (id < 0) {
-        QString dir = QString("Original.TR%1").arg(id);
-        if (fileManager.checkDir(dir, false)) {
+        path << QString("Original.TR%1").arg(id);
+        if (path.isDir()) {
             status = 2;
         } else {
             status = 1;
         }
     } else if (id > 0) {
-        QString dir = QString("%1.TRLE").arg(id);
-        if (fileManager.checkDir(dir, false)) {
+        path << QString("%1.TRLE").arg(id);
+        qDebug() << "getItemState: path is " << path.get();
+        if (path.isDir()) {
             status = 2;
         } else {
             status = 0;
@@ -175,8 +185,8 @@ bool Model::runUmu(const int id) {
 }
 
 
-void Model::setUmuEnv(const QVector<QPair<QString, QString>>& env) {
-    for (const QPair<QString, QString>& e : env) {
+void Model::setUmuEnv(const QVector<QPair<QString, QString>>& environment) {
+    for (const QPair<QString, QString>& e : environment) {
         m_umuRunner.insertProcessEnvironment(e);
     }
 }
@@ -224,8 +234,8 @@ bool Model::runWine(const qint64 id) {
     return status;
 }
 
-void Model::setWineEnv(const QVector<QPair<QString, QString>>& env) {
-    for (const QPair<QString, QString>& e : env) {
+void Model::setWineEnv(const QVector<QPair<QString, QString>>& environment) {
+    for (const QPair<QString, QString>& e : environment) {
         m_wineRunner.insertProcessEnvironment(e);
     }
 }
@@ -236,19 +246,22 @@ void Model::setWineSetup() {
 
 bool Model::setLink(int id) {
     bool status = false;
+    Path path(Path::resource);
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
-        const QString s = QString("/Original.TR%1").arg(orgId);
-        if (fileManager.checkDir(s, false )) {
+        path << QString("Original.TR%1").arg(orgId);
+        const QString s = path.get();
+        if (path.isDir()) {
             status = fileManager.linkGameDir(s, getGameDirectory(orgId));
         } else {
             qDebug() << "Dirr: " << s << " seems to bee missing";
         }
     } else {
-        const QString s = QString("/%1.TRLE").arg(id);
+        path << QString("%1.TRLE").arg(id);
+        const QString s = path.get();
         const int t = data.getType(id);
 
-        if (fileManager.checkDir(s, false )) {
+        if (path.isDir()) {
             status = fileManager.linkGameDir(s, getGameDirectory(t));
         } else {
             qDebug() << "Dirr: " << s << " seems to bee missing";
@@ -258,7 +271,7 @@ bool Model::setLink(int id) {
 }
 
 void Model::setupGame(int id) {
-    QVector<File> list = data.getFileList(id);
+    QVector<FileListItem> list = data.getFileList(id);
     const size_t s = list.size();
     assert(s != (unsigned int)0);
 
@@ -363,7 +376,11 @@ void Model::getLevel(int id) {
         downloader.setUrl(zipData.m_URL);
         downloader.setSaveFile(zipData.m_fileName);
         // this if just slips up execution but has nothing to do with the error
-        if (fileManager.checkFile(zipData.m_fileName, false)) {
+
+        Path path(Path::resource);
+        path << zipData.m_fileName;
+
+        if (path.isFile()) {
             qWarning() << "File exists:" << zipData.m_fileName;
             status = getLevelHaveFile(id, zipData.m_MD5sum, zipData.m_fileName);
         } else {

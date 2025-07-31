@@ -21,6 +21,7 @@
 #include <QByteArray>
 #include <QCryptographicHash>
 #include <QDebug>
+#include "../src/Path.hpp"
 
 class FileManager : public QObject {
     Q_OBJECT
@@ -60,38 +61,6 @@ class FileManager : public QObject {
      *         if an error occurs.
      */
     const QString calculateMD5(const QString& file, bool lookGameDir);
-
-    /**
-     * @brief Checks if a given directory exists.
-     *
-     * This function constructs the full path of a directory based on the given
-     * filename and the specified directory type (game directory or level directory).
-     * It then verifies whether the directory exists.
-     *
-     * @param file The name of the directory to check.
-     * @param lookGameDir If `true`, the directory is checked in the game directory;
-     *                    otherwise, it is checked in the level directory.
-     * @return `true` if the directory exists, otherwise `false`.
-     *
-     * @note This function does not check if the path is actually a directory.
-     */
-    bool checkDir(const QString& file, bool lookGameDir);
-
-    /**
-     * @brief Checks if a given file exists.
-     *
-     * This function constructs the full path of a file based on the given filename
-     * and the specified directory type (game directory or level directory).
-     * It then verifies whether the file exists.
-     *
-     * @param file The name of the file to check.
-     * @param lookGameDir If `true`, the file is checked in the game directory;
-     *                    otherwise, it is checked in the level directory.
-     * @return `true` if the file exists, otherwise `false`.
-     *
-     * @note This function does not check if the path is a regular file.
-     */
-    bool checkFile(const QString& file, bool lookGameDir);
 
     /**
      * @brief Checks the type of a file path and returns a status code.

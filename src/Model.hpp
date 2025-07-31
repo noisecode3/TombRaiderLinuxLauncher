@@ -23,6 +23,7 @@
 
 #include <cassert>
 
+#include "../src/Path.hpp"
 #include "../src/Data.hpp"
 #include "../src/FileManager.hpp"
 #include "../src/Network.hpp"
@@ -68,10 +69,10 @@ class Model : public QObject {
     void getCoverList(QVector<ListItemData*>* tiems);
     int getItemState(int id);
     bool runUmu(const int id);
-    void setUmuEnv(const QVector<QPair<QString, QString>>& env);
+    void setUmuEnv(const QVector<QPair<QString, QString>>& environment);
     void setUmuSetup();
     bool runWine(const qint64 id);
-    void setWineEnv(const QVector<QPair<QString, QString>>& env);
+    void setWineEnv(const QVector<QPair<QString, QString>>& environment);
     void setWineSetup();
     bool runLutris(const QStringList& arg);
     bool runSteam(const int id);

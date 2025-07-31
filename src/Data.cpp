@@ -267,9 +267,9 @@ void Data::setDownloadMd5(const int id, const QString& newMd5sum) {
     }
 }
 
-QVector<File> Data::getFileList(const int id) {
+QVector<FileListItem> Data::getFileList(const int id) {
     QSqlQuery query(db);
-    QVector<File> list;
+    QVector<FileListItem> list;
 
     if (!query.prepare(
             "SELECT File.path, File.md5sum "

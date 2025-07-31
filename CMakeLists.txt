@@ -95,6 +95,8 @@ set(SOURCES_MC
     src/Model.cpp
     src/Network.hpp
     src/Network.cpp
+    src/Path.cpp
+    src/Path.hpp
     src/PyRunner.cpp
     src/PyRunner.hpp
     src/Runner.cpp

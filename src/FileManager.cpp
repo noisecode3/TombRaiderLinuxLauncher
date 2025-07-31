@@ -24,6 +24,7 @@
 #include "../miniz/miniz_zip.h"
 #include "../src/gameFileTreeData.hpp"
 #include "../src/binary.hpp"
+#include "../src/Path.hpp"
 
 bool FileManager::backupGameDir(const QString &gameDir) {
     bool status = false;
@@ -68,17 +69,6 @@ const QString FileManager::calculateMD5(
     return result;
 }
 
-bool FileManager::checkDir(const QString& file, bool lookGameDir) {
-    const QString path = FileManager::getFullPath(file, lookGameDir);
-    QDir directory(path);
-    return directory.exists();
-}
-
-bool FileManager::checkFile(const QString& file, bool lookGameDir) {
-    const QString path = FileManager::getFullPath(file, lookGameDir);
-    QFile fFile(path);
-    return fFile.exists();
-}
 
 int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
     int status = 0;

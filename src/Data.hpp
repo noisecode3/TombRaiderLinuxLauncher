@@ -25,13 +25,12 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-
 /**
- * @struct File
+ * @struct FileListItem
  * @brief Files object to keep track of files.
  *
  */
-struct File {
+struct FileListItem {
     QString path;
     QString md5sum;
 };
@@ -459,28 +458,33 @@ class Data : public QObject {
      * @return The number of Level records
      */
     qint64 getListRowCount();
+
     /**
      * @brief Get the main list of levels, without the picture
      * @return The QVector ListItemData is all the level metadata
      */
     QVector<ListItemData> getListItems();
+
     /**
      * @brief Add Cover Pictures to ListItemData pointers
      * @param Cache like used QVector for holding ListItemData pointers
      */
     void getCoverPictures(QVector<ListItemData*>* items);
+
     /**
      * @brief Get the info page, this is HTML and picture data you see on trel.net
      * @param trle.net lid
      * @return The InfoData is a struct of QString and QVector<QPixmap>
      */
     InfoData getInfo(int id);
+
     /**
      * @brief Get the walkthrough HTML page
      * @param trle.net lid
      * @return HTML and Qt picture data
      */
     QString getWalkthrough(int id);
+
     /**
      * @brief Get the type of a level
      * @param trle.net lid
@@ -493,13 +497,15 @@ class Data : public QObject {
      * @param Id number for original game
      * @return File vector list (path and md5sum)
      */
-    QVector<File> getFileList(const int id);
+    QVector<FileListItem> getFileList(const int id);
+
     /**
      * @brief Get download info for a level
      * @param trle.net lid
      * @return zip data, url, filename, size, etc...
      */
     ZipData getDownload(const int id);
+
     /**
      * @brief Record new md5sum to database.
      * @param trle.net lid

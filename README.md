@@ -6,8 +6,8 @@ This project is my passion for Tomb Raider classics combined with learning C++, 
 
 ## Features
 
-- Run level wine/proton from app
-- Search trle.net with a fast offline indexing
+- Run level with Wine/Proton from app
+- Search trle.net with fast offline indexing
 - Lazy loading trle.net level info (runtime scraping)
 - Integrates with Linux other launchers (Steam, Lutris, etc.)
 - Controller mapper support using uinput
@@ -148,7 +148,7 @@ sudo modprobe ntsync
 
 ```
 
-I listed some open source modes that work well with proton/wine.
+I listed some open source modes that work well with Proton/Wine.
 
 ### TR1
 
