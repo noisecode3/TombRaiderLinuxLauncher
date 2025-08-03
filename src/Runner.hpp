@@ -33,7 +33,7 @@ class Runner : public QObject {
     void clearProcessEnvironment();
     void insertArguments(const QStringList& value);
     void clearArguments();
-    void toggleSetupFlag();
+    void setupFlag(bool setup);
 
  private slots:
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);

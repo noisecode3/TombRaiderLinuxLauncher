@@ -43,8 +43,10 @@ void Model::setup(const QString& level, const QString& game) {
             Path p(Path::resource);
             p << QString("Original.TR%1").arg(i + 1);
             if (p.isDir()) {
+                // game id number
                 commonFiles[i] = i + 1;
             } else if (dirStatus == 2) {
+                // negative id for not installed
                 commonFiles[i] = -(i + 1);
             } else {
                 commonFiles.removeAt(i);
@@ -67,7 +69,7 @@ void Model::checkCommonFiles(QList<int>* games) {
             games->append(2);
         } else if (dirStatus == 3) {
             games->append(3);
-            qDebug() << "File could be a broken link or a regular file";
+            qDebug() << "Could be a broken link/regular file";
         } else {
             games->append(0);
             qDebug() << "File don't exist";
@@ -99,10 +101,10 @@ QString Model::getExecutableName(int id) {
 
 int Model::checkGameDirectory(int id) {
     int status = -1;
-    const QString s = getGameDirectory(id);
-    qDebug() << s;
-    if (s != "") {
-        status = fileManager.checkFileInfo(s, true);
+    Path path(Path::programFiles);
+    path << getGameDirectory(id);
+    if (path.get() != "") {
+        status = fileManager.checkFileInfo(path);
     }
     return status;
 }
@@ -143,19 +145,18 @@ int Model::getItemState(int id) {
 
 bool Model::runBash(const int id) {
     bool status = true;
-    QString s;
+    Path path(Path::resource);
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
-        s = QString("Original.TR%1").arg(orgId);
+        path << QString("Original.TR%1").arg(orgId);
     } else {
-        s = QString("%1.TRLE").arg(id);
+        path << QString("%1.TRLE").arg(id);
     }
-    const QString a = fileManager.getFullPath(s, false);
-    const QString b =  ExecutableNames().data[data.getType(id)];
+    const QString s = path.get();
+    m_bashRunner.setWorkingDirectory(s);
+    path << "start.sh";
 
-    m_bashRunner.setWorkingDirectory(a);
-    m_bashRunner.insertArguments(QStringList()
-            << QString("%1/%2/start.sh").arg(a, b));
+    m_bashRunner.insertArguments(QStringList() << path.get());
     m_bashRunner.run();
 
     return status;
@@ -163,27 +164,34 @@ bool Model::runBash(const int id) {
 
 bool Model::runUmu(const int id) {
     bool status = true;
+    Path path(Path::resource);
 
-    QString a;
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
-        QString s = QString("Original.TR%1").arg(orgId);
-        a = fileManager.getFullPath(s, false);
+        path << QString("Original.TR%1").arg(orgId);
     } else {
-        QString s = QString("%1.TRLE").arg(id);
-        a = fileManager.getFullPath(s, false);
+        path << QString("%1.TRLE").arg(id);
     }
+    QString s = path.get();
+    qDebug() << "Model: path.get() "  << s;
 
-    const QString b = fileManager.getExtraPathToExe(a);
-    const QString c =  ExecutableNames().data[data.getType(id)];
+    path = fileManager.getExtraPathToExe(path);
 
-    m_umuRunner.setWorkingDirectory(b);
-    m_umuRunner.insertArguments(QStringList() << QString("%1/%2").arg(b, c));
+    s = path.get();
+    qDebug() << "Model: path.get() "  << s;
+
+
+    m_umuRunner.setWorkingDirectory(s);
+
+    path << ExecutableNames().data[data.getType(id)];
+    s = path.get();
+    qDebug() << "Model: path.get() "  << s;
+
+    m_umuRunner.insertArguments(QStringList() << path.get());
     m_umuRunner.run();
 
     return status;
 }
-
 
 void Model::setUmuEnv(const QVector<QPair<QString, QString>>& environment) {
     for (const QPair<QString, QString>& e : environment) {
@@ -191,8 +199,8 @@ void Model::setUmuEnv(const QVector<QPair<QString, QString>>& environment) {
     }
 }
 
-void Model::setUmuSetup() {
-    m_umuRunner.toggleSetupFlag();
+void Model::setUmuSetup(bool setup) {
+    m_umuRunner.setupFlag(setup);
 }
 
 bool Model::runSteam(const int id) {
@@ -214,22 +222,20 @@ bool Model::runLutris(const QStringList& arg) {
 
 bool Model::runWine(const qint64 id) {
     bool status = true;
+    Path path(Path::resource);
 
-    QString a;
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
-        QString s = QString("Original.TR%1").arg(orgId);
-        a = fileManager.getFullPath(s, false);
+        path << QString("Original.TR%1").arg(orgId);
     } else {
-        QString s = QString("%1.TRLE").arg(id);
-        a = fileManager.getFullPath(s, false);
+        path <<  QString("%1.TRLE").arg(id);
     }
 
-    const QString b = fileManager.getExtraPathToExe(a);
-    const QString c =  ExecutableNames().data[data.getType(id)];
+    path = fileManager.getExtraPathToExe(path);
+    m_wineRunner.setWorkingDirectory(path.get());
+    path << ExecutableNames().data[data.getType(id)];
 
-    m_wineRunner.setWorkingDirectory(b);
-    m_wineRunner.insertArguments(QStringList() << QString("%1/%2").arg(b, c));
+    m_wineRunner.insertArguments(QStringList() << path.get());
     m_wineRunner.run();
     return status;
 }
@@ -240,71 +246,92 @@ void Model::setWineEnv(const QVector<QPair<QString, QString>>& environment) {
     }
 }
 
-void Model::setWineSetup() {
-    m_umuRunner.toggleSetupFlag();
+void Model::setWineSetup(bool setup) {
+    m_umuRunner.setupFlag(setup);
 }
 
 bool Model::setLink(int id) {
     bool status = false;
-    Path path(Path::resource);
+    Path from(Path::resource);
+    Path to(Path::programFiles);
+
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
-        path << QString("Original.TR%1").arg(orgId);
-        const QString s = path.get();
-        if (path.isDir()) {
-            status = fileManager.linkGameDir(s, getGameDirectory(orgId));
+        from << QString("Original.TR%1").arg(orgId);
+        to   << getGameDirectory(orgId);
+        if (from.isDir()) {
+            status = fileManager.linkGameDir(from, to);
         } else {
-            qDebug() << "Dirr: " << s << " seems to bee missing";
+            qDebug() << "Dirr: " << from.get() << " seems to bee missing";
         }
     } else {
-        path << QString("%1.TRLE").arg(id);
-        const QString s = path.get();
-        const int t = data.getType(id);
+        from << QString("%1.TRLE").arg(id);
+        const QString s = getGameDirectory(data.getType(id));
+        to   << s;
+        qDebug() << "Model :to " <<  to.get();
+        qDebug() << "Model :from " << from.get();
 
-        if (path.isDir()) {
-            status = fileManager.linkGameDir(s, getGameDirectory(t));
+        if (from.isDir()) {
+            status = fileManager.linkGameDir(from, to);
         } else {
-            qDebug() << "Dirr: " << s << " seems to bee missing";
+            qDebug() << "Dirr: " << from.get() << " seems to bee missing";
         }
     }
+
     return status;
 }
 
 void Model::setupGame(int id) {
     QVector<FileListItem> list = data.getFileList(id);
     const size_t s = list.size();
-    assert(s != (unsigned int)0);
+    assert(s != 0);
+    Path from(Path::programFiles);
+    Path to(Path::resource);
 
-    const QString levelPath = QString("/Original.TR%1/").arg(id);
-    const QString gamePath = QString("/%1/").arg(getGameDirectory(id));
+    from << getGameDirectory(id);
+    to << QString("Original.TR%1").arg(id);
 
+    quint64 lastPrintedPercent = 0;
     for (size_t i = 0; i < s; i++) {
-        const QString levelFile = QString("%1%2").arg(levelPath, list[i].path);
-        const QString gameFile = QString("%1%2").arg(gamePath, list[i].path);
-        const QString calculated = fileManager.calculateMD5(gameFile, true);
+        Path fromFile = from;
+        fromFile << list[i].path;
+        Path toFile = to;
+        toFile << list[i].path;
+
+        const QString calculated = fileManager.calculateMD5(fromFile);
 
         if (list[i].md5sum == calculated) {
-            (void)fileManager.copyFile(gameFile, levelFile,  true);
+            (void)fileManager.copyFile(fromFile, toFile);
+
+            qint64 percent = (i * 100) / s;
+            if (percent != lastPrintedPercent) {
+                int delta = percent - lastPrintedPercent;
+                for (int j=0; j < delta; j++) {
+                    emit this->modelTickSignal();
+                    QCoreApplication::processEvents();
+                }
+                lastPrintedPercent = percent;
+            }
         } else {
             qDebug() << "Original file was modified, had" << list[i].md5sum
                      << " got " << calculated << " for file "
                      << list[i].path << Qt::endl;
-            (void)fileManager.cleanWorkingDir(levelPath);
+            (void)fileManager.cleanWorkingDir(to);
             break;
         }
     }
-    if (fileManager.backupGameDir(gamePath)) {
-        // remove the ending '/' and instantly link to
-        // the game directory link to new game directory
-        const QString src = levelPath.chopped(1);
-        const QString des = gamePath.chopped(1);
-        if (!fileManager.linkGameDir(src, des)) {
+
+    if (fileManager.backupGameDir(from)) {
+        if (!fileManager.linkGameDir(to, from)) {
             qDebug() << "Faild to create the link to the new game directory";
         }
     }
-    for (int i=0; i < 100; i++) {
-        emit this->modelTickSignal();
-        QCoreApplication::processEvents();
+
+    if (lastPrintedPercent < 100) {
+        for (int i = lastPrintedPercent; i < 100; i++) {
+            emit this->modelTickSignal();
+            QCoreApplication::processEvents();
+        }
     }
 }
 
@@ -328,15 +355,15 @@ bool Model::unpackLevel(const int id, const QString& name, const QString& exe) {
 }
 
 bool Model::getLevelHaveFile(
-        const int id, const QString& md5sum, const QString& name) {
+        const int id, const QString& md5sum, Path path) {
     bool status = false;
     if (md5sum != "") {
-        const QString existingFilesum = fileManager.calculateMD5(name, false);
+        const QString existingFilesum = fileManager.calculateMD5(path);
         if (existingFilesum != md5sum) {
             downloader.run();
             if (downloader.getStatus() == 0) {
                 const QString downloadedSum =
-                    fileManager.calculateMD5(name, false);
+                    fileManager.calculateMD5(path);
                 if (downloadedSum != md5sum) {
                     data.setDownloadMd5(id, downloadedSum);
                 }
@@ -355,11 +382,11 @@ bool Model::getLevelHaveFile(
 }
 
 bool Model::getLevelDontHaveFile(
-        const int id, const QString& md5sum, const QString& name) {
+        const int id, const QString& md5sum, Path path) {
     bool status = false;
     downloader.run();
-    if (!downloader.getStatus()) {
-        const QString downloadedSum = fileManager.calculateMD5(name, false);
+    if (downloader.getStatus() == 0) {
+        const QString downloadedSum = fileManager.calculateMD5(path);
         if (downloadedSum != md5sum) {
             data.setDownloadMd5(id, downloadedSum);
         }
@@ -381,12 +408,11 @@ void Model::getLevel(int id) {
         path << zipData.m_fileName;
 
         if (path.isFile()) {
-            qWarning() << "File exists:" << zipData.m_fileName;
-            status = getLevelHaveFile(id, zipData.m_MD5sum, zipData.m_fileName);
+            qWarning() << "File exists:" << path.get();
+            status = getLevelHaveFile(id, zipData.m_MD5sum, path);
         } else {
             qDebug() << "File does not exist:" << zipData.m_fileName;
-            status = getLevelDontHaveFile(
-                    id, zipData.m_MD5sum, zipData.m_fileName);
+            status = getLevelDontHaveFile(id, zipData.m_MD5sum, path);
         }
         if (status == true) {
             if (!unpackLevel(

@@ -29,7 +29,7 @@ class GameFileTree {
 
     void printTree(int level) const;
     bool matchesSubtree(const GameFileTree* other) const;
-    QString matchesFromAnyNode(const GameFileTree* other);
+    QStringList matchesFromAnyNode(const GameFileTree* other);
 
  private:
     explicit GameFileTree(

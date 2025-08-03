@@ -26,32 +26,29 @@
 #include "../src/binary.hpp"
 #include "../src/Path.hpp"
 
-bool FileManager::backupGameDir(const QString &gameDir) {
+bool FileManager::backupGameDir(Path path) {
     bool status = false;
-    const QString source = QString("%1%2")
-        .arg(m_gameDir.absolutePath(), gameDir.chopped(1));
-    const QString destination = QString("%1%2").arg(source, ".old");
-    QDir directory;
-    if (directory.rename(source, destination) == true) {
-        qDebug() << "Directory renamed successfully. New path:" << destination;
+    Path backupPath = path;
+    backupPath << ".old";
+
+    if (QDir().rename(path.get(), backupPath.get()) == true) {
+        qDebug() << "Directory renamed successfully. New path:"
+                                                    << backupPath.get();
         status = true;
     } else {
-        qWarning() << "Failed to rename directory:" << source;
+        qWarning() << "Failed to rename directory:" << path.get();
         status = false;
     }
     return status;
 }
 
-const QString FileManager::calculateMD5(
-        const QString& fileName, bool lookGameDir) {
-    const QString path = FileManager::getFullPath(fileName, lookGameDir);
-    QFileInfo fileInfo(path);
+const QString FileManager::calculateMD5(Path path) {
     QString result;
 
-    if (fileInfo.exists() && !fileInfo.isFile()) {
-        qDebug() << "Error: The path is not a regular file." << path;
+    if (path.exists() && !path.isFile()) {
+        qDebug() << "Error: The path is not a regular file." << path.get();
     } else {
-        QFile file(path);
+        QFile file(path.get());
         bool status = file.open(QIODevice::ReadOnly);  // flawfinder: ignore
         if (!status) {
             qDebug()
@@ -69,36 +66,32 @@ const QString FileManager::calculateMD5(
     return result;
 }
 
-
-int FileManager::checkFileInfo(const QString& file, bool lookGameDir) {
+int FileManager::checkFileInfo(Path path) {
     int status = 0;
-    const QString path = FileManager::getFullPath(file, lookGameDir);
-    QFileInfo fileInfo(path);
-    if (fileInfo.isDir() == true) {
+
+    if (path.exists() == true) {
         qDebug() << "The path is a directory.";
-        if (fileInfo.isSymLink() == true) {
+        if (path.isSymLink() == true) {
             qDebug() << "return value 1:The path is a symbolic link.";
             status = 1;
         } else {
             qDebug() << "return value 2:The path is not a symbolic link.";
             status = 2;
         }
-    } else {
-        qDebug() << "value 3:The path is not a directory.";
-        qDebug() << "filePath " << path;
-        status = 3;
+        if (!path.isDir()) {
+            qDebug() << "value 3:The path is not a directory.";
+            qDebug() << "filePath " << path.get();
+            status = 3;
+        }
     }
     return status;
 }
 
-int FileManager::cleanWorkingDir(const QString &levelDir) {
+int FileManager::cleanWorkingDir(Path path) {
     int status = 0;
-    const QString directoryPath = QString("%1%2%3")
-        .arg(m_levelDir.absolutePath(), m_sep, levelDir);
 
-    QDir directory(directoryPath);
-    if (directory.exists() == true) {
-        if (directory.removeRecursively() == true) {
+    if (path.isDir() == true) {
+        if (QDir(path.get()).removeRecursively() == true) {
             qDebug() << "Working Directory removed successfully.";
             status = 0;
         } else {
@@ -111,48 +104,39 @@ int FileManager::cleanWorkingDir(const QString &levelDir) {
     return status;
 }
 
-int FileManager::copyFile(const QString &gameFile,
-        const QString &levelFile, bool fromGameDir) {
+int FileManager::copyFile(Path from, Path to) {
     int status = 0;
 
-    const QString gamePath = QString("%1%2")
-        .arg(m_gameDir.absolutePath(), gameFile);
-
-    const QString levelPath = QString("%1%2")
-        .arg(m_levelDir.absolutePath(), levelFile);
-
-    const QString sourceFile = fromGameDir ? gamePath : levelPath;
-    const QString destinationFile = fromGameDir ? levelPath : gamePath;
-
     // Ensure the destination directory exists
-    const QFileInfo destinationFileInfo(destinationFile);
-    QDir destinationDir(destinationFileInfo.absolutePath());
-    if (!destinationDir.exists() == true) {
-        if (!QDir().mkpath(destinationDir.absolutePath())) {
-            qDebug() << "Error creating destination directory.";
+    if (!QDir(to.getDir()).exists() == true) {
+        if (!QDir().mkpath(to.getDir())) {
+            qDebug() << "FileManager: Error creating destination directory.";
             status = 1;
         }
-    } else if (QFile::copy(sourceFile, destinationFile) == true) {
-        qDebug() << "File copy to " << destinationFile << " successfully.";
-        status = 0;
-    } else {
-        if (QFile::exists(destinationFile) == true) {
-            qDebug() << "Target file already exist.";
-            status = 2;
-        } else {
-            qDebug() << "Failed to copy file: " << destinationFile;
-            status = 3;
-        }
     }
+
+    // Ensure the destination file/dir dose NOT exists
+    if ((status == 0) &&  to.exists() == true) {
+        qDebug() << "FileManager: Target file already exist.";
+        status = 2;
+    }
+
+    if ((status == 0) && (QFile::copy(from.get(), to.get()) == true)) {
+        qDebug() << "File copy to " << to.get() << " successfully.";
+    } else {
+        qDebug() << "FileManager Failed to copy the file.";
+        status = 3;
+    }
+
     return status;
 }
 
-int FileManager::createDirectory(const QString &file, bool gameDir) {
+int FileManager::createDirectory(Path path) {
     qint64 status = 0;
-    const QString path = FileManager::getFullPath(file, gameDir);
+
     // Create the directory if it doesn't exist
-    if (!QDir(path).exists()) {
-        if (QDir().mkpath(path) == true) {
+    if (!path.exists()) {
+        if (QDir().mkpath(path.get()) == true) {
             qDebug() << "Directory created successfully.";
             status = 0;
         } else {
@@ -166,18 +150,15 @@ int FileManager::createDirectory(const QString &file, bool gameDir) {
     return status;
 }
 
-void FileManager::createLinkToExe(
-        const QString& path,
-        const QString& expectedFileName) {
-    const QString pathToKnownPattern = getExtraPathToExe(path);
-    const QString pathToExpectedExe = QString("%1/%2")
-        .arg(pathToKnownPattern, expectedFileName);
+void FileManager::createLinkToExe(Path path, const QString& expectedFileName) {
+    path = getExtraPathToExe(path);
+    path << expectedFileName;
 
-    qDebug() << "pathToExpectedExe :" << pathToExpectedExe;
-    qDebug() << "pathToKnownPattern :" << pathToKnownPattern;
+    qDebug() << "path :" << path.get();
+    qDebug() << "pathDir :" << path.getDir();
 
-    if (!QFile(pathToExpectedExe).exists()) {
-        QDir dir(pathToKnownPattern);
+    if (!path.exists()) {
+        QDir dir(path.getDir());
         const QString finalExe = decideExe(dir);
         qDebug() << "finalExe :" << finalExe;
 
@@ -185,7 +166,7 @@ void FileManager::createLinkToExe(
             qDebug() << "error: could not find the exe file for the game!";
         } else {
             (void)makeRelativeLink(
-                pathToKnownPattern,
+                path,
                 finalExe,
                 expectedFileName);
         }
@@ -201,6 +182,8 @@ bool FileManager::extractZip(
         QString("%1%2%3").arg(m_levelDir.absolutePath(), m_sep, zipFilename);
     const QString& outputPath =
         QString("%1%2%3").arg(m_levelDir.absolutePath(), m_sep, outputFolder);
+    Path oPath(Path::resource);
+    oPath << outputFolder;
 
     qDebug() << "Unzipping file" << zipFilename << "to" << outputPath;
 
@@ -267,7 +250,7 @@ bool FileManager::extractZip(
                 }
                 lastPrintedPercent = currentPercent;
                 if (currentPercent == gotoPercent) {
-                    createLinkToExe(outputPath, executable);
+                    createLinkToExe(oPath, executable);
                     status = true;
                 }
             }
@@ -281,55 +264,47 @@ bool FileManager::extractZip(
     return status;
 }
 
-QString FileManager::getExtraPathToExe(const QString& levelPath) {
-    qDebug() << "levelPath :" << levelPath;
+Path FileManager::getExtraPathToExe(Path path) {
+    const QString s = path.get();
+    qDebug() << "levelPath :" << s;
+
     StaticTrees staticTrees;
-    QDir dir(levelPath);
+    QDir dir(s);
     GameFileTree tree(dir);
     tree.printTree(1);
-    QString extraPath;
+
+    QStringList extraPath;
 
     for (const GameFileTree* stree : staticTrees.data) {
         extraPath = tree.matchesFromAnyNode(stree);
-        if ((extraPath != QString("\0")) && (!extraPath.isEmpty())) {
-            QTextStream(stdout)
-                << "game tree matches: " << extraPath << Qt::endl;
+        if (!extraPath.isEmpty()) {
+            QString joined = extraPath.join(QDir::separator());
+            QTextStream(stdout) << "game tree matches: " << joined << Qt::endl;
+
+            for (int i = extraPath.size() - 1; i >= 0; --i) {
+                path << extraPath[i];
+            }
+
             break;
         }
     }
-    return levelPath + extraPath;
-}
 
-inline const QString FileManager::getFullPath(
-        const QString& file,
-        bool lookGameDir) {
-    QString path;
-    if (lookGameDir) {
-        path = QString("%1%2%3").arg(m_gameDir.absolutePath(), m_sep, file);
-    } else {
-        path = QString("%1%2%3").arg(m_levelDir.absolutePath(), m_sep, file);
-    }
     return path;
 }
 
-bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
+bool FileManager::linkGameDir(Path from, Path to) {
     bool status = false;
-    const QString gamePath =  QString("%1/%2")
-        .arg(m_gameDir.absolutePath(), gameDir);
-    const QString levelPath = getExtraPathToExe(
-        m_levelDir.absolutePath() + levelDir);
 
-    qDebug() << "levelPath: " << levelPath;
-    qDebug() << "gamePath: " << gamePath;
+    qDebug() << "levelPath: " << from.get();
+    qDebug() << "gamePath: " << to.get();
 
-    if (QFile::link(levelPath, gamePath) == true) {
+    if (QFile::link(from.get(), to.get()) == true) {
         qDebug() << "Symbolic link created successfully.";
         status = true;
     } else {
-        QFileInfo fileInfo(gamePath);
-        if (fileInfo.isSymLink() == true) {
-            (void)QFile::remove(gamePath);
-            if (QFile::link(levelPath, gamePath) == true) {
+        if (to.isSymLink() == true) {
+            (void)QFile::remove(to.get());
+            if (QFile::link(from.get(), to.get()) == true) {
                 qDebug() << "Symbolic link created successfully.";
                 status = true;
             } else {
@@ -345,29 +320,22 @@ bool FileManager::linkGameDir(const QString& levelDir, const QString& gameDir) {
 }
 
 bool FileManager::makeRelativeLink(
-        const QString& levelDir,
+        const Path& levelDir,
         const QString& from,
         const QString& to) {
     bool status = false;
 
-    const QString fromPath = QString("%1/%2")
-        .arg(levelDir, from);
-    const QString toPath = QString("%1/%2")
-        .arg(levelDir, to);
+    Path fromPath = levelDir;
+    fromPath << from;
+    Path toPath = levelDir;
 
-    qDebug() << "calling makeRelativeLink";
-    qDebug() << "levelDir :" << levelDir;
-    qDebug() << "fromPath :" << fromPath;
-    qDebug() << "toPath :" << toPath;
-
-    if (QFile::link(fromPath, toPath) == true) {
+    if (QFile::link(fromPath.get(), to) == true) {
         qDebug() << "Symbolic link created successfully.";
         status = true;
     } else {
-        QFileInfo i(toPath);
-        if (i.isSymLink() == true) {
-            (void)QFile::remove(toPath);
-            if (QFile::link(fromPath, to) == true) {
+        if (toPath.isSymLink() == true) {
+            (void)QFile::remove(toPath.get());
+            if (QFile::link(fromPath.get(), to) == true) {
                 qDebug() << "Symbolic link created successfully.";
                 status = true;
             } else {
@@ -382,36 +350,30 @@ bool FileManager::makeRelativeLink(
     return status;
 }
 
-qint64 FileManager::removeFileOrDirectory(
-        const QString &fileName,
-        bool lookGameDir) {
-    qint64 status = 0;
-    const QString path = FileManager::getFullPath(fileName, lookGameDir);
-    QDir dir(path);
-    if (dir.exists() == true) {
+qint64 FileManager::removeFileOrDirectory(Path path) {
+    qint64 status = 2;
+
+    if (path.isDir() == true) {
         // Remove directory and its contents
-        if (dir.removeRecursively() == true) {
-            qDebug() << "Directory removed successfully:" << path;
+        if (QDir(path.get()).removeRecursively() == true) {
+            qDebug() << "Directory removed successfully:" << path.get();
             status = 0;
         } else {
-            qWarning() << "Failed to remove directory:" << path;
+            qWarning() << "Failed to remove directory:" << path.get();
+            status = 1;
+        }
+    } else if (path.isFile()) {
+        QFile file(path.get());
+        // Check if the file exists before attempting to remove it
+        if (file.remove() == true) {
+            qDebug() << "File removed successfully:" << path.get();
+            status = 0;
+        } else {
+            qWarning() << "Failed to remove file:" << path.get();
             status = 1;
         }
     } else {
-        QFile file(path);
-        // Check if the file exists before attempting to remove it
-        if (file.exists() == true) {
-            if (file.remove() == true) {
-                qDebug() << "File removed successfully:" << path;
-                status = 0;
-            } else {
-                qWarning() << "Failed to remove file:" << path;
-                status = 1;
-            }
-        } else {
-            qDebug() << "File or directory does not exist:" << path;
-            status = 2;
-        }
+        qDebug() << "File or directory does not exist:" << path.get();
     }
     return status;
 }

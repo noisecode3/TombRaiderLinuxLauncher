@@ -70,10 +70,10 @@ class Model : public QObject {
     int getItemState(int id);
     bool runUmu(const int id);
     void setUmuEnv(const QVector<QPair<QString, QString>>& environment);
-    void setUmuSetup();
+    void setUmuSetup(bool setup);
     bool runWine(const qint64 id);
     void setWineEnv(const QVector<QPair<QString, QString>>& environment);
-    void setWineSetup();
+    void setWineSetup(bool setup);
     bool runLutris(const QStringList& arg);
     bool runSteam(const int id);
     bool runBash(const int id);
@@ -97,9 +97,9 @@ class Model : public QObject {
 
  private:
     bool getLevelHaveFile(
-        const int id, const QString& md5sum, const QString& name);
+        const int id, const QString& md5sum, Path path);
     bool getLevelDontHaveFile(
-        const int id, const QString& md5sum, const QString& name);
+        const int id, const QString& md5sum, Path path);
     bool unpackLevel(const int id, const QString& name, const QString& exe);
 
     Runner m_wineRunner   = Runner("wine");

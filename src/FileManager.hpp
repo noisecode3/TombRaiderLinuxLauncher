@@ -45,7 +45,7 @@ class FileManager : public QObject {
      *         - true: Directory successfully renamed (backup created).
      *         - false: Failed to rename the directory.
      */
-    bool backupGameDir(const QString &gameDir);
+    bool backupGameDir(Path path);
 
     /**
      * @brief Computes the MD5 hash of a given file.
@@ -60,7 +60,7 @@ class FileManager : public QObject {
      * @return The MD5 hash of the file as a hexadecimal `QString`, or an empty string
      *         if an error occurs.
      */
-    const QString calculateMD5(const QString& file, bool lookGameDir);
+    const QString calculateMD5(Path path);
 
     /**
      * @brief Checks the type of a file path and returns a status code.
@@ -77,7 +77,7 @@ class FileManager : public QObject {
      *         - `2` if the path is a directory but not a symbolic link.
      *         - `3` if the path is neither a directory nor a symbolic link.
      */
-    int checkFileInfo(const QString& file, bool lookGameDir);
+    int checkFileInfo(Path path);
 
     /**
      * @brief Removes the specified working directory and its contents.
@@ -92,7 +92,7 @@ class FileManager : public QObject {
      *         - 1: Failed to remove the directory.
      *         - (No specific code for non-existent directory, but logs an error message.)
      */
-    int cleanWorkingDir(const QString &levelDir);
+    int cleanWorkingDir(Path path);
 
     /**
      * @brief Copies a file between the game directory and the level directory.
@@ -112,10 +112,7 @@ class FileManager : public QObject {
      *         - 2: Target file already exists.
      *         - 3: Failed to copy the file.
      */
-    int copyFile(
-        const QString &gameFile,
-        const QString &levelFile,
-        bool fromGameDir);
+    int copyFile(Path from, Path to);
 
     /**
      * @brief Creates a directory at the specified path if it does not already exist.
@@ -130,7 +127,7 @@ class FileManager : public QObject {
      *         - 0: Directory created successfully or already exists.
      *         - 1: Failed to create directory.
      */
-    int createDirectory(const QString &file, bool gameDir);
+    int createDirectory(Path path);
 
     /**
      * @brief Creates a symbolic link to an executable file if it does not exist.
@@ -145,7 +142,7 @@ class FileManager : public QObject {
      * @note If the expected executable is not found, the function attempts to locate
      *       an alternative executable and create a relative symbolic link to it.
      */
-    void createLinkToExe(const QString& path, const QString& expectedFileName);
+    void createLinkToExe(Path path, const QString& expectedFileName);
 
     /**
      * @brief Extracts the contents of a ZIP archive into a specified output folder.
@@ -180,20 +177,7 @@ class FileManager : public QObject {
      * @return A QString containing the path, including the extra executable path
      *         if a match is found.
      */
-    QString getExtraPathToExe(const QString& levelPath);
-
-    /**
-     * @brief Constructs the full path to a file in either the game or level directory.
-     *
-     * This function generates a full file path by appending the given file name
-     * to either the game directory or the level directory, depending on the `lookGameDir` flag.
-     *
-     * @param file The name of the file.
-     * @param lookGameDir If `true`, the path is constructed using the game directory;
-     *                    otherwise, the level directory is used.
-     * @return The full path to the file as a `QString`.
-     */
-    const QString getFullPath(const QString& file, bool lookGameDir);
+    Path getExtraPathToExe(Path path);
 
     /**
      * @brief Creates a symbolic link from a level directory to a game directory.
@@ -206,7 +190,7 @@ class FileManager : public QObject {
      * @param gameDir The relative path of the game directory.
      * @return True if the symbolic link is successfully created, false otherwise.
      */
-    bool linkGameDir(const QString& levelDir, const QString& gameDir);
+    bool linkGameDir(Path from, Path to);
 
     /**
      * @brief Creates a symbolic link within a level directory.
@@ -221,7 +205,7 @@ class FileManager : public QObject {
      * @return True if the symbolic link was successfully created, false otherwise.
      */
     bool makeRelativeLink(
-        const QString& levelDir,
+        const Path& levelDir,
         const QString& from,
         const QString& to);
 
@@ -241,7 +225,7 @@ class FileManager : public QObject {
      *         - 1: Failed to remove file or directory.
      *         - 2: File or directory does not exist.
      */
-    qint64 removeFileOrDirectory(const QString &file, bool lookGameDir);
+    qint64 removeFileOrDirectory(Path path);
 
     /**
      * @brief Sets the game launch directory and level directory.

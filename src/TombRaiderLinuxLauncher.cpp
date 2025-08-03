@@ -54,8 +54,8 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
     // Thread work done signal connections
     connect(&Controller::getInstance(),
-        SIGNAL(controllerGenerateList(const QList<int>&)),
-        this, SLOT(generateList(const QList<int>&)));
+        SIGNAL(controllerGenerateList(QList<int>)),
+        this, SLOT(generateList(QList<int>)));
 
     // Error signal connections
     connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
@@ -74,23 +74,22 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     filter_p->setVisible(false);
 
     connect(ui->filterButton, &QPushButton::clicked,
-        [filter_p, filterButton_p]() -> void {
-            bool isVisible = !filter_p->isVisible();
-            filter_p->setVisible(isVisible);
+            this, [filter_p, filterButton_p]() -> void {
+        bool isVisible = !filter_p->isVisible();
+        filter_p->setVisible(isVisible);
 
-            QIcon arrowDownIcon(":/icons/down-arrow.svg");
-            QIcon arrowUpIcon(":/icons/up-arrow.svg");
+        QIcon arrowDownIcon(":/icons/down-arrow.svg");
+        QIcon arrowUpIcon(":/icons/up-arrow.svg");
 
-            if (isVisible) {
-                filterButton_p->setIcon(arrowUpIcon);
-            } else {
-                filterButton_p->setIcon(arrowDownIcon);
-            }
-            filterButton_p->setIconSize(QSize(16, 16));
-        });
+        if (isVisible) {
+            filterButton_p->setIcon(arrowUpIcon);
+        } else {
+            filterButton_p->setIcon(arrowDownIcon);
+        }
+        filterButton_p->setIconSize(QSize(16, 16));
+    });
 
     QIcon arrowDownIcon(":/icons/down-arrow.svg");
-    QIcon arrowUpIcon(":/icons/up-arrow.svg");
 
     filterButton_p->setIcon(arrowDownIcon);
     filterButton_p->setIconSize(QSize(16, 16));
@@ -198,12 +197,12 @@ void TombRaiderLinuxLauncher::setInstalled() {
     QStringList keys = settings.allKeys();
     QHash<int, bool> installedLevel;
     QHash<int, bool> installedGame;
-    for (const QString &key : keys) {
+    for (const auto &key : std::as_const(keys)) {
         if (key.startsWith("installed/game")) {
-            qint64 id = key.mid(QString("installed/game").length()).toInt();
+            qint64 id = key.midRef(QString("installed/game").length()).toInt();
             installedGame.insert(id, settings.value(key).toBool());
         } else if (key.startsWith("installed/level")) {
-            qint64 id = key.mid(QString("installed/level").length()).toInt();
+            qint64 id = key.midRef(QString("installed/level").length()).toInt();
             installedLevel.insert(id, settings.value(key).toBool());
         }
     }
@@ -372,12 +371,14 @@ void TombRaiderLinuxLauncher::setOptionsClicked() {
 }
 
 QStringList TombRaiderLinuxLauncher::parsToArg(const QString& str) {
-    return str.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    static const QRegularExpression re = QRegularExpression("\\s+");
+    QStringList list = str.split(re, Qt::SkipEmptyParts);
+    return list;
 }
 
 QVector<QPair<QString, QString>>
     TombRaiderLinuxLauncher::parsToEnv(const QString& str) {
-    QRegularExpression re("(\\w+)\\s*=\\s*\"([^\"]*)\"");
+    static QRegularExpression re("(\\w+)\\s*=\\s*\"([^\"]*)\"");
     QRegularExpressionMatchIterator it = re.globalMatch(str);
 
     QVector<QPair<QString, QString>> envList;
@@ -406,7 +407,9 @@ void TombRaiderLinuxLauncher::linkClicked() {
                 QVector<QPair<QString, QString>> envList =
                         parsToEnv(input->text());
                 if (ui->checkBoxSetup->isChecked()) {
-                    Model::getInstance().setUmuSetup();
+                    Model::getInstance().setUmuSetup(true);
+                } else {
+                    Model::getInstance().setUmuSetup(false);
                 }
                 Model::getInstance().setUmuEnv(envList);
                 Model::getInstance().runUmu(id);
@@ -415,7 +418,9 @@ void TombRaiderLinuxLauncher::linkClicked() {
                 QVector<QPair<QString, QString>> envList =
                         parsToEnv(input->text());
                 if (ui->checkBoxSetup->isChecked()) {
-                    Model::getInstance().setUmuSetup();
+                    Model::getInstance().setUmuSetup(true);
+                } else {
+                    Model::getInstance().setUmuSetup(false);
                 }
                 Model::getInstance().setWineEnv(envList);
                 Model::getInstance().runWine(id);
@@ -444,7 +449,7 @@ void TombRaiderLinuxLauncher::linkClicked() {
                 QApplication::quit();
 
             } else if (type == 6) {
-                if (levelListModel->getListType()) {
+                if (levelListModel->getListType() == true) {
                     id = (-1)*id;
                 }
                 if (!controller.link(id)) {

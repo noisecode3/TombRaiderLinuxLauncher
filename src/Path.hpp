@@ -52,19 +52,24 @@ class Path {
      */
     static bool setResourcePath();
     QString get();
+    QString getDir();
     bool exists();
     bool isFile();
     bool isDir();
+    bool isSymLink();
+    bool validateSymLink();
 
     Path& operator<<(const QString& subdir) {
-        const QString s = QString("%1%2%3").arg(m_path.filePath(), m_sep, subdir);
-        m_path.setFile(s);
+        if (subdir != "..") {
+            const QString s = QString("%1%2%3").arg(m_path.absoluteFilePath(), m_sep, subdir);
+            m_path.setFile(s);
+        }
         return *this;
     }
 
  private:
-    static bool validate(const QDir& dir);
-    static QString getCleanCanonical(const  QDir& dir);
+    static bool inHome(QString absoluteFilePath);
+    static bool validate(const QFileInfo& fileInfo);
 
     QFileInfo m_path;
     inline static QDir m_programFilesPath;

@@ -62,8 +62,8 @@ void Runner::setWorkingDirectory(const QString& cwd) {
     m_process.setWorkingDirectory(cwd);
 }
 
-void Runner::toggleSetupFlag() {
-    m_setupFlag = !m_setupFlag;
+void Runner::setupFlag(bool setup) {
+    m_setupFlag = setup;
 }
 
 void Runner::run() {

@@ -21,29 +21,17 @@ Path::Path(Root root) {
     }
 }
 
-bool Path::validate(const QDir& dir) {
+bool Path::validate(const QFileInfo& fileInfo) {
     bool status = true;
 
-    if (!dir.exists()) {
-        qDebug() << "Path: Validate faild does not exist!";
-        status = false;
-    }
-
-    if (!dir.isAbsolute()) {
+    if (!fileInfo.isAbsolute()) {
         qDebug() << "Path: Validate faild is not absolute path!";
         status = false;
     }
 
-#ifdef Q_OS_WIN
-    const QString home = QString("C:%1Users%1").arg(m_sep);
-#else
-    const QString home = QString("%1home%1").arg(m_sep);
-#endif
-    const QString cleanCanonical = getCleanCanonical(dir);
-    if (!cleanCanonical.startsWith(home)) {
-        qDebug() << "Path: Validation faild"
-            << " canonicalFilePath don't start with " << home;
-        status = false;
+    if (status == true) {
+        const QString clean = QDir::cleanPath(fileInfo.absoluteFilePath());
+        status = inHome(clean);
     }
 
     return status;
@@ -51,47 +39,50 @@ bool Path::validate(const QDir& dir) {
 
 bool Path::setProgramFilesPath() {
     bool status = false;
-    const QDir dir(getSettingsInstance().value("gamePath").toString());
-    qDebug() << "setProgramFilesPath :" << dir;
-    if (validate(dir)) {
+    const QFileInfo fileInfo(
+            getSettingsInstance().value("gamePath").toString());
+    if (validate(fileInfo)) {
         status = true;
-        m_programFilesPath = dir;
+        m_programFilesPath = QDir(fileInfo.absoluteFilePath());
     }
+
+    qDebug() << "setProgramFilesPath :" << m_programFilesPath;
     return status;
 }
 
 bool Path::setResourcePath() {
     bool status = false;
-    const QDir dir(getSettingsInstance().value("levelPath").toString());
-    qDebug() << "setProgramFilesPath :" << dir;
-    if (validate(dir)) {
+    const QFileInfo fileInfo(
+            getSettingsInstance().value("levelPath").toString());
+    if (validate(fileInfo)) {
         status = true;
-        m_resourcePath = dir;
+        m_resourcePath = QDir(fileInfo.absoluteFilePath());
     }
+
+    qDebug() << "setProgramFilesPath :" << m_resourcePath;
     return status;
 }
 
 QString Path::get() {
-    QString result;
-
-    if (m_path.isDir()) {
-        QDir dir(m_path.path());
-        if (validate(dir)) {
-            result = getCleanCanonical(dir);
-        }
-    } else if (m_path.isFile()) {
-        QDir dir(m_path.absoluteDir());
-        if (validate(dir)) {
-            result = getCleanCanonical(dir) + m_sep + m_path.fileName();
-        }
-    }
-
-    return result;
+    return QDir::cleanPath(m_path.absoluteFilePath());
 }
 
-QString Path::getCleanCanonical(const QDir& dir) {
-    const QString canonical = dir.canonicalPath();
-    return canonical.isEmpty() ? QString() : QDir::cleanPath(canonical);
+QString Path::getDir() {
+    return QDir::cleanPath(m_path.absolutePath());
+}
+
+bool Path::inHome(QString absoluteFilePath) {
+    bool status = true;
+    const QString clean = QDir::cleanPath(absoluteFilePath);
+    if (!clean.startsWith(QDir::homePath())) {
+        qDebug() << "Path: Validation faild Path don't start with "
+                                                << QDir::homePath();
+        qDebug() << "Path: absoluteFilePath " << absoluteFilePath;
+        qDebug() << "Path: clean " << clean;
+        status = false;
+    }
+
+    return status;
 }
 
 bool Path::exists() {
@@ -104,4 +95,20 @@ bool Path::isFile() {
 
 bool Path::isDir() {
     return m_path.isDir();
+}
+
+bool Path::isSymLink() {
+    return m_path.isSymLink();
+}
+
+bool Path::validateSymLink() {
+    bool status = false;
+    if (m_path.isSymLink()) {
+        const QFileInfo target(m_path.symLinkTarget());
+        if (validate(target)) {
+            status = true;
+        }
+    }
+
+    return status;
 }

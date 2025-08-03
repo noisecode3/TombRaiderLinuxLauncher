@@ -145,58 +145,38 @@ void GameFileTree::printTree(int level) const {
 }
 
 bool GameFileTree::matchesSubtree(const GameFileTree* other) const {
-    if (!other) return false;  // If the other tree is null, no match is possible.
+    if (!other) return false;
 
-    QQueue<QPair<const GameFileTree*, const GameFileTree*>> queue;
-    queue.enqueue({this, other});  // Start with the root nodes of both trees.
+    if (m_fileName.toUpper() != other->m_fileName.toUpper())
+        return false;
 
-    while (!queue.isEmpty()) {
-        QPair<const GameFileTree*, const GameFileTree*> current = queue.dequeue();
-
-        const GameFileTree* nodeThis = current.first;
-        const GameFileTree* nodeOther = current.second;
-
-        // Check if all children in `nodeOther` match at least one child in `nodeThis`.
-        for (const GameFileTree* childOther : nodeOther->m_childItems) {
-            bool found = false;
-            for (const GameFileTree* childThis : nodeThis->m_childItems) {
-                if (childThis->m_fileName.toUpper() == childOther->m_fileName.toUpper()) {
-                    // Enqueue the matching child nodes for further comparison.
-                    queue.enqueue({childThis, childOther});
-                    found = true;
-                    break;
-                }
-            }
-
-            // If no matching child is found, the subtree does not match.
-            if (!found) {
-                return false;
+    for (const GameFileTree* childOther : other->m_childItems) {
+        bool matched = false;
+        for (const GameFileTree* childThis : m_childItems) {
+            if (childThis->matchesSubtree(childOther)) {
+                matched = true;
+                break;
             }
         }
+        if (!matched)
+            return false;
     }
 
-    return true;  // All nodes and structures matched successfully.
+    return true;
 }
 
-QString GameFileTree::matchesFromAnyNode(const GameFileTree* other) {
-    // If this node matches the subtree, return its name
+QStringList GameFileTree::matchesFromAnyNode(const GameFileTree* other) {
     if (matchesSubtree(other)) {
-        return m_fileName;
+        return QStringList{ m_fileName };
     }
 
-    // Otherwise, check children recursively
     for (GameFileTree* child : m_childItems) {
-        QString childPath = child->matchesFromAnyNode(other);
+        QStringList childPath = child->matchesFromAnyNode(other);
         if (!childPath.isEmpty()) {
-            // Build the path backwards
-            return QString("%1%2%3")
-                .arg(m_fileName)
-                .arg(QDir::separator())
-                .arg(childPath);
+            childPath.prepend(m_fileName);  // its a bit backwards
+            return childPath;
         }
     }
 
-    // No match found
-    return QString("\0");
+    return {};
 }
-
