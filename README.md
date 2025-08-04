@@ -26,12 +26,11 @@ On Arch this should be enough, you get the rest probably when you install the ba
 Ensure the following are installed on your Linux desktop:
 
 - `curl` (7.71.0 or newer)
-- `Boost`
 - `OpenSSL`
 - `Qt5`
 
 ```shell
-sudo pacman -S qt5-wayland qt5-webengine qt5-imageformats boost
+sudo pacman -S qt5-wayland qt5-webengine qt5-imageformats
 ```
 
 ### Build

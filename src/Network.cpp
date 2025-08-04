@@ -14,71 +14,9 @@
 #include <curl/curl.h>
 #include <cstdio>
 #include <iostream>
-#include <vector>
 #include <string>
 #include "../src/Network.hpp"
 #include "../src/Path.hpp"
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
-
-namespace ssl = boost::asio::ssl;
-using tcp = boost::asio::ip::tcp;
-
-std::string get_ssl_certificate(const std::string& host) {
-    bool status = true;
-    std::string cert_buffer;
-    boost::asio::io_context io_context;
-
-    // Use SSLv23 context (it's compatible with all versions of SSL/TLS)
-    ssl::context ssl_context(ssl::context::sslv23);
-
-    // Restrict supported protocol to TLSv1.3
-    ssl_context.set_options(ssl::context::no_sslv2 | ssl::context::no_sslv3);
-    ssl_context.set_options(ssl::context::no_tlsv1 | ssl::context::no_tlsv1_1);
-    ssl_context.set_options(ssl::context::no_tlsv1_2);
-
-    // Resolver for HTTPS (default port 443)
-    tcp::resolver resolver(io_context);
-    tcp::resolver::results_type endpoints = resolver.resolve(host, "443");
-
-    ssl::stream<tcp::socket> stream(io_context, ssl_context);
-    SSL_set_tlsext_host_name(stream.native_handle(), host.c_str());
-
-    try {
-        boost::asio::connect(stream.lowest_layer(), endpoints);
-        stream.handshake(ssl::stream_base::client);
-    } catch (const boost::system::system_error& e) {
-        std::cerr << "SSL handshake failed: " << e.what() << std::endl;
-        status = false;
-    }
-
-    if (status) {
-        // Get certificate
-        X509* cert = SSL_get_peer_certificate(stream.native_handle());
-        if (!cert) {
-            std::cerr << "No certificate found." << std::endl;
-            status = false;
-        }
-        if (status) {
-            // Verify the certificate matches the host
-            if (X509_check_host(
-                        cert, host.c_str(), host.length(), 0, nullptr) != 1) {
-                std::cerr << "Hostname verification failed." << std::endl;
-                status = false;
-            }
-            if (status) {
-                BIO* bio = BIO_new(BIO_s_mem());
-                PEM_write_bio_X509(bio, cert);
-                char* cert_str = nullptr;
-                qint64 cert_len = BIO_get_mem_data(bio, &cert_str);
-                cert_buffer = std::string(cert_str, cert_len);
-                BIO_free(bio);
-            }
-        }
-        X509_free(cert);
-    }
-    return cert_buffer;
-}
 
 void Downloader::setUrl(QUrl url) {
     m_url = url;
@@ -134,20 +72,6 @@ void Downloader::runConnect(QFile *file, const std::string& url) {
         const std::string trle_domain = "https://www.trle.net";
         const std::string trcustoms_domain = "https://trcustoms.org";
 
-        // Securely determine which domain is being accessed
-        if (url.compare(0, trle_domain.size(), trle_domain) == 0) {
-            std::string cert_buffer = get_ssl_certificate("www.trle.net");
-            std::vector<char>
-                cert_buffer_vec(cert_buffer.begin(), cert_buffer.end());
-
-            curl_blob blob;
-            blob.data = cert_buffer_vec.data();
-            blob.len = cert_buffer_vec.size();
-            blob.flags = CURL_BLOB_COPY;
-
-            status = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-        }
-
         // Set the URL securely
         if (status == CURLE_OK) {
             status = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -156,6 +80,12 @@ void Downloader::runConnect(QFile *file, const std::string& url) {
         // Enable SSL verification
         if (status == CURLE_OK) {
             status = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        }
+
+        // Set TLS v1.3 version
+        if (status == CURLE_OK) {
+            status = curl_easy_setopt(curl, CURLOPT_SSLVERSION,
+                                                CURL_SSLVERSION_TLSv1_3);
         }
 
         // Secure Public Key Pinning

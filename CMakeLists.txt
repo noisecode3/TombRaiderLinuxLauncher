@@ -17,13 +17,6 @@ endif()
 find_package(Qt5 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
 
 find_package(CURL REQUIRED)
-# Set policy for Boost to ensure compatibility with newer CMake versions
-if(POLICY CMP0167)
-    cmake_policy(SET CMP0167 NEW)
-endif()
-find_package(Boost REQUIRED COMPONENTS system filesystem)
-
-find_package(OpenSSL REQUIRED)
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
     message(STATUS "Submodule 'libs/miniz' not found. Updating submodules...")
@@ -123,9 +116,6 @@ set(LINK_COMMON
     miniz
     LIEF::LIEF
     ${CURL_LIBRARY}
-    OpenSSL::SSL
-    Boost::system
-    Boost::filesystem
 )
 
 set(LINK_GUI
@@ -134,7 +124,6 @@ set(LINK_GUI
 
 set(INCLUDE_DIR
     ${CURL_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
     libs/miniz
     libs/LIEF/include
     src
