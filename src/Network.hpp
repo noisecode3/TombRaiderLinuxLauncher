@@ -22,6 +22,7 @@
 #include <QDebug>
 #include <curl/curl.h>
 #include <string>
+#include "../src/Path.hpp"
 
 class Downloader : public QObject {
     Q_OBJECT
@@ -34,10 +35,9 @@ class Downloader : public QObject {
     }
 
     void run();
-    bool setUpCamp(const QString& levelDir);
     void setUrl(QUrl url);
     int getStatus();
-    void setSaveFile(const QString& file);
+    void setSaveFile(Path filePath);
 
  signals:
     void networkWorkTickSignal();
@@ -45,17 +45,15 @@ class Downloader : public QObject {
 
  private:
     void saveToFile(const QByteArray& data, const QString& filePath);
-    void connect(QFile *file, const std::string& url);
+    void runConnect(QFile *file, const std::string& url);
     QUrl m_url;
-    QString m_file;
-    QDir m_levelDir;
+    Path m_saveFile;
     qint32 m_status;
     int m_lastEmittedProgress;
 
     Downloader() :
         m_url(""),
-        m_file(""),
-        m_levelDir(""),
+        m_saveFile(Path(Path::resource)),
         m_status(0),
         m_lastEmittedProgress(0) {
         curl_global_init(CURL_GLOBAL_DEFAULT);

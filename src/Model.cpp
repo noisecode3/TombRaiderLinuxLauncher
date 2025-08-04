@@ -22,7 +22,6 @@ bool Model::setupDirectories(const QString& level, const QString& game) {
     bool status = false;
 
     if (fileManager.setUpCamp(level, game) &&
-            downloader.setUpCamp(level) &&
             data.initializeDatabase(level) &&
             m_pyRunner.setUpCamp(level)) {
         Path::setProgramFilesPath();
@@ -400,12 +399,12 @@ void Model::getLevel(int id) {
     if (id > 0) {
         bool status = false;
         ZipData zipData = data.getDownload(id);
-        downloader.setUrl(zipData.m_URL);
-        downloader.setSaveFile(zipData.m_fileName);
-        // this if just slips up execution but has nothing to do with the error
-
         Path path(Path::resource);
         path << zipData.m_fileName;
+        downloader.setUrl(zipData.m_URL);
+        downloader.setSaveFile(path);
+        // this if just slips up execution but has nothing to do with the error
+
 
         if (path.isFile()) {
             qWarning() << "File exists:" << path.get();

@@ -13,7 +13,7 @@
 #include "../src/Path.hpp"
 #include "../src/settings.hpp"
 
-Path::Path(Root root) {
+Path::Path(Root root) : m_status(0), m_root(root) {
     if (root == programFiles) {
         m_path.setFile(m_programFilesPath.path());
     } else if (root == resource) {
@@ -111,4 +111,18 @@ bool Path::validateSymLink() {
     }
 
     return status;
+}
+
+QString Path::getRootString() {
+    QString path;
+    if (m_root == programFiles) {
+        path = m_programFilesPath.path();
+    } else if (m_root == resource) {
+        path = m_resourcePath.path();
+    }
+    return path;
+}
+
+Path::Root Path::getRoot() {
+    return m_root;
 }

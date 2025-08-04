@@ -53,6 +53,8 @@ class Path {
     static bool setResourcePath();
     QString get();
     QString getDir();
+    QString getRootString();
+    Path::Root getRoot();
     bool exists();
     bool isFile();
     bool isDir();
@@ -61,7 +63,8 @@ class Path {
 
     Path& operator<<(const QString& subdir) {
         if (subdir != "..") {
-            const QString s = QString("%1%2%3").arg(m_path.absoluteFilePath(), m_sep, subdir);
+            const QString s = QString("%1%2%3")
+                    .arg(m_path.absoluteFilePath(), m_sep, subdir);
             m_path.setFile(s);
         }
         return *this;
@@ -70,6 +73,9 @@ class Path {
  private:
     static bool inHome(QString absoluteFilePath);
     static bool validate(const QFileInfo& fileInfo);
+
+    qint64 m_status;
+    Root m_root;
 
     QFileInfo m_path;
     inline static QDir m_programFilesPath;

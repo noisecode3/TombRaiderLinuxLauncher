@@ -182,8 +182,8 @@ bool FileManager::extractZip(
         QString("%1%2%3").arg(m_levelDir.absolutePath(), m_sep, zipFilename);
     const QString& outputPath =
         QString("%1%2%3").arg(m_levelDir.absolutePath(), m_sep, outputFolder);
-    Path oPath(Path::resource);
-    oPath << outputFolder;
+
+    Path oPath = (Path(Path::resource) << outputFolder);
 
     qDebug() << "Unzipping file" << zipFilename << "to" << outputPath;
 

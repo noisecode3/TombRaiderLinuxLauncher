@@ -11,12 +11,13 @@
  * GNU General Public License for more details.
  */
 
-#include "../src/Network.hpp"
 #include <curl/curl.h>
 #include <cstdio>
 #include <iostream>
 #include <vector>
 #include <string>
+#include "../src/Network.hpp"
+#include "../src/Path.hpp"
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 
@@ -79,22 +80,12 @@ std::string get_ssl_certificate(const std::string& host) {
     return cert_buffer;
 }
 
-bool Downloader::setUpCamp(const QString& levelDir) {
-    bool status = false;
-    QFileInfo levelPathInfo(levelDir);
-    if (levelPathInfo.isDir() == true) {
-        m_levelDir.setPath(levelDir);
-        status = true;
-    }
-    return status;
-}
-
 void Downloader::setUrl(QUrl url) {
     m_url = url;
 }
 
-void Downloader::setSaveFile(const QString& file) {
-    m_file = file;
+void Downloader::setSaveFile(Path file) {
+    m_saveFile = file;
 }
 
 int Downloader::getStatus() {
@@ -102,43 +93,39 @@ int Downloader::getStatus() {
 }
 
 void Downloader::run() {
-    if (m_url.isEmpty() || m_file.isEmpty() || m_levelDir.isEmpty()) {
+    if (m_url.isEmpty() || m_saveFile.getRoot() != Path::resource) {
         m_status = 3;  // object error
     } else {
+        m_status = 0;
         qDebug() << "m_url: " << m_url.toString();
-        qDebug() << "m_file: " << m_file;
-        qDebug() << "m_levelDir: " << m_levelDir.absolutePath();
+        qDebug() << "m_filePath: " << m_saveFile.get();
 
-        QString urlString = m_url.toString();
-        QByteArray byteArray = urlString.toUtf8();
-        const char* url_cstring = byteArray.constData();
-
-        const QString filePath = QString("%1%2%3")
-            .arg(m_levelDir.absolutePath(), QDir::separator(), m_file);
-
-        qDebug() << "filePath: " << filePath;
-
-        QFileInfo fileInfo(filePath);
-
-        if (fileInfo.exists() && !fileInfo.isFile()) {
-            qDebug() << "Error: The zip path is not a regular file :"
-                << filePath;
+        if (m_saveFile.isSymLink()) {
+            m_status = 5;  // symlink error
+        } else if (m_saveFile.exists() && !m_saveFile.isFile()) {
+            qDebug()
+                    << "Error: The zip path is not a regular file :"
+                                                            << m_saveFile.get();
             m_status = 2;  // file error
-        } else {
-            QFile file(filePath);
-            if (!file.open(QIODevice::WriteOnly)) {  // flawfinder: ignore
-                qDebug() << "Error opening file for writing:" << filePath;
-                m_status = 2;
-            } else {
-                connect(&file, url_cstring);
-            }
 
-            file.close();
+        } else {
+            QFile file(m_saveFile.get());
+            if (!file.open(QIODevice::WriteOnly)) {  // flawfinder: ignore
+                qDebug()
+                        << "Error opening file for writing:"
+                                                            << m_saveFile.get();
+                m_status = 4;  // opening error
+            } else {
+                QByteArray byteArray = m_url.toString().toUtf8();
+                const char* url_cstring = byteArray.constData();
+                runConnect(&file, url_cstring);
+                file.close();
+            }
         }
     }
 }
 
-void Downloader::connect(QFile *file, const std::string& url) {
+void Downloader::runConnect(QFile *file, const std::string& url) {
     CURL* curl = curl_easy_init();
     if (!curl) {
         std::cerr << "Failed to initialize CURL\n";
