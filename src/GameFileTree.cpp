@@ -32,37 +32,27 @@
 
 GameFileTree::GameFileTree(
         const QString &fileName, GameFileTree *parent)
-    // cppcheck-suppress misra-c2012-12.3
     : m_fileName(fileName), m_parentItem(parent)
 {}
 
-GameFileTree::~GameFileTree() {
-    for (GameFileTree* child : m_childItems) {
-        delete child;
-    }
-}
-
 GameFileTree::GameFileTree(const QStringList& pathList)
-    // cppcheck-suppress misra-c2012-12.3
     : m_parentItem(nullptr) {
     addPathList(pathList);
 }
 
-GameFileTree::GameFileTree(const QDir &dir)
-    // cppcheck-suppress misra-c2012-12.3
+GameFileTree::GameFileTree(Path dirPath)
     : m_parentItem(nullptr) {
-    if (dir.exists() == true) {
+    if (dirPath.exists() == true && dirPath.isDir()) {
         QStringList pathList;
-        // Skapa en kö för att hantera kataloger iterativt
         QQueue<QString> dirQueue;
-        const QString base = dir.absolutePath();
+        const QString base = dirPath.get();  // Inside home and absolute
+        const QDir baseDir(base);
         dirQueue.enqueue(base);
 
         while (!dirQueue.isEmpty()) {
             QString currentDirPath = dirQueue.dequeue();
             QDir currentDir(currentDirPath);
 
-            // Hämta alla filer och mappar i den aktuella katalogen
             QFileInfoList fileList = currentDir.entryInfoList(
                 QDir::Files |
                 QDir::Dirs |
@@ -71,9 +61,9 @@ GameFileTree::GameFileTree(const QDir &dir)
                 QDir::Name);
 
             for (const QFileInfo& fileInfo : fileList) {
-                pathList << QString(fileInfo.absoluteFilePath().split(base)[1]);
+                pathList << baseDir
+                        .relativeFilePath(fileInfo.absoluteFilePath());
 
-                // Om objektet är en katalog, lägg till den i kön
                 if (fileInfo.isDir() == true) {
                     dirQueue.enqueue(fileInfo.absoluteFilePath());
                 }
@@ -82,7 +72,13 @@ GameFileTree::GameFileTree(const QDir &dir)
         addPathList(pathList);
     } else {
         QTextStream(stdout) << "Directory does not exist: "
-            << dir.absolutePath() << Qt::endl;
+            << dirPath.get() << Qt::endl;
+    }
+}
+
+GameFileTree::~GameFileTree() {
+    for (GameFileTree* child : m_childItems) {
+        delete child;
     }
 }
 
@@ -96,7 +92,7 @@ void GameFileTree::addPathList(const QStringList& pathList) {
             // Check if a child node with this name already exists
             auto it = std::find_if(
                 current->m_childItems.begin(), current->m_childItems.end(),
-                [&component](GameFileTree* child) {
+                [&component](const GameFileTree* child) {
                     return child->m_fileName == component;
             });
 
@@ -145,38 +141,57 @@ void GameFileTree::printTree(int level) const {
 }
 
 bool GameFileTree::matchesSubtree(const GameFileTree* other) const {
-    if (!other) return false;
+    bool status = true;
 
-    if (m_fileName.toUpper() != other->m_fileName.toUpper())
-        return false;
+    if (other == nullptr) {
+        status = false;
+    }
 
-    for (const GameFileTree* childOther : other->m_childItems) {
-        bool matched = false;
-        for (const GameFileTree* childThis : m_childItems) {
-            if (childThis->matchesSubtree(childOther)) {
-                matched = true;
+    // Check if first node name match
+    if (status && (m_fileName.toUpper() != other->m_fileName.toUpper())) {
+        status = false;
+    }
+
+    /* Check other recursively from 'this'
+     * It matches the branches like an Enarmad bandit machine
+     * throught all child nodes at this point. This builds up the
+     * matching "tower" on the stack by trying all Lego pieces
+     * available at this node until ONE Lego is not found
+     * it cancels the branch.
+     */
+    if (status) {
+        for (const GameFileTree* childOther : other->m_childItems) {
+            bool matched = std::any_of(
+                m_childItems.begin(), m_childItems.end(),
+                [childOther](const GameFileTree* childThis) {
+                    return childThis->matchesSubtree(childOther);
+                });
+
+            if (matched == false) {
+                status = false;
                 break;
             }
         }
-        if (!matched)
-            return false;
     }
 
-    return true;
+    return status;
 }
 
 QStringList GameFileTree::matchesFromAnyNode(const GameFileTree* other) {
-    if (matchesSubtree(other)) {
-        return QStringList{ m_fileName };
-    }
+    QStringList result;
 
-    for (GameFileTree* child : m_childItems) {
-        QStringList childPath = child->matchesFromAnyNode(other);
-        if (!childPath.isEmpty()) {
-            childPath.prepend(m_fileName);  // its a bit backwards
-            return childPath;
+    if (matchesSubtree(other)) {
+        result.append(m_fileName);
+    } else {
+        for (GameFileTree* child : m_childItems) {
+            QStringList childPath = child->matchesFromAnyNode(other);
+            if (!childPath.isEmpty()) {
+                childPath.prepend(m_fileName);  // its a bit backwards later
+                result = childPath;
+                break;
+            }
         }
     }
 
-    return {};
+    return result;
 }

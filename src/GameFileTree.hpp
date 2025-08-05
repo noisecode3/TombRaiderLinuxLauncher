@@ -20,10 +20,11 @@
 #include <QStringList>
 #include <QDebug>
 #include <QList>
+#include "../src/Path.hpp"
 
 class GameFileTree {
  public:
-    explicit GameFileTree(const QDir& fullPath);
+    explicit GameFileTree(Path dirPath);
     explicit GameFileTree(const QStringList& pathList);
     ~GameFileTree();
 
@@ -35,7 +36,6 @@ class GameFileTree {
     explicit GameFileTree(
         const QString &fileName, GameFileTree *parentItem);
     void addPathList(const QStringList& pathList);
-    void addNode(GameFileTree* node);  // maybe dont need this
     QVector<GameFileTree*> m_childItems;
     QString m_fileName;
     GameFileTree *m_parentItem;

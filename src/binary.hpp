@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QDataStream>
 #include <string>
+#include "../src/Path.hpp"
 
 // Define structures for PE headers
 #pragma pack(push, 1)  // Set 1-byte alignment
@@ -75,9 +76,9 @@ struct ExportDirectory {
 
 QString decideExe(const QDir& dir);
 void analyzeImportTable(const std::string& peFilePath);
-void readPEHeader(const QString &filePath);
-void readExportTable(const QString &filePath);
+void readPEHeader(Path filePath);
+void readExportTable(Path filePath);
 qint64 findReplacePattern(QFile* const file);
-qint64 widescreen_set(const QString& path);
+qint64 widescreen_set(Path filePath);
 
 #endif  // SRC_BINARY_HPP_

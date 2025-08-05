@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 #include <LIEF/LIEF.hpp>
+#include "../src/Path.hpp"
 
 QString decideExe(const QDir& dir) {
     QString fileName;
@@ -65,9 +66,9 @@ void analyzeImportTable(const std::string& binaryPath) {
     }
 }
 
-void readPEHeader(const QString &filePath) {
-    QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly) == true) {
+void readPEHeader(Path filePath) {
+    QFile file(filePath.get());
+    if (file.open(QIODevice::ReadOnly) == true) {  // flawfinder: ignore
         QDataStream in(&file);
         in.setByteOrder(QDataStream::LittleEndian);
 
@@ -104,15 +105,15 @@ void readPEHeader(const QString &filePath) {
         }
         file.close();
     } else {
-        qCritical() << "Failed to open file:" << filePath;
+        qCritical() << "Failed to open file:" << filePath.get();
     }
 }
 
 
-void readExportTable(const QString &filePath) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qCritical() << "Failed to open file:" << filePath;
+void readExportTable(Path filePath) {
+    QFile file(filePath.get());
+    if (!file.open(QIODevice::ReadOnly)) {  // flawfinder: ignore
+        qCritical() << "Failed to open file:" << filePath.get();
         return;
     }
 
@@ -142,7 +143,8 @@ void readExportTable(const QString &filePath) {
     file.seek(dosHeader.e_lfanew + sizeof(PEHeader));
 
     // Read Optional Header
-    QByteArray optionalHeaderData(peHeader.sizeOfOptionalHeader, Qt::Uninitialized);
+    QByteArray optionalHeaderData(
+            peHeader.sizeOfOptionalHeader, Qt::Uninitialized);
     in.readRawData(optionalHeaderData.data(), peHeader.sizeOfOptionalHeader);
 
     // Get Data Directory
@@ -152,8 +154,12 @@ void readExportTable(const QString &filePath) {
     };
 
     constexpr int IMAGE_DIRECTORY_ENTRY_EXPORT = 0;
-    auto dataDirectory = reinterpret_cast<DataDirectory*>(optionalHeaderData.data() + 96); // Offset 96: start of Data Directory
-    quint32 exportTableRVA = dataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].virtualAddress;
+    // Offset 96: start of Data Directory
+    auto dataDirectory =
+            reinterpret_cast<DataDirectory*>(optionalHeaderData.data() + 96);
+
+    quint32 exportTableRVA =
+        dataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].virtualAddress;
 
     if (exportTableRVA == 0) {
         qCritical() << "No Export Table found in this PE file.";
@@ -161,7 +167,10 @@ void readExportTable(const QString &filePath) {
     }
 
     // Find the section that contains the Export Table
-    file.seek(dosHeader.e_lfanew + sizeof(PEHeader) + peHeader.sizeOfOptionalHeader);
+    file.seek(dosHeader.e_lfanew +
+                sizeof(PEHeader) +
+                peHeader.sizeOfOptionalHeader);
+
     quint16 numSections = peHeader.numSections;
 
     struct SectionHeader {
@@ -181,13 +190,15 @@ void readExportTable(const QString &filePath) {
     quint32 exportTableFileOffset = 0;
 
     for (quint16 i = 0; i < numSections; i++) {
-        in.readRawData(reinterpret_cast<char*>(&section), sizeof(SectionHeader));
+        in.readRawData(
+                reinterpret_cast<char*>(&section), sizeof(SectionHeader));
         quint32 sectionStart = section.virtualAddress;
         quint32 sectionEnd = sectionStart + section.virtualSize;
 
         if (exportTableRVA >= sectionStart && exportTableRVA < sectionEnd) {
             quint32 offsetWithinSection = exportTableRVA - sectionStart;
-            exportTableFileOffset = section.pointerToRawData + offsetWithinSection;
+            exportTableFileOffset =
+                    section.pointerToRawData + offsetWithinSection;
             break;
         }
     }
@@ -200,10 +211,13 @@ void readExportTable(const QString &filePath) {
     // Read Export Directory
     file.seek(exportTableFileOffset);
     ExportDirectory exportDirectory;
-    in.readRawData(reinterpret_cast<char*>(&exportDirectory), sizeof(ExportDirectory));
+    in.readRawData(
+            reinterpret_cast<char*>(&exportDirectory), sizeof(ExportDirectory));
 
     // Read the DLL Name
-    file.seek(section.pointerToRawData + (exportDirectory.nameRVA - section.virtualAddress));
+    file.seek(section.pointerToRawData +
+            (exportDirectory.nameRVA - section.virtualAddress));
+
     QByteArray dllName;
     char c;
     while (file.getChar(&c) && c != '\0') {
@@ -216,7 +230,9 @@ void readExportTable(const QString &filePath) {
         qDebug() << "Exported Functions:";
 
         // Name Pointer Table
-        quint32 namePointerOffset = section.pointerToRawData + (exportDirectory.namePointerRVA - section.virtualAddress);
+        quint32 namePointerOffset = section.pointerToRawData +
+                (exportDirectory.namePointerRVA - section.virtualAddress);
+
         file.seek(namePointerOffset);
 
         QVector<quint32> nameRVAs(exportDirectory.numNamePointers);
@@ -225,7 +241,9 @@ void readExportTable(const QString &filePath) {
         }
 
         for (const quint32 &nameRVA : nameRVAs) {
-            quint32 nameOffset = section.pointerToRawData + (nameRVA - section.virtualAddress);
+            quint32 nameOffset = section.pointerToRawData +
+                    (nameRVA - section.virtualAddress);
+
             file.seek(nameOffset);
 
             QByteArray functionName;
@@ -291,14 +309,15 @@ qint64 findReplacePattern(QFile* const file) {
  * @retval 2 Could not preform the first read only opening of the file.
  * @return error qint64.
  */
-qint64 widescreen_set(const QString& path) {
+qint64 widescreen_set(Path filePath) {
     qint64 status = 0;
-    QFileInfo fileInfo(path);
-    QFile file(path);
+    QFile file(filePath.get());
 
     // Open the file
-    if (!fileInfo.exists() || !fileInfo.isFile()) {
-        qCritical() << "Error: The exe path is not a regular file: " << path;
+    if (!filePath.exists() || !filePath.isFile()) {
+        qCritical()
+                << "Error: The exe path is not a regular file: "
+                                                        << filePath.get();
         status = 1;  // Invalid file path
     } else if (!file.open(QIODevice::ReadOnly)) {  // flawfinder: ignore
         qCritical() << "Error opening file for reading!";

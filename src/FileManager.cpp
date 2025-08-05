@@ -265,12 +265,10 @@ bool FileManager::extractZip(
 }
 
 Path FileManager::getExtraPathToExe(Path path) {
-    const QString s = path.get();
-    qDebug() << "levelPath :" << s;
+    qDebug() << "levelPath :" << path.get();
 
     StaticTrees staticTrees;
-    QDir dir(s);
-    GameFileTree tree(dir);
+    GameFileTree tree(path);
     tree.printTree(1);
 
     QStringList extraPath;
