@@ -11,8 +11,9 @@
  * GNU General Public License for more details.
  */
 
+#include <QtGlobal>
+#include "../src/CommandLineParser.hpp"
 #ifdef TEST
-#include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QTest>
 #include "../src/binary.hpp"
@@ -71,19 +72,30 @@ int main(int argc, char *argv[]) {
  * Takes care of command line arguments and create the window.
  */
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-    QApplication::setOrganizationName("TombRaiderLinuxLauncher");
-    QApplication::setApplicationName("TombRaiderLinuxLauncher");
-
-    // Construct the QSettings object
-    TombRaiderLinuxLauncher w;
-
-    QStringList arguments = a.arguments();
-    if (arguments.contains("--fullscreen") == true) {
-        w.showFullScreen();
+    int status = 0;
+    if (argc > 100) {
+        qDebug() << "To many arguments, over 100";
+        status = 1;
     } else {
-        w.show();
+        QApplication app(argc, argv);
+        QApplication::setOrganizationName("TombRaiderLinuxLauncher");
+        QApplication::setApplicationName("TombRaiderLinuxLauncher");
+
+        CommandLineParser clp("APP");
+        const StartupSetting ss = clp.process(app.arguments());
+
+        // Construct the main window object
+        TombRaiderLinuxLauncher w;
+
+        w.setStartupSetting(ss);
+
+        if (ss.fullscreen == true) {
+            w.showFullScreen();
+        } else {
+            w.show();
+        }
+        status = app.exec();
     }
-    return a.exec();
+    return status;
 }
 #endif

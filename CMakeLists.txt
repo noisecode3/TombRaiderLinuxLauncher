@@ -64,16 +64,13 @@ endif()
 
 add_subdirectory(libs/LIEF)
 
-# Update submodules if we forget
-# git submodule update --init --recursive
-# git submodule update --remote --merge
-# git submodule sync # (optional) if URL change
-
 set(SOURCES_TESTS
     test/test.hpp
 )
 
 set(SOURCES_MC
+    src/CommandLineParser.hpp
+    src/CommandLineParser.cpp
     src/Controller.hpp
     src/Controller.cpp
     src/Data.hpp
@@ -82,6 +79,8 @@ set(SOURCES_MC
     src/FileManager.cpp
     src/GameFileTree.hpp
     src/GameFileTree.cpp
+    src/LevelViewList.hpp
+    src/LevelViewList.cpp
     src/LoadingIndicator.hpp
     src/LoadingIndicator.cpp
     src/Model.hpp
@@ -96,7 +95,6 @@ set(SOURCES_MC
     src/Runner.hpp
     src/binary.hpp
     src/binary.cpp
-    src/levelViewList.hpp
     src/main.cpp
     src/staticData.hpp
 )

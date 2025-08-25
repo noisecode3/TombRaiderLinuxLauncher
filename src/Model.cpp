@@ -334,6 +334,22 @@ void Model::setupGame(int id) {
     }
 }
 
+bool Model::deleteZip(int id) {
+    bool status = false;
+    ZipData zipData = data.getDownload(id);
+    Path path(Path::resource);
+    path << zipData.m_fileName;
+    if (path.isFile()) {
+        status = fileManager.removeFileOrDirectory(path);
+    }
+    return status;
+}
+
+bool backupSaveFiles(int id) {
+    bool status = false;
+    return status;
+}
+
 void Model::updateLevel(const int id) {
     qint64 status = m_pyRunner.updateLevel(id);
     emit this->modelLoadingDoneSignal();

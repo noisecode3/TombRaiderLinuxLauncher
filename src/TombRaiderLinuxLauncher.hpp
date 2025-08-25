@@ -28,8 +28,9 @@
 #include <QString>
 
 #include "../src/settings.hpp"
+#include "../src/CommandLineParser.hpp"
 #include "../src/Controller.hpp"
-#include "../src/levelViewList.hpp"
+#include "../src/LevelViewList.hpp"
 #include "../src/LoadingIndicator.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -58,6 +59,8 @@ class TombRaiderLinuxLauncher : public QMainWindow {
      */
     explicit TombRaiderLinuxLauncher(QWidget *parent = nullptr);
     ~TombRaiderLinuxLauncher();
+
+    bool setStartupSetting(const StartupSetting settings);
 
  public slots:
     /**
@@ -176,6 +179,7 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     QVector<QPair<QString, QString>> parsToEnv(const QString& str);
 
     LevelListModel *levelListModel;
+    LevelListProxy *levelListProxy;
     Controller& controller = Controller::getInstance();
     QSettings& settings = getSettingsInstance();
     Ui::TombRaiderLinuxLauncher *ui;
