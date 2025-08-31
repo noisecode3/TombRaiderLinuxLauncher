@@ -47,9 +47,9 @@ QVariant LevelListModel::data(const QModelIndex &index, int role) const {
     return {};
 }
 
-void LevelListModel::setScrollChange(const QModelIndex &index) {
+void LevelListModel::setScrollChange(const quint64 index) {
     m_scrollCoversCursorChanged = true;
-    m_scrollCoversCursor = index.row();
+    m_scrollCoversCursor = index;
 }
 
 QVector<QSharedPointer<ListItemData>> LevelListModel::getDataBuffer(quint64 items) {

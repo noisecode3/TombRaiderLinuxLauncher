@@ -33,7 +33,7 @@ CommandLineParser::CommandLineParser(const QString& type) {
         m_parser.addOption(QCommandLineOption(
             QStringList{"fc", "filterByClass"}, classDesc, "class"));
 
-        
+
         // Type
         const QString typeDesc =
             "Filter levels by TR game type. Allowed values:    "
@@ -181,7 +181,7 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
     }
 
     if (setSorts.size() > 1) {
-        qCritical().noquote() 
+        qCritical().noquote()
             << "Only one sort option may be specified at a time.\n"
             << "You provided:" << setSorts.join(", ");
         ::exit(1);

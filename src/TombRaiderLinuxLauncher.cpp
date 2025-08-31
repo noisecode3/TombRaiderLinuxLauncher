@@ -133,6 +133,13 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         this,
         &TombRaiderLinuxLauncher::onCurrentItemChanged);
 
+    connect(
+        ui->listViewLevels->verticalScrollBar(),
+        &QScrollBar::valueChanged,
+        this,
+        &TombRaiderLinuxLauncher::levelListScrolled
+    );
+
     connect(ui->checkBoxInstalled, &QCheckBox::toggled,
             levelListProxy, &LevelListProxy::setInstalledFilter);
 
@@ -591,6 +598,23 @@ void TombRaiderLinuxLauncher::loadMoreCovers() {
             levelListModel->reset();
         }
     }
+}
+
+void TombRaiderLinuxLauncher::levelListScrolled(int value) {
+    QModelIndex idx = ui->listViewLevels->model()->index(0, 0);
+    QRect rect = ui->listViewLevels->visualRect(idx);
+
+    quint64 itemWidth = rect.width();
+    quint64 viewportWidth = ui->listViewLevels->viewport()->width();
+    quint64 itemsInRow = 1;
+    if (itemWidth > 0) {
+        itemsInRow = viewportWidth / itemWidth;
+    }
+    quint64 pos = value *itemsInRow;
+
+    // qDebug() << "Scroll position at item:" << pos;
+
+    levelListModel->setScrollChange(pos);
 }
 
 void TombRaiderLinuxLauncher::workTick() {

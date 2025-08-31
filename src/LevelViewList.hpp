@@ -35,7 +35,7 @@ class LevelListModel : public QAbstractListModel {
     }
 
     void setLevels(const QVector<QSharedPointer<ListItemData>>& levels);
-    void setScrollChange(const QModelIndex &index);
+    void setScrollChange(const quint64 index);
     QVector<QSharedPointer<ListItemData>> getDataBuffer(const quint64 items);
     bool stop();
     void reset();
