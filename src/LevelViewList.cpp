@@ -12,10 +12,11 @@
  */
 
 #include "../src/LevelViewList.hpp"
-#include "../src/staticData.hpp"
-#include <QDateTime>
 
-void LevelListModel::setLevels(const QVector<ListItemData>& levels) {
+#include <QDateTime>
+#include "../src/staticData.hpp"
+
+void LevelListModel::setLevels(const QVector<QSharedPointer<ListItemData>>& levels) {
     beginResetModel();
     m_levels = levels;
     endResetModel();
@@ -30,20 +31,61 @@ QVariant LevelListModel::data(const QModelIndex &index, int role) const {
         return {};
     const auto &item = m_levels[index.row()];
     switch (role) {
-        case Qt::DisplayRole: return item.m_title;
-        case Qt::UserRole+1:  return item.m_game_id;
-        case Qt::UserRole+2:  return item.m_type;
-        case Qt::UserRole+3:  return item.m_releaseDate;
-        case Qt::UserRole+4:  return item.m_cover;
-        case Qt::UserRole+5:  return item.m_shortBody;
-        case Qt::UserRole+6:  return item.m_authors;
-        case Qt::UserRole+7:  return item.m_class;
-        case Qt::UserRole+8:  return item.m_difficulty;
-        case Qt::UserRole+9:  return item.m_duration;
-        case Qt::UserRole+10: return item.m_trle_id;
-        case Qt::UserRole+11: return item.m_installed;
+        case Qt::DisplayRole: return item->m_title;
+        case Qt::UserRole+1:  return item->m_game_id;
+        case Qt::UserRole+2:  return item->m_type;
+        case Qt::UserRole+3:  return item->m_releaseDate;
+        case Qt::UserRole+4:  return item->m_cover;
+        case Qt::UserRole+5:  return item->m_shortBody;
+        case Qt::UserRole+6:  return item->m_authors;
+        case Qt::UserRole+7:  return item->m_class;
+        case Qt::UserRole+8:  return item->m_difficulty;
+        case Qt::UserRole+9:  return item->m_duration;
+        case Qt::UserRole+10: return item->m_trle_id;
+        case Qt::UserRole+11: return item->m_installed;
     }
     return {};
+}
+
+void LevelListModel::setScrollChange(const QModelIndex &index) {
+    m_scrollCoversCursorChanged = true;
+    m_scrollCoversCursor = index.row();
+}
+
+QVector<QSharedPointer<ListItemData>> LevelListModel::getDataBuffer(quint64 items) {
+    QVector<QSharedPointer<ListItemData>> buffer;
+
+    if (items > 0 && !m_levels.isEmpty()) {
+        quint64 size = m_levels.size();
+        quint64 index_a, index_b;
+
+        if (m_scrollCoversCursorChanged) {
+            m_scrollCoversCursorChanged = false;
+            index_a = m_scrollCoversCursor;
+            index_b = qMin(m_scrollCoversCursor + items, size);
+            m_scrollCoversCursor = index_b;
+        } else {
+            index_a = m_sequentialCoversCursor;
+            index_b = qMin(m_sequentialCoversCursor + items, size);
+            m_sequentialCoversCursor = index_b;
+        }
+
+        buffer.reserve(index_b - index_a);
+        for (quint64 i = index_a; i < index_b; ++i) {
+            buffer.append(m_levels[i]);
+        }
+    }
+
+    beginResetModel();
+    return buffer;
+}
+
+void LevelListModel::reset() {
+    endResetModel();
+}
+
+bool LevelListModel::stop() {
+    return (m_sequentialCoversCursor == m_levels.size());
 }
 
 quint64 LevelListProxy::getLid(const QModelIndex &i) {

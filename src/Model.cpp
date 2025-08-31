@@ -108,11 +108,11 @@ int Model::checkGameDirectory(int id) {
     return status;
 }
 
-void Model::getList(QVector<ListItemData>* list) {
+void Model::getList(QVector<QSharedPointer<ListItemData>>* list) {
     *list = data.getListItems();
 }
 
-void Model::getCoverList(QVector<ListItemData*>* items) {
+void Model::getCoverList(QVector<QSharedPointer<ListItemData>> items) {
     data.getCoverPictures(items);
     emit modelReloadLevelListSignal();
 }

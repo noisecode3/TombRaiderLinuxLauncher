@@ -36,10 +36,10 @@ class Controller : public QObject {
     void setupLevel(int id);
     void updateLevel(int id);
     void syncLevels();
-    void getCoverList(QVector<ListItemData*>* items);
+    void getCoverList(QVector<QSharedPointer<ListItemData>> items);
 
     int checkGameDirectory(int id);
-    void getList(QVector<ListItemData>* list);
+    void getList(QVector<QSharedPointer<ListItemData>>* list);
     const InfoData getInfo(int id);
     const QString getWalkthrough(int id);
     bool link(int id);

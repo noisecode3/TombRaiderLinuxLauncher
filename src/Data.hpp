@@ -463,13 +463,13 @@ class Data : public QObject {
      * @brief Get the main list of levels, without the picture
      * @return The QVector ListItemData is all the level metadata
      */
-    QVector<ListItemData> getListItems();
+    QVector<QSharedPointer<ListItemData>> getListItems();
 
     /**
      * @brief Add Cover Pictures to ListItemData pointers
      * @param Cache like used QVector for holding ListItemData pointers
      */
-    void getCoverPictures(QVector<ListItemData*>* items);
+    void getCoverPictures(QVector<QSharedPointer<ListItemData>> items);
 
     /**
      * @brief Get the info page, this is HTML and picture data you see on trel.net

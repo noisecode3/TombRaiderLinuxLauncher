@@ -18,6 +18,7 @@
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 #include <QAbstractItemModel>
+#include <qobject.h>
 
 #include "../src/Data.hpp"
 
@@ -27,16 +28,25 @@ class LevelListModel : public QAbstractListModel {
 
  public:
     explicit LevelListModel(QObject *parent = nullptr)
-        : QAbstractListModel(parent) {}
+            : QAbstractListModel(parent) {
+        m_scrollCoversCursorChanged = false;
+        m_scrollCoversCursor = 0;
+        m_sequentialCoversCursor = 0;
+    }
 
-    void setLevels(const QVector<ListItemData>& levels);
-
+    void setLevels(const QVector<QSharedPointer<ListItemData>>& levels);
+    void setScrollChange(const QModelIndex &index);
+    QVector<QSharedPointer<ListItemData>> getDataBuffer(const quint64 items);
+    bool stop();
+    void reset();
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &index, int role) const override;
 
  private:
-    QVector<ListItemData> m_levels;
+    QVector<QSharedPointer<ListItemData>> m_levels;
+    bool m_scrollCoversCursorChanged;
+    quint64 m_scrollCoversCursor;
+    quint64 m_sequentialCoversCursor;
 };
 
 
@@ -48,9 +58,7 @@ class LevelListProxy : public QSortFilterProxyModel {
         : QSortFilterProxyModel(parent) {}
 
     quint64 getLid(const QModelIndex &i);
-
     bool getItemType(const QModelIndex &i);
-
     bool getInstalled(const QModelIndex &i);
 
     void setClassFilter(const QString &c);

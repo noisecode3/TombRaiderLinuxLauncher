@@ -36,10 +36,10 @@ qint64 Data::getListRowCount() {
     return result;
 }
 
-QVector<ListItemData> Data::getListItems() {
+QVector<QSharedPointer<ListItemData>> Data::getListItems() {
     bool status = true;
     QSqlQuery query(db);
-    QVector<ListItemData> items;
+    QVector<QSharedPointer<ListItemData>> items;
 
     status = query.prepare(
             "SELECT Info.trleID, "
@@ -64,18 +64,15 @@ QVector<ListItemData> Data::getListItems() {
     if (status) {
         if (query.exec()) {
             while (query.next()) {
-                ListItemData item;
-                // item.setGameId();
-                item.setLid(query.value("Info.trleID").toInt());
-                item.setTitle(query.value("Info.title").toString());
-                item.setAuthors(query.value("authors").toString().split(", "));
-                // item.setShortBody(),
-                item.setType(query.value("Info.type").toInt());
-                item.setClass(query.value("Info.class").toInt());
-                item.setDifficulty(query.value("Info.difficulty").toInt());
-                item.setDuration(query.value("Info.duration").toInt());
-                item.setReleaseDate(query.value("Info.release").toString());
-                // item.setPicture(const QByteArray& imageData),
+                auto item = QSharedPointer<ListItemData>::create();
+                item->setLid(query.value("Info.trleID").toInt());
+                item->setTitle(query.value("Info.title").toString());
+                item->setAuthors(query.value("authors").toString().split(", "));
+                item->setType(query.value("Info.type").toInt());
+                item->setClass(query.value("Info.class").toInt());
+                item->setDifficulty(query.value("Info.difficulty").toInt());
+                item->setDuration(query.value("Info.duration").toInt());
+                item->setReleaseDate(query.value("Info.release").toString());
                 items.append(item);
             }
         } else {
@@ -87,7 +84,7 @@ QVector<ListItemData> Data::getListItems() {
     return items;
 }
 
-void Data::getCoverPictures(QVector<ListItemData*>* items) {
+void Data::getCoverPictures(QVector<QSharedPointer<ListItemData>> items) {
     QSqlQuery query(db);
 
     bool status = query.prepare(
@@ -103,7 +100,7 @@ void Data::getCoverPictures(QVector<ListItemData*>* items) {
     }
 
     if (status) {
-        for (ListItemData* item : *items) {
+        for (QSharedPointer<ListItemData>& item : items) {
             if (item->m_cover.isNull()) {
                 query.bindValue(":id", item->m_trle_id);
                 if (query.exec()) {

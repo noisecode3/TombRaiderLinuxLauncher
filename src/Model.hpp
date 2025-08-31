@@ -67,8 +67,8 @@ class Model : public QObject {
     int checkLevelDirectory(int id);
     bool deleteZip(int id);
     bool backupSaveFiles(int id);
-    void getList(QVector<ListItemData>* list);
-    void getCoverList(QVector<ListItemData*>* tiems);
+    void getList(QVector<QSharedPointer<ListItemData>>* list);
+    void getCoverList(QVector<QSharedPointer<ListItemData>> tiems);
     int getItemState(int id);
     bool runUmu(const int id);
     void setUmuEnv(const QVector<QPair<QString, QString>>& environment);

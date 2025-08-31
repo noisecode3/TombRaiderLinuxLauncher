@@ -184,10 +184,11 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
         settings.setValue("lastUpdated", now.toString(Qt::ISODate));
         m_availableGames = availableGames;
     } else {
-        QVector<ListItemData> list;
+        QVector<QSharedPointer<ListItemData>> list;
         controller.getList(&list);
         levelListModel->setLevels(list);
         setInstalled();
+        loadMoreCovers();
         ui->stackedWidget->setCurrentWidget(
             ui->stackedWidget->findChild<QWidget*>("select"));
     }
@@ -576,7 +577,20 @@ void TombRaiderLinuxLauncher::backClicked() {
 }
 
 void TombRaiderLinuxLauncher::loadMoreCovers() {
-    //levelListModel->loadMoreCovers();
+    static bool firstTime = true;
+    if (firstTime) {
+        firstTime = false;
+    } else {
+        levelListModel->reset();
+    }
+    if (!levelListModel->stop()) {
+        QVector<QSharedPointer<ListItemData>> buffer = levelListModel->getDataBuffer(100);
+        if (!buffer.isEmpty()) {
+            controller.getCoverList(buffer);
+        } else {
+            levelListModel->reset();
+        }
+    }
 }
 
 void TombRaiderLinuxLauncher::workTick() {
@@ -635,10 +649,11 @@ void TombRaiderLinuxLauncher::downloadError(int status) {
 void TombRaiderLinuxLauncher::UpdateLevelDone() {
     m_loadingIndicatorWidget->hide();
     if (m_loadingDoneGoTo == "select") {
-        QVector<ListItemData> list;
+        QVector<QSharedPointer<ListItemData>> list;
         controller.getList(&list);
         levelListModel->setLevels(list);
         setInstalled();
+        loadMoreCovers();
         ui->stackedWidget->setCurrentWidget(
             ui->stackedWidget->findChild<QWidget*>("select"));
     } else if (m_loadingDoneGoTo == "info") {
