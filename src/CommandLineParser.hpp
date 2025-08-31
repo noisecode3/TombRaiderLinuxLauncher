@@ -34,11 +34,13 @@ class CommandLineParser : public QObject {
     Q_OBJECT
 
  public:
-    CommandLineParser(const QString& type);
+    explicit CommandLineParser(const QString& type);
     StartupSetting process(const QStringList& arguments);
+    quint64 getProcessStatus();
 
  private:
     QCommandLineParser m_parser;
+    quint64 m_processStatus;
 
     // Constant data ----------------------------------------------------------
     // Don't change the order, index is an id number --------------------------

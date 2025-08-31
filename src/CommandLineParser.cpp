@@ -12,87 +12,120 @@
  */
 
 #include "../src/CommandLineParser.hpp"
+#include <QCommandLineOption>
 #include <QDebug>
 
-CommandLineParser::CommandLineParser(const QString& type) {
+CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
     if (type == "APP") {
         m_parser.setApplicationDescription("Tomb Raider Linux Launcher");
         m_parser.addHelpOption();
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"so", "showOriginal"}, "Show old Core Design list"));
+        // Original ------------
+        QStringList showOriginalName;
+        showOriginalName << "so" << "showOriginal";
+        QCommandLineOption showOriginalOption(showOriginalName);
+        showOriginalOption.setDescription("Show old Core Design list");
+        m_parser.addOption(showOriginalOption);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"si", "showInstalled"}, "Show only installed list"));
+        // Installed -----------
+        QStringList showInstalledName;
+        showInstalledName << "si" << "showInstalled";
+        QCommandLineOption showInstalledOption(showInstalledName);
+        showInstalledOption.setDescription("Show only installed list");
+        m_parser.addOption(showInstalledOption);
 
-        // Class
-        const QString classDesc =
-            "Filter levels by class. Allowed values:\n    "
-            + m_class_options.join(", ");
+        // Class ---------------
+        QStringList filterByClassName;
+        filterByClassName << "fc" << "filterByClass";
+        QCommandLineOption filterByClassOption(filterByClassName);
+        const QString filterByClassDesc =
+            "\nFilter levels by class. Allowed values:\n"
+            + m_class_options.join(", ") + "\n";
+        filterByClassOption.setDescription(filterByClassDesc);
+        filterByClassOption.setValueName("class");
+        m_parser.addOption(filterByClassOption);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"fc", "filterByClass"}, classDesc, "class"));
+        // Type ----------------
+        QStringList filterByTypeName;
+        filterByTypeName << "ft" << "filterByType";
+        QCommandLineOption filterByTypeOption(filterByTypeName);
+        const QString filterByTypeDesc =
+            "Filter levels by TR game type. Allowed values:\n"
+            + m_type_options.join(", ") + "\n";
+        filterByTypeOption.setDescription(filterByTypeDesc);
+        filterByTypeOption.setValueName("type");
+        m_parser.addOption(filterByTypeOption);
 
+        // Difficulty ----------
+        QStringList filterByDifficultyName;
+        filterByDifficultyName << "fd" << "filterByDifficulty";
+        QCommandLineOption filterByDifficultyOption(filterByDifficultyName);
+        const QString filterByDifficultyDesc =
+            "Filter levels by difficulty. Allowed values:\n"
+            + m_type_options.join(", ") + "\n";
+        filterByDifficultyOption.setDescription(filterByDifficultyDesc);
+        filterByDifficultyOption.setValueName("difficulty");
+        m_parser.addOption(filterByDifficultyOption);
 
-        // Type
-        const QString typeDesc =
-            "Filter levels by TR game type. Allowed values:    "
-            + m_type_options.join(", ");
+        // Duration -----------
+        QStringList filterByDurationName;
+        filterByDurationName << "fr" << "filterByDuration";
+        QCommandLineOption filterByDurationOption(filterByDurationName);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"ft", "filterByType"}, typeDesc, "type"));
-
-
-        // Difficulty
-        const QString difficultyDesc =
-            "Filter levels by difficulty. Allowed values:    "
-            + m_type_options.join(", ");
-
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"fd", "filterByDifficulty"}, difficultyDesc, "difficulty"));
-
-
-        // Duration
-        const QString durationDesc =
-            "Filter levels by duration. Allowed values:    "
-            + m_type_options.join(", ");
-
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"fr", "filterByDuration"}, durationDesc, "duration"));
-
+        const QString filterByDurationDesc =
+            "Filter levels by duration. Allowed values:\n"
+            + m_type_options.join(", ") + "\n";
+        filterByDurationOption.setDescription(filterByDurationDesc);
+        filterByDurationOption.setValueName("duration");
+        m_parser.addOption(filterByDurationOption);
 
         // Sort
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"sortByTitle"}, "Sort the list by title"));
+        QCommandLineOption sortByTitleOption("sortByTitle");
+        sortByTitleOption.setDescription("Sort the list by title");
+        m_parser.addOption(sortByTitleOption);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"sortByDifficulty"}, "Sort the list by difficulty"));
+        QCommandLineOption sortByDifficultyOption("sortByDifficulty");
+        sortByDifficultyOption.setDescription("Sort the list by difficulty");
+        m_parser.addOption(sortByDifficultyOption);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"sortByDuration"}, "Sort the list by duration"));
+        QCommandLineOption sortByDurationOption("sortByDuration");
+        sortByDurationOption.setDescription("Sort the list by duration");
+        m_parser.addOption(sortByDurationOption);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"sortByClass"}, "Sort the list by class"));
+        QCommandLineOption sortByClassOption("sortByClass");
+        sortByClassOption.setDescription("Sort the list by class");
+        m_parser.addOption(sortByClassOption);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"sortByType"}, "Sort the list by type"));
+        QCommandLineOption sortByTypeOption("sortByType");
+        sortByTypeOption.setDescription("Sort the list by type");
+        m_parser.addOption(sortByTypeOption);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList{"sortByReleaseDate"}, "Sort the list by release date"));
+        QCommandLineOption sortByReleaseDateOption("sortByReleaseDate");
+        sortByReleaseDateOption.setDescription("Sort the list by release date");
+        m_parser.addOption(sortByReleaseDateOption);
 
     } else if (type == "TEST") {
         m_parser.setApplicationDescription("Tomb Raider Linux Launcher Test Suite");
         m_parser.addHelpOption();
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList {"w", "widescreen"},
-            "Set widescreen bit on original games, probably not useful for TRLE",
-            "PATH"));
+        QStringList widescreenName;
+        widescreenName << "w" << "widescreen";
+        QCommandLineOption widescreenOption(widescreenName);
+        const QString widescreenDesc = "Set widescreen bit on original games,"
+            + QString(" probably not useful for TRLE");
+        widescreenOption.setDescription(widescreenDesc);
+        widescreenOption.setDefaultValue("PATH");
+        m_parser.addOption(widescreenOption);
 
-        m_parser.addOption(QCommandLineOption(
-            QStringList {"b", "binary"},
-            "Print PE Header Information, to record Tomb Raider and TRLE binaries",
-            "PATH"));
+        QStringList binaryName;
+        binaryName << "b" << "binary";
+        QCommandLineOption binaryOption(binaryName);
+        const QString binaryDesc = "Print PE Header Information,"
+            + QString(" to record Tomb Raider and TRLE binaries");
+        binaryOption.setDescription(binaryDesc);
+        binaryOption.setDefaultValue("PATH");
+        m_parser.addOption(binaryOption);
+
     } else {
         qDebug() << "CommandLineParser: Internal object error";
     }
@@ -103,16 +136,16 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
 
     StartupSetting settings;
 
-    if (m_parser.isSet("showInstalled")) {
+    if (m_parser.isSet("showInstalled") == true) {
         settings.installed = true;
     }
 
-    if (m_parser.isSet("showOriginal")) {
+    if (m_parser.isSet("showOriginal") == true) {
         settings.original = true;
     }
 
     // --- Class ---
-    if (m_parser.isSet("filterByClass")) {
+    if (m_parser.isSet("filterByClass") == true) {
         QString value = m_parser.value("filterByClass");
         int idx = m_class_options.indexOf(value, Qt::CaseInsensitive);
         if (idx != -1) {
@@ -120,12 +153,12 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         } else {
             qCritical().noquote() << "Invalid class value:" << value
                                   << "\nAllowed:" << m_class_options.join(", ");
-            ::exit(1);
+            m_processStatus = 1;
         }
     }
 
     // --- Type ---
-    if (m_parser.isSet("filterByType")) {
+    if (m_parser.isSet("filterByType") == true) {
         QString value = m_parser.value("filterByType");
         int idx = m_type_options.indexOf(value, Qt::CaseInsensitive);
         if (idx != -1) {
@@ -133,12 +166,12 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         } else {
             qCritical().noquote() << "Invalid type value:" << value
                                   << "\nAllowed:" << m_type_options.join(", ");
-            ::exit(1);
+            m_processStatus = 1;
         }
     }
 
     // --- Difficulty ---
-    if (m_parser.isSet("filterByDifficulty")) {
+    if (m_parser.isSet("filterByDifficulty") == true) {
         QString value = m_parser.value("filterByDifficulty");
         int idx = m_difficulty_options.indexOf(value, Qt::CaseInsensitive);
         if (idx != -1) {
@@ -146,12 +179,12 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         } else {
             qCritical().noquote() << "Invalid difficulty value:" << value
                                   << "\nAllowed:" << m_difficulty_options.join(", ");
-            ::exit(1);
+            m_processStatus = 1;
         }
     }
 
     // --- Duration ---
-    if (m_parser.isSet("filterByDuration")) {
+    if (m_parser.isSet("filterByDuration") == true) {
         QString value = m_parser.value("filterByDuration");
         int idx = m_duration_options.indexOf(value, Qt::CaseInsensitive);
         if (idx != -1) {
@@ -159,7 +192,7 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         } else {
             qCritical().noquote() << "Invalid duration value:" << value
                                   << "\nAllowed:" << m_duration_options.join(", ");
-            ::exit(1);
+            m_processStatus = 1;
         }
     }
 
@@ -184,7 +217,7 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         qCritical().noquote()
             << "Only one sort option may be specified at a time.\n"
             << "You provided:" << setSorts.join(", ");
-        ::exit(1);
+        m_processStatus = 1;
     }
 
     if (setSorts.size() == 1) {
@@ -195,4 +228,8 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
     }
 
     return settings;
+}
+
+quint64 CommandLineParser::getProcessStatus() {
+    return m_processStatus;
 }

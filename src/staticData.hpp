@@ -96,76 +96,87 @@ struct OriginalGameStaticData {
 };
 
 struct StaticData {
-    std::unordered_map<qint64, QString> getDifficulty() const {
-        return {
-            {0, "null"},
-            {1, "easy"},
-            {2, "medium"},
-            {3, "challenging"},
-            {4, "very challenging"}
-        };
+ private:
+    // Difficulty
+    static constexpr std::pair<qint64, const char*> difficultyList[] = {
+        {0, "null"}, {1, "easy"}, {2, "medium"}, {3, "challenging"}, {4, "very challenging"}
+    };
+
+    // Class
+    static constexpr std::pair<qint64, const char*> classList[] = {
+        {0, "null"}, {1, "Alien/Space"}, {2, "Atlantis"}, {3, "Base/Lab"}, {4, "Cambodia"},
+        {5, "Castle"}, {6, "Cave/Cat"}, {7, "City"}, {8, "Coastal"}, {9, "Cold/Snowy"},
+        {10, "Desert"}, {11, "Easter"}, {12, "Egypt"}, {13, "Fantasy/Surreal"}, {14, "Home"},
+        {15, "Ireland"}, {16, "Joke"}, {17, "Jungle"}, {18, "Kids"}, {19, "Library"},
+        {20, "Mystery/Horror"}, {21, "nc"}, {22, "Nordic/Celtic"}, {23, "Oriental"},
+        {24, "Persia"}, {25, "Pirates"}, {26, "Remake"}, {27, "Rome/Greece"}, {28, "Ship"},
+        {29, "Shooter"}, {30, "South America"}, {31, "South Pacific"}, {32, "Steampunk"},
+        {33, "Train"}, {34, "Venice"}, {35, "Wild West"}, {36, "Xmas"}, {37, "Young Lara"}
+    };
+
+    // Duration
+    static constexpr std::pair<qint64, const char*> durationList[] = {
+        {0, "null"}, {1, "short"}, {2, "medium"}, {3, "long"}, {4, "very long"}
+    };
+
+    // Type
+    static constexpr std::pair<qint64, const char*> typeList[] = {
+        {0, "null"}, {1, "TR1"}, {2, "TR2"}, {3, "TR3"}, {4, "TR4"}, {5, "TR5"}, {6, "TEN"}
+    };
+
+    template <size_t N>
+    static std::unordered_map<qint64, QString> buildMap(const std::pair<qint64, const char*> (&arr)[N]) {
+        std::unordered_map<qint64, QString> m;
+        for (const auto &p : arr) m[p.first] = QString::fromUtf8(p.second);
+        return m;
     }
-    std::unordered_map<qint64, QString> getClass() const {
-        return {
-            {0, "null"},
-            {1, "Alien/Space"},
-            {2, "Atlantis"},
-            {3, "Base/Lab"},
-            {4, "Cambodia"},
-            {5, "Castle"},
-            {6, "Cave/Cat"},
-            {7, "City"},
-            {8, "Coastal"},
-            {9, "Cold/Snowy"},
-            {10, "Desert"},
-            {11, "Easter"},
-            {12, "Egypt"},
-            {13, "Fantasy/Surreal"},
-            {14, "Home"},
-            {15, "Ireland"},
-            {16, "Joke"},
-            {17, "Jungle"},
-            {18, "Kids"},
-            {19, "Library"},
-            {20, "Mystery/Horror"},
-            {21, "nc"},
-            {22, "Nordic/Celtic"},
-            {23, "Oriental"},
-            {24, "Persia"},
-            {25, "Pirates"},
-            {26, "Remake"},
-            {27, "Rome/Greece"},
-            {28, "Ship"},
-            {29, "Shooter"},
-            {30, "South America"},
-            {31, "South Pacific"},
-            {32, "Steampunk"},
-            {33, "Train"},
-            {34, "Venice"},
-            {35, "Wild West"},
-            {36, "Xmas"},
-            {37, "Young Lara"}
-        };
+
+    template <size_t N>
+    static std::unordered_map<QString, qint64> buildReverseMap(const std::pair<qint64, const char*> (&arr)[N]) {
+        std::unordered_map<QString, qint64> m;
+        for (const auto &p : arr) m[QString::fromUtf8(p.second)] = p.first;
+        return m;
     }
-    std::unordered_map<qint64, QString> getDuration() const {
-        return {
-            {0, "null"},
-            {1, "short"},
-            {2, "medium"},
-            {3, "long"},
-            {4, "very long"}
-        };
+
+ public:
+    // Difficulty
+    static const std::unordered_map<qint64, QString>& getDifficulty() {
+        static const auto m = buildMap(difficultyList);
+        return m;
     }
-    std::unordered_map<qint64, QString> getType() const {
-        return {
-            {0, "null"},
-            {1, "TR1"},
-            {2, "TR2"},
-            {3, "TR3"},
-            {4, "TR4"},
-            {5, "TR5"},
-            {6, "TEN"}
-        };
+    static const std::unordered_map<QString, qint64>& getDifficultyID() {
+        static const auto m = buildReverseMap(difficultyList);
+        return m;
+    }
+
+    // Class
+    static const std::unordered_map<qint64, QString>& getClass() {
+        static const auto m = buildMap(classList);
+        return m;
+    }
+    static const std::unordered_map<QString, qint64>& getClassID() {
+        static const auto m = buildReverseMap(classList);
+        return m;
+    }
+
+    // Duration
+    static const std::unordered_map<qint64, QString>& getDuration() {
+        static const auto m = buildMap(durationList);
+        return m;
+    }
+    static const std::unordered_map<QString, qint64>& getDurationID() {
+        static const auto m = buildReverseMap(durationList);
+        return m;
+    }
+
+    // Type
+    static const std::unordered_map<qint64, QString>& getType() {
+        static const auto m = buildMap(typeList);
+        return m;
+    }
+    static const std::unordered_map<QString, qint64>& getTypeID() {
+        static const auto m = buildReverseMap(typeList);
+        return m;
     }
 };
 

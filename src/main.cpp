@@ -72,10 +72,9 @@ int main(int argc, char *argv[]) {
  * Takes care of command line arguments and create the window.
  */
 int main(int argc, char *argv[]) {
-    int status = 0;
+    int status = 1;
     if (argc > 100) {
-        qDebug() << "To many arguments, over 100";
-        status = 1;
+        qDebug() << "Error: To many arguments, over 100";
     } else {
         QApplication app(argc, argv);
         QApplication::setOrganizationName("TombRaiderLinuxLauncher");
@@ -84,18 +83,26 @@ int main(int argc, char *argv[]) {
         CommandLineParser clp("APP");
         const StartupSetting ss = clp.process(app.arguments());
 
-        // Construct the main window object
-        TombRaiderLinuxLauncher w;
+        status = clp.getProcessStatus();
+        if (status == 0) {
+            // Construct the main window object
+            TombRaiderLinuxLauncher w;
 
-        w.setStartupSetting(ss);
+            if (w.setStartupSetting(ss)) {
+                if (ss.fullscreen == true) {
+                    w.showFullScreen();
+                } else {
+                    w.show();
+                }
 
-        if (ss.fullscreen == true) {
-            w.showFullScreen();
-        } else {
-            w.show();
+                status = app.exec();
+
+            } else {
+                qDebug() << "Error: Could not set startup arguments internally";
+            }
         }
-        status = app.exec();
     }
+
     return status;
 }
 #endif

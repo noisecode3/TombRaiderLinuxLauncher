@@ -27,24 +27,17 @@ int LevelListModel::rowCount(const QModelIndex &parent) const {
 }
 
 QVariant LevelListModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || index.row() >= m_levels.size())
-        return {};
-    const auto &item = m_levels[index.row()];
-    switch (role) {
-        case Qt::DisplayRole: return item->m_title;
-        case Qt::UserRole+1:  return item->m_game_id;
-        case Qt::UserRole+2:  return item->m_type;
-        case Qt::UserRole+3:  return item->m_releaseDate;
-        case Qt::UserRole+4:  return item->m_cover;
-        case Qt::UserRole+5:  return item->m_shortBody;
-        case Qt::UserRole+6:  return item->m_authors;
-        case Qt::UserRole+7:  return item->m_class;
-        case Qt::UserRole+8:  return item->m_difficulty;
-        case Qt::UserRole+9:  return item->m_duration;
-        case Qt::UserRole+10: return item->m_trle_id;
-        case Qt::UserRole+11: return item->m_installed;
+    QVariant result;
+
+    if (index.isValid() && index.row() < m_levels.size()) {
+        const ListItemData &item = *m_levels[index.row()];
+        const auto it = m_roleMap.find(role);
+        if (it != m_roleMap.end()) {
+            result = it.value()(item);
+        }
     }
-    return {};
+
+    return result;
 }
 
 void LevelListModel::setScrollChange(const quint64 index) {
@@ -55,9 +48,10 @@ void LevelListModel::setScrollChange(const quint64 index) {
 QVector<QSharedPointer<ListItemData>> LevelListModel::getDataBuffer(quint64 items) {
     QVector<QSharedPointer<ListItemData>> buffer;
 
-    if (items > 0 && !m_levels.isEmpty()) {
+    if ((items > 0) && !m_levels.isEmpty()) {
         quint64 size = m_levels.size();
-        quint64 index_a, index_b;
+        quint64 index_a;
+        quint64 index_b;
 
         if (m_scrollCoversCursorChanged) {
             m_scrollCoversCursorChanged = false;
@@ -105,22 +99,38 @@ bool LevelListProxy::getInstalled(const QModelIndex &i) {
 }
 
 void LevelListProxy::setClassFilter(const QString &c) {
-    m_class = c;
+    if (c == m_all) {
+        m_class = 0;
+    } else {
+        m_class = StaticData::getClassID().at(c);
+    }
     invalidateFilter();
 }
 
 void LevelListProxy::setTypeFilter(const QString &t) {
-    m_type = t;
+    if (t == m_all) {
+        m_type = 0;
+    } else {
+        m_type = StaticData::getTypeID().at(t);
+    }
     invalidateFilter();
 }
 
 void LevelListProxy::setDifficultyFilter(const QString &d) {
-    m_difficulty = d;
+    if (d == m_all) {
+        m_difficulty = 0;
+    } else {
+        m_difficulty = StaticData::getDifficultyID().at(d);
+    }
     invalidateFilter();
 }
 
 void LevelListProxy::setDurationFilter(const QString &d) {
-    m_duration = d;
+    if(d == m_all) {
+        m_duration = 0;
+    } else {
+        m_duration = StaticData::getDurationID().at(d);
+    }
     invalidateFilter();
 }
 
@@ -150,62 +160,69 @@ bool LevelListProxy::lessThan(const QModelIndex &left,
     case Title:
         return l.toString().localeAwareCompare(r.toString()) < 0;
     case ReleaseDate:
-        return l.toDateTime() < r.toDateTime();
+        return l.toDateTime() > r.toDateTime();
     default:
-        return l.toInt() < r.toInt();
+        return l.toInt() > r.toInt();
     }
 }
 
 bool LevelListProxy::filterAcceptsRow(int sourceRow,
         const QModelIndex &parent) const {
     QModelIndex idx = sourceModel()->index(sourceRow, 0, parent);
+    bool status = true;
 
-    auto title       = sourceModel()->data(idx, Qt::DisplayRole).toString();
-    auto gameClass   = sourceModel()->data(idx, Qt::UserRole+7).toString();
-    auto type        = sourceModel()->data(idx, Qt::UserRole+2).toString();
-    auto difficulty  = sourceModel()->data(idx, Qt::UserRole+8).toString();
-    auto duration    = sourceModel()->data(idx, Qt::UserRole+9).toString();
-    auto installed   = sourceModel()->data(idx, Qt::UserRole+11).toBool();
-
-    if (!m_class.isEmpty() && m_class != gameClass) {
-        return false;
+    auto gameClass = sourceModel()->data(idx, Qt::UserRole+7).toUInt();
+    if ((m_class != 0)  && (m_class != gameClass)) {
+        status = false;
     }
 
-    if (!m_type.isEmpty() && m_type != type) {
-        return false;
+    if (status == true) {
+        auto type = sourceModel()->data(idx, Qt::UserRole+2).toUInt();
+        if ((m_type != 0) && (m_type != type)) {
+            status = false;
+        }
     }
 
-    if (!m_difficulty.isEmpty() && m_difficulty != difficulty) {
-        return false;
+    if (status == true) {
+        auto difficulty = sourceModel()->data(idx, Qt::UserRole+8).toUInt();
+        if ((m_difficulty != 0) && (m_difficulty != difficulty)) {
+            status = false;
+        }
     }
 
-    if (!m_duration.isEmpty() && m_duration != duration) {
-        return false;
+    if (status == true) {
+        auto duration = sourceModel()->data(idx, Qt::UserRole+9).toUInt();
+        if ((m_duration != 0) && (m_duration != duration)) {
+            status = false;
+        }
     }
 
-    if (m_installed && !installed) {
-        return false;
+    if (status == true) {
+        auto installed = sourceModel()->data(idx, Qt::UserRole+11).toBool();
+        if (m_installed && !installed) {
+            status = false;
+        }
     }
 
-    if (!m_search.isEmpty() && !title.contains(m_search, Qt::CaseInsensitive)) {
-        return false;
+    if (status == true) {
+        auto title = sourceModel()->data(idx, Qt::DisplayRole).toString();
+        if (!m_search.isEmpty() &&
+                !title.contains(m_search, Qt::CaseInsensitive)) {
+            status = false;
+        }
     }
 
-    return true;
+    return status;
 }
 
 int LevelListProxy::roleForMode() const {
-    switch (m_sortMode) {
-    case Title:       return Qt::DisplayRole;
-    case Difficulty:  return Qt::UserRole+8;
-    case Duration:    return Qt::UserRole+9;
-    case Class:       return Qt::UserRole+7;
-    case Type:        return Qt::UserRole+2;
-    case ReleaseDate: return Qt::UserRole+3;
-    default:          return Qt::UserRole+3;
+    int index = static_cast<int>(m_sortMode);
+    int result = Qt::UserRole+3; // default ReleaseDate
+    if (index >= 0 && index < static_cast<int>(std::size(m_roleForModeTable))) {
+        result = m_roleForModeTable[index];
     }
+    return result;
 }
-
 
 void CardItemDelegate::paint(QPainter *painter,
         const QStyleOptionViewItem &option, const QModelIndex &index) const {
@@ -233,7 +250,7 @@ void CardItemDelegate::paint(QPainter *painter,
     qint64 x = cardRect.left() + 10;
     qint64 y = cardRect.top() + 40;
     QRect imageRect = QRect(x, y, 160, 120);
-    painter->setBrush(QColor("#cccccc"));
+    painter->setBrush(QColor(0xFFCCCCCC));
     QPixmap cover = index.data(Qt::UserRole + 4).value<QPixmap>();
 
     if (!cover.isNull()) {
@@ -262,7 +279,7 @@ void CardItemDelegate::paint(QPainter *painter,
     painter->setFont(normalFont);
 
     qint64 typeId = index.data(Qt::UserRole + 2).toInt();
-    QString type = StaticData().getType()[typeId];
+    QString type = StaticData::getType().at(typeId);
     point.setX(textX);
     point.setY(textY + 60);
     QString typeText = QString("Type: %1").arg(type);
@@ -279,19 +296,19 @@ void CardItemDelegate::paint(QPainter *painter,
         painter->drawText(point, authorsText);
 
         qint64 classId = index.data(Qt::UserRole + 7).toInt();
-        QString class_ = StaticData().getClass()[classId];
+        QString class_ = StaticData::getClass().at(classId);
         point.setY(textY + 90);
         QString classText = QString("class: %1").arg(class_);
         painter->drawText(point, classText);
 
         qint64 difficultyId = index.data(Qt::UserRole + 8).toInt();
-        QString difficulty = StaticData().getDifficulty()[difficultyId];
+        QString difficulty = StaticData::getDifficulty().at(difficultyId);
         point.setY(textY + 120);
         QString difficultyText = QString("Difficulty: %1").arg(difficulty);
         painter->drawText(point, difficultyText);
 
         qint64 durationId = index.data(Qt::UserRole + 9).toInt();
-        QString duration = StaticData().getDuration()[durationId];
+        QString duration = StaticData::getDuration().at(durationId);
         point.setY(textY + 105);
         QString durationText = QString("Duration: %1").arg(duration);
         painter->drawText(point, durationText);
