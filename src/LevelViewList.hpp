@@ -32,7 +32,7 @@ class LevelListModel : public QAbstractListModel {
         m_scrollCoversCursor(0),
         m_sequentialCoversCursor(0),
         m_scrollCoversCursorChanged(false),
-        m_roleMap({
+        m_roleTable({
             { Qt::DisplayRole,  [](const ListItemData &i){ return i.m_title; }},
             { Qt::UserRole+1,   [](const ListItemData &i){ return i.m_game_id; }},
             { Qt::UserRole+2,   [](const ListItemData &i){ return i.m_type; }},
@@ -57,7 +57,7 @@ class LevelListModel : public QAbstractListModel {
     QVariant data(const QModelIndex &index, int role) const override;
 
  private:
-    const QMap<int, std::function<QVariant(const ListItemData&)>> m_roleMap;
+    const QHash<int, std::function<QVariant(const ListItemData&)>> m_roleTable;
     QVector<QSharedPointer<ListItemData>> m_levels;
     bool m_scrollCoversCursorChanged;
     quint64 m_scrollCoversCursor;

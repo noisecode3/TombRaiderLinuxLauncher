@@ -220,13 +220,23 @@ void TombRaiderLinuxLauncher::setInstalled() {
 
 bool TombRaiderLinuxLauncher::setStartupSetting(const StartupSetting settings) {
     bool status = true;
-    if (settings.installed) {
+    if (settings.installed == true) {
         ui->checkBoxInstalled->setChecked(true);
-        levelListProxy->setInstalledFilter(true);
     }
-    if (settings.original) {
-        // ui->checkBoxOriginal->setChecked(true);
-        // levelListProxy->set
+    if (settings.original == true) {
+        ui->checkBoxOriginal->setChecked(true);
+    }
+    if (settings.type_id != 0) {
+        ui->comboBoxType->setCurrentIndex(settings.type_id);
+    }
+    if (settings.class_id != 0) {
+        ui->comboBoxClass->setCurrentIndex(settings.class_id);
+    }
+    if (settings.difficulty_id != 0) {
+        ui->comboBoxDifficulty->setCurrentIndex(settings.difficulty_id);
+    }
+    if (settings.duration_id != 0) {
+        ui->comboBoxDuration->setCurrentIndex(settings.duration_id);
     }
     return status;
 }
@@ -250,12 +260,8 @@ void TombRaiderLinuxLauncher::sortByReleaseDate() {
     levelListProxy->setSortMode(LevelListProxy::ReleaseDate);
 }
 
-// void TombRaiderLinuxLauncher::showOriginal() {
-    // levelListProxy->setSortMode(LevelListProxy::None);
-// }
-
 void TombRaiderLinuxLauncher::showtOriginal() {
-    //levelListModel->showOriginal();
+    // levelListModel->showOriginal();
 }
 
 void TombRaiderLinuxLauncher::filterByClass(const QString &class_) {

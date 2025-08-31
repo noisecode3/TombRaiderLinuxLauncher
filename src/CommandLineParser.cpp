@@ -20,6 +20,13 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
         m_parser.setApplicationDescription("Tomb Raider Linux Launcher");
         m_parser.addHelpOption();
 
+        // Fullscreen ------------
+        QStringList fullscreenName;
+        fullscreenName << "f" << "fullscreen";
+        QCommandLineOption fullscreenOption(fullscreenName);
+        fullscreenOption.setDescription("Start in fullscreen");
+        m_parser.addOption(fullscreenOption);
+
         // Original ------------
         QStringList showOriginalName;
         showOriginalName << "so" << "showOriginal";
@@ -38,9 +45,10 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
         QStringList filterByClassName;
         filterByClassName << "fc" << "filterByClass";
         QCommandLineOption filterByClassOption(filterByClassName);
-        const QString filterByClassDesc =
-            "\nFilter levels by class. Allowed values:\n"
-            + m_class_options.join(", ") + "\n";
+        const QString filterByClassDesc = QString("%1%2%3").arg(
+            "\nFilter levels by class. Allowed values:\n",
+            m_class_options.join(", "),
+            "\n");
         filterByClassOption.setDescription(filterByClassDesc);
         filterByClassOption.setValueName("class");
         m_parser.addOption(filterByClassOption);
@@ -49,9 +57,10 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
         QStringList filterByTypeName;
         filterByTypeName << "ft" << "filterByType";
         QCommandLineOption filterByTypeOption(filterByTypeName);
-        const QString filterByTypeDesc =
-            "Filter levels by TR game type. Allowed values:\n"
-            + m_type_options.join(", ") + "\n";
+        const QString filterByTypeDesc = QString("%1%2%3").arg(
+            "Filter levels by TR game type. Allowed values:\n",
+            m_type_options.join(", "),
+            "\n");
         filterByTypeOption.setDescription(filterByTypeDesc);
         filterByTypeOption.setValueName("type");
         m_parser.addOption(filterByTypeOption);
@@ -60,9 +69,10 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
         QStringList filterByDifficultyName;
         filterByDifficultyName << "fd" << "filterByDifficulty";
         QCommandLineOption filterByDifficultyOption(filterByDifficultyName);
-        const QString filterByDifficultyDesc =
-            "Filter levels by difficulty. Allowed values:\n"
-            + m_type_options.join(", ") + "\n";
+        const QString filterByDifficultyDesc = QString("%1%2%3").arg(
+            "Filter levels by difficulty. Allowed values:\n",
+            m_type_options.join(", "),
+            "\n");
         filterByDifficultyOption.setDescription(filterByDifficultyDesc);
         filterByDifficultyOption.setValueName("difficulty");
         m_parser.addOption(filterByDifficultyOption);
@@ -72,9 +82,10 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
         filterByDurationName << "fr" << "filterByDuration";
         QCommandLineOption filterByDurationOption(filterByDurationName);
 
-        const QString filterByDurationDesc =
-            "Filter levels by duration. Allowed values:\n"
-            + m_type_options.join(", ") + "\n";
+        const QString filterByDurationDesc = QString("%1%2%3").arg(
+            "Filter levels by duration. Allowed values:\n",
+            m_type_options.join(", "),
+            "\n");
         filterByDurationOption.setDescription(filterByDurationDesc);
         filterByDurationOption.setValueName("duration");
         m_parser.addOption(filterByDurationOption);
@@ -111,8 +122,9 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
         QStringList widescreenName;
         widescreenName << "w" << "widescreen";
         QCommandLineOption widescreenOption(widescreenName);
-        const QString widescreenDesc = "Set widescreen bit on original games,"
-            + QString(" probably not useful for TRLE");
+        const QString widescreenDesc = QString("%1%2").arg(
+            "Set widescreen bit on original games,",
+            " probably not useful for TRLE");
         widescreenOption.setDescription(widescreenDesc);
         widescreenOption.setDefaultValue("PATH");
         m_parser.addOption(widescreenOption);
@@ -120,8 +132,9 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
         QStringList binaryName;
         binaryName << "b" << "binary";
         QCommandLineOption binaryOption(binaryName);
-        const QString binaryDesc = "Print PE Header Information,"
-            + QString(" to record Tomb Raider and TRLE binaries");
+        const QString binaryDesc = QString("%1%2").arg(
+            "Print PE Header Information,",
+            " to record Tomb Raider and TRLE binaries");
         binaryOption.setDescription(binaryDesc);
         binaryOption.setDefaultValue("PATH");
         m_parser.addOption(binaryOption);
@@ -135,6 +148,10 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
     m_parser.process(arguments);
 
     StartupSetting settings;
+    
+    if (m_parser.isSet("fullscreen") == true) {
+        settings.fullscreen = true;
+    }
 
     if (m_parser.isSet("showInstalled") == true) {
         settings.installed = true;
@@ -149,7 +166,7 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         QString value = m_parser.value("filterByClass");
         int idx = m_class_options.indexOf(value, Qt::CaseInsensitive);
         if (idx != -1) {
-            settings.class_id = static_cast<quint8>(idx+1);
+            settings.class_id = static_cast<quint8>(idx + 1);
         } else {
             qCritical().noquote() << "Invalid class value:" << value
                                   << "\nAllowed:" << m_class_options.join(", ");
@@ -162,7 +179,7 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         QString value = m_parser.value("filterByType");
         int idx = m_type_options.indexOf(value, Qt::CaseInsensitive);
         if (idx != -1) {
-            settings.type_id = static_cast<quint8>(idx);
+            settings.type_id = static_cast<quint8>(idx + 1);
         } else {
             qCritical().noquote() << "Invalid type value:" << value
                                   << "\nAllowed:" << m_type_options.join(", ");
@@ -175,7 +192,7 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         QString value = m_parser.value("filterByDifficulty");
         int idx = m_difficulty_options.indexOf(value, Qt::CaseInsensitive);
         if (idx != -1) {
-            settings.difficulty_id = static_cast<quint8>(idx);
+            settings.difficulty_id = static_cast<quint8>(idx + 1);
         } else {
             qCritical().noquote() << "Invalid difficulty value:" << value
                                   << "\nAllowed:" << m_difficulty_options.join(", ");
@@ -188,7 +205,7 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
         QString value = m_parser.value("filterByDuration");
         int idx = m_duration_options.indexOf(value, Qt::CaseInsensitive);
         if (idx != -1) {
-            settings.duration_id = static_cast<quint8>(idx);
+            settings.duration_id = static_cast<quint8>(idx + 1);
         } else {
             qCritical().noquote() << "Invalid duration value:" << value
                                   << "\nAllowed:" << m_duration_options.join(", ");
@@ -208,7 +225,7 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
 
     QStringList setSorts;
     for (const QString &opt : sortOptions) {
-        if (m_parser.isSet(opt)) {
+        if (m_parser.isSet(opt) == true) {
             setSorts << opt;
         }
     }

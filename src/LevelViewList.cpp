@@ -31,8 +31,8 @@ QVariant LevelListModel::data(const QModelIndex &index, int role) const {
 
     if (index.isValid() && index.row() < m_levels.size()) {
         const ListItemData &item = *m_levels[index.row()];
-        const auto it = m_roleMap.find(role);
-        if (it != m_roleMap.end()) {
+        const auto it = m_roleTable.find(role);
+        if (it != m_roleTable.end()) {
             result = it.value()(item);
         }
     }
@@ -147,23 +147,34 @@ void LevelListProxy::setInstalledFilter(bool on) {
 void LevelListProxy::setSortMode(SortMode mode) {
     m_sortMode = mode;
     invalidate();
-    this->sort(0);
+    this->sort(0, Qt::DescendingOrder);
 }
 
 bool LevelListProxy::lessThan(const QModelIndex &left,
                               const QModelIndex &right) const {
-    int role = roleForMode();
+    const quint64 role = roleForMode();
     QVariant l = sourceModel()->data(left, role);
     QVariant r = sourceModel()->data(right, role);
 
+    bool less = false;
     switch (m_sortMode) {
     case Title:
-        return l.toString().localeAwareCompare(r.toString()) < 0;
+        less = l.toString().localeAwareCompare(r.toString()) < 0;
+        break;
     case ReleaseDate:
-        return l.toDateTime() > r.toDateTime();
+        less = l.toDateTime() < r.toDateTime();
+        break;
+    case Difficulty:
+    case Duration:
+    case Class:
+    case Type:
+        less = l.toUInt() < r.toUInt();
+        break;
     default:
-        return l.toInt() > r.toInt();
+        less = false;
+        break;
     }
+    return less;
 }
 
 bool LevelListProxy::filterAcceptsRow(int sourceRow,
