@@ -29,9 +29,8 @@ class LevelListModel : public QAbstractListModel {
  public:
     explicit LevelListModel(QObject *parent = nullptr)
         : QAbstractListModel(parent),
-        m_scrollCoversCursor(0),
-        m_sequentialCoversCursor(0),
-        m_scrollCoversCursorChanged(false),
+        m_scrollCursorChanged(false),
+        m_seq_cursor_a(0),
         m_roleTable({
             { Qt::DisplayRole,  [](const ListItemData &i){ return i.m_title; }},
             { Qt::UserRole+1,   [](const ListItemData &i){ return i.m_game_id; }},
@@ -48,9 +47,10 @@ class LevelListModel : public QAbstractListModel {
         })
     {}
 
+    QVector<QSharedPointer<ListItemData>> getDataBuffer(const quint64 items);
     void setLevels(const QVector<QSharedPointer<ListItemData>>& levels);
     void setScrollChange(const quint64 index);
-    QVector<QSharedPointer<ListItemData>> getDataBuffer(const quint64 items);
+    void setInstalled(const QModelIndex &index);
     bool stop();
     void reset();
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -59,9 +59,10 @@ class LevelListModel : public QAbstractListModel {
  private:
     const QHash<int, std::function<QVariant(const ListItemData&)>> m_roleTable;
     QVector<QSharedPointer<ListItemData>> m_levels;
-    bool m_scrollCoversCursorChanged;
-    quint64 m_scrollCoversCursor;
-    quint64 m_sequentialCoversCursor;
+    bool m_scrollCursorChanged;
+    quint64 m_seq_cursor_a;
+    QModelIndex m_cursor_a;
+    QModelIndex m_cursor_b;
 };
 
 

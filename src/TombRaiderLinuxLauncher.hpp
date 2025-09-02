@@ -33,6 +33,11 @@
 #include "../src/LevelViewList.hpp"
 #include "../src/LoadingIndicator.hpp"
 
+struct InstalledStatus {
+    QHash<quint64, bool> game;
+    QHash<quint64, bool> trle;
+};
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
 QT_END_NAMESPACE
@@ -152,7 +157,12 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     /**
      * 
      */
-    void setInstalled();
+    void setList();
+
+    /**
+     * 
+     */
+    InstalledStatus getInstalled();
 
     /**
      * 

@@ -26,6 +26,11 @@ int LevelListModel::rowCount(const QModelIndex &parent) const {
     return parent.isValid() ? 0 : m_levels.size();
 }
 
+void LevelListModel::setInstalled(const QModelIndex &index) {
+    ListItemData &item = *m_levels[index.row()];
+    item.m_installed = true;
+}
+
 QVariant LevelListModel::data(const QModelIndex &index, int role) const {
     QVariant result;
 
@@ -41,8 +46,14 @@ QVariant LevelListModel::data(const QModelIndex &index, int role) const {
 }
 
 void LevelListModel::setScrollChange(const quint64 index) {
-    m_scrollCoversCursorChanged = true;
-    m_scrollCoversCursor = index;
+    if (!m_levels.empty()) {
+        m_scrollCursorChanged = true;
+        m_seq_cursor_a = m_cursor_a.row();
+
+        quint64 size = m_levels.size();
+        quint64 i = qMin(index, size);
+        m_cursor_a = this->index(i, 0);
+    }
 }
 
 QVector<QSharedPointer<ListItemData>> LevelListModel::getDataBuffer(quint64 items) {
@@ -50,36 +61,41 @@ QVector<QSharedPointer<ListItemData>> LevelListModel::getDataBuffer(quint64 item
 
     if ((items > 0) && !m_levels.isEmpty()) {
         quint64 size = m_levels.size();
-        quint64 index_a;
-        quint64 index_b;
+        // m_cursor_a starts on -1
+        // there is no way to inialize it
+        quint64 a = m_cursor_a.row() + 1;
+        quint64 b = qMin(a + items, size);
 
-        if (m_scrollCoversCursorChanged) {
-            m_scrollCoversCursorChanged = false;
-            index_a = m_scrollCoversCursor;
-            index_b = qMin(m_scrollCoversCursor + items, size);
-            m_scrollCoversCursor = index_b;
-        } else {
-            index_a = m_sequentialCoversCursor;
-            index_b = qMin(m_sequentialCoversCursor + items, size);
-            m_sequentialCoversCursor = index_b;
-        }
+        m_cursor_b = this->index(b, 0);
 
-        buffer.reserve(index_b - index_a);
-        for (quint64 i = index_a; i < index_b; ++i) {
+        buffer.reserve(b - a);
+        for (quint64 i = a; i < b; ++i) {
             buffer.append(m_levels[i]);
         }
     }
 
-    beginResetModel();
     return buffer;
 }
 
 void LevelListModel::reset() {
-    endResetModel();
+    if (m_cursor_a.isValid() && m_cursor_b.isValid()) {
+        emit dataChanged(m_cursor_a, m_cursor_b);
+    }
+
+    if (m_scrollCursorChanged == true) {
+        m_cursor_a = this->index(m_seq_cursor_a, 0);
+        m_scrollCursorChanged = false;
+    } else {
+        m_cursor_a = this->index(m_cursor_b.row(), 0);
+    }
 }
 
 bool LevelListModel::stop() {
-    return (m_sequentialCoversCursor == m_levels.size());
+    bool status = false;
+    if (m_scrollCursorChanged == false) {
+        status = (m_cursor_b.row() >= m_levels.size());
+    }
+    return status;
 }
 
 quint64 LevelListProxy::getLid(const QModelIndex &i) {

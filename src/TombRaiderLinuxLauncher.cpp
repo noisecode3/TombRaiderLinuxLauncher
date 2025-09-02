@@ -15,7 +15,6 @@
 #include "ui_TombRaiderLinuxLauncher.h"
 #include <QLineEdit>
 
-
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     : QMainWindow(parent) {
     ui = new Ui::TombRaiderLinuxLauncher;
@@ -137,8 +136,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         ui->listViewLevels->verticalScrollBar(),
         &QScrollBar::valueChanged,
         this,
-        &TombRaiderLinuxLauncher::levelListScrolled
-    );
+        &TombRaiderLinuxLauncher::levelListScrolled);
 
     connect(ui->checkBoxInstalled, &QCheckBox::toggled,
             levelListProxy, &LevelListProxy::setInstalledFilter);
@@ -167,6 +165,21 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     }
 }
 
+void TombRaiderLinuxLauncher::setList() {
+    QVector<QSharedPointer<ListItemData>> list;
+    controller.getList(&list);
+    InstalledStatus installedStatus = getInstalled();
+
+    for (const auto &item : list) {
+        Q_ASSERT(item != nullptr);
+        bool trle = installedStatus.trle.value(item->m_trle_id, false);
+        item->m_installed = trle;
+    }
+
+    levelListModel->setLevels(list);
+    loadMoreCovers();
+}
+
 void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
     // Update list only when 24 hours past
     QDateTime now = QDateTime::currentDateTime();
@@ -191,31 +204,27 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
         settings.setValue("lastUpdated", now.toString(Qt::ISODate));
         m_availableGames = availableGames;
     } else {
-        QVector<QSharedPointer<ListItemData>> list;
-        controller.getList(&list);
-        levelListModel->setLevels(list);
-        setInstalled();
-        loadMoreCovers();
+        setList();
         ui->stackedWidget->setCurrentWidget(
             ui->stackedWidget->findChild<QWidget*>("select"));
     }
 }
 
-void TombRaiderLinuxLauncher::setInstalled() {
+InstalledStatus TombRaiderLinuxLauncher::getInstalled() {
     QStringList keys = settings.allKeys();
-    QHash<int, bool> installedLevel;
-    QHash<int, bool> installedGame;
+    InstalledStatus list;
     for (const auto &key : std::as_const(keys)) {
         if (key.startsWith("installed/game")) {
-            qint64 id = key.midRef(QString("installed/game").length()).toInt();
-            installedGame.insert(id, settings.value(key).toBool());
+            quint64 id =
+                    key.midRef(QString("installed/game").length()).toUInt();
+            list.game.insert(id, settings.value(key).toBool());
         } else if (key.startsWith("installed/level")) {
-            qint64 id = key.midRef(QString("installed/level").length()).toInt();
-            installedLevel.insert(id, settings.value(key).toBool());
+            quint64 id =
+                    key.midRef(QString("installed/level").length()).toUInt();
+            list.trle.insert(id, settings.value(key).toBool());
         }
     }
-    // levelListModel->setInstalledListOriginal(installedGame);
-    // levelListModel->setInstalledList(installedLevel);
+    return list;
 }
 
 bool TombRaiderLinuxLauncher::setStartupSetting(const StartupSetting settings) {
@@ -509,7 +518,7 @@ void TombRaiderLinuxLauncher::downloadClicked() {
 void TombRaiderLinuxLauncher::infoClicked() {
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
-        qint64 id = levelListProxy->getLid(current);   // getLid(current);
+        qint64 id = levelListProxy->getLid(current);  // getLid(current);
         if (id != 0) {
             InfoData info = controller.getInfo(id);
             if (info.m_body == "" && info.m_imageList.size() == 0) {
@@ -597,7 +606,8 @@ void TombRaiderLinuxLauncher::loadMoreCovers() {
         levelListModel->reset();
     }
     if (!levelListModel->stop()) {
-        QVector<QSharedPointer<ListItemData>> buffer = levelListModel->getDataBuffer(100);
+        QVector<QSharedPointer<ListItemData>> buffer =
+                levelListModel->getDataBuffer(100);
         if (!buffer.isEmpty()) {
             controller.getCoverList(buffer);
         } else {
@@ -631,8 +641,8 @@ void TombRaiderLinuxLauncher::workTick() {
         QModelIndex current = ui->listViewLevels->currentIndex();
         if (current.isValid()) {
             qint64 id = levelListProxy->getLid(current);
-            //levelListProxy->setInstalled(current);
-            if (levelListProxy->getItemType(current)) {  // its the original game
+            levelListModel->setInstalled(current);
+            if (levelListProxy->getItemType(current)) {
                 settings.setValue(
                         QString("installed/game%1").arg(id),
                         "true");
@@ -679,11 +689,7 @@ void TombRaiderLinuxLauncher::downloadError(int status) {
 void TombRaiderLinuxLauncher::UpdateLevelDone() {
     m_loadingIndicatorWidget->hide();
     if (m_loadingDoneGoTo == "select") {
-        QVector<QSharedPointer<ListItemData>> list;
-        controller.getList(&list);
-        levelListModel->setLevels(list);
-        setInstalled();
-        loadMoreCovers();
+        setList();
         ui->stackedWidget->setCurrentWidget(
             ui->stackedWidget->findChild<QWidget*>("select"));
     } else if (m_loadingDoneGoTo == "info") {

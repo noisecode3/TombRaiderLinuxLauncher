@@ -4,3 +4,6 @@
 [submodule "libs/LIEF"]
 	path = libs/LIEF
 	url = https://github.com/lief-project/LIEF
+[submodule "libs/libbacktrace"]
+	path = libs/libbacktrace
+	url = https://github.com/ianlancetaylor/libbacktrace
