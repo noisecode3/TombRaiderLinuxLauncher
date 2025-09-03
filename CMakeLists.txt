@@ -18,29 +18,33 @@ find_package(Qt5 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
 
 find_package(CURL REQUIRED)
 
+# Add miniz as a subdirectory
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
     message(STATUS "Submodule 'libs/miniz' not found. Updating submodules...")
     execute_process(
         COMMAND git submodule update --init --recursive
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
-    file(READ "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" cmake)
+    file(READ "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" MINIZ_CMAKE)
     string(REPLACE "cmake_minimum_required(VERSION 3.5)"
-        "cmake_minimum_required(VERSION 3.16)" my_cmake "${cmake}")
-    file(WRITE "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" "${my_cmake}")
-endif()
-
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/database/tombll.db")
-    message(STATUS "Database not found, running get_trle.sh...")
-    execute_process(
-        COMMAND bash "${CMAKE_SOURCE_DIR}/database/get_trle.sh"
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        "cmake_minimum_required(VERSION 3.16)"
+        NEW_MINIZ_CMAKE
+        "${MINIZ_CMAKE}"
+    )
+    file(WRITE "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt"
+        "${NEW_MINIZ_CMAKE}"
     )
 endif()
-
 add_subdirectory(libs/miniz)
 
 # Add LIEF as a subdirectory
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt")
+    message(STATUS "Submodule 'libs/LIEF' not found. Updating submodules...")
+    execute_process(
+        COMMAND git submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endif()
 set(LIEF_INSTALL OFF CACHE BOOL "Disable installation of LIEF")
 set(LIEF_EXAMPLES OFF)
 set(LIEF_TESTS OFF)
@@ -51,18 +55,52 @@ set(LIEF_PE ON)
 set(LIEF_MACHO OFF)
 set(LIEF_DEX OFF)
 set(LIEF_ART OFF)
+add_subdirectory(libs/LIEF)
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt"
-        AND NOT NO_DATABASE
+# Add libbacktrace as a subdirectory
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure")
+    message(STATUS
+        "Submodule 'libs/libbacktrace' not found. Updating submodules..."
     )
-    message(STATUS "Submodule 'libs/LIEF' not found. Updating submodules...")
     execute_process(
         COMMAND git submodule update --init --recursive
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
 endif()
+if(EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure")
+    message(STATUS "Running autoconf to prepare libbacktrace")
+    execute_process(
+        COMMAND bash "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/libbacktrace"
+        RESULT_VARIABLE AUTOCONF_RESULT
+    )
+    if(NOT AUTOCONF_RESULT EQUAL 0)
+        message(
+            FATAL_ERROR
+            "Autoconf failed with exit code ${AUTOCONF_RESULT}"
+        )
+    endif()
+    execute_process(
+        COMMAND make
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/libbacktrace"
+        RESULT_VARIABLE MAKE_RESULT
+    )
+    if(NOT MAKE_RESULT EQUAL 0)
+        message(
+            FATAL_ERROR
+            "Make failed with exit code ${MAKE__RESULT}"
+        )
+    endif()
+endif()
 
-add_subdirectory(libs/LIEF)
+
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/database/tombll.db")
+    message(STATUS "Database not found, running get_trle.sh...")
+    execute_process(
+        COMMAND bash "${CMAKE_SOURCE_DIR}/database/get_trle.sh"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
+endif()
 
 set(SOURCES_TESTS
     test/test.hpp
@@ -93,6 +131,7 @@ set(SOURCES_MC
     src/PyRunner.hpp
     src/Runner.cpp
     src/Runner.hpp
+    src/assert.hpp
     src/binary.hpp
     src/binary.cpp
     src/main.cpp
@@ -114,6 +153,7 @@ set(LINK_COMMON
     miniz
     LIEF::LIEF
     ${CURL_LIBRARY}
+    "${CMAKE_SOURCE_DIR}/libs/libbacktrace/.libs/libbacktrace.a"
 )
 
 set(LINK_GUI
@@ -124,6 +164,7 @@ set(INCLUDE_DIR
     ${CURL_INCLUDE_DIR}
     libs/miniz
     libs/LIEF/include
+    libs/libbacktrace
     src
 )
 

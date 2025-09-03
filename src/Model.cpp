@@ -14,6 +14,8 @@
 #include "../src/Model.hpp"
 #include "../src/Data.hpp"
 #include "../src/Path.hpp"
+#include "../src/assert.hpp"
+#include <qglobal.h>
 
 Model::Model() {}
 Model::~Model() {}
@@ -283,7 +285,7 @@ bool Model::setLink(int id) {
 void Model::setupGame(int id) {
     QVector<FileListItem> list = data.getFileList(id);
     const size_t s = list.size();
-    assert(s != 0);
+    Q_ASSERT_WITH_TRACE(s != 0);
     Path from(Path::programFiles);
     Path to(Path::resource);
 

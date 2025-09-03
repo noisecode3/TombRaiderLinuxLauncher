@@ -499,6 +499,8 @@ void TombRaiderLinuxLauncher::downloadClicked() {
     QModelIndex current = ui->listViewLevels->currentIndex();
     if (current.isValid()) {
         qint64 id = levelListProxy->getLid(current);
+        qDebug() << "void TombRaiderLinuxLauncher" <<
+                    "::downloadClicked() quint64 id: " << id; 
         if (levelListProxy->getItemType(current)) {
             ui->listViewLevels->setEnabled(false);
             ui->progressBar->setValue(0);

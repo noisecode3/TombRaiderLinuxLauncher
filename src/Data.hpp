@@ -25,6 +25,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "../src/assert.hpp"
+
 /**
  * @struct FileListItem
  * @brief Files object to keep track of files.
@@ -251,26 +253,32 @@ struct ListItemData {
 
 
     void setGameId(const qint64 id) {
+        Q_ASSERT_WITH_TRACE(id != 0);
         m_game_id = id;
     }
 
     void setLid(const qint64 id) {
+        Q_ASSERT_WITH_TRACE(id != 0);
         m_trle_id = id;
     }
 
     void setTitle(const QString& title) {
+        Q_ASSERT_WITH_TRACE(!title.isEmpty());
         m_title = title;
     }
 
     void setAuthors(const QStringList& authors) {
+        Q_ASSERT_WITH_TRACE(!authors.isEmpty());
         m_authors = authors;
     }
 
     void setShortBody(const QString& shortBody) {
+        Q_ASSERT_WITH_TRACE(!shortBody.isEmpty());
         m_shortBody = shortBody;
     }
 
     void setType(const qint64 type) {
+        Q_ASSERT_WITH_TRACE(type != 0);
         m_type = type;
     }
 
@@ -287,6 +295,7 @@ struct ListItemData {
     }
 
     void setReleaseDate(const QString& releaseDate) {
+        Q_ASSERT_WITH_TRACE(!releaseDate.isEmpty());
         m_releaseDate = releaseDate;
     }
 

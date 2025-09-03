@@ -103,11 +103,12 @@ quint64 LevelListProxy::getLid(const QModelIndex &i) {
     if (id == 0) {
         id = sourceModel()->data(i, Qt::UserRole+10).toInt();
     }
+    Q_ASSERT_WITH_TRACE(id != 0);
     return id;
 }
 
 bool LevelListProxy::getItemType(const QModelIndex &i) {
-    return sourceModel()->data(i, Qt::UserRole+10).toBool();
+    return sourceModel()->data(i, Qt::UserRole+1).toBool();
 }
 
 bool LevelListProxy::getInstalled(const QModelIndex &i) {
