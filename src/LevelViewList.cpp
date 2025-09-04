@@ -16,7 +16,8 @@
 #include <QDateTime>
 #include "../src/staticData.hpp"
 
-void LevelListModel::setLevels(const QVector<QSharedPointer<ListItemData>>& levels) {
+void LevelListModel::setLevels(
+        const QVector<QSharedPointer<ListItemData>>& levels) {
     beginResetModel();
     m_levels = levels;
     endResetModel();

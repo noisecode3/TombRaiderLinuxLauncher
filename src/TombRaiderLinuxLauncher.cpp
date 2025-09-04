@@ -601,18 +601,18 @@ void TombRaiderLinuxLauncher::backClicked() {
 }
 
 void TombRaiderLinuxLauncher::loadMoreCovers() {
-    static bool firstTime = true;
-    if (!firstTime) {
-        levelListModel->reset();
-    } else {
-        firstTime = false;
-    }
     if (!levelListModel->stop()) {
         QVector<QSharedPointer<ListItemData>> buffer =
                 levelListModel->getDataBuffer(100);
         if (!buffer.isEmpty()) {
             controller.getCoverList(buffer);
         }
+    }
+    static bool firstTime = true;
+    if (!firstTime) {
+        levelListModel->reset();
+    } else {
+        firstTime = false;
     }
 }
 
