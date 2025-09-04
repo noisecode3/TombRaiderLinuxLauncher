@@ -45,60 +45,65 @@ QVariant LevelListModel::data(const QModelIndex &index, int role) const {
     return result;
 }
 
+inline quint64 LevelListModel::indexInBounds(const quint64 index) const {
+    return qMin(index, quint64(m_levels.size()));
+}
+
 void LevelListModel::setScrollChange(const quint64 index) {
     if (!m_levels.empty()) {
         m_scrollCursorChanged = true;
-        m_seq_cursor_a = m_cursor_a.row();
-
-        quint64 size = m_levels.size();
-        quint64 i = qMin(index, size);
-        m_cursor_a = this->index(i, 0);
+        m_scroll_cursor_a = indexInBounds(index);;
     }
 }
 
-QVector<QSharedPointer<ListItemData>> LevelListModel::getDataBuffer(quint64 items) {
-    QVector<QSharedPointer<ListItemData>> buffer;
+QVector<QSharedPointer<ListItemData>>
+        LevelListModel::getChunk(const quint64 cursor, const quint64 items) {
+    const quint64 len = indexInBounds(cursor + items) - cursor;
+    return m_levels.mid(cursor, len);
+}
 
+QVector<QSharedPointer<ListItemData>>
+        LevelListModel::getDataBuffer(quint64 items) {
+    QVector<QSharedPointer<ListItemData>> chunk;
     if ((items > 0) && !m_levels.isEmpty()) {
-        quint64 size = m_levels.size();
-        // m_cursor_a starts on -1
-        // there is no way to inialize it
-        quint64 a = m_cursor_a.row() + 1;
-        quint64 b = qMin(a + items, size);
-
-        m_cursor_b = this->index(b, 0);
-
-        buffer.reserve(b - a);
-        for (quint64 i = a; i < b; ++i) {
-            buffer.append(m_levels[i]);
+        if (m_scrollCursorChanged == true) {
+            m_scroll_cursor_b = indexInBounds(m_scroll_cursor_a + items);
+            chunk = getChunk(m_scroll_cursor_a, items);
+        } else {
+            m_cursor_b = indexInBounds(m_cursor_a + items);
+            chunk = getChunk(m_cursor_a, items);
         }
     }
 
-    return buffer;
+    return chunk;
+}
+
+void LevelListModel::updateCovers(quint64 a, quint64 b) {
+    QModelIndex index_a(index(a, 0));
+    QModelIndex index_b(index(b, 0));
+    if (index_a.isValid() && index_b.isValid()) {
+        qDebug() << "LevelListModel updated covers "
+            << index_a.row() << " to " << index_b.row();
+        emit dataChanged(index_a, index_b);
+    }
 }
 
 void LevelListModel::reset() {
-    if (m_cursor_a.isValid() && m_cursor_b.isValid()) {
-        emit dataChanged(m_cursor_a, m_cursor_b);
-    }
-
     if (m_scrollCursorChanged == true) {
-        m_cursor_a = this->index(m_seq_cursor_a, 0);
+        updateCovers(m_scroll_cursor_a, m_scroll_cursor_b);
+        m_scroll_cursor_a = m_scroll_cursor_b;
         m_scrollCursorChanged = false;
     } else {
-        m_cursor_a = this->index(m_cursor_b.row(), 0);
+        updateCovers(m_cursor_a, m_cursor_b);
+        m_cursor_a = m_cursor_b;
     }
 }
 
-bool LevelListModel::stop() {
-    bool status = false;
-    if (m_scrollCursorChanged == false) {
-        status = (m_cursor_b.row() >= m_levels.size());
-    }
-    return status;
+bool LevelListModel::stop() const {
+    return !m_scrollCursorChanged && (m_cursor_b >= m_levels.size());
 }
 
-quint64 LevelListProxy::getLid(const QModelIndex &i) {
+quint64 LevelListProxy::getLid(const QModelIndex &i) const {
     quint64 id = sourceModel()->data(i, Qt::UserRole+1).toInt();
     if (id == 0) {
         id = sourceModel()->data(i, Qt::UserRole+10).toInt();
@@ -107,11 +112,11 @@ quint64 LevelListProxy::getLid(const QModelIndex &i) {
     return id;
 }
 
-bool LevelListProxy::getItemType(const QModelIndex &i) {
+bool LevelListProxy::getItemType(const QModelIndex &i) const {
     return sourceModel()->data(i, Qt::UserRole+1).toBool();
 }
 
-bool LevelListProxy::getInstalled(const QModelIndex &i) {
+bool LevelListProxy::getInstalled(const QModelIndex &i) const {
     return sourceModel()->data(i, Qt::UserRole+11).toBool();
 }
 

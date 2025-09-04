@@ -216,11 +216,11 @@ InstalledStatus TombRaiderLinuxLauncher::getInstalled() {
     for (const auto &key : std::as_const(keys)) {
         if (key.startsWith("installed/game")) {
             quint64 id =
-                    key.midRef(QString("installed/game").length()).toUInt();
+                    key.mid(QString("installed/game").length()).toUInt();
             list.game.insert(id, settings.value(key).toBool());
         } else if (key.startsWith("installed/level")) {
             quint64 id =
-                    key.midRef(QString("installed/level").length()).toUInt();
+                    key.mid(QString("installed/level").length()).toUInt();
             list.trle.insert(id, settings.value(key).toBool());
         }
     }
@@ -602,18 +602,16 @@ void TombRaiderLinuxLauncher::backClicked() {
 
 void TombRaiderLinuxLauncher::loadMoreCovers() {
     static bool firstTime = true;
-    if (firstTime) {
-        firstTime = false;
-    } else {
+    if (!firstTime) {
         levelListModel->reset();
+    } else {
+        firstTime = false;
     }
     if (!levelListModel->stop()) {
         QVector<QSharedPointer<ListItemData>> buffer =
                 levelListModel->getDataBuffer(100);
         if (!buffer.isEmpty()) {
             controller.getCoverList(buffer);
-        } else {
-            levelListModel->reset();
         }
     }
 }

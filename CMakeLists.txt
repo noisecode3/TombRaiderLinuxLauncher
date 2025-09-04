@@ -14,7 +14,7 @@ else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt5 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
 
 find_package(CURL REQUIRED)
 
@@ -146,10 +146,10 @@ set(SOURCES_VIEW
 )
 
 set(LINK_COMMON
-    Qt5::Core
-    Qt5::Widgets
-    Qt5::WebEngineWidgets
-    Qt5::Sql
+    Qt6::Core
+    Qt6::Widgets
+    Qt6::WebEngineWidgets
+    Qt6::Sql
     miniz
     LIEF::LIEF
     ${CURL_LIBRARY}
@@ -157,7 +157,7 @@ set(LINK_COMMON
 )
 
 set(LINK_GUI
-    Qt5::Gui
+    Qt6::Gui
 )
 
 set(INCLUDE_DIR
@@ -176,7 +176,7 @@ if(TEST)
     set(SOURCES ${SOURCES_MC} ${SOURCES_TESTS})
     add_executable(${PROJECT_NAME}Test ${SOURCES})
     add_test(NAME ${PROJECT_NAME}Test COMMAND ${PROJECT_NAME}Test)
-    target_link_libraries(${PROJECT_NAME}Test PUBLIC ${LINK_COMMON} Qt5::Test)
+    target_link_libraries(${PROJECT_NAME}Test PUBLIC ${LINK_COMMON} Qt6::Test)
     target_include_directories(${PROJECT_NAME}Test PRIVATE ${INCLUDE_DIR} test)
     target_compile_definitions(${PROJECT_NAME}Test PRIVATE TEST)
     set_target_properties(${PROJECT_NAME}Test PROPERTIES

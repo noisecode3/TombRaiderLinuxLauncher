@@ -30,7 +30,10 @@ class LevelListModel : public QAbstractListModel {
     explicit LevelListModel(QObject *parent = nullptr)
         : QAbstractListModel(parent),
         m_scrollCursorChanged(false),
-        m_seq_cursor_a(0),
+        m_scroll_cursor_a(0),
+        m_scroll_cursor_b(0),
+        m_cursor_a(0),
+        m_cursor_b(0),
         m_roleTable({
             { Qt::DisplayRole,  [](const ListItemData &i){ return i.m_title; }},
             { Qt::UserRole+1,   [](const ListItemData &i){ return i.m_game_id; }},
@@ -47,11 +50,15 @@ class LevelListModel : public QAbstractListModel {
         })
     {}
 
+    QVector<QSharedPointer<ListItemData>> getChunk(const quint64 cursor,
+                                                    const quint64 items);
     QVector<QSharedPointer<ListItemData>> getDataBuffer(const quint64 items);
     void setLevels(const QVector<QSharedPointer<ListItemData>>& levels);
     void setScrollChange(const quint64 index);
     void setInstalled(const QModelIndex &index);
-    bool stop();
+    quint64 indexInBounds(quint64 index) const;
+    bool stop() const;
+    void updateCovers(quint64 a, quint64 b);
     void reset();
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -60,9 +67,10 @@ class LevelListModel : public QAbstractListModel {
     const QHash<int, std::function<QVariant(const ListItemData&)>> m_roleTable;
     QVector<QSharedPointer<ListItemData>> m_levels;
     bool m_scrollCursorChanged;
-    quint64 m_seq_cursor_a;
-    QModelIndex m_cursor_a;
-    QModelIndex m_cursor_b;
+    quint64 m_scroll_cursor_a;
+    quint64 m_scroll_cursor_b;
+    quint64 m_cursor_a;
+    quint64 m_cursor_b;
 };
 
 
@@ -81,9 +89,9 @@ class LevelListProxy : public QSortFilterProxyModel {
         m_sortMode(ReleaseDate)
     {}
 
-    quint64 getLid(const QModelIndex &i);
-    bool getItemType(const QModelIndex &i);
-    bool getInstalled(const QModelIndex &i);
+    quint64 getLid(const QModelIndex &i) const;
+    bool getItemType(const QModelIndex &i) const;
+    bool getInstalled(const QModelIndex &i) const;
 
     void setClassFilter(const QString &c);
     void setTypeFilter(const QString &t);
