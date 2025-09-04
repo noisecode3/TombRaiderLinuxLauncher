@@ -65,8 +65,10 @@ class Model : public QObject {
     void checkCommonFiles(QList<int>* games);
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
-    void getList(QVector<ListItemData>* list);
-    void getCoverList(QVector<ListItemData*>* tiems);
+    bool deleteZip(int id);
+    bool backupSaveFiles(int id);
+    void getList(QVector<QSharedPointer<ListItemData>>* list);
+    void getCoverList(QVector<QSharedPointer<ListItemData>> tiems);
     int getItemState(int id);
     bool runUmu(const int id);
     void setUmuEnv(const QVector<QPair<QString, QString>>& environment);

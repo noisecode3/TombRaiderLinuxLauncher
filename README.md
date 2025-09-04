@@ -102,6 +102,7 @@ sudo zypper install python3-pycurl python3-tqdm python3-cryptography python3-bea
 ```shell
 sudo apk add py3-pycurl py3-tqdm py3-cryptography py3-beautifulsoup4 py3-pillow
 ```
+
 Use the -sc flag to sync to trle
 
 ```shell
@@ -139,6 +140,7 @@ I tested the original, unpatched Tomb Raider III on an i7-4800MQ using its integ
 ```shell
 WINEPREFIX="/home/noisecode3/.newtombprefix" PROTONPATH="/home/noisecode3/.steam/steam/compatibilitytools.d/GE-Proton10-10" GAMEID="225320" MESA_SHADER_CACHE="true"
 ```
+
 It ran nearly perfectly — only a tiny framedrop once per hour, or sometimes not at all. Timing jitter caused by Wine’s threading system is largely eliminated under NTSync.
 NTSync can help DDraw, DirectSound other I/O thread workers in wine. On Arch Linux (or other distros with a modular kernel), you’ll need to manually load the ntsync driver to enable proper synchronization support:
 

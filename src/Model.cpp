@@ -14,6 +14,8 @@
 #include "../src/Model.hpp"
 #include "../src/Data.hpp"
 #include "../src/Path.hpp"
+#include "../src/assert.hpp"
+#include <qglobal.h>
 
 Model::Model() {}
 Model::~Model() {}
@@ -108,11 +110,11 @@ int Model::checkGameDirectory(int id) {
     return status;
 }
 
-void Model::getList(QVector<ListItemData>* list) {
+void Model::getList(QVector<QSharedPointer<ListItemData>>* list) {
     *list = data.getListItems();
 }
 
-void Model::getCoverList(QVector<ListItemData*>* items) {
+void Model::getCoverList(QVector<QSharedPointer<ListItemData>> items) {
     data.getCoverPictures(items);
     emit modelReloadLevelListSignal();
 }
@@ -283,7 +285,7 @@ bool Model::setLink(int id) {
 void Model::setupGame(int id) {
     QVector<FileListItem> list = data.getFileList(id);
     const size_t s = list.size();
-    assert(s != 0);
+    Q_ASSERT_WITH_TRACE(s != 0);
     Path from(Path::programFiles);
     Path to(Path::resource);
 
@@ -332,6 +334,22 @@ void Model::setupGame(int id) {
             QCoreApplication::processEvents();
         }
     }
+}
+
+bool Model::deleteZip(int id) {
+    bool status = false;
+    ZipData zipData = data.getDownload(id);
+    Path path(Path::resource);
+    path << zipData.m_fileName;
+    if (path.isFile()) {
+        status = fileManager.removeFileOrDirectory(path);
+    }
+    return status;
+}
+
+bool backupSaveFiles(int id) {
+    bool status = false;
+    return status;
 }
 
 void Model::updateLevel(const int id) {

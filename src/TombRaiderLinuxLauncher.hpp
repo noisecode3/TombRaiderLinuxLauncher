@@ -28,9 +28,15 @@
 #include <QString>
 
 #include "../src/settings.hpp"
+#include "../src/CommandLineParser.hpp"
 #include "../src/Controller.hpp"
-#include "../src/levelViewList.hpp"
+#include "../src/LevelViewList.hpp"
 #include "../src/LoadingIndicator.hpp"
+
+struct InstalledStatus {
+    QHash<quint64, bool> game;
+    QHash<quint64, bool> trle;
+};
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
@@ -58,6 +64,8 @@ class TombRaiderLinuxLauncher : public QMainWindow {
      */
     explicit TombRaiderLinuxLauncher(QWidget *parent = nullptr);
     ~TombRaiderLinuxLauncher();
+
+    bool setStartupSetting(const StartupSetting settings);
 
  public slots:
     /**
@@ -138,6 +146,7 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     void filterByType(const QString& type);
     void filterByDifficulty(const QString& difficulty);
     void filterByDuration(const QString& duration);
+    void levelListScrolled(int value);
     void showtOriginal();
     void GlobalSaveClicked();
     void GlobalResetClicked();
@@ -148,7 +157,12 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     /**
      * 
      */
-    void setInstalled();
+    void setList();
+
+    /**
+     * 
+     */
+    InstalledStatus getInstalled();
 
     /**
      * 
@@ -176,6 +190,7 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     QVector<QPair<QString, QString>> parsToEnv(const QString& str);
 
     LevelListModel *levelListModel;
+    LevelListProxy *levelListProxy;
     Controller& controller = Controller::getInstance();
     QSettings& settings = getSettingsInstance();
     Ui::TombRaiderLinuxLauncher *ui;

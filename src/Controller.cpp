@@ -93,7 +93,7 @@ void Controller::syncLevels() {
     runOnThreadA([=]() { model.syncLevels(); });
 }
 
-void Controller::getCoverList(QVector<ListItemData*>* items) {
+void Controller::getCoverList(QVector<QSharedPointer<ListItemData>> items) {
     runOnThreadB([=]() { model.getCoverList(items); });
 }
 
@@ -102,7 +102,7 @@ int Controller::checkGameDirectory(int id) {
     return model.checkGameDirectory(id);
 }
 
-void Controller::getList(QVector<ListItemData>* list) {
+void Controller::getList(QVector<QSharedPointer<ListItemData>>* list) {
     model.getList(list);
 }
 
