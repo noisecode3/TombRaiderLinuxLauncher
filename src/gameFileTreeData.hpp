@@ -14,6 +14,8 @@
 #ifndef SRC_GAMEFILETREEDATA_HPP_
 #define SRC_GAMEFILETREEDATA_HPP_
 
+#include "../src/GameFileTree.hpp"
+
 struct StaticTrees {
     QList<GameFileTree*> data;
     StaticTrees() {
@@ -64,6 +66,11 @@ struct StaticTrees {
             "audio",
             "data",
             "pix",
+        }));
+        data.append(new GameFileTree(QStringList{
+            "tomb4.exe",
+            "audio",
+            "data",
         }));
         data.append(new GameFileTree(QStringList{
             "tomb4.exe",
