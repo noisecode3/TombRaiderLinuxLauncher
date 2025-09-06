@@ -16,7 +16,11 @@
 
 #include <QtCore>
 #include <QtTest/QtTest>
+// #include "../src/GameFileTree.hpp"
+// #include "../src/gameFileTreeData.hpp"
+#include "../src/Path.hpp"
 #include "../src/PyRunner.hpp"
+#include "../src/Model.hpp"
 
 class PyRunnerTest : public QObject {
     Q_OBJECT
@@ -34,7 +38,46 @@ class PyRunnerTest : public QObject {
         QVERIFY(1 + 1 == 2);
     }
  private:
-    PyRunner pyrunner = PyRunner();
+    PyRunner pyRunner = PyRunner();
 };
 
+
+class GameFileTreeTest : public QObject {
+    Q_OBJECT
+
+ public:
+    GameFileTreeTest() {
+    }
+    ~GameFileTreeTest() {
+    }
+
+ private slots:
+    void ListTest() {
+        Path::setTestProgramFilesPath();
+        Path::setTestResourcePath();
+        Path level(Path::resource);
+        Path game(Path::programFiles);
+        QVERIFY(model.setupDirectories(level.get(), game.get()));
+        Path testLevel(Path::resource);
+        quint64 id = 3713;
+        testLevel << QString("%1.TRLE").arg(id);
+        if (testLevel.isDir()) {
+            qDebug() << "Exists: " << testLevel.get();
+        } else {
+            model.getLevel(id);
+            qDebug() << "Does not exist: " << testLevel.get();
+        }
+        Path testLevelBefore = testLevel;
+        testLevel = fileManager.getExtraPathToExe(testLevel);
+        QVERIFY(testLevelBefore.get() ==  testLevel.get());
+    }
+
+    void test2() {
+        QVERIFY(1 + 1 == 2);
+    }
+
+ private:
+    Model& model = Model::getInstance();
+    FileManager& fileManager = FileManager::getInstance();
+};
 #endif  // TEST_TEST_HPP_

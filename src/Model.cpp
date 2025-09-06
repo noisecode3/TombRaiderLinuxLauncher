@@ -26,8 +26,10 @@ bool Model::setupDirectories(const QString& level, const QString& game) {
     if (fileManager.setUpCamp(level, game) &&
             data.initializeDatabase(level) &&
             m_pyRunner.setUpCamp(level)) {
+        #ifndef TEST
         Path::setProgramFilesPath();
         Path::setResourcePath();
+        #endif
         status = true;
     }
     return status;
@@ -176,7 +178,7 @@ bool Model::runUmu(const int id) {
     QString s = path.get();
     qDebug() << "Model: path.get() "  << s;
 
-    path = fileManager.getExtraPathToExe(path);
+    fileManager.getExtraPathToExe(path, data.getType(id));
 
     s = path.get();
     qDebug() << "Model: path.get() "  << s;
@@ -232,7 +234,7 @@ bool Model::runWine(const qint64 id) {
         path <<  QString("%1.TRLE").arg(id);
     }
 
-    path = fileManager.getExtraPathToExe(path);
+    fileManager.getExtraPathToExe(path, data.getType(id));
     m_wineRunner.setWorkingDirectory(path.get());
     path << ExecutableNames().data[data.getType(id)];
 

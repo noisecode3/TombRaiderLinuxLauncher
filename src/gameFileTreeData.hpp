@@ -15,98 +15,108 @@
 #define SRC_GAMEFILETREEDATA_HPP_
 
 #include "../src/GameFileTree.hpp"
+#include <array>
+#include <QDir>
+#include <QStringList>
+#include <QVector>
 
 struct StaticTrees {
-    QList<GameFileTree*> data;
-    StaticTrees() {
-        data.append(new GameFileTree(QStringList{
-            "TOMBRAID/tomb.exe",
-            "dosbox.exe",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "Tomb1Main.exe",
-            "cfg",
-            "data",
-            "shaders",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "TR1X.exe",
-            "cfg",
-            "data",
-            "shaders",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "TR2Main.json",
-            "data",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "Tomb2.exe",
-            "data",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "tomb3_ConfigTool.json",
-            "tomb3.exe",
-            "audio",
-            "data",
-            "pix",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "tomb3.exe",
-            "audio",
-            "data",
-            "Pix",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "tomb3.exe",
-            "audio",
-            "Data",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "tomb3.exe",
-            "audio",
-            "data",
-            "pix",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "tomb4.exe",
-            "audio",
-            "data",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "tomb4.exe",
-            "audio",
-            "Data",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "tomb4.exe",
-            "audio",
-            "data",
-            "pix",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "audio",
-            "data",
-            "pix",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "PCTomb5.exe",
-            "audio",
-            "data",
-            "pix",
-        }));
-        data.append(new GameFileTree(QStringList{
-            "TombEngine.exe",
-        }));
-    }
-    ~StaticTrees() {
-        for (GameFileTree* tree : data) {
-            delete tree;
-        }
-        data.clear();
-    }
+    StaticTrees()
+        : data{{
+            {},  // [0] Null
+            QVector<GameFileTree>{  // [1] TR1
+                GameFileTree(QStringList{
+                    "TR1X.EXE",
+                    "CFG",
+                    "DATA",
+                    "SHADERS",
+                }),
+                GameFileTree(QStringList{
+                    QString("TOMBRAID%1TOMB.EXE").arg(QDir::separator()),
+                    "DOSBOX.EXE"
+                }),
+                GameFileTree(QStringList{
+                    "TOMB1MAIN.EXE",
+                    "CFG",
+                    "DATA",
+                    "SHADERS"
+                }),
+            },
+            QVector<GameFileTree>{  // [2] TR2
+                GameFileTree(QStringList{
+                    "TR2MAIN.JSON",
+                    "DATA",
+                }),
+                GameFileTree(QStringList{
+                    "TOMB2.EXE",
+                    "DATA",
+                }),
+            },
+            QVector<GameFileTree>{  // [3] TR3
+                GameFileTree(QStringList{
+                    "TOMB3_CONFIGTOOL.JSON",
+                    "TOMB3.EXE",
+                    "AUDIO",
+                    "DATA",
+                    "PIX",
+                }),
+                GameFileTree(QStringList{
+                    "TOMB3.EXE",
+                    "AUDIO",
+                    "DATA",
+                    "PIX",
+                }),
+                GameFileTree(QStringList{
+                    "TOMB3.EXE",
+                    "AUDIO",
+                    "DATA",
+                }),
+                GameFileTree(QStringList{
+                    "TOMB3.EXE",
+                    "AUDIO",
+                    "DATA",
+                    "PIX",
+                }),
+            },
+            QVector<GameFileTree>{  // [4] TR4
+                GameFileTree(QStringList{
+                    "TOMB4.EXE",
+                    "AUDIO",
+                    "DATA",
+                }),
+                GameFileTree(QStringList{
+                    "TOMB4.EXE",
+                    "AUDIO",
+                    "DATA",
+                }),
+                GameFileTree(QStringList{
+                    "TOMB4.EXE",
+                    "AUDIO",
+                    "DATA",
+                    "PIX",
+                }),
+                GameFileTree(QStringList{
+                    "AUDIO",
+                    "DATA",
+                    "PIX",
+                }),
+            },
+            QVector<GameFileTree>{  // [5] TR5
+                GameFileTree(QStringList{
+                    "PCTOMB5.EXE",
+                    "AUDIO",
+                    "DATA",
+                    "PIX",
+                }),
+                GameFileTree(QStringList{
+                    "TOMBENGINE.EXE",
+                }),
+            },
+            QVector<GameFileTree>{},  // [6] Placeholder (empty)
+        }}
+    {}
+    const std::array<QVector<GameFileTree>, 7> data;
 };
-
-
 
 
 #endif  // SRC_GAMEFILETREEDATA_HPP_

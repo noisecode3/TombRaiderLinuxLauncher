@@ -182,14 +182,13 @@ QStringList GameFileTree::matchesFromAnyNode(const GameFileTree* other) {
 
     if (matchesSubtree(other)) {
         result.append(m_fileName);
-    } else {
-        for (GameFileTree* child : m_childItems) {
-            QStringList childPath = child->matchesFromAnyNode(other);
-            if (!childPath.isEmpty()) {
-                childPath.prepend(m_fileName);  // its a bit backwards later
-                result = childPath;
-                break;
-            }
+    }
+
+    for (GameFileTree* child : m_childItems) {
+        QStringList childPath = child->matchesFromAnyNode(other);
+        if (!childPath.isEmpty()) {
+            childPath.prepend(m_fileName);
+            result.append(childPath);
         }
     }
 

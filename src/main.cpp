@@ -16,7 +16,6 @@
 #ifdef TEST
 #include <QCoreApplication>
 #include <QTest>
-#include "../src/binary.hpp"
 #include "../test/test.hpp"
 #else
 #include <QApplication>
@@ -28,42 +27,21 @@
  * The main function used for console tests
  */
 int main(int argc, char *argv[]) {
+    int status = 0;
+
     QCoreApplication app(argc, argv);
-    qint64 status = 0;
 
-    // Access the existing QTest command-line parser
-    QCommandLineParser parser;
-    parser.setApplicationDescription("Tomb Raider Linux Launcher Test Suite");
-    parser.addHelpOption();
+    CommandLineParser clp("APP");
+    const StartupSetting ss = clp.process(app.arguments());
 
-    // Add custom -w option for widescreen
-    parser.addOption(QCommandLineOption(
-        QStringList {"w", "widescreen"},
-        "Set widescreen bit on original games, probably not useful for TRLE",
-        "PATH"));
+    status = clp.getProcessStatus();
 
-    // Add custom -b option for binary detection
-    parser.addOption(QCommandLineOption(
-        QStringList {"b", "binary"},
-        "Print PE Header Information, to record Tomb Raider and TRLE binaries",
-        "PATH"));
-
-    // Process arguments
-    parser.process(app);
-
-    // Handle custom -w flag
-    if (parser.isSet("widescreen")  == true) {
-        status = widescreen_set(parser.value("widescreen"));
-    } else if (parser.isSet("binary")  == true) {
-        readPEHeader(parser.value("binary"));
-        readExportTable(parser.value("binary"));
-        analyzeImportTable(parser.value("binary").toStdString());
-    } else {
-        // Pass remaining arguments to QTest
-        PyRunnerTest test;
-        QStringList testArgs = app.arguments();
-        status =  QTest::qExec(&test, testArgs);
+    if (status == 0) {
+        // Run the tests
+        GameFileTreeTest test;
+        status = QTest::qExec(&test, app.arguments());
     }
+
     return status;  // Exit after handling the custom flag
 }
 #else

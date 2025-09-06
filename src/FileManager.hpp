@@ -21,8 +21,10 @@
 #include <QByteArray>
 #include <QCryptographicHash>
 #include <QDebug>
+#include "../src/gameFileTreeData.hpp"
 #include "../src/Path.hpp"
 
+    const StaticTrees m_staticTrees;
 class FileManager : public QObject {
     Q_OBJECT
 
@@ -142,7 +144,7 @@ class FileManager : public QObject {
      * @note If the expected executable is not found, the function attempts to locate
      *       an alternative executable and create a relative symbolic link to it.
      */
-    void createLinkToExe(Path path, const QString& expectedFileName);
+    void createLinkToExe(Path path, const QString& expectedFileName, const quint64 type);
 
     /**
      * @brief Extracts the contents of a ZIP archive into a specified output folder.
@@ -169,15 +171,15 @@ class FileManager : public QObject {
     /**
      * @brief Determines an additional path to the executable within a level directory.
      *
-     * This function constructs a path to a level directory and searches for
-     * an extra executable path by comparing the directory structure with predefined
+     * This function adds to a path on a level directory by searching for an
+     * extra executable path by comparing the directory structure with predefined
      * static trees.
      *
-     * @param levelDir The relative path of the level directory.
-     * @return A QString containing the path, including the extra executable path
-     *         if a match is found.
+     * @param Path to a lid.TRLE level directory.
+     * @param quint64 game type, Tomb Raider 1, 2, 3, 4, 5, 6.
+     * @return bool status if a match is found.
      */
-    Path getExtraPathToExe(Path path);
+    bool getExtraPathToExe(Path &path, quint64 type);
 
     /**
      * @brief Creates a symbolic link from a level directory to a game directory.
@@ -246,14 +248,17 @@ class FileManager : public QObject {
     void fileWorkTickSignal();
 
  private:
-    FileManager() {}
+    FileManager() :
+        m_sep(QDir::separator())
+    {}
     bool isHomePath(const QString& path) {
         return path.startsWith(QDir::homePath());
     }
 
     QDir m_levelDir;
     QDir m_gameDir;
-    const QString m_sep = QDir::separator();
+    const QString m_sep;
+    const StaticTrees m_staticTrees;
     Q_DISABLE_COPY(FileManager)
 };
 

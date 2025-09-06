@@ -63,6 +63,35 @@ bool Path::setResourcePath() {
     return status;
 }
 
+bool Path::setTestProgramFilesPath() {
+    bool status = false;
+    const QFileInfo fileInfo(QString("%1%2%3%4%5").arg(
+            QCoreApplication::applicationDirPath(), m_sep,
+            "tester_root", m_sep, "PROGRAM_FILES"));
+    if (validate(fileInfo)) {
+        status = true;
+        m_programFilesPath = QDir(fileInfo.absoluteFilePath());
+    }
+
+    qDebug() << "setProgramFilesPath :" << m_programFilesPath;
+    return status;
+}
+
+bool Path::setTestResourcePath() {
+    bool status = false;
+    const QFileInfo fileInfo(QString("%1%2%3%4%5%6%7%8%9").arg(
+            QCoreApplication::applicationDirPath(), m_sep,
+            "tester_root", m_sep, "usr", m_sep, "share",
+            m_sep, "TombRaiderLinuxLauncher"));
+    if (validate(fileInfo)) {
+        status = true;
+        m_resourcePath = QDir(fileInfo.absoluteFilePath());
+    }
+
+    qDebug() << "setProgramFilesPath :" << m_resourcePath;
+    return status;
+}
+
 QString Path::get() {
     return QDir::cleanPath(m_path.absoluteFilePath());
 }

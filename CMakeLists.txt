@@ -134,6 +134,7 @@ set(SOURCES_MC
     src/assert.hpp
     src/binary.hpp
     src/binary.cpp
+    src/gameFileTreeData.hpp
     src/main.cpp
     src/staticData.hpp
 )

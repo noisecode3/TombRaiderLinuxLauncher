@@ -19,7 +19,6 @@
 #include <QtCore>
 #include <QByteArray>
 #include <QDataStream>
-#include "../src/GameFileTree.hpp"
 #include "../miniz/miniz.h"  // IWYU pragma: keep
 #include "../miniz/miniz_zip.h"
 #include "../src/gameFileTreeData.hpp"
@@ -150,8 +149,8 @@ int FileManager::createDirectory(Path path) {
     return status;
 }
 
-void FileManager::createLinkToExe(Path path, const QString& expectedFileName) {
-    path = getExtraPathToExe(path);
+void FileManager::createLinkToExe(Path path, const QString& expectedFileName, const quint64 type) {
+    getExtraPathToExe(path, type);
     path << expectedFileName;
 
     qDebug() << "path :" << path.get();
@@ -264,30 +263,30 @@ bool FileManager::extractZip(
     return status;
 }
 
-Path FileManager::getExtraPathToExe(Path path) {
+bool FileManager::getExtraPathToExe(Path &path, quint64 type) {
+    bool status = false;
     qDebug() << "levelPath :" << path.get();
 
-    StaticTrees staticTrees;
     GameFileTree tree(path);
     tree.printTree(1);
 
     QStringList extraPath;
 
-    for (const GameFileTree* stree : staticTrees.data) {
-        extraPath = tree.matchesFromAnyNode(stree);
+    for (const GameFileTree& stree : m_staticTrees.data[type]) {
+        extraPath = tree.matchesFromAnyNode(&stree);
         if (!extraPath.isEmpty()) {
-            QString joined = extraPath.join(QDir::separator());
+            QString joined = extraPath.join(m_sep);
             QTextStream(stdout) << "game tree matches: " << joined << Qt::endl;
 
             for (int i = extraPath.size() - 1; i >= 0; --i) {
                 path << extraPath[i];
             }
-
+            status = true;
             break;
         }
     }
 
-    return path;
+    return status;
 }
 
 bool FileManager::linkGameDir(Path from, Path to) {
