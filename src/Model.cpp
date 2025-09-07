@@ -364,15 +364,6 @@ void Model::syncLevels() {
     emit this->modelLoadingDoneSignal();
 }
 
-bool Model::unpackLevel(const int id, const QString& name, const QString& exe) {
-    bool status = false;
-    const QString directory = QString("%1.TRLE").arg(id);
-    if (fileManager.extractZip(name, directory, exe) == true) {
-        status = true;
-    }
-    return status;
-}
-
 bool Model::getLevelHaveFile(
         const int id, const QString& md5sum, Path path) {
     bool status = false;
@@ -434,10 +425,7 @@ void Model::getLevel(int id) {
             status = getLevelDontHaveFile(id, zipData.m_MD5sum, path);
         }
         if (status == true) {
-            if (!unpackLevel(
-                id,
-                zipData.m_fileName,
-                getExecutableName(zipData.m_type))) {
+            if (!fileManager.extractZip(zipData)) {
                 qDebug() << "unpackLevel failed";
             }
         }
@@ -446,6 +434,10 @@ void Model::getLevel(int id) {
 
 const InfoData Model::getInfo(int id) {
     return data.getInfo(id);
+}
+
+const int Model::getType(int id) {
+    return data.getType(id);
 }
 
 const QString Model::getWalkthrough(int id) {

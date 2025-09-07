@@ -198,16 +198,24 @@ struct ZipData {
      * @brief This sets the zip file name metadata.
      * @param version File version from trcustoms.org
      */
-    inline void setVersion(const qint64 version) {
+    inline void setVersion(const quint64 version) {
         m_version = version;
     }
 
     /**
-     * @brief This sets the zip file name metadata.
+     * @brief This sets the level type metadata.
      * @param type Level type.
      */
-    inline void setType(const qint64 type) {
+    inline void setType(const quint64 type) {
         m_type = type;
+    }
+
+    /**
+     * @brief This sets the id metadata.
+     * @param type Level is.
+     */
+    inline void setId(const quint64 id) {
+        m_id = id;
     }
 
     /**
@@ -222,8 +230,10 @@ struct ZipData {
     float m_mebibyteSize;  ///< The archive file size in MiB.
     QString m_MD5sum;      ///< The archive md5sum.
     QString m_URL;         ///< The URL of the TRLE level download.
-    int m_version;         ///< The Version of trcustoms archive file.
-    int m_type;            ///< The TRLE type used to identify a executable.
+    quint64 m_version;     ///< The Version of trcustoms archive file.
+    quint64 m_type;        ///< The TRLE type used to identify a executable.
+    quint64 m_id;          ///< The Level id.
+    QString m_host;        ///< The host TRLE or TRCUSTOMS.
     QString m_release;     ///< The The date of file release from trcustoms.
 };
 

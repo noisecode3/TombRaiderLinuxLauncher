@@ -172,31 +172,27 @@ void FileManager::createLinkToExe(Path path, const QString& expectedFileName, co
     }
 }
 
-bool FileManager::extractZip(
-    const QString& zipFilename,
-    const QString& outputFolder,
-    const QString& executable) {
+bool FileManager::extractZip(ZipData zipData) {
     bool status = false;
-    const QString& zipPath =
-        QString("%1%2%3").arg(m_levelDir.absolutePath(), m_sep, zipFilename);
-    const QString& outputPath =
-        QString("%1%2%3").arg(m_levelDir.absolutePath(), m_sep, outputFolder);
+    Path zipFilename = Path(Path::resource) << zipData.m_fileName;
+    Path outputFolder = Path(Path::resource)
+                            << QString("%1.TRLE").arg(zipData.m_id);
 
-    Path oPath = (Path(Path::resource) << outputFolder);
 
-    qDebug() << "Unzipping file" << zipFilename << "to" << outputPath;
+    qDebug() << "Unzipping file"
+             << zipData.m_fileName
+             << "to" << outputFolder.get();
 
     // Create output folder if it doesn't exist
-    QDir dir(outputPath);
-    if (!dir.exists()) {
-        dir.mkpath(".");
+    if (!outputFolder.exists()) {
+        QDir().mkpath(outputFolder.get());
     }
 
     // Open the zip file
     mz_zip_archive zip;
     (void)memset(&zip, 0, sizeof(zip));
     if (mz_zip_reader_init_file(
-        &zip, zipPath.toUtf8().constData(), 0) == true) {
+        &zip, zipFilename.get().toUtf8().constData(), 0) == true) {
         // Extract each file in the zip archive
         quint64 numFiles = mz_zip_reader_get_num_files(&zip);
         qDebug() << "Zip file contains" << numFiles << "files";
@@ -208,7 +204,7 @@ bool FileManager::extractZip(
             mz_zip_archive_file_stat file_stat;
             if (!mz_zip_reader_file_stat(&zip, i, &file_stat)) {
                 qWarning() << "Failed to get file info for file" << i
-                << "in zip file" << zipPath;
+                           << "in zip file" << zipFilename.get();
                 mz_zip_reader_end(&zip);
                 break;
             }
@@ -218,7 +214,7 @@ bool FileManager::extractZip(
                 continue;  // Skip directories
             }
 
-            QString outFile = QString("%1/%2").arg(outputPath, filename);
+            QString outFile = QString("%1%2%3").arg(outputFolder.get(), m_sep, filename);
             qDebug() << "Extracting" << filename;
 
             if (!QDir().mkpath(QFileInfo(outFile).path())) {
@@ -233,7 +229,7 @@ bool FileManager::extractZip(
                     outFile.toUtf8().constData(),
                     0)) {
                 qWarning() << "Failed to extract file" << filename
-                        << "from zip file" << zipPath;
+                           << "from zip file" << zipFilename.get();
                 mz_zip_reader_end(&zip);
                 break;
             }
@@ -249,13 +245,16 @@ bool FileManager::extractZip(
                 }
                 lastPrintedPercent = currentPercent;
                 if (currentPercent == gotoPercent) {
-                    createLinkToExe(oPath, executable);
+                    createLinkToExe(
+                            outputFolder,
+                            ExecutableNames().data[zipData.m_type],
+                            zipData.m_type);
                     status = true;
                 }
             }
         }
     } else {
-        qWarning() << "Failed to open zip file" << zipPath;
+        qWarning() << "Failed to open zip file" << zipFilename.get();
     }
     // Clean up
     mz_zip_reader_end(&zip);
@@ -272,8 +271,8 @@ bool FileManager::getExtraPathToExe(Path &path, quint64 type) {
 
     QStringList extraPath;
 
-    for (const GameFileTree& stree : m_staticTrees.data[type]) {
-        extraPath = tree.matchesFromAnyNode(&stree);
+    for (const GameFileTree* stree : staticTrees.data[type]) {
+        extraPath = tree.matchesFromAnyNode(stree);
         if (!extraPath.isEmpty()) {
             QString joined = extraPath.join(m_sep);
             QTextStream(stdout) << "game tree matches: " << joined << Qt::endl;

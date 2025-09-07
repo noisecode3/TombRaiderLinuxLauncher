@@ -21,6 +21,7 @@
 #include <QByteArray>
 #include <QCryptographicHash>
 #include <QDebug>
+#include "../src/Data.hpp"
 #include "../src/gameFileTreeData.hpp"
 #include "../src/Path.hpp"
 
@@ -153,9 +154,7 @@ class FileManager : public QObject {
      * its contents to a specified output folder. It ensures that the output directory
      * exists and handles errors related to file extraction.
      *
-     * @param zipFilename The name of the ZIP archive to extract.
-     * @param outputFolder The name of the destination folder where files will be extracted.
-     * @param executable The name of the game launch executable.
+     * @param ZipData zip archive to extract.
      * @return `true` if extraction is successful, otherwise `false`.
      *
      * @note This function uses `miniz` for ZIP operations.
@@ -163,10 +162,7 @@ class FileManager : public QObject {
      *          and terminate extraction, potentially leaving incomplete files.
      * @signal fileWorkTickSignal() is emitted to indicate extraction progress.
      */
-    bool extractZip(
-        const QString& zipFilename,
-        const QString& outputFolder,
-        const QString& executable);
+    bool extractZip(ZipData zipData);
 
     /**
      * @brief Determines an additional path to the executable within a level directory.
@@ -258,7 +254,6 @@ class FileManager : public QObject {
     QDir m_levelDir;
     QDir m_gameDir;
     const QString m_sep;
-    const StaticTrees m_staticTrees;
     Q_DISABLE_COPY(FileManager)
 };
 

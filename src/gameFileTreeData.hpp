@@ -24,99 +24,105 @@ struct StaticTrees {
     StaticTrees()
         : data{{
             {},  // [0] Null
-            QVector<GameFileTree>{  // [1] TR1
-                GameFileTree(QStringList{
+            QVector<GameFileTree*>{  // [1] TR1
+                new GameFileTree(QStringList{
                     "TR1X.EXE",
                     "CFG",
                     "DATA",
                     "SHADERS",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     QString("TOMBRAID%1TOMB.EXE").arg(QDir::separator()),
                     "DOSBOX.EXE"
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "TOMB1MAIN.EXE",
                     "CFG",
                     "DATA",
                     "SHADERS"
                 }),
             },
-            QVector<GameFileTree>{  // [2] TR2
-                GameFileTree(QStringList{
+            QVector<GameFileTree*>{  // [2] TR2
+                new GameFileTree(QStringList{
                     "TR2MAIN.JSON",
                     "DATA",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "TOMB2.EXE",
                     "DATA",
                 }),
             },
-            QVector<GameFileTree>{  // [3] TR3
-                GameFileTree(QStringList{
+            QVector<GameFileTree*>{  // [3] TR3
+                new GameFileTree(QStringList{
                     "TOMB3_CONFIGTOOL.JSON",
                     "TOMB3.EXE",
                     "AUDIO",
                     "DATA",
                     "PIX",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "TOMB3.EXE",
                     "AUDIO",
                     "DATA",
                     "PIX",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "TOMB3.EXE",
                     "AUDIO",
                     "DATA",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "TOMB3.EXE",
                     "AUDIO",
                     "DATA",
                     "PIX",
                 }),
             },
-            QVector<GameFileTree>{  // [4] TR4
-                GameFileTree(QStringList{
+            QVector<GameFileTree*>{  // [4] TR4
+                new GameFileTree(QStringList{
                     "TOMB4.EXE",
                     "AUDIO",
                     "DATA",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "TOMB4.EXE",
                     "AUDIO",
                     "DATA",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "TOMB4.EXE",
                     "AUDIO",
                     "DATA",
                     "PIX",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "AUDIO",
                     "DATA",
                     "PIX",
                 }),
             },
-            QVector<GameFileTree>{  // [5] TR5
-                GameFileTree(QStringList{
+            QVector<GameFileTree*>{  // [5] TR5
+                new GameFileTree(QStringList{
                     "PCTOMB5.EXE",
                     "AUDIO",
                     "DATA",
                     "PIX",
                 }),
-                GameFileTree(QStringList{
+                new GameFileTree(QStringList{
                     "TOMBENGINE.EXE",
                 }),
             },
-            QVector<GameFileTree>{},  // [6] Placeholder (empty)
+            QVector<GameFileTree*>{},  // [6] Placeholder (empty)
         }}
     {}
-    const std::array<QVector<GameFileTree>, 7> data;
+    ~StaticTrees() {
+        for (auto &vec : data)
+            for (auto ptr : vec)
+                delete ptr;
+    }
+    const std::array<QVector<GameFileTree*>, 7> data;
 };
 
+inline StaticTrees staticTrees;
 
 #endif  // SRC_GAMEFILETREEDATA_HPP_

@@ -85,6 +85,7 @@ class Model : public QObject {
     void setupGame(int id);
     void getLevel(int id);
     const InfoData getInfo(int id);
+    const int getType(int id);
     const QString getWalkthrough(int id);
     bool setupDirectories(const QString& level, const QString& game);
     void setup(const QString& level, const QString& game);
@@ -102,7 +103,6 @@ class Model : public QObject {
         const int id, const QString& md5sum, Path path);
     bool getLevelDontHaveFile(
         const int id, const QString& md5sum, Path path);
-    bool unpackLevel(const int id, const QString& name, const QString& exe);
 
     Runner m_wineRunner   = Runner("wine");
     Runner m_lutrisRunner = Runner("lutris");
