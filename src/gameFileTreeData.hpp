@@ -54,56 +54,18 @@ struct StaticTrees {
             },
             QVector<GameFileTree*>{  // [3] TR3
                 new GameFileTree(QStringList{
-                    "TOMB3_CONFIGTOOL.JSON",
-                    "TOMB3.EXE",
                     "AUDIO",
                     "DATA",
-                    "PIX",
-                }),
-                new GameFileTree(QStringList{
-                    "TOMB3.EXE",
-                    "AUDIO",
-                    "DATA",
-                    "PIX",
-                }),
-                new GameFileTree(QStringList{
-                    "TOMB3.EXE",
-                    "AUDIO",
-                    "DATA",
-                }),
-                new GameFileTree(QStringList{
-                    "TOMB3.EXE",
-                    "AUDIO",
-                    "DATA",
-                    "PIX",
                 }),
             },
             QVector<GameFileTree*>{  // [4] TR4
                 new GameFileTree(QStringList{
-                    "TOMB4.EXE",
                     "AUDIO",
                     "DATA",
-                }),
-                new GameFileTree(QStringList{
-                    "TOMB4.EXE",
-                    "AUDIO",
-                    "DATA",
-                }),
-                new GameFileTree(QStringList{
-                    "TOMB4.EXE",
-                    "AUDIO",
-                    "DATA",
-                    "PIX",
-                }),
-                new GameFileTree(QStringList{
-                    "AUDIO",
-                    "DATA",
-                    "PIX",
                 }),
             },
             QVector<GameFileTree*>{  // [5] TR5
                 new GameFileTree(QStringList{
-                    "PCTOMB5.EXE",
                     "AUDIO",
                     "DATA",
                     "PIX",

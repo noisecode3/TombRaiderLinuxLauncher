@@ -29,11 +29,16 @@
 #include <QFileInfo>
 #include <QQueue>
 #include <QTextStream>
+#include <QStack>
+#include <QPair>
 
 GameFileTree::GameFileTree(
         const QString &fileName, GameFileTree *parent)
-    : m_fileName(fileName), m_parentItem(parent)
-{}
+    : m_fileName(fileName), m_parentItem(parent) {
+    if (parent != nullptr) {
+        parent->m_childNames.insert(fileName);
+    }
+}
 
 GameFileTree::GameFileTree(const QStringList& pathList)
     : m_parentItem(nullptr) {
@@ -140,31 +145,49 @@ void GameFileTree::printTree(int level) const {
     }
 }
 
-bool GameFileTree::matchesSubtree(const GameFileTree* other) const {
+bool GameFileTree::matcheTrees(
+            const GameFileTree* subTree,
+            const GameFileTree* other) const {
     bool status = true;
+    QStack<QPair<const GameFileTree*, const GameFileTree*>> stack;
+    stack.push(qMakePair(subTree, other));
+
+    while (!stack.isEmpty() || (status == true)) {
+        QPair<const GameFileTree*, const GameFileTree*> pair = stack.pop();
+        const GameFileTree* subTreeCurrent = pair.first;
+        const GameFileTree* otherCurrent = pair.second;
+
+
+        //  QSet<T> &QSet::intersect(const QSet<T> &other)
+            //  Removes all items from this set that are not
+            //  contained in the other set. A reference to this set is returned.
+
+        // Push child pairs in reverse order (for left-to-right DFS)
+        for (int i = childrenA.size() - 1; i >= 0; --i) {
+            stack.push(qMakePair(childrenA[i], childrenB[i]));
+        }
+    }
+
 
     if (other == nullptr) {
         status = false;
     }
 
     // Check if first node name match
-    if (status && (m_fileName.toUpper() != other->m_fileName.toUpper())) {
-        status = false;
+    // if we have an empty fileName we are at root
+    if (status && (subTree->m_fileName.isEmpty() || other->m_fileName.isEmpty())) {
+        if ((subTree->m_fileName.toUpper() != other->m_fileName.toUpper())) {
+            status = false;
+        }
     }
+    // --------------------------------------------------
 
-    /* Check other recursively from 'this'
-     * It matches the branches like an Enarmad bandit machine
-     * throught all child nodes at this point. This builds up the
-     * matching "tower" on the stack by trying all Lego pieces
-     * available at this node until ONE Lego is not found
-     * it cancels the branch.
-     */
     if (status) {
         for (const GameFileTree* childOther : other->m_childItems) {
             bool matched = std::any_of(
-                m_childItems.begin(), m_childItems.end(),
+                subTree->m_childItems.begin(), subTree->m_childItems.end(),
                 [childOther](const GameFileTree* childThis) {
-                    return childThis->matchesSubtree(childOther);
+                    return childThis->matcheTrees(childOther, );
                 });
 
             if (matched == false) {
@@ -177,18 +200,20 @@ bool GameFileTree::matchesSubtree(const GameFileTree* other) const {
     return status;
 }
 
-QStringList GameFileTree::matchesFromAnyNode(const GameFileTree* other) {
+QStringList GameFileTree::matchesFromAnyNode(const GameFileTree* other) const {
     QStringList result;
+    QQueue<const GameFileTree*> directoryNodes;
+    directoryNodes.enqueue(this);
 
-    if (matchesSubtree(other)) {
-        result.append(m_fileName);
-    }
-
-    for (GameFileTree* child : m_childItems) {
-        QStringList childPath = child->matchesFromAnyNode(other);
-        if (!childPath.isEmpty()) {
-            childPath.prepend(m_fileName);
-            result.append(childPath);
+    while (!directoryNodes.isEmpty()) {
+        const GameFileTree* currentNode = directoryNodes.dequeue();
+        if (matcheTrees(currentNode, other)) {
+            result.append(currentNode->m_fileName);
+        }
+        for (const GameFileTree* childNode : currentNode->m_childItems) {
+            if (!childNode->m_childItems.isEmpty()) {
+                directoryNodes.enqueue(childNode);
+            }
         }
     }
 
