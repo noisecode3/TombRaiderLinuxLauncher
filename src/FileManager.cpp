@@ -275,7 +275,9 @@ bool FileManager::getExtraPathToExe(Path &path, quint64 type) {
         extraPath = tree.matchesFromAnyNode(stree);
         if (!extraPath.isEmpty()) {
             QString joined = extraPath.join(m_sep);
-            QTextStream(stdout) << "game tree matches: " << joined << Qt::endl;
+            QTextStream(stdout)
+                << "Extra path to executable directory: "
+                << joined << Qt::endl;
 
             for (int i = extraPath.size() - 1; i >= 0; --i) {
                 path << extraPath[i];

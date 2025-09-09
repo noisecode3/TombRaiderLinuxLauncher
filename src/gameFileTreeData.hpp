@@ -26,17 +26,14 @@ struct StaticTrees {
             {},  // [0] Null
             QVector<GameFileTree*>{  // [1] TR1
                 new GameFileTree(QStringList{
-                    "TR1X.EXE",
                     "CFG",
                     "DATA",
                     "SHADERS",
                 }),
                 new GameFileTree(QStringList{
-                    QString("TOMBRAID%1TOMB.EXE").arg(QDir::separator()),
-                    "DOSBOX.EXE"
+                    QString("TOMBRAID"),
                 }),
                 new GameFileTree(QStringList{
-                    "TOMB1MAIN.EXE",
                     "CFG",
                     "DATA",
                     "SHADERS"
@@ -44,11 +41,6 @@ struct StaticTrees {
             },
             QVector<GameFileTree*>{  // [2] TR2
                 new GameFileTree(QStringList{
-                    "TR2MAIN.JSON",
-                    "DATA",
-                }),
-                new GameFileTree(QStringList{
-                    "TOMB2.EXE",
                     "DATA",
                 }),
             },
@@ -71,7 +63,7 @@ struct StaticTrees {
                     "PIX",
                 }),
                 new GameFileTree(QStringList{
-                    "TOMBENGINE.EXE",
+                    "DATA",
                 }),
             },
             QVector<GameFileTree*>{},  // [6] Placeholder (empty)

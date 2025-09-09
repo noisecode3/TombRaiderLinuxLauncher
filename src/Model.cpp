@@ -91,13 +91,13 @@ QString Model::getGameDirectory(int id) {
     return value;
 }
 
-QString Model::getExecutableName(int id) {
+QString Model::getExecutableName(int type) {
     QString value;
     ExecutableNames name;
-    if (name.data.contains(id)) {
-        value = name.data[id];
+    if (name.data.contains(type)) {
+        value = name.data[type];
     } else {
-        qDebug() << "Id number:" << id << " is not a game.";
+        qDebug() << "Id number:" << type << " is not a game.";
     }
     return value;
 }

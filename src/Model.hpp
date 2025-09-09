@@ -81,7 +81,7 @@ class Model : public QObject {
     bool runBash(const int id);
     bool setLink(int id);
     QString getGameDirectory(int id);
-    QString getExecutableName(int id);
+    QString getExecutableName(int type);
     void setupGame(int id);
     void getLevel(int id);
     const InfoData getInfo(int id);

@@ -14,6 +14,7 @@
 #ifndef TEST_TEST_HPP_
 #define TEST_TEST_HPP_
 
+#include <random>
 #include <QtCore>
 #include <QtTest/QtTest>
 // #include "../src/GameFileTree.hpp"
@@ -41,6 +42,10 @@ class PyRunnerTest : public QObject {
     PyRunner pyRunner = PyRunner();
 };
 
+/*  Extra path to executable directory: Part 1 - Prologue - Lara's Home/Part 2 - Treasure Island/Part 3 - Into The Depths/Part 4 - Penglai Shan/Part 5 - The Shard/Part 6 - Mexico
+ *  FAIL!  : GameFileTreeTest::ListTest() 'testLevelExtraToExe.exists()' returned FALSE. ()
+ *  In Mexico for 2922 XD haha
+ */
 
 class GameFileTreeTest : public QObject {
     Q_OBJECT
@@ -58,23 +63,32 @@ class GameFileTreeTest : public QObject {
         Path level(Path::resource);
         Path game(Path::programFiles);
         QVERIFY(model.setupDirectories(level.get(), game.get()));
-        Path testLevel(Path::resource);
-        quint64 id = 3713;
-        testLevel << QString("%1.TRLE").arg(id);
-        if (testLevel.isDir()) {
-            qDebug() << "Exists: " << testLevel.get();
-        } else {
-            model.getLevel(id);
-            qDebug() << "Does not exist: " << testLevel.get();
-        }
-        Path testLevelBefore = testLevel;
-        testLevelBefore << "Engine";
-        fileManager.getExtraPathToExe(testLevel, model.getType(id));
-        QVERIFY(testLevelBefore.get() ==  testLevel.get());
-    }
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distr(1, 3718);
 
-    void test2() {
-        QVERIFY(1 + 1 == 2);
+        for (int i = 0; i < 10; ++i) {
+            //  id numbers that have faild...
+            //  we need at better way to do this, put them in a QList?
+            //  quint64 id = 2217;
+            //  quint64 id = 3347;
+            quint64 id = distr(gen);
+            Path testLevel(Path::resource);
+            testLevel << QString("%1.TRLE").arg(id);
+            model.getLevel(id);
+            if (testLevel.isDir()) {
+                qDebug() << "Exists: " << testLevel.get();
+                Path testLevelExtraToExe = testLevel;
+                quint64 type = model.getType(id);
+                fileManager.getExtraPathToExe(testLevel, type);
+                testLevelExtraToExe << model.getExecutableName(type);
+                QVERIFY(testLevelExtraToExe.exists());
+                model.deleteZip(id);
+                fileManager.removeFileOrDirectory(testLevel);
+            } else {
+                qDebug() << "Does not exist: " << testLevel.get();
+            }
+        }
     }
 
  private:
