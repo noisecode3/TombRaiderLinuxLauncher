@@ -34,9 +34,14 @@
 
 GameFileTree::GameFileTree(
         const QString &fileName, GameFileTree *parent)
-    : m_fileName(fileName), m_parentItem(parent) {
+        : m_fileName(fileName), m_parentItem(parent) {
     if (parent != nullptr) {
-        parent->m_childNames.insert(fileName);
+        parent->m_childNames.insert(fileName.toUpper());
+        if (parent->m_childItems.size() == 2) {
+            if (parent->m_parentItem != nullptr) {
+                parent->m_parentItem->m_childDirItems.append(parent);
+            }
+        }
     }
 }
 
@@ -152,47 +157,22 @@ bool GameFileTree::matcheTrees(
     QStack<QPair<const GameFileTree*, const GameFileTree*>> stack;
     stack.push(qMakePair(subTree, other));
 
-    while (!stack.isEmpty() || (status == true)) {
+    while ((status == true) && !stack.isEmpty()) {
         QPair<const GameFileTree*, const GameFileTree*> pair = stack.pop();
         const GameFileTree* subTreeCurrent = pair.first;
         const GameFileTree* otherCurrent = pair.second;
 
+        QSet otherNameSubSet = otherCurrent->m_childNames;
+        status = (otherNameSubSet.subtract(subTreeCurrent->m_childNames).isEmpty());
 
-        //  QSet<T> &QSet::intersect(const QSet<T> &other)
-            //  Removes all items from this set that are not
-            //  contained in the other set. A reference to this set is returned.
-
-        // Push child pairs in reverse order (for left-to-right DFS)
-        for (int i = childrenA.size() - 1; i >= 0; --i) {
-            stack.push(qMakePair(childrenA[i], childrenB[i]));
-        }
-    }
-
-
-    if (other == nullptr) {
-        status = false;
-    }
-
-    // Check if first node name match
-    // if we have an empty fileName we are at root
-    if (status && (subTree->m_fileName.isEmpty() || other->m_fileName.isEmpty())) {
-        if ((subTree->m_fileName.toUpper() != other->m_fileName.toUpper())) {
-            status = false;
-        }
-    }
-    // --------------------------------------------------
-
-    if (status) {
-        for (const GameFileTree* childOther : other->m_childItems) {
-            bool matched = std::any_of(
-                subTree->m_childItems.begin(), subTree->m_childItems.end(),
-                [childOther](const GameFileTree* childThis) {
-                    return childThis->matcheTrees(childOther, );
-                });
-
-            if (matched == false) {
-                status = false;
-                break;
+        if (status == true) {
+            for (const GameFileTree* otherChildDir : otherCurrent->m_childItems) {
+                for (const GameFileTree* subTreeChildDir : subTreeCurrent->m_childDirItems) {
+                    if(otherChildDir->m_fileName.toUpper() == subTreeChildDir->m_fileName.toUpper()) {
+                        stack.push(qMakePair(subTreeChildDir, otherChildDir));
+                        break;
+                    }
+                }
             }
         }
     }

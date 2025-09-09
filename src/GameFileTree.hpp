@@ -38,8 +38,10 @@ class GameFileTree {
     explicit GameFileTree(
         const QString &fileName, GameFileTree *parentItem);
     void addPathList(const QStringList& pathList);
+    const GameFileTree* findChildByName(const QString& name) const;
     QVector<GameFileTree*> m_childItems;
-    QSet<QString> m_childNames;
+    QVector<GameFileTree*> m_childDirItems;
+    QSet<const QString> m_childNames;
     QString m_fileName;
     GameFileTree *m_parentItem;
 };
