@@ -15,7 +15,7 @@
 #include "../src/Data.hpp"
 #include "../src/Path.hpp"
 #include "../src/assert.hpp"
-#include <qglobal.h>
+#include <QtGlobal>
 
 Model::Model() {}
 Model::~Model() {}
@@ -263,7 +263,7 @@ bool Model::setLink(int id) {
         from << QString("Original.TR%1").arg(orgId);
         to   << getGameDirectory(orgId);
         if (from.isDir()) {
-            status = fileManager.linkGameDir(from, to);
+            status = fileManager.linkPaths(from, to);
         } else {
             qDebug() << "Dirr: " << from.get() << " seems to bee missing";
         }
@@ -275,7 +275,7 @@ bool Model::setLink(int id) {
         qDebug() << "Model :from " << from.get();
 
         if (from.isDir()) {
-            status = fileManager.linkGameDir(from, to);
+            status = fileManager.linkPaths(from, to);
         } else {
             qDebug() << "Dirr: " << from.get() << " seems to bee missing";
         }
@@ -325,7 +325,7 @@ void Model::setupGame(int id) {
     }
 
     if (fileManager.backupGameDir(from)) {
-        if (!fileManager.linkGameDir(to, from)) {
+        if (!fileManager.linkPaths(to, from)) {
             qDebug() << "Faild to create the link to the new game directory";
         }
     }

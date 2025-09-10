@@ -42,17 +42,12 @@ class PyRunnerTest : public QObject {
     PyRunner pyRunner = PyRunner();
 };
 
-/*  Extra path to executable directory: Part 1 - Prologue - Lara's Home/Part 2 - Treasure Island/Part 3 - Into The Depths/Part 4 - Penglai Shan/Part 5 - The Shard/Part 6 - Mexico
- *  FAIL!  : GameFileTreeTest::ListTest() 'testLevelExtraToExe.exists()' returned FALSE. ()
- *  In Mexico for 2922 XD haha
- */
-
 class GameFileTreeTest : public QObject {
     Q_OBJECT
 
  public:
-    GameFileTreeTest() {
-    }
+    GameFileTreeTest() : faildLevels({3713, 2218, 3347, 2922})
+    {}
     ~GameFileTreeTest() {
     }
 
@@ -67,12 +62,9 @@ class GameFileTreeTest : public QObject {
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> distr(1, 3718);
 
-        for (int i = 0; i < 10; ++i) {
-            //  id numbers that have faild...
-            //  we need at better way to do this, put them in a QList?
-            //  quint64 id = 2217;
-            //  quint64 id = 3347;
-            quint64 id = distr(gen);
+        for (int i = 0; i < faildLevels.size(); ++i) {
+            //  quint64 id = distr(gen);
+            quint64 id = faildLevels.at(i);
             Path testLevel(Path::resource);
             testLevel << QString("%1.TRLE").arg(id);
             model.getLevel(id);
@@ -80,8 +72,9 @@ class GameFileTreeTest : public QObject {
                 qDebug() << "Exists: " << testLevel.get();
                 Path testLevelExtraToExe = testLevel;
                 quint64 type = model.getType(id);
-                fileManager.getExtraPathToExe(testLevel, type);
+                fileManager.getExtraPathToExe(testLevelExtraToExe, type);
                 testLevelExtraToExe << model.getExecutableName(type);
+                qDebug() << "testLevelExtraToExe: " << testLevelExtraToExe.get();
                 QVERIFY(testLevelExtraToExe.exists());
                 model.deleteZip(id);
                 fileManager.removeFileOrDirectory(testLevel);
@@ -92,6 +85,7 @@ class GameFileTreeTest : public QObject {
     }
 
  private:
+    const QList<quint64> faildLevels;
     Model& model = Model::getInstance();
     FileManager& fileManager = FileManager::getInstance();
 };

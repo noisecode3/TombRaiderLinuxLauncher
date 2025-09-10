@@ -19,6 +19,7 @@
 #include <QtCore>
 #include <QByteArray>
 #include <QDataStream>
+#include <QtLogging>
 #include "../miniz/miniz.h"  // IWYU pragma: keep
 #include "../miniz/miniz_zip.h"
 #include "../src/gameFileTreeData.hpp"
@@ -32,7 +33,7 @@ bool FileManager::backupGameDir(Path path) {
 
     if (QDir().rename(path.get(), backupPath.get()) == true) {
         qDebug() << "Directory renamed successfully. New path:"
-                                                    << backupPath.get();
+                 << backupPath.get();
         status = true;
     } else {
         qWarning() << "Failed to rename directory:" << path.get();
@@ -149,29 +150,6 @@ int FileManager::createDirectory(Path path) {
     return status;
 }
 
-void FileManager::createLinkToExe(Path path, const QString& expectedFileName, const quint64 type) {
-    getExtraPathToExe(path, type);
-    path << expectedFileName;
-
-    qDebug() << "path :" << path.get();
-    qDebug() << "pathDir :" << path.getDir();
-
-    if (!path.exists()) {
-        QDir dir(path.getDir());
-        const QString finalExe = decideExe(dir);
-        qDebug() << "finalExe :" << finalExe;
-
-        if (finalExe.isEmpty() == true) {
-            qDebug() << "error: could not find the exe file for the game!";
-        } else {
-            (void)makeRelativeLink(
-                path,
-                finalExe,
-                expectedFileName);
-        }
-    }
-}
-
 bool FileManager::extractZip(ZipData zipData) {
     bool status = false;
     Path zipFilename = Path(Path::resource) << zipData.m_fileName;
@@ -245,10 +223,21 @@ bool FileManager::extractZip(ZipData zipData) {
                 }
                 lastPrintedPercent = currentPercent;
                 if (currentPercent == gotoPercent) {
-                    createLinkToExe(
-                            outputFolder,
-                            ExecutableNames().data[zipData.m_type],
-                            zipData.m_type);
+                    Path outputFolderExpectedExe = outputFolder;
+                    Path outputFolderFoundExe = outputFolder;
+                    outputFolderExpectedExe << ExecutableNames().data[zipData.m_type];
+
+                    if (outputFolderExpectedExe.isFile() == false) {
+                        if (getExtraPathToExe(outputFolderFoundExe, zipData.m_type)) {
+                            outputFolderFoundExe << decideExe(QDir(outputFolderFoundExe.get()));
+                            linkPaths(outputFolderFoundExe, outputFolderExpectedExe);
+                        } else {
+                            qCritical()
+                                << "Faild to detect exe file in archive!!\n"
+                                << "Please report the level name, it won't be able to launch the game!!";
+                        }
+                    }
+
                     status = true;
                 }
             }
@@ -290,55 +279,22 @@ bool FileManager::getExtraPathToExe(Path &path, quint64 type) {
     return status;
 }
 
-bool FileManager::linkGameDir(Path from, Path to) {
+bool FileManager::linkPaths(Path from, Path to) {
     bool status = false;
-
-    qDebug() << "levelPath: " << from.get();
-    qDebug() << "gamePath: " << to.get();
 
     if (QFile::link(from.get(), to.get()) == true) {
         qDebug() << "Symbolic link created successfully.";
         status = true;
     } else {
         if (to.isSymLink() == true) {
-            (void)QFile::remove(to.get());
-            if (QFile::link(from.get(), to.get()) == true) {
-                qDebug() << "Symbolic link created successfully.";
-                status = true;
-            } else {
-                qDebug() << "Failed to create symbolic link.";
-                status = false;
-            }
-        } else {
-            qDebug() << "Failed to create symbolic link.";
-            status = false;
-        }
-    }
-    return status;
-}
-
-bool FileManager::makeRelativeLink(
-        const Path& levelDir,
-        const QString& from,
-        const QString& to) {
-    bool status = false;
-
-    Path fromPath = levelDir;
-    fromPath << from;
-    Path toPath = levelDir;
-
-    if (QFile::link(fromPath.get(), to) == true) {
-        qDebug() << "Symbolic link created successfully.";
-        status = true;
-    } else {
-        if (toPath.isSymLink() == true) {
-            (void)QFile::remove(toPath.get());
-            if (QFile::link(fromPath.get(), to) == true) {
-                qDebug() << "Symbolic link created successfully.";
-                status = true;
-            } else {
-                qDebug() << "Failed to create symbolic link.";
-                status = false;
+            if (QFile::remove(to.get()) == true) {
+                if (QFile::link(from.get(), to.get()) == true) {
+                    qDebug() << "Symbolic link created successfully.";
+                    status = true;
+                } else {
+                    qDebug() << "Failed to create symbolic link.";
+                    status = false;
+                }
             }
         } else {
             qDebug() << "Failed to create symbolic link.";
