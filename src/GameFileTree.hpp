@@ -32,7 +32,7 @@ class GameFileTree {
 
     bool matcheTrees(const GameFileTree* subTree,
                      const GameFileTree* other) const;
-    QStringList matchesFromAnyNode(const GameFileTree* other) const;
+    QList<QStringList> matchesFromAnyNode(const GameFileTree* other) const;
 
  private:
     explicit GameFileTree(

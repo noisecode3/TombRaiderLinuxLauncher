@@ -153,42 +153,25 @@ void GameFileTree::printTree(int level) const {
 bool GameFileTree::matcheTrees(
             const GameFileTree* subTree,
             const GameFileTree* other) const {
-    bool status = true;
-    QStack<QPair<const GameFileTree*, const GameFileTree*>> stack;
-    stack.push(qMakePair(subTree, other));
-
-    while ((status == true) && !stack.isEmpty()) {
-        QPair<const GameFileTree*, const GameFileTree*> pair = stack.pop();
-        const GameFileTree* subTreeCurrent = pair.first;
-        const GameFileTree* otherCurrent = pair.second;
-
-        QSet otherNameSubSet = otherCurrent->m_childNames;
-        status = (otherNameSubSet.subtract(subTreeCurrent->m_childNames).isEmpty());
-
-        if (status == true) {
-            for (const GameFileTree* otherChildDir : otherCurrent->m_childItems) {
-                for (const GameFileTree* subTreeChildDir : subTreeCurrent->m_childDirItems) {
-                    if(otherChildDir->m_fileName.toUpper() == subTreeChildDir->m_fileName.toUpper()) {
-                        stack.push(qMakePair(subTreeChildDir, otherChildDir));
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    return status;
+    QSet otherNameSubSet = other->m_childNames;
+    return otherNameSubSet.subtract(subTree->m_childNames).isEmpty();
 }
 
-QStringList GameFileTree::matchesFromAnyNode(const GameFileTree* other) const {
-    QStringList result;
+QList<QStringList> GameFileTree::matchesFromAnyNode(const GameFileTree* other) const {
+    QList<QStringList> result;
     QQueue<const GameFileTree*> directoryNodes;
     directoryNodes.enqueue(this);
 
     while (!directoryNodes.isEmpty()) {
         const GameFileTree* currentNode = directoryNodes.dequeue();
         if (matcheTrees(currentNode, other)) {
-            result.append(currentNode->m_fileName);
+            QStringList list;
+            const GameFileTree* currentMatch = currentNode;
+            while(!currentMatch->m_fileName.isEmpty()) {
+                list.append(currentMatch->m_fileName);
+                currentMatch = currentMatch->m_parentItem;
+            }
+            result.append(list);
         }
         for (const GameFileTree* childNode : currentNode->m_childItems) {
             if (!childNode->m_childItems.isEmpty()) {
