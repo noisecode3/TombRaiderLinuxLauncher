@@ -174,6 +174,16 @@ class FileManager : public QObject {
     bool linkPaths(Path from, Path to);
 
     /**
+     * @brief Creates a case sensitive symbolic link to executable.
+     *
+     * The link is absolute full path and relative in position to the found executable.
+     *
+     * @param Path Level directory, lid.TRLE path.
+     * @param quint64 The type of level is a number from 1-6.
+     */
+    void linkToExe(Path level, quint64 type);
+
+    /**
      * @brief Removes a file or directory, including its contents if applicable.
      *
      * This function attempts to delete a file or directory at the specified path.

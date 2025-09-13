@@ -150,6 +150,25 @@ int FileManager::createDirectory(Path path) {
     return status;
 }
 
+void FileManager::linkToExe(Path level, quint64 type) {
+    Path levelExtraPathToExe = level;
+    if (getExtraPathToExe(levelExtraPathToExe, type)) {
+        Path levelExtraPathToExeFile = levelExtraPathToExe;
+        levelExtraPathToExeFile << ExecutableNames().data[type];
+        if (!levelExtraPathToExeFile.isFile()) {
+            levelExtraPathToExe << decideExe(QDir(levelExtraPathToExe.get()));
+            if (levelExtraPathToExe.isFile()) {
+                linkPaths(levelExtraPathToExe, levelExtraPathToExeFile);
+            } else {
+                qCritical()
+                    << "Faild to detect exe file in archive!!\n"
+                    << "Please report the level name, "
+                    <<"it won't be able to launch the game!!";
+            }
+        }
+    }
+}
+
 bool FileManager::extractZip(ZipData zipData) {
     bool status = false;
     Path zipFilename = Path(Path::resource) << zipData.m_fileName;
@@ -224,20 +243,10 @@ bool FileManager::extractZip(ZipData zipData) {
                 lastPrintedPercent = currentPercent;
                 if (currentPercent == gotoPercent) {
                     Path outputFolderExpectedExe = outputFolder;
-                    Path outputFolderFoundExe = outputFolder;
                     outputFolderExpectedExe << ExecutableNames().data[zipData.m_type];
-
-                    if (outputFolderExpectedExe.isFile() == false) {
-                        if (getExtraPathToExe(outputFolderFoundExe, zipData.m_type)) {
-                            outputFolderFoundExe << decideExe(QDir(outputFolderFoundExe.get()));
-                            linkPaths(outputFolderFoundExe, outputFolderExpectedExe);
-                        } else {
-                            qCritical()
-                                << "Faild to detect exe file in archive!!\n"
-                                << "Please report the level name, it won't be able to launch the game!!";
-                        }
+                    if (!outputFolderExpectedExe.isFile()) {
+                        linkToExe(outputFolder, zipData.m_type);
                     }
-
                     status = true;
                 }
             }
