@@ -25,7 +25,7 @@ class Dialog : public QWidget {
     Q_OBJECT
 
  public:
-    Dialog(QWidget* parent);
+    explicit Dialog(QWidget* parent);
     void setMessage(const QString &text);
     void setOptions(const QStringList &options);
     QString selectedOption() const;
