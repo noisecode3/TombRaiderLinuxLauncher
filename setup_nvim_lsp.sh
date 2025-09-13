@@ -20,4 +20,5 @@ git config submodule.libs/libbacktrace.ignore all
 ./build.sh
 
 #clangd complain
-sed -i 's/-mno-direct-extern-access[ ]*//g' build/compile_commands.json
+cp build/compile_commands.json compile_commands.json
+sed -i 's/-mno-direct-extern-access[ ]*//g' compile_commands.json

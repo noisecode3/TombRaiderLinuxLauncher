@@ -3,12 +3,14 @@ cd "$(dirname "$0")" || exit 1
 
 if [ -d "$1/Desktop-Debug" ]; then
     TOMBLL_USER_SHARE="$1/Desktop-Debug/tester_root/usr/share/TombRaiderLinuxLauncher"
+    TOMBLL_PROGRAM_FILES="$1/Desktop-Debug/tester_root/PROGRAM_FILES"
 else
     TOMBLL_USER_SHARE="$1/tester_root/usr/share/TombRaiderLinuxLauncher"
+    TOMBLL_PROGRAM_FILES="$1/tester_root/PROGRAM_FILES"
 fi
 
 mkdir -p "$TOMBLL_USER_SHARE"
-mkdir -p "$1/tester_root/PROGRAM_FILES"
+mkdir -p "$TOMBLL_PROGRAM_FILES"
 cp -f \
   ../database/data_factory.py \
   ../database/get_leaf_cert.py \

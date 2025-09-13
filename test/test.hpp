@@ -62,9 +62,9 @@ class GameFileTreeTest : public QObject {
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> distr(1, 3718);
 
-        for (int i = 0; i < faildLevels.size(); ++i) {
-            //  quint64 id = distr(gen);
-            quint64 id = faildLevels.at(i);
+        for (int i = 0; i < 30; ++i) {
+            quint64 id = distr(gen);
+            //  quint64 id = faildLevels.at(i);
             Path testLevel(Path::resource);
             testLevel << QString("%1.TRLE").arg(id);
             model.getLevel(id);
