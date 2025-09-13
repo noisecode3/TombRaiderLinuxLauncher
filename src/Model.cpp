@@ -15,7 +15,7 @@
 #include "../src/Data.hpp"
 #include "../src/Path.hpp"
 #include "../src/assert.hpp"
-#include <qglobal.h>
+#include <QtGlobal>
 
 Model::Model() {}
 Model::~Model() {}
@@ -26,8 +26,10 @@ bool Model::setupDirectories(const QString& level, const QString& game) {
     if (fileManager.setUpCamp(level, game) &&
             data.initializeDatabase(level) &&
             m_pyRunner.setUpCamp(level)) {
+        #ifndef TEST
         Path::setProgramFilesPath();
         Path::setResourcePath();
+        #endif
         status = true;
     }
     return status;
@@ -89,13 +91,13 @@ QString Model::getGameDirectory(int id) {
     return value;
 }
 
-QString Model::getExecutableName(int id) {
+QString Model::getExecutableName(int type) {
     QString value;
     ExecutableNames name;
-    if (name.data.contains(id)) {
-        value = name.data[id];
+    if (name.data.contains(type)) {
+        value = name.data[type];
     } else {
-        qDebug() << "Id number:" << id << " is not a game.";
+        qDebug() << "Id number:" << type << " is not a game.";
     }
     return value;
 }
@@ -176,7 +178,7 @@ bool Model::runUmu(const int id) {
     QString s = path.get();
     qDebug() << "Model: path.get() "  << s;
 
-    path = fileManager.getExtraPathToExe(path);
+    fileManager.getExtraPathToExe(path, data.getType(id));
 
     s = path.get();
     qDebug() << "Model: path.get() "  << s;
@@ -232,7 +234,7 @@ bool Model::runWine(const qint64 id) {
         path <<  QString("%1.TRLE").arg(id);
     }
 
-    path = fileManager.getExtraPathToExe(path);
+    fileManager.getExtraPathToExe(path, data.getType(id));
     m_wineRunner.setWorkingDirectory(path.get());
     path << ExecutableNames().data[data.getType(id)];
 
@@ -261,7 +263,7 @@ bool Model::setLink(int id) {
         from << QString("Original.TR%1").arg(orgId);
         to   << getGameDirectory(orgId);
         if (from.isDir()) {
-            status = fileManager.linkGameDir(from, to);
+            status = fileManager.linkPaths(from, to);
         } else {
             qDebug() << "Dirr: " << from.get() << " seems to bee missing";
         }
@@ -273,7 +275,7 @@ bool Model::setLink(int id) {
         qDebug() << "Model :from " << from.get();
 
         if (from.isDir()) {
-            status = fileManager.linkGameDir(from, to);
+            status = fileManager.linkPaths(from, to);
         } else {
             qDebug() << "Dirr: " << from.get() << " seems to bee missing";
         }
@@ -323,7 +325,7 @@ void Model::setupGame(int id) {
     }
 
     if (fileManager.backupGameDir(from)) {
-        if (!fileManager.linkGameDir(to, from)) {
+        if (!fileManager.linkPaths(to, from)) {
             qDebug() << "Faild to create the link to the new game directory";
         }
     }
@@ -360,15 +362,6 @@ void Model::updateLevel(const int id) {
 void Model::syncLevels() {
     qint64 status = m_pyRunner.syncCards();
     emit this->modelLoadingDoneSignal();
-}
-
-bool Model::unpackLevel(const int id, const QString& name, const QString& exe) {
-    bool status = false;
-    const QString directory = QString("%1.TRLE").arg(id);
-    if (fileManager.extractZip(name, directory, exe) == true) {
-        status = true;
-    }
-    return status;
 }
 
 bool Model::getLevelHaveFile(
@@ -432,10 +425,7 @@ void Model::getLevel(int id) {
             status = getLevelDontHaveFile(id, zipData.m_MD5sum, path);
         }
         if (status == true) {
-            if (!unpackLevel(
-                id,
-                zipData.m_fileName,
-                getExecutableName(zipData.m_type))) {
+            if (!fileManager.extractZip(zipData)) {
                 qDebug() << "unpackLevel failed";
             }
         }
@@ -444,6 +434,10 @@ void Model::getLevel(int id) {
 
 const InfoData Model::getInfo(int id) {
     return data.getInfo(id);
+}
+
+const int Model::getType(int id) {
+    return data.getType(id);
 }
 
 const QString Model::getWalkthrough(int id) {

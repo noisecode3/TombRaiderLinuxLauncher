@@ -21,8 +21,11 @@
 #include <QByteArray>
 #include <QCryptographicHash>
 #include <QDebug>
+#include "../src/Data.hpp"
+#include "../src/gameFileTreeData.hpp"
 #include "../src/Path.hpp"
 
+    const StaticTrees m_staticTrees;
 class FileManager : public QObject {
     Q_OBJECT
 
@@ -130,30 +133,13 @@ class FileManager : public QObject {
     int createDirectory(Path path);
 
     /**
-     * @brief Creates a symbolic link to an executable file if it does not exist.
-     *
-     * This function checks whether the expected executable file is present at the given path.
-     * If it is missing, the function attempts to determine the actual executable file and
-     * creates a symbolic link pointing to it.
-     *
-     * @param path The directory where the executable file is expected to be found.
-     * @param expectedFileName The name of the expected executable file.
-     *
-     * @note If the expected executable is not found, the function attempts to locate
-     *       an alternative executable and create a relative symbolic link to it.
-     */
-    void createLinkToExe(Path path, const QString& expectedFileName);
-
-    /**
      * @brief Extracts the contents of a ZIP archive into a specified output folder.
      *
      * This function unzips a given archive file from the level directory and extracts
      * its contents to a specified output folder. It ensures that the output directory
      * exists and handles errors related to file extraction.
      *
-     * @param zipFilename The name of the ZIP archive to extract.
-     * @param outputFolder The name of the destination folder where files will be extracted.
-     * @param executable The name of the game launch executable.
+     * @param ZipData zip archive to extract.
      * @return `true` if extraction is successful, otherwise `false`.
      *
      * @note This function uses `miniz` for ZIP operations.
@@ -161,53 +147,41 @@ class FileManager : public QObject {
      *          and terminate extraction, potentially leaving incomplete files.
      * @signal fileWorkTickSignal() is emitted to indicate extraction progress.
      */
-    bool extractZip(
-        const QString& zipFilename,
-        const QString& outputFolder,
-        const QString& executable);
+    bool extractZip(ZipData zipData);
 
     /**
      * @brief Determines an additional path to the executable within a level directory.
      *
-     * This function constructs a path to a level directory and searches for
-     * an extra executable path by comparing the directory structure with predefined
+     * This function adds to a path on a level directory by searching for an
+     * extra executable path by comparing the directory structure with predefined
      * static trees.
      *
-     * @param levelDir The relative path of the level directory.
-     * @return A QString containing the path, including the extra executable path
-     *         if a match is found.
+     * @param Path to a lid.TRLE level directory.
+     * @param quint64 game type, Tomb Raider 1, 2, 3, 4, 5, 6.
+     * @return bool status if a match is found.
      */
-    Path getExtraPathToExe(Path path);
+    bool getExtraPathToExe(Path &path, quint64 type);
 
     /**
-     * @brief Creates a symbolic link from a level directory to a game directory.
+     * @brief Creates a symbolic link from a Path to another.
      *
-     * This function attempts to create a symbolic link from the resolved level path
-     * to the specified game directory. If a link already exists, it is removed
-     * and recreated.
+     * If a link already exists, it is removed and recreated.
      *
-     * @param levelDir The relative path of the level directory.
-     * @param gameDir The relative path of the game directory.
+     * @param Path from The target path can be a file or directory.
+     * @param Path to The file link we create, can't be a directory.
      * @return True if the symbolic link is successfully created, false otherwise.
      */
-    bool linkGameDir(Path from, Path to);
+    bool linkPaths(Path from, Path to);
 
     /**
-     * @brief Creates a symbolic link within a level directory.
+     * @brief Creates a case sensitive symbolic link to executable.
      *
-     * This function attempts to create a symbolic link from the `from` path to the `to` path,
-     * both relative to the specified `levelDir`. If a symlink already exists, it is removed
-     * and recreated.
+     * The link is absolute full path and relative in position to the found executable.
      *
-     * @param levelDir The base level directory.
-     * @param from The source file or directory to link from.
-     * @param to The destination link path.
-     * @return True if the symbolic link was successfully created, false otherwise.
+     * @param Path Level directory, lid.TRLE path.
+     * @param quint64 The type of level is a number from 1-6.
      */
-    bool makeRelativeLink(
-        const Path& levelDir,
-        const QString& from,
-        const QString& to);
+    void linkToExe(Path level, quint64 type);
 
     /**
      * @brief Removes a file or directory, including its contents if applicable.
@@ -246,14 +220,16 @@ class FileManager : public QObject {
     void fileWorkTickSignal();
 
  private:
-    FileManager() {}
+    FileManager() :
+        m_sep(QDir::separator())
+    {}
     bool isHomePath(const QString& path) {
         return path.startsWith(QDir::homePath());
     }
 
     QDir m_levelDir;
     QDir m_gameDir;
-    const QString m_sep = QDir::separator();
+    const QString m_sep;
     Q_DISABLE_COPY(FileManager)
 };
 

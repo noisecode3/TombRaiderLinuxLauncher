@@ -27,10 +27,10 @@ Ensure the following are installed on your Linux desktop:
 
 - `curl` (7.71.0 or newer)
 - `OpenSSL`
-- `Qt5`
+- `Qt6`
 
 ```shell
-sudo pacman -S qt5-wayland qt5-webengine qt5-imageformats
+sudo pacman -S qt6-wayland qt6-webengine qt6-imageformats
 ```
 
 ### Build

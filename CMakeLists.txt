@@ -113,6 +113,8 @@ set(SOURCES_MC
     src/Controller.cpp
     src/Data.hpp
     src/Data.cpp
+    src/Dialog.hpp
+    src/Dialog.cpp
     src/FileManager.hpp
     src/FileManager.cpp
     src/GameFileTree.hpp
@@ -134,6 +136,7 @@ set(SOURCES_MC
     src/assert.hpp
     src/binary.hpp
     src/binary.cpp
+    src/gameFileTreeData.hpp
     src/main.cpp
     src/staticData.hpp
 )

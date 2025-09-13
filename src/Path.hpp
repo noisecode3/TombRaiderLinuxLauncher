@@ -13,6 +13,7 @@
 #ifndef SRC_PATH_HPP_
 #define SRC_PATH_HPP_
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QString>
 #include <QDir>
@@ -51,6 +52,29 @@ class Path {
      * @return `true` if pass validation, `false` otherwise.
      */
     static bool setResourcePath();
+
+    /**
+     * @brief Sets the test Program Files launch directory.
+     *
+     * - Installed game files, the classic "Program Files (x86)".
+     * - This function ensures that all file operations are contained
+     * Within the a default test directory.
+     *
+     * @return `true` if pass validation, `false` otherwise.
+     */
+    static bool setTestProgramFilesPath();
+
+    /**
+     * @brief Sets the test Resource directory.
+     *
+     * - Downloaded program files and index database.
+     * - This function ensures that all file operations are contained
+     * Within the a default test directory.
+     *
+     * @return `true` if pass validation, `false` otherwise.
+     */
+    static bool setTestResourcePath();
+
     QString get();
     QString getDir();
     QString getRootString();

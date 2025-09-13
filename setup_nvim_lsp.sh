@@ -18,3 +18,7 @@ git config submodule.libs/miniz.ignore all
 git config submodule.libs/libbacktrace.ignore all
 
 ./build.sh
+
+#clangd complain
+cp build/compile_commands.json compile_commands.json
+sed -i 's/-mno-direct-extern-access[ ]*//g' compile_commands.json

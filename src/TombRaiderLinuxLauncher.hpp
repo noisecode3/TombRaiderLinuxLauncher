@@ -32,6 +32,7 @@
 #include "../src/Controller.hpp"
 #include "../src/LevelViewList.hpp"
 #include "../src/LoadingIndicator.hpp"
+#include "../src/Dialog.hpp"
 
 struct InstalledStatus {
     QHash<quint64, bool> game;
@@ -195,8 +196,10 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     QSettings& settings = getSettingsInstance();
     Ui::TombRaiderLinuxLauncher *ui;
     LoadingIndicator* m_loadingIndicatorWidget;
+    Dialog* m_dialogWidget;
     QString m_loadingDoneGoTo;
     QList<int> m_availableGames;
+    QModelIndex m_current;
 };
 
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_

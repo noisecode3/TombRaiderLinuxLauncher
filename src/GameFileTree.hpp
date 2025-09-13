@@ -29,14 +29,19 @@ class GameFileTree {
     ~GameFileTree();
 
     void printTree(int level) const;
-    bool matchesSubtree(const GameFileTree* other) const;
-    QStringList matchesFromAnyNode(const GameFileTree* other);
+
+    bool matcheTrees(const GameFileTree* subTree,
+                     const GameFileTree* other) const;
+    QList<QStringList> matchesFromAnyNode(const GameFileTree* other) const;
 
  private:
     explicit GameFileTree(
         const QString &fileName, GameFileTree *parentItem);
     void addPathList(const QStringList& pathList);
+    const GameFileTree* findChildByName(const QString& name) const;
     QVector<GameFileTree*> m_childItems;
+    QVector<GameFileTree*> m_childDirItems;
+    QSet<const QString> m_childNames;
     QString m_fileName;
     GameFileTree *m_parentItem;
 };

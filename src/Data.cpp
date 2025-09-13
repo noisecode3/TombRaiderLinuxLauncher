@@ -225,6 +225,7 @@ ZipData Data::getDownload(const int id) {
                 result.setURL(query.value("Zip.url").toString());
                 result.setVersion(query.value("Zip.version").toInt());
                 result.setType(query.value("Info.type").toInt());
+                result.setId(id);
                 result.setRelease(query.value("Zip.release").toString());
             } else {
                 qDebug() << "No results found for Level ID:" << id;

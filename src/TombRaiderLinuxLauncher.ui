@@ -86,14 +86,14 @@
                   </sizepolicy>
                  </property>
                  <property name="layoutDirection">
-                  <enum>Qt::LeftToRight</enum>
+                  <enum>Qt::LayoutDirection::LeftToRight</enum>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_11" stretch="0,0">
                   <property name="spacing">
                    <number>0</number>
                   </property>
                   <property name="sizeConstraint">
-                   <enum>QLayout::SetDefaultConstraint</enum>
+                   <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
                   </property>
                   <property name="leftMargin">
                    <number>0</number>
@@ -735,7 +735,7 @@
             <item>
              <widget class="QListView" name="listViewLevels">
               <property name="dragDropMode">
-               <enum>QAbstractItemView::NoDragDrop</enum>
+               <enum>QAbstractItemView::DragDropMode::NoDragDrop</enum>
               </property>
               <property name="iconSize">
                <size>
@@ -744,22 +744,22 @@
                </size>
               </property>
               <property name="verticalScrollMode">
-               <enum>QAbstractItemView::ScrollPerItem</enum>
+               <enum>QAbstractItemView::ScrollMode::ScrollPerItem</enum>
               </property>
               <property name="movement">
-               <enum>QListView::Static</enum>
+               <enum>QListView::Movement::Static</enum>
               </property>
               <property name="flow">
-               <enum>QListView::LeftToRight</enum>
+               <enum>QListView::Flow::LeftToRight</enum>
               </property>
               <property name="isWrapping" stdset="0">
                <bool>true</bool>
               </property>
               <property name="resizeMode">
-               <enum>QListView::Adjust</enum>
+               <enum>QListView::ResizeMode::Adjust</enum>
               </property>
               <property name="viewMode">
-               <enum>QListView::ListMode</enum>
+               <enum>QListView::ViewMode::ListMode</enum>
               </property>
               <property name="uniformItemSizes">
                <bool>true</bool>
@@ -903,8 +903,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>538</width>
-                 <height>70</height>
+                 <width>1247</width>
+                 <height>753</height>
                 </rect>
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1103,6 +1103,9 @@
           <widget class="QWidget" name="loading">
            <layout class="QVBoxLayout" name="verticalLayout_15"/>
           </widget>
+          <widget class="QWidget" name="dialog">
+           <layout class="QVBoxLayout" name="verticalLayout_17"/>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -1146,7 +1149,7 @@
         <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -1185,7 +1188,7 @@
             <item>
              <widget class="QFrame" name="frameLevelSetup">
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_13">
                <item>
@@ -1204,7 +1207,7 @@
                   </sizepolicy>
                  </property>
                  <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                  <enum>QFrame::Shape::NoFrame</enum>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_14">
                   <item>
@@ -1341,7 +1344,7 @@
                      <item>
                       <spacer name="horizontalSpacer">
                        <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
+                        <enum>Qt::Orientation::Horizontal</enum>
                        </property>
                        <property name="sizeHint" stdset="0">
                         <size>
@@ -1370,7 +1373,7 @@
                      <item>
                       <spacer name="horizontalSpacer_2">
                        <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
+                        <enum>Qt::Orientation::Horizontal</enum>
                        </property>
                        <property name="sizeHint" stdset="0">
                         <size>
@@ -1393,10 +1396,10 @@
                   <item>
                    <spacer name="verticalSpacerLevelSetup">
                     <property name="orientation">
-                     <enum>Qt::Vertical</enum>
+                     <enum>Qt::Orientation::Vertical</enum>
                     </property>
                     <property name="sizeType">
-                     <enum>QSizePolicy::Maximum</enum>
+                     <enum>QSizePolicy::Policy::Maximum</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -1441,7 +1444,7 @@
             <item>
              <widget class="QFrame" name="frameGlobalSetup">
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
@@ -1547,7 +1550,7 @@
                <item>
                 <spacer name="verticalSpacerSetupLara">
                  <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                  <enum>Qt::Orientation::Vertical</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -1640,7 +1643,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                <item>
                 <spacer name="verticalSpacerSetupOptions">
                  <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                  <enum>Qt::Orientation::Vertical</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -1679,7 +1682,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <item row="0" column="0">
          <widget class="QFrame" name="frameAbout">
           <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
+           <enum>QFrame::Shape::NoFrame</enum>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
@@ -1691,15 +1694,18 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </property>
              <property name="html">
               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif'; font-size:large; font-weight:600;&quot;&gt;About&lt;/span&gt;&lt;/h3&gt;
-&lt;h4 style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif'; font-size:medium; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;&lt;/h4&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Welcome to the &lt;/span&gt;&lt;span style=&quot; font-family:'Sans Serif'; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;! This application is designed to provide a streamlined and convenient way to launch your favorite Tomb Raider games on Linux. Currently, the launcher supports Tomb Raider 1-5, trle.net and TEN at the moment.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Our aim is to enhance your gaming experience by offering a user-friendly interface that simplifies game management and launching. The launcher is still a work in progress, and we are actively working on adding support for more games and improving functionality.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Stay tuned for updates and new features as we continue to develop and refine the Tomb Raider Linux Launcher. Your feedback and suggestions are always welcome to help us create the best possible tool for Tomb Raider fans.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Thank you for using the Tomb Raider Linux Launcher!&lt;/span&gt;&lt;/p&gt;
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;About&lt;/span&gt;&lt;/h3&gt;
+&lt;h4 style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:medium; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;&lt;/h4&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Welcome to the &lt;span style=&quot; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;! This application is designed to provide a streamlined and convenient way to launch your favorite Tomb Raider games on Linux. Currently, the launcher supports Tomb Raider 1-5, trle.net and TEN at the moment.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Our aim is to enhance your gaming experience by offering a user-friendly interface that simplifies game management and launching. The launcher is still a work in progress, and we are actively working on adding support for more games and improving functionality.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Stay tuned for updates and new features as we continue to develop and refine the Tomb Raider Linux Launcher. Your feedback and suggestions are always welcome to help us create the best possible tool for Tomb Raider fans.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Thank you for using the Tomb Raider Linux Launcher!&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/pictures/Lara3.jpg&quot; width=&quot;400&quot; height=&quot;350&quot; /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
