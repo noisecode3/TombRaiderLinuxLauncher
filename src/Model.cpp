@@ -175,20 +175,15 @@ bool Model::runUmu(const int id) {
     } else {
         path << QString("%1.TRLE").arg(id);
     }
-    QString s = path.get();
-    qDebug() << "Model: path.get() "  << s;
 
     fileManager.getExtraPathToExe(path, data.getType(id));
 
-    s = path.get();
-    qDebug() << "Model: path.get() "  << s;
 
-
-    m_umuRunner.setWorkingDirectory(s);
+    m_umuRunner.setWorkingDirectory(path.get());
+    qDebug() << "Model: setWorkingDirectory:"  << path.get();
 
     path << ExecutableNames().data[data.getType(id)];
-    s = path.get();
-    qDebug() << "Model: path.get() "  << s;
+    qDebug() << "Model: ExecutableName:"  << path.get();
 
     m_umuRunner.insertArguments(QStringList() << path.get());
     m_umuRunner.run();

@@ -644,11 +644,10 @@ void TombRaiderLinuxLauncher::workTick() {
     ui->progressBar->setValue(value + 1);
     qDebug() << ui->progressBar->value() << "%";
     if (ui->progressBar->value() >= 100) {
-        QModelIndex current = ui->listViewLevels->currentIndex();
-        if (current.isValid()) {
-            qint64 id = levelListProxy->getLid(current);
-            levelListModel->setInstalled(current);
-            if (levelListProxy->getItemType(current)) {
+        if (m_current.isValid()) {
+            qint64 id = levelListProxy->getLid(m_current);
+            levelListModel->setInstalled(m_current);
+            if (levelListProxy->getItemType(m_current)) {
                 settings.setValue(
                         QString("installed/game%1").arg(id),
                         "true");
@@ -699,9 +698,8 @@ void TombRaiderLinuxLauncher::UpdateLevelDone() {
         ui->stackedWidget->setCurrentWidget(
             ui->stackedWidget->findChild<QWidget*>("select"));
     } else if (m_loadingDoneGoTo == "info") {
-        QModelIndex current = ui->listViewLevels->currentIndex();
-        if (current.isValid()) {
-            qint64 id = levelListProxy->getLid(current);
+        if (m_current.isValid()) {
+            qint64 id = levelListProxy->getLid(m_current);
             if (id != 0) {
                 InfoData info = controller.getInfo(id);
                 if (!(info.m_body == "" && info.m_imageList.size() == 0)) {
