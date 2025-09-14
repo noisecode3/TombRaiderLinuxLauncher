@@ -119,15 +119,13 @@ compile with cmake -DTEST=on
 ./TombRaiderLinuxLauncherTest -w tomb4.exe
 ```
 
-I was going to mix trle.net with trcustoms.org data, I have not made contacted with the site owner
-to ask if I can use the site for scraping for non commercial use. As this task turned out to be
-harder than I thought, to match data without creating doubles, I'm gonna wait until the basics
-and trle.net part is implemented.
+I was going to mix trle.net with trcustoms.org data, I have not made contacted with the site owner to ask if I can use the site for scraping for non commercial use. As this task turned out to be harder than I thought, to match data without creating doubles, I'm gonna wait until the basics and trle.net part is implemented.
 
 ## Screenshots
 
 ![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot1.jpg)
-![screenshot1](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot2.jpg)
+![screenshot2](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot2.jpg)
+![screenshot3](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot3.jpg)
 
 ## Guide
 
@@ -141,8 +139,7 @@ I tested the original, unpatched Tomb Raider III on an i7-4800MQ using its integ
 WINEPREFIX="/home/noisecode3/.newtombprefix" PROTONPATH="/home/noisecode3/.steam/steam/compatibilitytools.d/GE-Proton10-10" GAMEID="225320" MESA_SHADER_CACHE="true"
 ```
 
-It ran nearly perfectly — only a tiny framedrop once per hour, or sometimes not at all. Timing jitter caused by Wine’s threading system is largely eliminated under NTSync.
-NTSync can help DDraw, DirectSound other I/O thread workers in wine. On Arch Linux (or other distros with a modular kernel), you’ll need to manually load the ntsync driver to enable proper synchronization support:
+It ran nearly perfectly — only a tiny framedrop once per hour, or sometimes not at all. Timing jitter caused by Wine’s threading system is largely eliminated under NTSync. NTSync can help DDraw, DirectSound other I/O thread workers in wine. On Arch Linux (or other distros with a modular kernel), you’ll need to manually load the ntsync driver to enable proper synchronization support:
 
 ```shell
 sudo modprobe ntsync
@@ -173,9 +170,8 @@ I listed some open source modes that work well with Proton/Wine.
 
 ## Targets
 
-I program mostly on Slackware-current and Arch, I gonna try target and test SteamOS for second release.
-I don't use Windows but it should build on both Windows and Linux with MinGw.
-It's recommended as a standard to use Arch Linux or MSYS2 on Windows, with qt-creator.
+I program mostly on Slackware-current and Arch, I gonna try target and test SteamOS for second release. I don't use Windows but it should build on both Windows and Linux with MinGw. It's recommended as a standard to use Arch Linux or MSYS2 on Windows, with qt-creator. I use neovim and qt-creator at the same time. You can have qt-creator open and configured to build in build/Desktop-Debug while you have neovim using the build directory. I find qt-creator useful for its debugger.
+![screenshot4](https://raw.githubusercontent.com/noisecode3/TombRaiderLinuxLauncher/main/doc/screenshot4.jpg)
 
 ## License
 

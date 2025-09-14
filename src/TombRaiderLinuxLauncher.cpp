@@ -22,7 +22,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
     // Button signal connections
     // List tab
-    connect(ui->pushButtonRun, SIGNAL(clicked()), this, SLOT(linkClicked()));
+    connect(ui->pushButtonRun, SIGNAL(clicked()), this, SLOT(runClicked()));
     connect(ui->pushButtonDownload, SIGNAL(clicked()),
         this, SLOT(downloadClicked()));
     connect(ui->pushButtonInfo, SIGNAL(clicked()), this, SLOT(infoClicked()));
@@ -171,6 +171,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     } else {
         readSavedSettings();
     }
+
 }
 
 void TombRaiderLinuxLauncher::setList() {
@@ -301,7 +302,7 @@ void TombRaiderLinuxLauncher::readSavedSettings() {
     const QString levelPathValue = settings.value("levelPath").toString();
     ui->tableWidgetSetup->item(1, 0)->setText(levelPathValue);
     qDebug() << "Read level path value:" << levelPathValue;
-    controller.setup(levelPathValue, gamePathValue);
+    controller.setup();
 }
 
 void TombRaiderLinuxLauncher::setup() {
@@ -434,7 +435,7 @@ QVector<QPair<QString, QString>>
     return envList;
 }
 
-void TombRaiderLinuxLauncher::linkClicked() {
+void TombRaiderLinuxLauncher::runClicked() {
     if (m_current.isValid()) {
         qint64 id = levelListProxy->getLid(m_current);
         if (id != 0) {
@@ -444,37 +445,23 @@ void TombRaiderLinuxLauncher::linkClicked() {
             qDebug() << "Type was: " << type;
 
             if (type == 0) {
-                QVector<QPair<QString, QString>> envList =
-                        parsToEnv(input->text());
-                if (ui->checkBoxSetup->isChecked()) {
-                    Model::getInstance().setUmuSetup(true);
-                } else {
-                    Model::getInstance().setUmuSetup(false);
-                }
-                Model::getInstance().setUmuEnv(envList);
+                Model::getInstance().setUmuSetup(ui->checkBoxSetup->isChecked());
+                Model::getInstance().setUmuEnv(parsToEnv(input->text()));
                 Model::getInstance().runUmu(id);
 
             } else if (type == 1) {
-                QVector<QPair<QString, QString>> envList =
-                        parsToEnv(input->text());
-                if (ui->checkBoxSetup->isChecked()) {
-                    Model::getInstance().setUmuSetup(true);
-                } else {
-                    Model::getInstance().setUmuSetup(false);
-                }
-                Model::getInstance().setWineEnv(envList);
+                Model::getInstance().setWineSetup(ui->checkBoxSetup->isChecked());
+                Model::getInstance().setWineEnv(parsToEnv(input->text()));
                 Model::getInstance().runWine(id);
 
             } else if (type == 2) {
-                QStringList argList = parsToArg(input->text());
-                Model::getInstance().runLutris(argList);
+                Model::getInstance().runLutris(parsToArg(input->text()));
 
             } else if (type == 3) {
                 if (!controller.link(id)) {
                     qDebug() << "link error";
                 }
-                QStringList argList = parsToArg(input->text());
-                Model::getInstance().runLutris(argList);
+                Model::getInstance().runLutris(parsToArg(input->text()));
 
             } else if (type == 4) {
                 Model::getInstance().runSteam(id);
@@ -504,22 +491,17 @@ void TombRaiderLinuxLauncher::linkClicked() {
 }
 
 void TombRaiderLinuxLauncher::downloadClicked() {
-    levelListProxy->getLid(m_current);
     if (m_current.isValid()) {
         qint64 id = levelListProxy->getLid(m_current);
         qDebug() << "void TombRaiderLinuxLauncher" <<
                     "::downloadClicked() quint64 id: " << id; 
-        if (levelListProxy->getItemType(m_current)) {
-            ui->listViewLevels->setEnabled(false);
-            ui->progressBar->setValue(0);
-            ui->stackedWidgetBar->setCurrentWidget(
+        ui->listViewLevels->setEnabled(false);
+        ui->progressBar->setValue(0);
+        ui->stackedWidgetBar->setCurrentWidget(
             ui->stackedWidgetBar->findChild<QWidget*>("progress"));
+        if (levelListProxy->getItemType(m_current)) {
             controller.setupGame(id);
         } else {
-            ui->listViewLevels->setEnabled(false);
-            ui->progressBar->setValue(0);
-            ui->stackedWidgetBar->setCurrentWidget(
-            ui->stackedWidgetBar->findChild<QWidget*>("progress"));
             controller.setupLevel(id);
         }
     }
@@ -725,8 +707,7 @@ void TombRaiderLinuxLauncher::GlobalSaveClicked() {
     if ((newLevelPath != oldLevelPath) || (newGamePath != oldGamePath)) {
         settings.setValue("levelPath" , newLevelPath);
         settings.setValue("gamePath" , newGamePath);
-
-        controller.setup(newLevelPath, newGamePath);
+        controller.setup();
     }
 }
 

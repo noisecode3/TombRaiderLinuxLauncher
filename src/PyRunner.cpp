@@ -12,16 +12,10 @@
  */
 
 #include "../src/PyRunner.hpp"
+#include "../src/Path.hpp"
 #include <QDebug>
 #include <QFile>
 #include <QProcess>
-
-bool PyRunner::setUpCamp(const QString& level) {
-    if (!QFile::exists(level)) return false;
-    m_cwd = level;
-    m_isRunning = false;
-    return true;
-}
 
 void PyRunner::run(const QString& script, const QVector<QString>& args) {
     if (m_isRunning) {
@@ -32,18 +26,16 @@ void PyRunner::run(const QString& script, const QVector<QString>& args) {
     QProcess process;
     QString program = "python3";
 
-    // Build full path to script if cwd is set
-    QString fullScript =
-        m_cwd.isEmpty() ? script : (m_cwd + "/" + script + ".py");
+    // Build full path to script
+    Path path = Path(Path::resource);
+    process.setWorkingDirectory(path.get());
+    path << QString("%1.py").arg(script);
 
     QStringList arguments;
-    arguments << fullScript;
+    arguments << path.get();
     for (const QString& arg : args) {
         arguments << arg;
     }
-
-    if (!m_cwd.isEmpty())
-        process.setWorkingDirectory(m_cwd);
 
     process.setProcessChannelMode(QProcess::MergedChannels);
 
@@ -52,7 +44,7 @@ void PyRunner::run(const QString& script, const QVector<QString>& args) {
         qDebug().noquote() << QString::fromUtf8(output);
     });
 
-    qDebug() << "[PyRunner] Starting Python script:" << fullScript;
+    qDebug() << "[PyRunner] Starting Python script:" << path.get();
     process.start(program, arguments);
 
     if (!process.waitForStarted()) {

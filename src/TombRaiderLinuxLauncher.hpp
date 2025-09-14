@@ -70,9 +70,9 @@ class TombRaiderLinuxLauncher : public QMainWindow {
 
  public slots:
     /**
-     * Triggered by the "Link" button.
+     * Triggered by the "Run" button.
      */
-    void linkClicked();
+    void runClicked();
     /**
      * Triggered by the "Download" button.
      */

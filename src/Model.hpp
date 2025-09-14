@@ -87,8 +87,7 @@ class Model : public QObject {
     const InfoData getInfo(int id);
     const int getType(int id);
     const QString getWalkthrough(int id);
-    bool setupDirectories(const QString& level, const QString& game);
-    void setup(const QString& level, const QString& game);
+    void setup();
     void updateLevel(const int id);
     void syncLevels();
 
@@ -111,9 +110,9 @@ class Model : public QObject {
     Runner m_bashRunner   = Runner("bash");
 
     PyRunner m_pyRunner;
-    Data& data = Data::getInstance();
-    FileManager& fileManager = FileManager::getInstance();
-    Downloader& downloader = Downloader::getInstance();
+    Data& data;
+    FileManager& fileManager;
+    Downloader& downloader;
 
     Model();
     ~Model();

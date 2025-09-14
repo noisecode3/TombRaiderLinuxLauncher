@@ -19,27 +19,14 @@
 Runner::Runner() : m_env(QProcessEnvironment::systemEnvironment()) {
     m_status = 0;
     m_setupFlag = false;
-
-    // Merge stderr into stdout
-    m_process.setProcessChannelMode(QProcess::MergedChannels);
-
-    // Connect single output handler
-    QObject::connect(&m_process, &QProcess::readyReadStandardOutput,
-                     this,       &Runner::handleOutput);
-
-
-    // Connect to clean up and singnal View function
-    QObject::connect(
-            &m_process,
-            QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            this,
-            &Runner::onProcessFinished);
+    m_isRunning = false;
 }
 
 Runner::Runner(const QString& cmd)
     : m_env(QProcessEnvironment::systemEnvironment()), m_command(cmd) {
     m_status = 0;
     m_setupFlag = false;
+    m_isRunning = false;
 }
 
 void Runner::insertArguments(const QStringList& value) {
@@ -59,7 +46,7 @@ void Runner::clearProcessEnvironment() {
 }
 
 void Runner::setWorkingDirectory(const QString& cwd) {
-    m_process.setWorkingDirectory(cwd);
+    m_cwd = cwd;
 }
 
 void Runner::setupFlag(bool setup) {
@@ -67,40 +54,47 @@ void Runner::setupFlag(bool setup) {
 }
 
 void Runner::run() {
-    m_process.setProcessEnvironment(m_env);
-    m_process.setProgram(m_command);
+    if (m_isRunning) {
+        qWarning() << "[Runner] Already running!";
+        return;
+    }
+    m_isRunning = true;
+    QProcess process;
+    process.setWorkingDirectory(m_cwd);
+    process.setProcessEnvironment(m_env);
+    process.setProgram(m_command);
 
     if (m_setupFlag) {
-        m_arguments << "-setup";
-    }
-    m_process.setArguments(m_arguments);
-
-    m_process.start();
-    if (!m_process.waitForStarted()) {
-        qWarning() << "Process failed to start!";
-        qWarning() << "Error: " << m_process.errorString();
-        m_status = 1;
-    }
-}
-
-void Runner::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
-    if (exitStatus == QProcess::NormalExit) {
-        qDebug() << "Process exited normally with code:" << exitCode;
-        m_status = exitCode;
+        process.setArguments(QStringList() << m_arguments << "-setup");
     } else {
-        qWarning() << "Process crashed or was killed!";
-        m_status = 1;
+        process.setArguments(m_arguments);
     }
 
-    m_env.clear();
-    m_env.insert(QProcessEnvironment::systemEnvironment());
+    process.start();
 
-    m_arguments.clear();
-    m_setupFlag = false;
-}
+    process.setProcessChannelMode(QProcess::MergedChannels);
 
-void Runner::handleOutput() {
-    QByteArray output = m_process.readAllStandardOutput();
-    QTextStream outStream(stdout);
-    outStream << output;
+    QObject::connect(&process, &QProcess::readyReadStandardOutput, [&]() {
+        QByteArray output = process.readAllStandardOutput();
+        qDebug().noquote() << QString::fromUtf8(output);
+    });
+
+    if (!process.waitForStarted()) {
+        qWarning() << "Process failed to start!";
+        qWarning() << "Error: " << process.errorString();
+        m_status = 1;
+        return;
+    }
+
+    while (process.state() != QProcess::NotRunning) {
+        process.waitForReadyRead(50);
+    }
+
+    int exitCode = process.exitCode();
+    m_status = (exitCode == 0) ? 0 : 1;
+
+    qDebug() << "[Runner] Finished with code:" << exitCode;
+
+    m_isRunning = false;
+
 }

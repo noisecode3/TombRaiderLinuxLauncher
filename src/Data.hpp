@@ -26,6 +26,7 @@
 #include <QSqlQuery>
 
 #include "../src/assert.hpp"
+#include "Path.hpp"
 
 /**
  * @struct FileListItem
@@ -440,19 +441,19 @@ class Data : public QObject {
      *
      * @param path Full path to the datbase without the file name.
      */
-    bool initializeDatabase(const QString& path) {
+    bool initializeDatabase() {
         bool status = false;
-        const QString filePath = QString("%1/%2").arg(path, "tombll.db");
-        QFileInfo fileInfo(filePath);
+        Path path = Path(Path::resource);
+        path << "tombll.db";
 
         // Open the file
-        if (!fileInfo.exists() || !fileInfo.isFile()) {
+        if (!path.exists() || !path.isFile()) {
             qCritical()
-                << "Error: The database path is not a regular file: " << path;
+                << "Error: The database path is not a regular file: " << path.get();
             status = false;
         } else {
             db = QSqlDatabase::addDatabase("QSQLITE");
-            db.setDatabaseName(QString("%1/tombll.db").arg(path));
+            db.setDatabaseName(path.get());
             if (db.open() == true) {  // flawfinder: ignore
                 status = true;
             } else {

@@ -17,26 +17,20 @@
 #include "../src/assert.hpp"
 #include <QtGlobal>
 
-Model::Model() {}
-Model::~Model() {}
-
-bool Model::setupDirectories(const QString& level, const QString& game) {
-    bool status = false;
-
-    if (fileManager.setUpCamp(level, game) &&
-            data.initializeDatabase(level) &&
-            m_pyRunner.setUpCamp(level)) {
-        #ifndef TEST
-        Path::setProgramFilesPath();
-        Path::setResourcePath();
-        #endif
-        status = true;
-    }
-    return status;
+Model::Model() :
+        data(Data::getInstance()),
+        fileManager(FileManager::getInstance()),
+        downloader(Downloader::getInstance()) {
 }
 
-void Model::setup(const QString& level, const QString& game) {
-    if (setupDirectories(level, game) == true) {
+Model::~Model() {}
+
+void Model::setup() {
+    #ifndef TEST
+    Path::setProgramFilesPath();
+    Path::setResourcePath();
+    #endif
+    if(data.initializeDatabase()) {
         QList<int> commonFiles;
         checkCommonFiles(&commonFiles);
         // Iterate backward to avoid index shifting
@@ -58,8 +52,6 @@ void Model::setup(const QString& level, const QString& game) {
         emit generateListSignal(commonFiles);
         QCoreApplication::processEvents();
     } else {
-        // send signal to gui with error about setup fail
-        qDebug() << "setupDirectories setup failed";
     }
 }
 

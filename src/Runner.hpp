@@ -35,17 +35,14 @@ class Runner : public QObject {
     void clearArguments();
     void setupFlag(bool setup);
 
- private slots:
-    void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
-
  private:
-    void handleOutput();
-    QProcess m_process;
     QProcessEnvironment m_env;
     QString m_command;
     QStringList m_arguments;
     qint64 m_status;
     bool m_setupFlag;
+    bool m_isRunning;
+    QString m_cwd;
 };
 
 #endif  // SRC_RUNNER_HPP_

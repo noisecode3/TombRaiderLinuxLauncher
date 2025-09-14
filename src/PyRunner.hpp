@@ -19,17 +19,18 @@
 
 class PyRunner {
  public:
-    PyRunner() : m_status(0) { m_isRunning = false; }
+    PyRunner() :
+        m_status(0),
+        m_isRunning(false)
+    {}
     ~PyRunner() {}
 
-    bool setUpCamp(const QString& level);
     void run(const QString& script, const QVector<QString>& args);
     qint64 updateLevel(qint64 lid);
     qint64 syncCards();
     qint64 getStatus() const;
 
  private:
-    QString m_cwd;
     qint64 m_status;
     bool m_isRunning;
 };

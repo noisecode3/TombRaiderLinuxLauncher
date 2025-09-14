@@ -31,7 +31,7 @@ class Controller : public QObject {
         return instance;
     }
 
-    void setup(const QString& level, const QString& game);
+    void setup();
     void setupGame(int id);
     void setupLevel(int id);
     void updateLevel(int id);

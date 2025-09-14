@@ -201,21 +201,6 @@ class FileManager : public QObject {
      */
     qint64 removeFileOrDirectory(Path path);
 
-    /**
-     * @brief Sets the game launch directory and level directory.
-     *
-     * This function ensures that all file operations are contained within two directories:
-     * - One for installed game files, similar to "Program Files (x86)".
-     * - One for program files and downloaded levels.
-     *
-     * If the directories do not exist, it attempts to create them.
-     *
-     * @param levelDir The path to the level directory.
-     * @param gameDir The path to the game directory.
-     * @return `true` if both directories exist or were successfully created, `false` otherwise.
-     */
-    bool setUpCamp(const QString& levelDir, const QString& gameDir);
-
  signals:
     void fileWorkTickSignal();
 
@@ -227,8 +212,6 @@ class FileManager : public QObject {
         return path.startsWith(QDir::homePath());
     }
 
-    QDir m_levelDir;
-    QDir m_gameDir;
     const QString m_sep;
     Q_DISABLE_COPY(FileManager)
 };

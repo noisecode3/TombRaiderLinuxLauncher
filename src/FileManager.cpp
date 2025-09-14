@@ -340,26 +340,3 @@ qint64 FileManager::removeFileOrDirectory(Path path) {
     }
     return status;
 }
-
-bool FileManager::setUpCamp(const QString& levelDir, const QString& gameDir) {
-    bool status = true;
-
-    QDir levelDirPath(levelDir);
-    if (!levelDirPath.exists() && !levelDirPath.mkpath(levelDir)) {
-        qWarning() << "Failed to create level directory:" << levelDir;
-        status = false;
-    } else {
-        m_levelDir.setPath(levelDir);
-    }
-
-    QDir gameDirPath(gameDir);
-    if (!gameDirPath.exists() && !gameDirPath.mkpath(gameDir)) {
-        qWarning() << "Failed to create game directory:" << gameDir;
-        status = false;
-    } else {
-        m_gameDir.setPath(gameDir);
-    }
-
-    return status;
-}
-

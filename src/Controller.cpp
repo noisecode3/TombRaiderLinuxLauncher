@@ -73,8 +73,8 @@ void Controller::runOnThreadB(std::function<void()> func) {
 }
 
 // Threaded work
-void Controller::setup(const QString& level, const QString& game) {
-    runOnThreadA([=]() { model.setup(level, game); });
+void Controller::setup() {
+    runOnThreadA([=]() { model.setup(); });
 }
 
 void Controller::setupGame(int id) {
