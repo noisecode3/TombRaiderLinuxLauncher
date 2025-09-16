@@ -137,7 +137,7 @@ int Model::getItemState(int id) {
     }
     return status;
 }
-
+/*
 bool Model::runBash(const int id) {
     bool status = true;
     Path path(Path::resource);
@@ -239,7 +239,7 @@ void Model::setWineEnv(const QVector<QPair<QString, QString>>& environment) {
 void Model::setWineSetup(bool setup) {
     m_umuRunner.setupFlag(setup);
 }
-
+*/
 bool Model::setLink(int id) {
     bool status = false;
     Path from(Path::resource);

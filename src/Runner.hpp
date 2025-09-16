@@ -17,32 +17,31 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 
+#include "../src/Path.hpp"
 
 class Runner : public QObject {
     Q_OBJECT
 
  public:
     Runner();
-    explicit Runner(const QString& cmd);
     void run();
-    int getStatus();
-    int getCommand();
-    bool setCommand(const QString& cmd);
-    void setWorkingDirectory(const QString& cwd);
-    void insertProcessEnvironment(const QPair<QString, QString> env);
-    void clearProcessEnvironment();
-    void insertArguments(const QStringList& value);
-    void clearArguments();
-    void setupFlag(bool setup);
+    const quint64 getStatus();
+    void clear();
+    void setProgram(const quint64 command);
+    void setWorkingDirectory(const Path& cwd);
+    void setProcessEnvironment(const QPair<QString, QString> env);
+    void setArguments(const QStringList& value);
+    void setSetupFlag(bool setup);
 
  private:
+    QString getCommandString(const quint64 cmd);
     QProcessEnvironment m_env;
-    QString m_command;
     QStringList m_arguments;
-    qint64 m_status;
+    Path m_cwd;
+    quint64 m_command;
+    quint64 m_status;
     bool m_setupFlag;
     bool m_isRunning;
-    QString m_cwd;
 };
 
 #endif  // SRC_RUNNER_HPP_

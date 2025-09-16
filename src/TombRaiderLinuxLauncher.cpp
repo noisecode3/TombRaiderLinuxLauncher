@@ -443,6 +443,7 @@ void TombRaiderLinuxLauncher::runClicked() {
                     QString("level%1/RunnerType").arg(id)).toInt();
             QLineEdit* input = ui->lineEditEnvironmentVariables;
             qDebug() << "Type was: " << type;
+            /*
 
             if (type == 0) {
                 Model::getInstance().setUmuSetup(ui->checkBoxSetup->isChecked());
@@ -486,6 +487,7 @@ void TombRaiderLinuxLauncher::runClicked() {
             } else if (type == 7) {
                 Model::getInstance().runBash(id);
             }
+        */
         }
     }
 }

@@ -39,6 +39,14 @@ struct InstalledStatus {
     QHash<quint64, bool> trle;
 };
 
+struct RunnerOpptions {
+    quint64 command;
+    Path cwd;
+    QList<QPair<QString, QString>> envList;
+    QStringList arguments;
+    bool setup;
+};
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
 QT_END_NAMESPACE

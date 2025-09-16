@@ -70,15 +70,19 @@ class Model : public QObject {
     void getList(QVector<QSharedPointer<ListItemData>>* list);
     void getCoverList(QVector<QSharedPointer<ListItemData>> tiems);
     int getItemState(int id);
-    bool runUmu(const int id);
-    void setUmuEnv(const QVector<QPair<QString, QString>>& environment);
-    void setUmuSetup(bool setup);
-    bool runWine(const qint64 id);
-    void setWineEnv(const QVector<QPair<QString, QString>>& environment);
-    void setWineSetup(bool setup);
-    bool runLutris(const QStringList& arg);
-    bool runSteam(const int id);
-    bool runBash(const int id);
+
+    bool setRunnerProgram(const quint64 program);
+   /* 
+    void run();
+    const quint64 getStatus();
+    void clear();
+    void setProgram(const quint64 cmd);
+    void setWorkingDirectory(const Path& cwd);
+    void setProcessEnvironment(const QPair<QString, QString> env);
+    void setArguments(const QStringList& value);
+    void setSetupFlag(bool setup);
+    */
+
     bool setLink(int id);
     QString getGameDirectory(int id);
     QString getExecutableName(int type);
@@ -103,13 +107,9 @@ class Model : public QObject {
     bool getLevelDontHaveFile(
         const int id, const QString& md5sum, Path path);
 
-    Runner m_wineRunner   = Runner("wine");
-    Runner m_lutrisRunner = Runner("lutris");
-    Runner m_steamRunner  = Runner("steam");
-    Runner m_umuRunner    = Runner("umu-run");
-    Runner m_bashRunner   = Runner("bash");
-
+    Runner m_runner;
     PyRunner m_pyRunner;
+
     Data& data;
     FileManager& fileManager;
     Downloader& downloader;

@@ -12,45 +12,70 @@
  */
 
 #include "../src/Runner.hpp"
+#include "../src/Path.hpp"
 #include <QDebug>
 #include <QTextStream>
 #include <QObject>
 
-Runner::Runner() : m_env(QProcessEnvironment::systemEnvironment()) {
+Runner::Runner()
+    : m_env(QProcessEnvironment::systemEnvironment()),
+    m_command(0),
+    m_cwd(Path(Path::resource))
+{
     m_status = 0;
     m_setupFlag = false;
     m_isRunning = false;
+
 }
 
-Runner::Runner(const QString& cmd)
-    : m_env(QProcessEnvironment::systemEnvironment()), m_command(cmd) {
-    m_status = 0;
-    m_setupFlag = false;
-    m_isRunning = false;
+const quint64 Runner::getStatus() {
+    return m_status;
 }
 
-void Runner::insertArguments(const QStringList& value) {
-    m_arguments << value;
-}
-
-void Runner::clearArguments() {
+void Runner::clear() {
     m_arguments.clear();
-}
-
-void Runner::insertProcessEnvironment(const QPair<QString, QString> env) {
-    m_env.insert(env.first, env.second);
-}
-
-void Runner::clearProcessEnvironment() {
     m_env.clear();
+    m_cwd = Path(Path::resource);
+    m_command = 0;
+    m_setupFlag = false;
 }
 
-void Runner::setWorkingDirectory(const QString& cwd) {
+void Runner::setProgram(const quint64 command) {
+    m_command = command;
+}
+
+void Runner::setWorkingDirectory(const Path& cwd) {
     m_cwd = cwd;
 }
 
-void Runner::setupFlag(bool setup) {
+void Runner::setProcessEnvironment(const QPair<QString, QString> env) {
+    m_env.insert(env.first, env.second);
+}
+
+void Runner::setArguments(const QStringList& value) {
+    m_arguments << value;
+}
+
+void Runner::setSetupFlag(bool setup) {
     m_setupFlag = setup;
+}
+
+QString Runner::getCommandString(const quint64 cmd) {
+    QString result;
+    if (cmd == 0) {
+        result = "umu-run";
+    } else if (cmd == 1) {
+        result = "wine";
+    } else if (cmd == 2) {
+        result = "lutris";
+    } else if (cmd == 3) {
+        result = "steam";
+    } else if (cmd == 4) {
+        result = "bash";
+    } else {
+        result = "umu-run";
+    }
+    return result;
 }
 
 void Runner::run() {
@@ -60,9 +85,9 @@ void Runner::run() {
     }
     m_isRunning = true;
     QProcess process;
-    process.setWorkingDirectory(m_cwd);
+    process.setWorkingDirectory(m_cwd.get());
     process.setProcessEnvironment(m_env);
-    process.setProgram(m_command);
+    process.setProgram(getCommandString(m_command));
 
     if (m_setupFlag) {
         process.setArguments(QStringList() << m_arguments << "-setup");
@@ -96,5 +121,4 @@ void Runner::run() {
     qDebug() << "[Runner] Finished with code:" << exitCode;
 
     m_isRunning = false;
-
 }
