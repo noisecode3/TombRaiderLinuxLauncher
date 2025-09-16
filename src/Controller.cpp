@@ -15,16 +15,25 @@
 #include <QMetaObject>
 
 Controller::Controller() {
-    threadA.reset(new QThread());
-    threadB.reset(new QThread());
-    workerA.reset(new QObject());
-    workerB.reset(new QObject());
+    threadDatabase.reset(new QThread());
+    threadFile.reset(new QThread());
+    threadScrape.reset(new QThread());
+    threadRun.reset(new QThread());
 
-    workerA->moveToThread(threadA.data());
-    workerB->moveToThread(threadB.data());
+    workerDatabase.reset(new QObject());
+    workerFile.reset(new QObject());
+    workerScrape.reset(new QObject());
+    workerRun.reset(new QObject());
 
-    threadA->start();
-    threadB->start();
+    workerDatabase->moveToThread(threadDatabase.data());
+    workerFile->moveToThread(threadFile.data());
+    workerScrape->moveToThread(threadScrape.data());
+    workerRun->moveToThread(threadRun.data());
+
+    threadDatabase->start();
+    threadFile->start();
+    threadScrape->start();
+    threadRun->start();
 
     connect(&model, &Model::modelTickSignal,
             this,   &Controller::controllerTickSignal,
@@ -56,45 +65,60 @@ Controller::Controller() {
 }
 
 Controller::~Controller() {
-    threadA->quit();
-    threadB->quit();
-    threadA->wait();
-    threadB->wait();
+    threadDatabase->quit();
+    threadFile->quit();
+    threadScrape->quit();
+    threadRun->quit();
+
+    threadDatabase->wait();
+    threadFile->wait();
+    threadScrape->wait();
+    threadRun->wait();
 }
 
-void Controller::runOnThreadA(std::function<void()> func) {
-    QMetaObject::invokeMethod(
-            workerA.data(), [func]() { func(); }, Qt::QueuedConnection);
+void Controller::runOnThreadDatabase(std::function<void()> func) {
+    QMetaObject::invokeMethod(workerDatabase.data(),
+            [func]() { func(); }, Qt::QueuedConnection);
 }
 
-void Controller::runOnThreadB(std::function<void()> func) {
-    QMetaObject::invokeMethod(
-            workerB.data(), [func]() { func(); }, Qt::QueuedConnection);
+void Controller::runOnThreadFile(std::function<void()> func) {
+    QMetaObject::invokeMethod(workerFile.data(),
+            [func]() { func(); }, Qt::QueuedConnection);
+}
+
+void Controller::runOnThreadScrape(std::function<void()> func) {
+    QMetaObject::invokeMethod(workerScrape.data(),
+            [func]() { func(); }, Qt::QueuedConnection);
+}
+
+void Controller::runOnThreadRun(std::function<void()> func) {
+    QMetaObject::invokeMethod(workerRun.data(),
+            [func]() { func(); }, Qt::QueuedConnection);
 }
 
 // Threaded work
 void Controller::setup() {
-    runOnThreadA([=]() { model.setup(); });
+    runOnThreadFile([=]() { model.setup(); });
 }
 
 void Controller::setupGame(int id) {
-    runOnThreadA([=]() { model.setupGame(id); });
+    runOnThreadFile([=]() { model.setupGame(id); });
 }
 
 void Controller::setupLevel(int id) {
-    runOnThreadA([=]() { model.getLevel(id); });
+    runOnThreadFile([=]() { model.getLevel(id); });
 }
 
 void Controller::updateLevel(int id) {
-    runOnThreadA([=]() { model.updateLevel(id); });
+    runOnThreadScrape([=]() { model.updateLevel(id); });
 }
 
 void Controller::syncLevels() {
-    runOnThreadA([=]() { model.syncLevels(); });
+    runOnThreadScrape([=]() { model.syncLevels(); });
 }
 
 void Controller::getCoverList(QVector<QSharedPointer<ListItemData>> items) {
-    runOnThreadB([=]() { model.getCoverList(items); });
+    runOnThreadDatabase([=]() { model.getCoverList(items); });
 }
 
 // UI/main thread work

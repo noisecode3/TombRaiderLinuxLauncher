@@ -57,13 +57,20 @@ class Controller : public QObject {
     ~Controller();
     void initThreads();
 
-    void runOnThreadA(std::function<void()> func);
-    void runOnThreadB(std::function<void()> func);
+    void runOnThreadDatabase(std::function<void()> func);
+    void runOnThreadFile(std::function<void()> func);
+    void runOnThreadScrape(std::function<void()> func);
+    void runOnThreadRun(std::function<void()> func);
 
-    QScopedPointer<QThread> threadA;
-    QScopedPointer<QThread> threadB;
-    QScopedPointer<QObject> workerA;
-    QScopedPointer<QObject> workerB;
+    QScopedPointer<QThread> threadDatabase;
+    QScopedPointer<QThread> threadFile;
+    QScopedPointer<QThread> threadScrape;
+    QScopedPointer<QThread> threadRun;
+
+    QScopedPointer<QObject> workerDatabase;
+    QScopedPointer<QObject> workerFile;
+    QScopedPointer<QObject> workerScrape;
+    QScopedPointer<QObject> workerRun;
 
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();
