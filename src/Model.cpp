@@ -16,6 +16,7 @@
 #include "../src/Path.hpp"
 #include "../src/assert.hpp"
 #include <QtGlobal>
+#include <qlogging.h>
 
 Model::Model() :
         data(Data::getInstance()),
@@ -52,6 +53,7 @@ void Model::setup() {
         emit generateListSignal(commonFiles);
         QCoreApplication::processEvents();
     } else {
+        qCritical() << "Initializing database failed!";
     }
 }
 
@@ -72,7 +74,7 @@ void Model::checkCommonFiles(QList<int>* games) {
     }
 }
 
-QString Model::getGameDirectory(int id) {
+QString Model::getPrograFilesDirectory(int id) {
     QString value;
     FolderNames folder;
     if (folder.data.contains(id)) {
@@ -97,7 +99,7 @@ QString Model::getExecutableName(int type) {
 int Model::checkGameDirectory(int id) {
     int status = -1;
     Path path(Path::programFiles);
-    path << getGameDirectory(id);
+    path << getPrograFilesDirectory(id);
     if (path.get() != "") {
         status = fileManager.checkFileInfo(path);
     }
@@ -137,6 +139,33 @@ int Model::getItemState(int id) {
     }
     return status;
 }
+
+void Model::run(RunnerOptions opptions) {
+    // Setup the basic
+    m_runner.setProgram(opptions.command);
+
+    Path path = Path(Path::resource);
+    fileManager.addLevelDir(path, opptions.id);
+
+    // Command specific
+    if ((opptions.command == UMU) || (opptions.command ==  WINE)) {
+        // FIXME: if original get type from struct
+        fileManager.getExtraPathToExe(path, data.getType(opptions.id));
+        for (QPair<QString, QString>& env : opptions.envList) {
+            m_runner.addEnvironmentVariable(env);
+        }
+        if (opptions.setup) {
+            m_runner.addArguments(QStringList() << "-setup");
+        }
+    } else if (opptions.command == BASH) {
+        m_runner.addArguments(QStringList() << "start.sh");
+    }
+
+    m_runner.setCurrentWorkingDirectory(path.get());
+    m_runner.run();
+    emit modelRunningDoneSignal();
+}
+
 /*
 bool Model::runBash(const int id) {
     bool status = true;
@@ -248,7 +277,7 @@ bool Model::setLink(int id) {
     if (id < 0) {  // we use original game id as negative number
         int orgId = (-1)*id;
         from << QString("Original.TR%1").arg(orgId);
-        to   << getGameDirectory(orgId);
+        to   << getPrograFilesDirectory(orgId);
         if (from.isDir()) {
             status = fileManager.linkPaths(from, to);
         } else {
@@ -256,7 +285,7 @@ bool Model::setLink(int id) {
         }
     } else {
         from << QString("%1.TRLE").arg(id);
-        const QString s = getGameDirectory(data.getType(id));
+        const QString s = getPrograFilesDirectory(data.getType(id));
         to   << s;
         qDebug() << "Model :to " <<  to.get();
         qDebug() << "Model :from " << from.get();
@@ -278,7 +307,7 @@ void Model::setupGame(int id) {
     Path from(Path::programFiles);
     Path to(Path::resource);
 
-    from << getGameDirectory(id);
+    from << getPrograFilesDirectory(id);
     to << QString("Original.TR%1").arg(id);
 
     quint64 lastPrintedPercent = 0;

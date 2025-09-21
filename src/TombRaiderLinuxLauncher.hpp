@@ -39,14 +39,6 @@ struct InstalledStatus {
     QHash<quint64, bool> trle;
 };
 
-struct RunnerOpptions {
-    quint64 command;
-    Path cwd;
-    QList<QPair<QString, QString>> envList;
-    QStringList arguments;
-    bool setup;
-};
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class TombRaiderLinuxLauncher; }
 QT_END_NAMESPACE
@@ -121,7 +113,11 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     /**
      * Switch back to level list or info page after network/python work.
      */
-    void UpdateLevelDone();
+    void updateLevelDone();
+    /**
+     * Switch back to list selection state after running the game.
+     */
+    void runningLevelDone();
     /**
      * Generates the initial level list after file analysis.
      */

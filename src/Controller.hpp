@@ -15,6 +15,7 @@
 #define SRC_CONTROLLER_HPP_
 #include <QObject>
 #include <QThread>
+#include "../src/globalTypes.hpp"
 #include "../src/Model.hpp"
 
 /**
@@ -37,6 +38,7 @@ class Controller : public QObject {
     void updateLevel(int id);
     void syncLevels();
     void getCoverList(QVector<QSharedPointer<ListItemData>> items);
+    void run(RunnerOptions opptions);
 
     int checkGameDirectory(int id);
     void getList(QVector<QSharedPointer<ListItemData>>* list);
@@ -51,6 +53,7 @@ class Controller : public QObject {
     void controllerDownloadError(int status);
     void controllerReloadLevelList();
     void controllerLoadingDone();
+    void controllerRunningDone();
 
  private:
     Controller();

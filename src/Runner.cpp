@@ -11,8 +11,8 @@
  * GNU General Public License for more details.
  */
 
+#include "../src/assert.hpp"
 #include "../src/Runner.hpp"
-#include "../src/Path.hpp"
 #include <QDebug>
 #include <QTextStream>
 #include <QObject>
@@ -20,10 +20,8 @@
 Runner::Runner()
     : m_env(QProcessEnvironment::systemEnvironment()),
     m_command(0),
-    m_cwd(Path(Path::resource))
+    m_status(0)
 {
-    m_status = 0;
-    m_setupFlag = false;
     m_isRunning = false;
 
 }
@@ -35,29 +33,24 @@ const quint64 Runner::getStatus() {
 void Runner::clear() {
     m_arguments.clear();
     m_env.clear();
-    m_cwd = Path(Path::resource);
+    m_cwd.clear();
     m_command = 0;
-    m_setupFlag = false;
 }
 
 void Runner::setProgram(const quint64 command) {
     m_command = command;
 }
 
-void Runner::setWorkingDirectory(const Path& cwd) {
-    m_cwd = cwd;
+void Runner::setCurrentWorkingDirectory(const QString& dir) {
+    m_cwd = dir;
 }
 
-void Runner::setProcessEnvironment(const QPair<QString, QString> env) {
+void Runner::addEnvironmentVariable(const QPair<QString, QString> env) {
     m_env.insert(env.first, env.second);
 }
 
-void Runner::setArguments(const QStringList& value) {
+void Runner::addArguments(const QStringList& value) {
     m_arguments << value;
-}
-
-void Runner::setSetupFlag(bool setup) {
-    m_setupFlag = setup;
 }
 
 QString Runner::getCommandString(const quint64 cmd) {
@@ -73,7 +66,7 @@ QString Runner::getCommandString(const quint64 cmd) {
     } else if (cmd == 4) {
         result = "bash";
     } else {
-        result = "umu-run";
+        Q_ASSERT_WITH_TRACE(false);
     }
     return result;
 }
@@ -83,26 +76,23 @@ void Runner::run() {
         qWarning() << "[Runner] Already running!";
         return;
     }
+    Q_ASSERT_WITH_TRACE(!m_cwd.isEmpty());
+
     m_isRunning = true;
     QProcess process;
-    process.setWorkingDirectory(m_cwd.get());
+
+    process.setWorkingDirectory(m_cwd);
     process.setProcessEnvironment(m_env);
     process.setProgram(getCommandString(m_command));
-
-    if (m_setupFlag) {
-        process.setArguments(QStringList() << m_arguments << "-setup");
-    } else {
-        process.setArguments(m_arguments);
-    }
-
-    process.start();
-
+    process.setArguments(m_arguments);
     process.setProcessChannelMode(QProcess::MergedChannels);
 
     QObject::connect(&process, &QProcess::readyReadStandardOutput, [&]() {
         QByteArray output = process.readAllStandardOutput();
         qDebug().noquote() << QString::fromUtf8(output);
     });
+
+    process.start();
 
     if (!process.waitForStarted()) {
         qWarning() << "Process failed to start!";

@@ -340,3 +340,14 @@ qint64 FileManager::removeFileOrDirectory(Path path) {
     }
     return status;
 }
+
+void FileManager::addLevelDir(Path& path, quint64 id) {
+    // we use original game id as negative number
+
+    if (id < 0) {
+        int orgId = (-1)*id;
+        path << QString("Original.TR%1").arg(orgId);
+    } else {
+        path <<  QString("%1.TRLE").arg(id);
+    }
+}

@@ -62,6 +62,10 @@ Controller::Controller() {
     connect(&model, &Model::modelLoadingDoneSignal,
             this,   &Controller::controllerLoadingDone,
         Qt::QueuedConnection);
+
+    connect(&model, &Model::modelRunningDoneSignal,
+            this,   &Controller::controllerRunningDone,
+        Qt::QueuedConnection);
 }
 
 Controller::~Controller() {
@@ -119,6 +123,10 @@ void Controller::syncLevels() {
 
 void Controller::getCoverList(QVector<QSharedPointer<ListItemData>> items) {
     runOnThreadDatabase([=]() { model.getCoverList(items); });
+}
+
+void Controller::run(RunnerOptions opptions) {
+    runOnThreadRun([=]() { model.run(opptions); });
 }
 
 // UI/main thread work

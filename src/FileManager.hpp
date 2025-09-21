@@ -201,6 +201,8 @@ class FileManager : public QObject {
      */
     qint64 removeFileOrDirectory(Path path);
 
+    void addLevelDir(Path& path, quint64 id);
+
  signals:
     void fileWorkTickSignal();
 

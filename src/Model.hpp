@@ -23,6 +23,7 @@
 
 #include <cassert>
 
+#include "../src/globalTypes.hpp"
 #include "../src/Path.hpp"
 #include "../src/Data.hpp"
 #include "../src/FileManager.hpp"
@@ -70,21 +71,9 @@ class Model : public QObject {
     void getList(QVector<QSharedPointer<ListItemData>>* list);
     void getCoverList(QVector<QSharedPointer<ListItemData>> tiems);
     int getItemState(int id);
-
-    bool setRunnerProgram(const quint64 program);
-   /* 
-    void run();
-    const quint64 getStatus();
-    void clear();
-    void setProgram(const quint64 cmd);
-    void setWorkingDirectory(const Path& cwd);
-    void setProcessEnvironment(const QPair<QString, QString> env);
-    void setArguments(const QStringList& value);
-    void setSetupFlag(bool setup);
-    */
-
+    void run(RunnerOptions opptions);
     bool setLink(int id);
-    QString getGameDirectory(int id);
+    QString getPrograFilesDirectory(int id);
     QString getExecutableName(int type);
     void setupGame(int id);
     void getLevel(int id);
@@ -100,6 +89,7 @@ class Model : public QObject {
     void modelTickSignal();
     void modelReloadLevelListSignal();
     void modelLoadingDoneSignal();
+    void modelRunningDoneSignal();
 
  private:
     bool getLevelHaveFile(

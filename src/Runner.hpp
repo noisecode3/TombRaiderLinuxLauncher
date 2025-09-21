@@ -17,8 +17,6 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 
-#include "../src/Path.hpp"
-
 class Runner : public QObject {
     Q_OBJECT
 
@@ -28,19 +26,17 @@ class Runner : public QObject {
     const quint64 getStatus();
     void clear();
     void setProgram(const quint64 command);
-    void setWorkingDirectory(const Path& cwd);
-    void setProcessEnvironment(const QPair<QString, QString> env);
-    void setArguments(const QStringList& value);
-    void setSetupFlag(bool setup);
+    void setCurrentWorkingDirectory(const QString& dir);
+    void addEnvironmentVariable(const QPair<QString, QString> env);
+    void addArguments(const QStringList& value);
 
  private:
     QString getCommandString(const quint64 cmd);
     QProcessEnvironment m_env;
     QStringList m_arguments;
-    Path m_cwd;
+    QString m_cwd;
     quint64 m_command;
     quint64 m_status;
-    bool m_setupFlag;
     bool m_isRunning;
 };
 

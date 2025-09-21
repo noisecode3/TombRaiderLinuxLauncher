@@ -12,6 +12,7 @@
  */
 
 #include "../src/TombRaiderLinuxLauncher.hpp"
+#include "../src/globalTypes.hpp"
 #include "ui_TombRaiderLinuxLauncher.h"
 #include <QLineEdit>
 
@@ -62,7 +63,11 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
     // Loading done signal connections
     connect(&Controller::getInstance(), SIGNAL(controllerLoadingDone()),
-        this, SLOT(UpdateLevelDone()));
+        this, SLOT(updateLevelDone()));
+
+    // Loading done signal connections
+    connect(&Controller::getInstance(), SIGNAL(controllerRunningDone()),
+        this, SLOT(runningLevelDone()));
 
     // Set init state
     ui->pushButtonRun->setEnabled(false);
@@ -437,59 +442,69 @@ QVector<QPair<QString, QString>>
 
 void TombRaiderLinuxLauncher::runClicked() {
     if (m_current.isValid()) {
+        ui->listViewLevels->setEnabled(false);
+        ui->pushButtonRun->setEnabled(false);
+        ui->checkBoxSetup->setEnabled(false);
+
         qint64 id = levelListProxy->getLid(m_current);
+        if (levelListProxy->getItemType(m_current)) {
+            id = (-1)*id;
+        }
         if (id != 0) {
             qint64 type = settings.value(
                     QString("level%1/RunnerType").arg(id)).toInt();
             QLineEdit* input = ui->lineEditEnvironmentVariables;
             qDebug() << "Type was: " << type;
-            /*
+            RunnerOptions options;
 
             if (type == 0) {
-                Model::getInstance().setUmuSetup(ui->checkBoxSetup->isChecked());
-                Model::getInstance().setUmuEnv(parsToEnv(input->text()));
-                Model::getInstance().runUmu(id);
-
+                options.id = id;
+                options.command = UMU;
+                options.setup = ui->checkBoxSetup->isChecked();
+                options.envList = parsToEnv(input->text());
+                controller.run(options);
             } else if (type == 1) {
-                Model::getInstance().setWineSetup(ui->checkBoxSetup->isChecked());
-                Model::getInstance().setWineEnv(parsToEnv(input->text()));
-                Model::getInstance().runWine(id);
-
+                options.id = id;
+                options.command = WINE;
+                options.setup = ui->checkBoxSetup->isChecked();
+                options.envList = parsToEnv(input->text());
+                controller.run(options);
             } else if (type == 2) {
-                Model::getInstance().runLutris(parsToArg(input->text()));
-
+                options.command = LUTRIS;
+                options.envList = parsToEnv(input->text());
+                controller.run(options);
             } else if (type == 3) {
                 if (!controller.link(id)) {
                     qDebug() << "link error";
                 }
-                Model::getInstance().runLutris(parsToArg(input->text()));
-
+                options.command = LUTRIS;
+                options.envList = parsToEnv(input->text());
             } else if (type == 4) {
-                Model::getInstance().runSteam(id);
-
+                options.id = id;
+                options.command = STEAM;
+                controller.run(options);
             } else if (type == 5) {
-                if (levelListProxy->getItemType(m_current)) {
-                    id = (-1)*id;
-                }
                 if (!controller.link(id)) {
                     qDebug() << "link error";
                 }
                 QApplication::quit();
-
             } else if (type == 6) {
-                if (levelListProxy->getItemType(m_current) == true) {
-                    id = (-1)*id;
-                }
                 if (!controller.link(id)) {
                     qDebug() << "link error";
                 }
-
             } else if (type == 7) {
-                Model::getInstance().runBash(id);
+                options.id = id;
+                options.command = BASH;
+                controller.run(options);
             }
-        */
         }
     }
+}
+
+void TombRaiderLinuxLauncher::runningLevelDone() {
+    ui->listViewLevels->setEnabled(true);
+    ui->pushButtonRun->setEnabled(true);
+    ui->checkBoxSetup->setEnabled(true);
 }
 
 void TombRaiderLinuxLauncher::downloadClicked() {
@@ -675,7 +690,7 @@ void TombRaiderLinuxLauncher::downloadError(int status) {
     msgBox.exec();
 }
 
-void TombRaiderLinuxLauncher::UpdateLevelDone() {
+void TombRaiderLinuxLauncher::updateLevelDone() {
     m_loadingIndicatorWidget->hide();
     if (m_loadingDoneGoTo == "select") {
         setList();

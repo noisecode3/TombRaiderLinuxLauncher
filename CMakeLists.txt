@@ -138,6 +138,7 @@ set(SOURCES_MC
     src/binary.hpp
     src/binary.cpp
     src/gameFileTreeData.hpp
+    src/globalTypes.hpp
     src/main.cpp
     src/staticData.hpp
 )
