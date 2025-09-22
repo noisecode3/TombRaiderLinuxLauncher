@@ -33,8 +33,10 @@ const quint64 Runner::getStatus() {
 void Runner::clear() {
     m_arguments.clear();
     m_env.clear();
+    m_env.insert(QProcessEnvironment::systemEnvironment());
     m_cwd.clear();
     m_command = 0;
+    m_status = 0;
 }
 
 void Runner::setProgram(const quint64 command) {
