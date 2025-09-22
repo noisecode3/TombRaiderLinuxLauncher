@@ -478,7 +478,8 @@ void TombRaiderLinuxLauncher::runClicked() {
                     qDebug() << "link error";
                 }
                 options.command = LUTRIS;
-                options.envList = parsToEnv(input->text());
+                options.arguments = parsToArg(input->text());
+                controller.run(options);
             } else if (type == 4) {
                 options.id = id;
                 options.command = STEAM;
@@ -492,6 +493,7 @@ void TombRaiderLinuxLauncher::runClicked() {
                 if (!controller.link(id)) {
                     qDebug() << "link error";
                 }
+                runningLevelDone();
             } else if (type == 7) {
                 options.id = id;
                 options.command = BASH;
