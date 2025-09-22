@@ -149,152 +149,47 @@ void Model::run(RunnerOptions opptions) {
 
     // Command specific
     if ((opptions.command == UMU) || (opptions.command ==  WINE)) {
-        // FIXME: if original get type from struct
+        // Path the executable directory
         fileManager.getExtraPathToExe(path, data.getType(opptions.id));
+
+        // Shell arguments
         for (QPair<QString, QString>& env : opptions.envList) {
             m_runner.addEnvironmentVariable(env);
         }
+
+        // Executable to run
+        quint64 type = getType(opptions.id);
+        m_runner.addArguments(QStringList() << ExecutableNames().data[type]);
         if (opptions.setup) {
             m_runner.addArguments(QStringList() << "-setup");
         }
+    } else if (opptions.command == LUTRIS) {
+    } else if (opptions.command == STEAM) {
     } else if (opptions.command == BASH) {
         m_runner.addArguments(QStringList() << "start.sh");
     }
 
     m_runner.setCurrentWorkingDirectory(path.get());
     m_runner.run();
+    m_runner.clear();
     emit modelRunningDoneSignal();
 }
 
-/*
-bool Model::runBash(const int id) {
-    bool status = true;
-    Path path(Path::resource);
-    if (id < 0) {  // we use original game id as negative number
-        int orgId = (-1)*id;
-        path << QString("Original.TR%1").arg(orgId);
-    } else {
-        path << QString("%1.TRLE").arg(id);
-    }
-    const QString s = path.get();
-    m_bashRunner.setWorkingDirectory(s);
-    path << "start.sh";
-
-    m_bashRunner.insertArguments(QStringList() << path.get());
-    m_bashRunner.run();
-
-    return status;
-}
-
-bool Model::runUmu(const int id) {
-    bool status = true;
-    Path path(Path::resource);
-
-    if (id < 0) {  // we use original game id as negative number
-        int orgId = (-1)*id;
-        path << QString("Original.TR%1").arg(orgId);
-    } else {
-        path << QString("%1.TRLE").arg(id);
-    }
-
-    fileManager.getExtraPathToExe(path, data.getType(id));
-
-
-    m_umuRunner.setWorkingDirectory(path.get());
-    qDebug() << "Model: setWorkingDirectory:"  << path.get();
-
-    path << ExecutableNames().data[data.getType(id)];
-    qDebug() << "Model: ExecutableName:"  << path.get();
-
-    m_umuRunner.insertArguments(QStringList() << path.get());
-    m_umuRunner.run();
-
-    return status;
-}
-
-void Model::setUmuEnv(const QVector<QPair<QString, QString>>& environment) {
-    for (const QPair<QString, QString>& e : environment) {
-        m_umuRunner.insertProcessEnvironment(e);
-    }
-}
-
-void Model::setUmuSetup(bool setup) {
-    m_umuRunner.setupFlag(setup);
-}
-
-bool Model::runSteam(const int id) {
-    bool status = true;
-    QStringList arg;
-    const qint64 appid =  SteamAppIds().data[data.getType(id)];
-    arg << QString("steam://run/%1").arg(appid);
-    m_steamRunner.insertArguments(arg);
-    m_steamRunner.run();
-    return status;
-}
-
-bool Model::runLutris(const QStringList& arg) {
-    bool status = true;
-    m_lutrisRunner.insertArguments(arg);
-    m_lutrisRunner.run();
-    return status;
-}
-
-bool Model::runWine(const qint64 id) {
-    bool status = true;
-    Path path(Path::resource);
-
-    if (id < 0) {  // we use original game id as negative number
-        int orgId = (-1)*id;
-        path << QString("Original.TR%1").arg(orgId);
-    } else {
-        path <<  QString("%1.TRLE").arg(id);
-    }
-
-    fileManager.getExtraPathToExe(path, data.getType(id));
-    m_wineRunner.setWorkingDirectory(path.get());
-    path << ExecutableNames().data[data.getType(id)];
-
-    m_wineRunner.insertArguments(QStringList() << path.get());
-    m_wineRunner.run();
-    return status;
-}
-
-void Model::setWineEnv(const QVector<QPair<QString, QString>>& environment) {
-    for (const QPair<QString, QString>& e : environment) {
-        m_wineRunner.insertProcessEnvironment(e);
-    }
-}
-
-void Model::setWineSetup(bool setup) {
-    m_umuRunner.setupFlag(setup);
-}
-*/
 bool Model::setLink(int id) {
     bool status = false;
     Path from(Path::resource);
     Path to(Path::programFiles);
 
-    if (id < 0) {  // we use original game id as negative number
-        int orgId = (-1)*id;
-        from << QString("Original.TR%1").arg(orgId);
-        to   << getPrograFilesDirectory(orgId);
-        if (from.isDir()) {
-            status = fileManager.linkPaths(from, to);
-        } else {
-            qDebug() << "Dirr: " << from.get() << " seems to bee missing";
-        }
-    } else {
-        from << QString("%1.TRLE").arg(id);
-        const QString s = getPrograFilesDirectory(data.getType(id));
-        to   << s;
-        qDebug() << "Model :to " <<  to.get();
-        qDebug() << "Model :from " << from.get();
+    fileManager.addLevelDir(from, id);
+    to << getPrograFilesDirectory(getType(id));
 
-        if (from.isDir()) {
-            status = fileManager.linkPaths(from, to);
-        } else {
-            qDebug() << "Dirr: " << from.get() << " seems to bee missing";
-        }
+    qDebug() << "Model::setLink :to " <<  to.get();
+    qDebug() << "Model::setLink :from " << from.get();
+
+    if (from.isDir()) {
+        status = fileManager.linkPaths(from, to);
+    } else {
+        qDebug() << "Directory: " << from.get() << " seems to bee missing";
     }
 
     return status;
@@ -452,8 +347,27 @@ const InfoData Model::getInfo(int id) {
     return data.getInfo(id);
 }
 
-const int Model::getType(int id) {
-    return data.getType(id);
+const quint64 Model::getType(qint64 id) {
+    static const QMap<quint64, quint64> coreType = {
+            {0, 0},
+            {1, 1},
+            {2, 2},
+            {3, 3},
+            {4, 4},
+            {5, 5},
+            {6, 6},
+            {7, 1},
+            {8, 2},
+            {9, 3},
+            {10, 4},
+    };
+    quint64 result = 0;
+    if (id < 0) {
+        result = coreType[id];
+    } else {
+        result = data.getType(id);
+    }
+    return result;
 }
 
 const QString Model::getWalkthrough(int id) {

@@ -6,13 +6,13 @@
     <file>pictures/Lara2.jpg</file>
     <file>pictures/Lara3.jpg</file>
     <file>pictures/Tomb_Raider_I.jpg</file>
-    <file>pictures/Tomb_Raider_I_UB.jpg</file>
+    <file>pictures/Tomb_Raider_IUB.jpg</file>
     <file>pictures/Tomb_Raider_II.jpg</file>
-    <file>pictures/Tomb_Raider_II_GM.jpg</file>
+    <file>pictures/Tomb_Raider_IIGM.jpg</file>
     <file>pictures/Tomb_Raider_III.jpg</file>
-    <file>pictures/Tomb_Raider_III_LA.jpg</file>
+    <file>pictures/Tomb_Raider_IIILA.jpg</file>
     <file>pictures/Tomb_Raider_IV.jpg</file>
-    <file>pictures/Tomb_Raider_IV_TT.jpg</file>
+    <file>pictures/Tomb_Raider_IVTT.jpg</file>
     <file>pictures/Tomb_Raider_V.jpg</file>
   </qresource>
 </RCC>

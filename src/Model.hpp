@@ -78,7 +78,7 @@ class Model : public QObject {
     void setupGame(int id);
     void getLevel(int id);
     const InfoData getInfo(int id);
-    const int getType(int id);
+    const quint64 getType(qint64 id);
     const QString getWalkthrough(int id);
     void setup();
     void updateLevel(const int id);
