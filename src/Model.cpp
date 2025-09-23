@@ -16,6 +16,7 @@
 #include "../src/Path.hpp"
 #include "../src/assert.hpp"
 #include <QtGlobal>
+#include <qlogging.h>
 
 Model::Model() :
         data(Data::getInstance()),
@@ -52,6 +53,7 @@ void Model::setup() {
         emit generateListSignal(commonFiles);
         QCoreApplication::processEvents();
     } else {
+        qCritical() << "Initializing database failed!";
     }
 }
 
@@ -72,7 +74,7 @@ void Model::checkCommonFiles(QList<int>* games) {
     }
 }
 
-QString Model::getGameDirectory(int id) {
+QString Model::getPrograFilesDirectory(int id) {
     QString value;
     FolderNames folder;
     if (folder.data.contains(id)) {
@@ -97,7 +99,7 @@ QString Model::getExecutableName(int type) {
 int Model::checkGameDirectory(int id) {
     int status = -1;
     Path path(Path::programFiles);
-    path << getGameDirectory(id);
+    path << getPrograFilesDirectory(id);
     if (path.get() != "") {
         status = fileManager.checkFileInfo(path);
     }
@@ -138,106 +140,44 @@ int Model::getItemState(int id) {
     return status;
 }
 
-bool Model::runBash(const int id) {
-    bool status = true;
-    Path path(Path::resource);
-    if (id < 0) {  // we use original game id as negative number
-        int orgId = (-1)*id;
-        path << QString("Original.TR%1").arg(orgId);
-    } else {
-        path << QString("%1.TRLE").arg(id);
-    }
-    const QString s = path.get();
-    m_bashRunner.setWorkingDirectory(s);
-    path << "start.sh";
+void Model::run(RunnerOptions options) {
+    // Setup the basic
+    m_runner.setProgram(options.command);
 
-    m_bashRunner.insertArguments(QStringList() << path.get());
-    m_bashRunner.run();
+    Path path = Path(Path::resource);
+    fileManager.addLevelDir(path, options.id);
 
-    return status;
-}
+    // Command specific
+    if ((options.command == UMU) || (options.command ==  WINE)) {
+        // Path the executable directory
+        fileManager.getExtraPathToExe(path, data.getType(options.id));
 
-bool Model::runUmu(const int id) {
-    bool status = true;
-    Path path(Path::resource);
+        // Shell arguments
+        for (QPair<QString, QString>& env : options.envList) {
+            m_runner.addEnvironmentVariable(env);
+        }
 
-    if (id < 0) {  // we use original game id as negative number
-        int orgId = (-1)*id;
-        path << QString("Original.TR%1").arg(orgId);
-    } else {
-        path << QString("%1.TRLE").arg(id);
-    }
-
-    fileManager.getExtraPathToExe(path, data.getType(id));
-
-
-    m_umuRunner.setWorkingDirectory(path.get());
-    qDebug() << "Model: setWorkingDirectory:"  << path.get();
-
-    path << ExecutableNames().data[data.getType(id)];
-    qDebug() << "Model: ExecutableName:"  << path.get();
-
-    m_umuRunner.insertArguments(QStringList() << path.get());
-    m_umuRunner.run();
-
-    return status;
-}
-
-void Model::setUmuEnv(const QVector<QPair<QString, QString>>& environment) {
-    for (const QPair<QString, QString>& e : environment) {
-        m_umuRunner.insertProcessEnvironment(e);
-    }
-}
-
-void Model::setUmuSetup(bool setup) {
-    m_umuRunner.setupFlag(setup);
-}
-
-bool Model::runSteam(const int id) {
-    bool status = true;
-    QStringList arg;
-    const qint64 appid =  SteamAppIds().data[data.getType(id)];
-    arg << QString("steam://run/%1").arg(appid);
-    m_steamRunner.insertArguments(arg);
-    m_steamRunner.run();
-    return status;
-}
-
-bool Model::runLutris(const QStringList& arg) {
-    bool status = true;
-    m_lutrisRunner.insertArguments(arg);
-    m_lutrisRunner.run();
-    return status;
-}
-
-bool Model::runWine(const qint64 id) {
-    bool status = true;
-    Path path(Path::resource);
-
-    if (id < 0) {  // we use original game id as negative number
-        int orgId = (-1)*id;
-        path << QString("Original.TR%1").arg(orgId);
-    } else {
-        path <<  QString("%1.TRLE").arg(id);
+        // Executable to run
+        const quint64 type = getType(options.id);
+        m_runner.addArguments(QStringList() << ExecutableNames().data[type]);
+        if (options.setup) {
+            m_runner.addArguments(QStringList() << "-setup");
+        }
+    } else if (options.command == LUTRIS) {
+        m_runner.addArguments(options.arguments);
+    } else if (options.command == STEAM) {
+        const quint64 type = getType(options.id);
+        const quint64 steamID = SteamAppIds().data[type];
+        const QString arument = QString("steam://run/%1").arg(steamID);
+        m_runner.addArguments(QStringList() << arument);
+    } else if (options.command == BASH) {
+        m_runner.addArguments(QStringList() << "start.sh");
     }
 
-    fileManager.getExtraPathToExe(path, data.getType(id));
-    m_wineRunner.setWorkingDirectory(path.get());
-    path << ExecutableNames().data[data.getType(id)];
-
-    m_wineRunner.insertArguments(QStringList() << path.get());
-    m_wineRunner.run();
-    return status;
-}
-
-void Model::setWineEnv(const QVector<QPair<QString, QString>>& environment) {
-    for (const QPair<QString, QString>& e : environment) {
-        m_wineRunner.insertProcessEnvironment(e);
-    }
-}
-
-void Model::setWineSetup(bool setup) {
-    m_umuRunner.setupFlag(setup);
+    m_runner.setCurrentWorkingDirectory(path.get());
+    m_runner.run();
+    m_runner.clear();
+    emit modelRunningDoneSignal();
 }
 
 bool Model::setLink(int id) {
@@ -245,27 +185,16 @@ bool Model::setLink(int id) {
     Path from(Path::resource);
     Path to(Path::programFiles);
 
-    if (id < 0) {  // we use original game id as negative number
-        int orgId = (-1)*id;
-        from << QString("Original.TR%1").arg(orgId);
-        to   << getGameDirectory(orgId);
-        if (from.isDir()) {
-            status = fileManager.linkPaths(from, to);
-        } else {
-            qDebug() << "Dirr: " << from.get() << " seems to bee missing";
-        }
-    } else {
-        from << QString("%1.TRLE").arg(id);
-        const QString s = getGameDirectory(data.getType(id));
-        to   << s;
-        qDebug() << "Model :to " <<  to.get();
-        qDebug() << "Model :from " << from.get();
+    fileManager.addLevelDir(from, id);
+    to << getPrograFilesDirectory(getType(id));
 
-        if (from.isDir()) {
-            status = fileManager.linkPaths(from, to);
-        } else {
-            qDebug() << "Dirr: " << from.get() << " seems to bee missing";
-        }
+    qDebug() << "Model::setLink :to " <<  to.get();
+    qDebug() << "Model::setLink :from " << from.get();
+
+    if (from.isDir()) {
+        status = fileManager.linkPaths(from, to);
+    } else {
+        qDebug() << "Directory: " << from.get() << " seems to bee missing";
     }
 
     return status;
@@ -278,7 +207,7 @@ void Model::setupGame(int id) {
     Path from(Path::programFiles);
     Path to(Path::resource);
 
-    from << getGameDirectory(id);
+    from << getPrograFilesDirectory(id);
     to << QString("Original.TR%1").arg(id);
 
     quint64 lastPrintedPercent = 0;
@@ -423,8 +352,27 @@ const InfoData Model::getInfo(int id) {
     return data.getInfo(id);
 }
 
-const int Model::getType(int id) {
-    return data.getType(id);
+const quint64 Model::getType(qint64 id) {
+    static const QMap<quint64, quint64> coreType = {
+            {0, 0},
+            {1, 1},
+            {2, 2},
+            {3, 3},
+            {4, 4},
+            {5, 5},
+            {6, 6},
+            {7, 1},
+            {8, 2},
+            {9, 3},
+            {10, 4},
+    };
+    quint64 result = 0;
+    if (id < 0) {
+        result = coreType[id];
+    } else {
+        result = data.getType(id);
+    }
+    return result;
 }
 
 const QString Model::getWalkthrough(int id) {

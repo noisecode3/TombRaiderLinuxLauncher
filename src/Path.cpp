@@ -10,6 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+#include "../src/assert.hpp"
 #include "../src/Path.hpp"
 #include "../src/settings.hpp"
 
@@ -93,11 +94,17 @@ bool Path::setTestResourcePath() {
 }
 
 QString Path::get() {
-    return QDir::cleanPath(m_path.absoluteFilePath());
+    QString result = QDir::cleanPath(m_path.absoluteFilePath());
+    //  qDebug() << "Path::get :" << result;
+    Q_ASSERT_WITH_TRACE(result != ".");
+    return result;
 }
 
 QString Path::getDir() {
-    return QDir::cleanPath(m_path.absolutePath());
+    QString result = QDir::cleanPath(m_path.absolutePath());
+    //  qDebug() << "Path::get :" << result;
+    Q_ASSERT_WITH_TRACE(result != ".");
+    return result;
 }
 
 bool Path::inHome(QString absoluteFilePath) {
@@ -129,6 +136,20 @@ bool Path::isDir() {
 bool Path::isSymLink() {
     return m_path.isSymLink();
 }
+
+void Path::setLevelDir(const quint64 id) {
+    Q_ASSERT_WITH_TRACE(id != 0);
+    QString result;
+    if (id > 0) {
+        result = QString("%1.TRLE").arg(id);
+    } else {
+        result = QString("%1.Original").arg(id);
+    }
+    const QString s = QString("%1%2%3")
+        .arg(m_path.absoluteFilePath(), m_sep, result);
+    m_path.setFile(s);
+}
+
 
 bool Path::validateSymLink() {
     bool status = false;

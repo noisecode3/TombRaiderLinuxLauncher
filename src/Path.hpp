@@ -75,6 +75,7 @@ class Path {
      */
     static bool setTestResourcePath();
 
+    void setLevelDir(const quint64 id);
     QString get();
     QString getDir();
     QString getRootString();
@@ -86,7 +87,7 @@ class Path {
     bool validateSymLink();
 
     Path& operator<<(const QString& subdir) {
-        if (subdir != "..") {
+        if (!subdir.contains(QString("..%1").arg(m_sep))) {
             const QString s = QString("%1%2%3")
                     .arg(m_path.absoluteFilePath(), m_sep, subdir);
             m_path.setFile(s);

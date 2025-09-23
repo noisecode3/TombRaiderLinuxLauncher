@@ -15,6 +15,7 @@
 #define SRC_CONTROLLER_HPP_
 #include <QObject>
 #include <QThread>
+#include "../src/globalTypes.hpp"
 #include "../src/Model.hpp"
 
 /**
@@ -37,6 +38,7 @@ class Controller : public QObject {
     void updateLevel(int id);
     void syncLevels();
     void getCoverList(QVector<QSharedPointer<ListItemData>> items);
+    void run(RunnerOptions opptions);
 
     int checkGameDirectory(int id);
     void getList(QVector<QSharedPointer<ListItemData>>* list);
@@ -51,19 +53,27 @@ class Controller : public QObject {
     void controllerDownloadError(int status);
     void controllerReloadLevelList();
     void controllerLoadingDone();
+    void controllerRunningDone();
 
  private:
     Controller();
     ~Controller();
     void initThreads();
 
-    void runOnThreadA(std::function<void()> func);
-    void runOnThreadB(std::function<void()> func);
+    void runOnThreadDatabase(std::function<void()> func);
+    void runOnThreadFile(std::function<void()> func);
+    void runOnThreadScrape(std::function<void()> func);
+    void runOnThreadRun(std::function<void()> func);
 
-    QScopedPointer<QThread> threadA;
-    QScopedPointer<QThread> threadB;
-    QScopedPointer<QObject> workerA;
-    QScopedPointer<QObject> workerB;
+    QScopedPointer<QThread> threadDatabase;
+    QScopedPointer<QThread> threadFile;
+    QScopedPointer<QThread> threadScrape;
+    QScopedPointer<QThread> threadRun;
+
+    QScopedPointer<QObject> workerDatabase;
+    QScopedPointer<QObject> workerFile;
+    QScopedPointer<QObject> workerScrape;
+    QScopedPointer<QObject> workerRun;
 
     Data& data = Data::getInstance();
     FileManager& fileManager = FileManager::getInstance();

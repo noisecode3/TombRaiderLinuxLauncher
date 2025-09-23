@@ -46,6 +46,7 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt")
     )
 endif()
 set(LIEF_INSTALL OFF CACHE BOOL "Disable installation of LIEF")
+set(LIEF_PYTHON_API OFF)
 set(LIEF_EXAMPLES OFF)
 set(LIEF_TESTS OFF)
 set(LIEF_DOC OFF)
@@ -137,6 +138,7 @@ set(SOURCES_MC
     src/binary.hpp
     src/binary.cpp
     src/gameFileTreeData.hpp
+    src/globalTypes.hpp
     src/main.cpp
     src/staticData.hpp
 )

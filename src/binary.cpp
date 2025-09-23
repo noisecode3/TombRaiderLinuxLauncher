@@ -18,7 +18,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <LIEF/LIEF.hpp>
+#include <LIEF/PE.hpp>
 #include "../src/Path.hpp"
 
 QString decideExe(const QDir& dir) {

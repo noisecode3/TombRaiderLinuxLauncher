@@ -11,46 +11,66 @@
  * GNU General Public License for more details.
  */
 
+#include "../src/assert.hpp"
 #include "../src/Runner.hpp"
 #include <QDebug>
 #include <QTextStream>
 #include <QObject>
 
-Runner::Runner() : m_env(QProcessEnvironment::systemEnvironment()) {
-    m_status = 0;
-    m_setupFlag = false;
+Runner::Runner()
+    : m_env(QProcessEnvironment::systemEnvironment()),
+    m_command(0),
+    m_status(0)
+{
     m_isRunning = false;
+
 }
 
-Runner::Runner(const QString& cmd)
-    : m_env(QProcessEnvironment::systemEnvironment()), m_command(cmd) {
-    m_status = 0;
-    m_setupFlag = false;
-    m_isRunning = false;
+const quint64 Runner::getStatus() {
+    return m_status;
 }
 
-void Runner::insertArguments(const QStringList& value) {
-    m_arguments << value;
-}
-
-void Runner::clearArguments() {
+void Runner::clear() {
     m_arguments.clear();
+    m_env.clear();
+    m_env.insert(QProcessEnvironment::systemEnvironment());
+    m_cwd.clear();
+    m_command = 0;
+    m_status = 0;
 }
 
-void Runner::insertProcessEnvironment(const QPair<QString, QString> env) {
+void Runner::setProgram(const quint64 command) {
+    m_command = command;
+}
+
+void Runner::setCurrentWorkingDirectory(const QString& dir) {
+    m_cwd = dir;
+}
+
+void Runner::addEnvironmentVariable(const QPair<QString, QString> env) {
     m_env.insert(env.first, env.second);
 }
 
-void Runner::clearProcessEnvironment() {
-    m_env.clear();
+void Runner::addArguments(const QStringList& value) {
+    m_arguments << value;
 }
 
-void Runner::setWorkingDirectory(const QString& cwd) {
-    m_cwd = cwd;
-}
-
-void Runner::setupFlag(bool setup) {
-    m_setupFlag = setup;
+QString Runner::getCommandString(const quint64 cmd) {
+    QString result;
+    if (cmd == 0) {
+        result = "umu-run";
+    } else if (cmd == 1) {
+        result = "wine";
+    } else if (cmd == 2) {
+        result = "lutris";
+    } else if (cmd == 3) {
+        result = "steam";
+    } else if (cmd == 4) {
+        result = "bash";
+    } else {
+        Q_ASSERT_WITH_TRACE(false);
+    }
+    return result;
 }
 
 void Runner::run() {
@@ -58,26 +78,23 @@ void Runner::run() {
         qWarning() << "[Runner] Already running!";
         return;
     }
+    Q_ASSERT_WITH_TRACE(!m_cwd.isEmpty());
+
     m_isRunning = true;
     QProcess process;
+
     process.setWorkingDirectory(m_cwd);
     process.setProcessEnvironment(m_env);
-    process.setProgram(m_command);
-
-    if (m_setupFlag) {
-        process.setArguments(QStringList() << m_arguments << "-setup");
-    } else {
-        process.setArguments(m_arguments);
-    }
-
-    process.start();
-
+    process.setProgram(getCommandString(m_command));
+    process.setArguments(m_arguments);
     process.setProcessChannelMode(QProcess::MergedChannels);
 
     QObject::connect(&process, &QProcess::readyReadStandardOutput, [&]() {
         QByteArray output = process.readAllStandardOutput();
         qDebug().noquote() << QString::fromUtf8(output);
     });
+
+    process.start();
 
     if (!process.waitForStarted()) {
         qWarning() << "Process failed to start!";
@@ -96,5 +113,4 @@ void Runner::run() {
     qDebug() << "[Runner] Finished with code:" << exitCode;
 
     m_isRunning = false;
-
 }

@@ -23,6 +23,7 @@
 
 #include <cassert>
 
+#include "../src/globalTypes.hpp"
 #include "../src/Path.hpp"
 #include "../src/Data.hpp"
 #include "../src/FileManager.hpp"
@@ -70,22 +71,14 @@ class Model : public QObject {
     void getList(QVector<QSharedPointer<ListItemData>>* list);
     void getCoverList(QVector<QSharedPointer<ListItemData>> tiems);
     int getItemState(int id);
-    bool runUmu(const int id);
-    void setUmuEnv(const QVector<QPair<QString, QString>>& environment);
-    void setUmuSetup(bool setup);
-    bool runWine(const qint64 id);
-    void setWineEnv(const QVector<QPair<QString, QString>>& environment);
-    void setWineSetup(bool setup);
-    bool runLutris(const QStringList& arg);
-    bool runSteam(const int id);
-    bool runBash(const int id);
+    void run(RunnerOptions options);
     bool setLink(int id);
-    QString getGameDirectory(int id);
+    QString getPrograFilesDirectory(int id);
     QString getExecutableName(int type);
     void setupGame(int id);
     void getLevel(int id);
     const InfoData getInfo(int id);
-    const int getType(int id);
+    const quint64 getType(qint64 id);
     const QString getWalkthrough(int id);
     void setup();
     void updateLevel(const int id);
@@ -96,6 +89,7 @@ class Model : public QObject {
     void modelTickSignal();
     void modelReloadLevelListSignal();
     void modelLoadingDoneSignal();
+    void modelRunningDoneSignal();
 
  private:
     bool getLevelHaveFile(
@@ -103,13 +97,9 @@ class Model : public QObject {
     bool getLevelDontHaveFile(
         const int id, const QString& md5sum, Path path);
 
-    Runner m_wineRunner   = Runner("wine");
-    Runner m_lutrisRunner = Runner("lutris");
-    Runner m_steamRunner  = Runner("steam");
-    Runner m_umuRunner    = Runner("umu-run");
-    Runner m_bashRunner   = Runner("bash");
-
+    Runner m_runner;
     PyRunner m_pyRunner;
+
     Data& data;
     FileManager& fileManager;
     Downloader& downloader;
