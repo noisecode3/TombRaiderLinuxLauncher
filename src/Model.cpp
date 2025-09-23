@@ -140,32 +140,37 @@ int Model::getItemState(int id) {
     return status;
 }
 
-void Model::run(RunnerOptions opptions) {
+void Model::run(RunnerOptions options) {
     // Setup the basic
-    m_runner.setProgram(opptions.command);
+    m_runner.setProgram(options.command);
 
     Path path = Path(Path::resource);
-    fileManager.addLevelDir(path, opptions.id);
+    fileManager.addLevelDir(path, options.id);
 
     // Command specific
-    if ((opptions.command == UMU) || (opptions.command ==  WINE)) {
+    if ((options.command == UMU) || (options.command ==  WINE)) {
         // Path the executable directory
-        fileManager.getExtraPathToExe(path, data.getType(opptions.id));
+        fileManager.getExtraPathToExe(path, data.getType(options.id));
 
         // Shell arguments
-        for (QPair<QString, QString>& env : opptions.envList) {
+        for (QPair<QString, QString>& env : options.envList) {
             m_runner.addEnvironmentVariable(env);
         }
 
         // Executable to run
-        quint64 type = getType(opptions.id);
+        const quint64 type = getType(options.id);
         m_runner.addArguments(QStringList() << ExecutableNames().data[type]);
-        if (opptions.setup) {
+        if (options.setup) {
             m_runner.addArguments(QStringList() << "-setup");
         }
-    } else if (opptions.command == LUTRIS) {
-    } else if (opptions.command == STEAM) {
-    } else if (opptions.command == BASH) {
+    } else if (options.command == LUTRIS) {
+        m_runner.addArguments(options.arguments);
+    } else if (options.command == STEAM) {
+        const quint64 type = getType(options.id);
+        const quint64 steamID = SteamAppIds().data[type];
+        const QString arument = QString("steam://run/%1").arg(steamID);
+        m_runner.addArguments(QStringList() << arument);
+    } else if (options.command == BASH) {
         m_runner.addArguments(QStringList() << "start.sh");
     }
 

@@ -71,7 +71,7 @@ class Model : public QObject {
     void getList(QVector<QSharedPointer<ListItemData>>* list);
     void getCoverList(QVector<QSharedPointer<ListItemData>> tiems);
     int getItemState(int id);
-    void run(RunnerOptions opptions);
+    void run(RunnerOptions options);
     bool setLink(int id);
     QString getPrograFilesDirectory(int id);
     QString getExecutableName(int type);

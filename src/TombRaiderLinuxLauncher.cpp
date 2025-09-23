@@ -242,24 +242,33 @@ InstalledStatus TombRaiderLinuxLauncher::getInstalled() {
 }
 
 bool TombRaiderLinuxLauncher::setStartupSetting(const StartupSetting settings) {
-    bool status = true;
+    bool status = false;
     if (settings.installed == true) {
         ui->checkBoxInstalled->setChecked(true);
+        status = true;
     }
     if (settings.original == true) {
         ui->checkBoxOriginal->setChecked(true);
+        status = true;
     }
     if (settings.type_id != 0) {
         ui->comboBoxType->setCurrentIndex(settings.type_id);
+        status = true;
     }
     if (settings.class_id != 0) {
         ui->comboBoxClass->setCurrentIndex(settings.class_id);
+        status = true;
     }
     if (settings.difficulty_id != 0) {
         ui->comboBoxDifficulty->setCurrentIndex(settings.difficulty_id);
+        status = true;
     }
     if (settings.duration_id != 0) {
         ui->comboBoxDuration->setCurrentIndex(settings.duration_id);
+        status = true;
+    }
+    if (status == true) {
+        levelListModel->setScrollChange(0);
     }
     return status;
 }
@@ -470,20 +479,29 @@ void TombRaiderLinuxLauncher::runClicked() {
                 options.envList = parsToEnv(input->text());
                 controller.run(options);
             } else if (type == 2) {
+                options.id = id;
                 options.command = LUTRIS;
-                options.envList = parsToEnv(input->text());
+                options.arguments = parsToArg(input->text());
                 controller.run(options);
             } else if (type == 3) {
                 if (!controller.link(id)) {
                     qDebug() << "link error";
+                    runningLevelDone();
+                } else {
+                    options.id = id;
+                    options.command = LUTRIS;
+                    options.arguments = parsToArg(input->text());
+                    controller.run(options);
                 }
-                options.command = LUTRIS;
-                options.arguments = parsToArg(input->text());
-                controller.run(options);
             } else if (type == 4) {
-                options.id = id;
-                options.command = STEAM;
-                controller.run(options);
+                if (!controller.link(id)) {
+                    qDebug() << "link error";
+                    runningLevelDone();
+                } else {
+                    options.id = id;
+                    options.command = STEAM;
+                    controller.run(options);
+                }
             } else if (type == 5) {
                 if (!controller.link(id)) {
                     qDebug() << "link error";
