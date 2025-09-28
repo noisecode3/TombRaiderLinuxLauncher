@@ -140,7 +140,7 @@ set(SOURCES_MC
     src/gameFileTreeData.hpp
     src/globalTypes.hpp
     src/main.cpp
-    src/staticData.hpp
+    src/staticViewData.hpp
 )
 
 set(SOURCES_VIEW

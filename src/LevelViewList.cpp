@@ -14,8 +14,91 @@
 #include "../src/LevelViewList.hpp"
 
 #include <QDateTime>
-#include "../src/staticData.hpp"
+#include "../src/staticViewData.hpp"
 
+
+LevelViewList::LevelViewList(QWidget *parent)
+    : QListView(parent)
+{
+}
+
+void LevelViewList::scrollContentsBy(int dx, int dy)
+{
+    // qDebug() << "LevelViewList::scrollContentsBy: " << "";
+    QListView::scrollContentsBy(dx, dy);
+    // updateVisibleItems();
+}
+
+void LevelViewList::resizeEvent(QResizeEvent *event)
+{
+    // qDebug() << "LevelViewList::resizeEvent: " << "";
+    QListView::resizeEvent(event);
+    // updateVisibleItems();
+}
+
+void LevelViewList::paintEvent(QPaintEvent *event)
+{
+    // qDebug() << "LevelViewList::paintEvent: " << "";
+    QListView::paintEvent(event);
+    // updateVisibleItems();
+}
+
+QModelIndexList LevelViewList::visibleIndexes() const
+{
+    QModelIndexList result;
+    auto r = viewport()->rect();
+    auto topLeft = indexAt(r.topLeft());
+    auto bottomRight = indexAt(r.bottomRight());
+
+    if (!topLeft.isValid() || !bottomRight.isValid())
+        return result;
+
+    int top = topLeft.row();
+    int bottom = bottomRight.row();
+    for (int row = top; row <= bottom; ++row) {
+        auto idx = indexAt(QPoint(0, visualRect(model()->index(row, 0)).center().y()));
+        if (idx.isValid())
+            result << idx;
+    }
+    return result;
+}
+
+void LevelViewList::updateVisibleItems()
+{
+    QModelIndexList vis = visibleIndexes();
+    for (auto &idx : vis) {
+        if (!idx.isValid())
+            continue;
+        // Map proxy index to source index if model is a proxy
+        QModelIndex sourceIdx = idx;
+        // Try cast to QAbstractProxyModel to map
+        if (auto proxy = qobject_cast<QAbstractProxyModel *>(model())) {
+            sourceIdx = proxy->mapToSource(idx);
+        }
+
+        // Now fetch LevelPtr from the source model, not the proxy (if available)
+        QVariant varLvl;
+        /*
+        if (sourceIdx.isValid()) {
+            // If we have proxy, get sourceModel, else fallback to model()
+            if (auto proxy = qobject_cast<QAbstractProxyModel *>(model())) {
+                varLvl = proxy->sourceModel()->data(sourceIdx, LevelModel::RoleLevel);
+            } else {
+                varLvl = model()->data(sourceIdx, LevelModel::RoleLevel);
+            }
+        } else {
+            varLvl = model()->data(idx, LevelModel::RoleLevel);
+        }
+         auto lvl = varLvl.value<LevelPtr>();
+        if (lvl) {
+            // do update, e.g. preload something
+            lvl->requestThumb();
+        }
+        */
+    }
+}
+
+// The Model
 void LevelListModel::setLevels(
         const QVector<QSharedPointer<ListItemData>>& levels) {
     beginResetModel();
@@ -50,11 +133,13 @@ inline quint64 LevelListModel::indexInBounds(const quint64 index) const {
     return qMin(index, quint64(m_levels.size()));
 }
 
-void LevelListModel::setScrollChange(const quint64 index) {
+void LevelListModel::setScrollChange() {
     if (!m_levels.empty()) {
         m_scrollCursorChanged = true;
-        m_scroll_cursor_a = indexInBounds(index);;
     }
+}
+
+void LevelListModel::addScrollItem(const quint64 index) {
 }
 
 QVector<QSharedPointer<ListItemData>>
@@ -66,10 +151,9 @@ QVector<QSharedPointer<ListItemData>>
 QVector<QSharedPointer<ListItemData>>
         LevelListModel::getDataBuffer(quint64 items) {
     QVector<QSharedPointer<ListItemData>> chunk;
-    if ((items > 0) && !m_levels.isEmpty()) {
+    if (!m_levels.isEmpty()) {
         if (m_scrollCursorChanged == true) {
-            m_scroll_cursor_b = indexInBounds(m_scroll_cursor_a + items);
-            chunk = getChunk(m_scroll_cursor_a, items);
+            // chunk = m_scrollBuffer;
         } else {
             m_cursor_b = indexInBounds(m_cursor_a + items);
             chunk = getChunk(m_cursor_a, items);
@@ -91,8 +175,9 @@ void LevelListModel::updateCovers(quint64 a, quint64 b) {
 
 void LevelListModel::reset() {
     if (m_scrollCursorChanged == true) {
-        updateCovers(m_scroll_cursor_a, m_scroll_cursor_b);
-        m_scroll_cursor_a = m_scroll_cursor_b;
+    QModelIndex index_b(index(0, 0));
+        // updateCovers(m_scrollBuffer);
+        // m_scrollBuffer.clear();
         m_scrollCursorChanged = false;
     } else {
         updateCovers(m_cursor_a, m_cursor_b);
@@ -168,9 +253,15 @@ void LevelListProxy::setInstalledFilter(bool on) {
 }
 
 void LevelListProxy::setSortMode(SortMode mode) {
-    m_sortMode = mode;
+    Qt::SortOrder order;
+    if (m_sortMode == mode){
+        order = Qt::AscendingOrder;
+    } else {
+        m_sortMode = mode;
+        order = Qt::DescendingOrder;
+    }
     invalidate();
-    this->sort(0, Qt::DescendingOrder);
+    this->sort(0, order);
 }
 
 bool LevelListProxy::lessThan(const QModelIndex &left,
@@ -182,7 +273,7 @@ bool LevelListProxy::lessThan(const QModelIndex &left,
     bool less = false;
     switch (m_sortMode) {
     case Title:
-        less = l.toString().localeAwareCompare(r.toString()) < 0;
+        less = l.toString().localeAwareCompare(r.toString().toUpper()) < 0;
         break;
     case ReleaseDate:
         less = l.toDateTime() < r.toDateTime();

@@ -22,6 +22,23 @@
 
 #include "../src/Data.hpp"
 
+class LevelViewList : public QListView {
+    Q_OBJECT
+
+public:
+    explicit LevelViewList(QWidget *parent = nullptr);
+
+    QModelIndexList visibleIndexes() const;
+
+protected:
+    void scrollContentsBy(int dx, int dy) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+
+private:
+    void updateVisibleItems();
+};
+
 
 class LevelListModel : public QAbstractListModel {
     Q_OBJECT
@@ -30,8 +47,6 @@ class LevelListModel : public QAbstractListModel {
     explicit LevelListModel(QObject *parent = nullptr)
         : QAbstractListModel(parent),
         m_scrollCursorChanged(false),
-        m_scroll_cursor_a(0),
-        m_scroll_cursor_b(0),
         m_cursor_a(0),
         m_cursor_b(0),
         m_roleTable({
@@ -54,7 +69,8 @@ class LevelListModel : public QAbstractListModel {
                                                     const quint64 items);
     QVector<QSharedPointer<ListItemData>> getDataBuffer(const quint64 items);
     void setLevels(const QVector<QSharedPointer<ListItemData>>& levels);
-    void setScrollChange(const quint64 index);
+    void setScrollChange();
+    void addScrollItem(const quint64 index);
     void setInstalled(const QModelIndex &index);
     quint64 indexInBounds(quint64 index) const;
     bool stop() const;
@@ -67,8 +83,6 @@ class LevelListModel : public QAbstractListModel {
     const QHash<int, std::function<QVariant(const ListItemData&)>> m_roleTable;
     QVector<QSharedPointer<ListItemData>> m_levels;
     bool m_scrollCursorChanged;
-    quint64 m_scroll_cursor_a;
-    quint64 m_scroll_cursor_b;
     quint64 m_cursor_a;
     quint64 m_cursor_b;
 };

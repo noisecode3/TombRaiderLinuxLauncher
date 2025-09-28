@@ -137,11 +137,6 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         this,
         &TombRaiderLinuxLauncher::onCurrentItemChanged);
 
-    connect(
-        ui->listViewLevels->verticalScrollBar(),
-        &QScrollBar::valueChanged,
-        this,
-        &TombRaiderLinuxLauncher::levelListScrolled);
 
     connect(ui->checkBoxInstalled, &QCheckBox::toggled,
             levelListProxy, &LevelListProxy::setInstalledFilter);
@@ -241,36 +236,25 @@ InstalledStatus TombRaiderLinuxLauncher::getInstalled() {
     return list;
 }
 
-bool TombRaiderLinuxLauncher::setStartupSetting(const StartupSetting settings) {
-    bool status = false;
+void TombRaiderLinuxLauncher::setStartupSetting(const StartupSetting settings) {
     if (settings.installed == true) {
         ui->checkBoxInstalled->setChecked(true);
-        status = true;
     }
     if (settings.original == true) {
         ui->checkBoxOriginal->setChecked(true);
-        status = true;
     }
     if (settings.type_id != 0) {
         ui->comboBoxType->setCurrentIndex(settings.type_id);
-        status = true;
     }
     if (settings.class_id != 0) {
         ui->comboBoxClass->setCurrentIndex(settings.class_id);
-        status = true;
     }
     if (settings.difficulty_id != 0) {
         ui->comboBoxDifficulty->setCurrentIndex(settings.difficulty_id);
-        status = true;
     }
     if (settings.duration_id != 0) {
         ui->comboBoxDuration->setCurrentIndex(settings.duration_id);
-        status = true;
     }
-    if (status == true) {
-        levelListModel->setScrollChange(0);
-    }
-    return status;
 }
 
 void TombRaiderLinuxLauncher::sortByTitle() {
@@ -641,6 +625,7 @@ void TombRaiderLinuxLauncher::loadMoreCovers() {
     }
 }
 
+/*
 void TombRaiderLinuxLauncher::levelListScrolled(int value) {
     QModelIndex idx = ui->listViewLevels->model()->index(0, 0);
     QRect rect = ui->listViewLevels->visualRect(idx);
@@ -655,8 +640,9 @@ void TombRaiderLinuxLauncher::levelListScrolled(int value) {
 
     // qDebug() << "Scroll position at item:" << pos;
 
-    levelListModel->setScrollChange(pos);
+    //levelListModel->setScrollChange(pos);
 }
+*/
 
 void TombRaiderLinuxLauncher::workTick() {
     int value = ui->progressBar->value();

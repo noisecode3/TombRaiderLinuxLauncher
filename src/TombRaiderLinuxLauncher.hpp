@@ -66,82 +66,100 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     explicit TombRaiderLinuxLauncher(QWidget *parent = nullptr);
     ~TombRaiderLinuxLauncher();
 
-    bool setStartupSetting(const StartupSetting settings);
+    void setStartupSetting(const StartupSetting settings);
 
  public slots:
     /**
      * Triggered by the "Run" button.
      */
     void runClicked();
+
     /**
      * Triggered by the "Download" button.
      */
     void downloadClicked();
+
     /**
      * Opens the Info thru the navigation bar.
      */
     void infoClicked();
+
     /**
      * Opens the Walkthrough thru the navigation bar.
      */
     void walkthroughClicked();
+
     /**
      * Returns to the first navigation state, the list.
      */
     void backClicked();
+
     /**
-     * Opens the first-time setup options.
+     * Opens the first-time setup options clicked.
      */
     void setOptionsClicked();
+
     /**
      * Updates button states based on selected menu level.
      */
     void onCurrentItemChanged(
             const QModelIndex &current, const QModelIndex &previous);
+
     /**
      *  Try loading 100 more levels cards by calling for more cover pictures.
      */
     void loadMoreCovers();
+
     /**
      * Updates progress by 1% of total work steps.
      */
     void workTick();
+
     /**
      * Displays an error dialog for a curl download error.
      */
     void downloadError(int status);
+
     /**
      * Switch back to level list or info page after network/python work.
      */
     void updateLevelDone();
+
     /**
      * Switch back to list selection state after running the game.
      */
     void runningLevelDone();
+
     /**
      * Generates the initial level list after file analysis.
      */
     void generateList(const QList<int>& availableGames);
+
     /**
      * Sorts the list by title.
      */
     void sortByTitle();
+
     /**
      * Sorts the list by difficulty.
      */
     void sortByDifficulty();
+
     /**
      * Sorts the list by duration.
      */
     void sortByDuration();
+
     /**
      * Sorts the list by level class.
      */
     void sortByClass();
+
     /**
      * Sorts the list by type.
      */
     void sortByType();
+
     /**
      * Sorts the list by release date.
      */
@@ -151,7 +169,6 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     void filterByType(const QString& type);
     void filterByDifficulty(const QString& difficulty);
     void filterByDuration(const QString& duration);
-    void levelListScrolled(int value);
     void showtOriginal();
     void GlobalSaveClicked();
     void GlobalResetClicked();

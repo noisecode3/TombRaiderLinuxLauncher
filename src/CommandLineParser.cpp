@@ -71,7 +71,7 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
         QCommandLineOption filterByDifficultyOption(filterByDifficultyName);
         const QString filterByDifficultyDesc = QString("%1%2%3").arg(
             "Filter levels by difficulty. Allowed values:\n",
-            m_type_options.join(", "),
+            m_difficulty_options.join(", "),
             "\n");
         filterByDifficultyOption.setDescription(filterByDifficultyDesc);
         filterByDifficultyOption.setValueName("difficulty");
@@ -84,7 +84,7 @@ CommandLineParser::CommandLineParser(const QString& type) : m_processStatus(0) {
 
         const QString filterByDurationDesc = QString("%1%2%3").arg(
             "Filter levels by duration. Allowed values:\n",
-            m_type_options.join(", "),
+            m_duration_options.join(", "),
             "\n");
         filterByDurationOption.setDescription(filterByDurationDesc);
         filterByDurationOption.setValueName("duration");

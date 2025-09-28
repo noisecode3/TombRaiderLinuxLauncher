@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
 
     CommandLineParser clp("APP");
-    const StartupSetting ss = clp.process(app.arguments());
+    (void)clp.process(app.arguments());
 
     status = clp.getProcessStatus();
 
@@ -65,19 +65,13 @@ int main(int argc, char *argv[]) {
         if (status == 0) {
             // Construct the main window object
             TombRaiderLinuxLauncher w;
-
-            if (w.setStartupSetting(ss)) {
-                if (ss.fullscreen == true) {
-                    w.showFullScreen();
-                } else {
-                    w.show();
-                }
-
-                status = app.exec();
-
+            w.setStartupSetting(ss);
+            if (ss.fullscreen == true) {
+                w.showFullScreen();
             } else {
-                qDebug() << "Error: Could not set startup arguments internally";
+                w.show();
             }
+            status = app.exec();
         }
     }
 
