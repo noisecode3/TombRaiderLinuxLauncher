@@ -15,86 +15,61 @@
 
 #include <QDateTime>
 #include "../src/staticViewData.hpp"
+#include "../src/assert.hpp"
 
 
 LevelViewList::LevelViewList(QWidget *parent)
     : QListView(parent)
 {
+    m_coversLoaded = false;
+    m_proxyCoversFirst = false;
+}
+
+void LevelViewList::setProxyCoversFirst() {
+    m_proxyCoversFirst = true;
 }
 
 void LevelViewList::scrollContentsBy(int dx, int dy)
 {
-    // qDebug() << "LevelViewList::scrollContentsBy: " << "";
     QListView::scrollContentsBy(dx, dy);
-    // updateVisibleItems();
-}
-
-void LevelViewList::resizeEvent(QResizeEvent *event)
-{
-    // qDebug() << "LevelViewList::resizeEvent: " << "";
-    QListView::resizeEvent(event);
-    // updateVisibleItems();
+    if (!m_coversLoaded) {
+        updateVisibleItems();
+    }
 }
 
 void LevelViewList::paintEvent(QPaintEvent *event)
 {
-    // qDebug() << "LevelViewList::paintEvent: " << "";
     QListView::paintEvent(event);
-    // updateVisibleItems();
+    if (m_proxyCoversFirst == true) {
+        updateVisibleItems();
+    }
 }
 
-QModelIndexList LevelViewList::visibleIndexes() const
+QModelIndexList LevelViewList::visibleIndexes(QAbstractProxyModel* proxy) const
 {
     QModelIndexList result;
-    auto r = viewport()->rect();
-    auto topLeft = indexAt(r.topLeft());
-    auto bottomRight = indexAt(r.bottomRight());
+    QRect visRect = viewport()->rect();
 
-    if (!topLeft.isValid() || !bottomRight.isValid())
-        return result;
-
-    int top = topLeft.row();
-    int bottom = bottomRight.row();
-    for (int row = top; row <= bottom; ++row) {
-        auto idx = indexAt(QPoint(0, visualRect(model()->index(row, 0)).center().y()));
-        if (idx.isValid())
-            result << idx;
+    for (int row = 0; row < model()->rowCount(); ++row) {
+        QModelIndex idx = model()->index(row, 0);
+        QRect itemRect = visualRect(idx);
+        if (itemRect.isValid() && visRect.intersects(itemRect)) {
+            result << proxy->mapToSource(idx);
+        }
     }
     return result;
 }
 
 void LevelViewList::updateVisibleItems()
 {
-    QModelIndexList vis = visibleIndexes();
-    for (auto &idx : vis) {
-        if (!idx.isValid())
-            continue;
-        // Map proxy index to source index if model is a proxy
-        QModelIndex sourceIdx = idx;
-        // Try cast to QAbstractProxyModel to map
-        if (auto proxy = qobject_cast<QAbstractProxyModel *>(model())) {
-            sourceIdx = proxy->mapToSource(idx);
-        }
-
-        // Now fetch LevelPtr from the source model, not the proxy (if available)
-        QVariant varLvl;
-        /*
-        if (sourceIdx.isValid()) {
-            // If we have proxy, get sourceModel, else fallback to model()
-            if (auto proxy = qobject_cast<QAbstractProxyModel *>(model())) {
-                varLvl = proxy->sourceModel()->data(sourceIdx, LevelModel::RoleLevel);
-            } else {
-                varLvl = model()->data(sourceIdx, LevelModel::RoleLevel);
-            }
-        } else {
-            varLvl = model()->data(idx, LevelModel::RoleLevel);
-        }
-         auto lvl = varLvl.value<LevelPtr>();
-        if (lvl) {
-            // do update, e.g. preload something
-            lvl->requestThumb();
-        }
-        */
+    QAbstractProxyModel* proxy = qobject_cast<QAbstractProxyModel *>(model());
+    Q_ASSERT_WITH_TRACE(proxy != nullptr);
+    LevelListModel* model = qobject_cast<LevelListModel*>(proxy->sourceModel());
+    Q_ASSERT_WITH_TRACE( model != nullptr);
+    if (model->stop()) {
+        m_coversLoaded = true;
+    } else {
+        model->setScrollChanged(visibleIndexes(proxy));
     }
 }
 
@@ -133,13 +108,19 @@ inline quint64 LevelListModel::indexInBounds(const quint64 index) const {
     return qMin(index, quint64(m_levels.size()));
 }
 
-void LevelListModel::setScrollChange() {
+void LevelListModel::setScrollChanged(QModelIndexList list) {
     if (!m_levels.empty()) {
-        m_scrollCursorChanged = true;
+        m_viewItems << list;
     }
 }
 
-void LevelListModel::addScrollItem(const quint64 index) {
+QVector<QSharedPointer<ListItemData>>
+        LevelListModel::getChunk(QModelIndexList list) {
+    QVector<QSharedPointer<ListItemData>> result;
+    for (QModelIndex& item : list) {
+        result << m_levels.at(item.row());
+    }
+    return result;
 }
 
 QVector<QSharedPointer<ListItemData>>
@@ -152,8 +133,8 @@ QVector<QSharedPointer<ListItemData>>
         LevelListModel::getDataBuffer(quint64 items) {
     QVector<QSharedPointer<ListItemData>> chunk;
     if (!m_levels.isEmpty()) {
-        if (m_scrollCursorChanged == true) {
-            // chunk = m_scrollBuffer;
+        if (!m_viewItems.isEmpty()) {
+            chunk = getChunk(m_viewItems);
         } else {
             m_cursor_b = indexInBounds(m_cursor_a + items);
             chunk = getChunk(m_cursor_a, items);
@@ -163,22 +144,24 @@ QVector<QSharedPointer<ListItemData>>
     return chunk;
 }
 
+void LevelListModel::updateCovers(QModelIndexList list) {
+    for (QModelIndex& item : list) {
+        emit dataChanged(item, item);
+    }
+}
+
 void LevelListModel::updateCovers(quint64 a, quint64 b) {
     QModelIndex index_a(index(a, 0));
     QModelIndex index_b(index(b, 0));
     if (index_a.isValid() && index_b.isValid()) {
-        qDebug() << "LevelListModel updated covers "
-            << index_a.row() << " to " << index_b.row();
         emit dataChanged(index_a, index_b);
     }
 }
 
 void LevelListModel::reset() {
-    if (m_scrollCursorChanged == true) {
-    QModelIndex index_b(index(0, 0));
-        // updateCovers(m_scrollBuffer);
-        // m_scrollBuffer.clear();
-        m_scrollCursorChanged = false;
+    if (!m_viewItems.isEmpty()) {
+        updateCovers(m_viewItems);
+        m_viewItems.clear();
     } else {
         updateCovers(m_cursor_a, m_cursor_b);
         m_cursor_a = m_cursor_b;
@@ -186,7 +169,7 @@ void LevelListModel::reset() {
 }
 
 bool LevelListModel::stop() const {
-    return !m_scrollCursorChanged && (m_cursor_b >= m_levels.size());
+    return m_viewItems.isEmpty() && (m_cursor_b >= m_levels.size());
 }
 
 quint64 LevelListProxy::getLid(const QModelIndex &i) const {
@@ -253,6 +236,7 @@ void LevelListProxy::setInstalledFilter(bool on) {
 }
 
 void LevelListProxy::setSortMode(SortMode mode) {
+    qDebug() << "LevelListProxy::setSortMode";
     Qt::SortOrder order;
     if (m_sortMode == mode){
         order = Qt::AscendingOrder;

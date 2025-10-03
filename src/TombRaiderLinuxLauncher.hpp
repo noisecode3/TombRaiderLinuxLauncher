@@ -214,7 +214,8 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     LevelListModel *levelListModel;
     LevelListProxy *levelListProxy;
     Controller& controller = Controller::getInstance();
-    QSettings& settings = getSettingsInstance();
+    QSettings& g_settings = getSettingsInstance();
+    StartupSetting m_ss;
     Ui::TombRaiderLinuxLauncher *ui;
     LoadingIndicator* m_loadingIndicatorWidget;
     Dialog* m_dialogWidget;

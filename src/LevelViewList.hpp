@@ -27,16 +27,17 @@ class LevelViewList : public QListView {
 
 public:
     explicit LevelViewList(QWidget *parent = nullptr);
-
-    QModelIndexList visibleIndexes() const;
+    void setProxyCoversFirst();
 
 protected:
     void scrollContentsBy(int dx, int dy) override;
-    void resizeEvent(QResizeEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
 
 private:
     void updateVisibleItems();
+    QModelIndexList visibleIndexes(QAbstractProxyModel* proxy) const;
+    bool m_coversLoaded;
+    bool m_proxyCoversFirst;
 };
 
 
@@ -46,7 +47,6 @@ class LevelListModel : public QAbstractListModel {
  public:
     explicit LevelListModel(QObject *parent = nullptr)
         : QAbstractListModel(parent),
-        m_scrollCursorChanged(false),
         m_cursor_a(0),
         m_cursor_b(0),
         m_roleTable({
@@ -65,16 +65,19 @@ class LevelListModel : public QAbstractListModel {
         })
     {}
 
+    QVector<QSharedPointer<ListItemData>> getChunk(QModelIndexList list);
     QVector<QSharedPointer<ListItemData>> getChunk(const quint64 cursor,
                                                     const quint64 items);
     QVector<QSharedPointer<ListItemData>> getDataBuffer(const quint64 items);
+
     void setLevels(const QVector<QSharedPointer<ListItemData>>& levels);
-    void setScrollChange();
-    void addScrollItem(const quint64 index);
+    void setScrollChanged(QModelIndexList list);
     void setInstalled(const QModelIndex &index);
+
     quint64 indexInBounds(quint64 index) const;
     bool stop() const;
     void updateCovers(quint64 a, quint64 b);
+    void updateCovers(QModelIndexList list);
     void reset();
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -82,7 +85,7 @@ class LevelListModel : public QAbstractListModel {
  private:
     const QHash<int, std::function<QVariant(const ListItemData&)>> m_roleTable;
     QVector<QSharedPointer<ListItemData>> m_levels;
-    bool m_scrollCursorChanged;
+    QModelIndexList m_viewItems;
     quint64 m_cursor_a;
     quint64 m_cursor_b;
 };
