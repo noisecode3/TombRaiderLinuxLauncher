@@ -230,22 +230,32 @@ void LevelListProxy::setSearchFilter(const QString &s) {
     invalidateFilter();
 }
 
+void LevelListProxy::setSearchType(const QString &t) {
+    if (t == "Level") {
+        m_searchType = 0;
+    } else if (t ==  "Author") {
+        m_searchType = 1;
+    }
+    invalidateFilter();
+}
+
 void LevelListProxy::setInstalledFilter(bool on) {
     m_installed = on;
     invalidateFilter();
 }
 
 void LevelListProxy::setSortMode(SortMode mode) {
-    qDebug() << "LevelListProxy::setSortMode";
-    Qt::SortOrder order;
-    if (m_sortMode == mode){
-        order = Qt::AscendingOrder;
+    if (m_sortMode == mode) {
+        // same mode, toggle order
+        m_sortOrder = (m_sortOrder == Qt::AscendingOrder) ?
+                        Qt::DescendingOrder : Qt::AscendingOrder;
     } else {
+        // new mode, reset order
         m_sortMode = mode;
-        order = Qt::DescendingOrder;
+        m_sortOrder = Qt::DescendingOrder;
     }
     invalidate();
-    this->sort(0, order);
+    this->sort(0, m_sortOrder);
 }
 
 bool LevelListProxy::lessThan(const QModelIndex &left,
@@ -314,10 +324,18 @@ bool LevelListProxy::filterAcceptsRow(int sourceRow,
     }
 
     if (status == true) {
-        auto title = sourceModel()->data(idx, Qt::DisplayRole).toString();
-        if (!m_search.isEmpty() &&
-                !title.contains(m_search, Qt::CaseInsensitive)) {
-            status = false;
+        if (m_searchType == 0) {
+            auto title = sourceModel()->data(idx, Qt::DisplayRole).toString();
+            if (!m_search.isEmpty() &&
+                    !title.contains(m_search, Qt::CaseInsensitive)) {
+                status = false;
+            }
+        } else if (m_searchType == 1) {
+            auto authors = sourceModel()->data(idx, Qt::UserRole+6).toString();
+            if (!m_search.isEmpty() &&
+                    !authors.contains(m_search, Qt::CaseInsensitive)) {
+                status = false;
+            }
         }
     }
 

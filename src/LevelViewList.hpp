@@ -101,6 +101,7 @@ class LevelListProxy : public QSortFilterProxyModel {
         m_type(0),
         m_difficulty(0),
         m_duration(0),
+        m_searchType(0),
         m_all(" - All -"),
         m_installed(false),
         m_sortMode(ReleaseDate)
@@ -115,6 +116,7 @@ class LevelListProxy : public QSortFilterProxyModel {
     void setDifficultyFilter(const QString &d);
     void setDurationFilter(const QString &d);
     void setSearchFilter(const QString &s);
+    void setSearchType(const QString &t);
     void setInstalledFilter(bool on);
 
     enum SortMode {
@@ -145,9 +147,11 @@ class LevelListProxy : public QSortFilterProxyModel {
         Qt::UserRole+3
     };
     SortMode m_sortMode = ReleaseDate;
+    Qt::SortOrder m_sortOrder = Qt::DescendingOrder;
     quint64 m_class, m_type, m_difficulty, m_duration;
     const QString m_all;
     QString m_search;
+    quint64 m_searchType;
     bool m_installed;
 };
 

@@ -137,9 +137,11 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         this,
         &TombRaiderLinuxLauncher::onCurrentItemChanged);
 
-
     connect(ui->checkBoxInstalled, &QCheckBox::toggled,
             levelListProxy, &LevelListProxy::setInstalledFilter);
+
+    connect(ui->comboBoxSearch, &QComboBox::currentTextChanged,
+            levelListProxy, &LevelListProxy::setSearchType);
 
     connect(ui->lineEditSearch, &QLineEdit::textChanged,
             levelListProxy, &LevelListProxy::setSearchFilter);
@@ -163,6 +165,9 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
 
     ui->Tabs->setTabEnabled(
         ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Modding")), false);
+
+    ui->Tabs->setTabEnabled(
+        ui->Tabs->indexOf(ui->Tabs->findChild<QWidget*>("Controller")), false);
 
     // Read settings
     QString value = g_settings.value("setup").toString();
@@ -472,6 +477,10 @@ QVector<QPair<QString, QString>>
 void TombRaiderLinuxLauncher::runClicked() {
     if (m_current.isValid()) {
         ui->listViewLevels->setEnabled(false);
+        ui->groupBoxSearch->setEnabled(false);
+        ui->groupBoxFilter->setEnabled(false);
+        ui->groupBoxToggle->setEnabled(false);
+        ui->groupBoxSort->setEnabled(false);
         ui->pushButtonRun->setEnabled(false);
         ui->checkBoxSetup->setEnabled(false);
 
@@ -543,6 +552,10 @@ void TombRaiderLinuxLauncher::runClicked() {
 
 void TombRaiderLinuxLauncher::runningLevelDone() {
     ui->listViewLevels->setEnabled(true);
+    ui->groupBoxSearch->setEnabled(true);
+    ui->groupBoxFilter->setEnabled(true);
+    ui->groupBoxToggle->setEnabled(true);
+    ui->groupBoxSort->setEnabled(true);
     ui->pushButtonRun->setEnabled(true);
     ui->checkBoxSetup->setEnabled(true);
 }
@@ -551,8 +564,12 @@ void TombRaiderLinuxLauncher::downloadClicked() {
     if (m_current.isValid()) {
         qint64 id = levelListProxy->getLid(m_current);
         qDebug() << "void TombRaiderLinuxLauncher" <<
-                    "::downloadClicked() quint64 id: " << id; 
+                    "::downloadClicked() qint64 id: " << id;
         ui->listViewLevels->setEnabled(false);
+        ui->groupBoxSearch->setEnabled(false);
+        ui->groupBoxFilter->setEnabled(false);
+        ui->groupBoxToggle->setEnabled(false);
+        ui->groupBoxSort->setEnabled(false);
         ui->progressBar->setValue(0);
         ui->stackedWidgetBar->setCurrentWidget(
             ui->stackedWidgetBar->findChild<QWidget*>("progress"));
@@ -687,6 +704,10 @@ void TombRaiderLinuxLauncher::workTick() {
             ui->stackedWidgetBar->setCurrentWidget(
                 ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
             ui->listViewLevels->setEnabled(true);
+            ui->groupBoxSearch->setEnabled(true);
+            ui->groupBoxFilter->setEnabled(true);
+            ui->groupBoxToggle->setEnabled(true);
+            ui->groupBoxSort->setEnabled(true);
         }
     }
 }
