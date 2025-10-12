@@ -23,32 +23,53 @@ Dialog::Dialog(QWidget *parent)
       m_buttonGroup(new QButtonGroup(this)),
       m_okButton(new QPushButton("OK", this))
 {
-    // Remove or reduce spacing between widgets
-    m_layout->setSpacing(4);  // smaller space between widgets
-    m_layout->setContentsMargins(10, 10, 10, 10);
+    // ========== Frame to hold content ==========
+    QFrame *frame = new QFrame(this);
+    frame->setFrameShape(QFrame::StyledPanel);
+    frame->setFrameShadow(QFrame::Plain);
+    frame->setStyleSheet("QFrame { border: 1px solid #999; border-radius: 6px; padding: 10px; }");
 
-    // Add stretch to push content to vertical center
-    m_layout->addStretch(1);
+    // Layout inside the frame
+    QVBoxLayout *frameLayout = new QVBoxLayout(frame);
+    frameLayout->setSpacing(6);
+    frameLayout->setContentsMargins(10, 10, 10, 10);
 
-    // Label (centered)
+    // Label
     m_label->setAlignment(Qt::AlignCenter);
-    m_layout->addWidget(m_label, 0, Qt::AlignHCenter);
+    frameLayout->addWidget(m_label, 0, Qt::AlignHCenter);
 
-    // Option container (centered and compact)
-    m_optionLayout->setContentsMargins(0, 0, 0, 0);
+    // Options
     m_optionLayout->setSpacing(4);
+    m_optionLayout->setContentsMargins(0, 0, 0, 0);
     m_optionContainer->setLayout(m_optionLayout);
-    m_layout->addWidget(m_optionContainer, 0, Qt::AlignHCenter);
+    frameLayout->addWidget(m_optionContainer, 0, Qt::AlignHCenter);
 
-    // OK Button (centered, fixed width)
+    // ========== OK + Cancel buttons ==========
+    QHBoxLayout *buttonLayout = new QHBoxLayout;
     m_okButton->setFixedWidth(80);
-    m_layout->addWidget(m_okButton, 0, Qt::AlignHCenter);
+    QPushButton *m_cancelButton = new QPushButton("Cancel", this);
+    m_cancelButton->setFixedWidth(80);
 
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(m_okButton);
+    buttonLayout->addWidget(m_cancelButton);
+    buttonLayout->addStretch();
+
+    frameLayout->addLayout(buttonLayout);
+
+    // ========== Main layout ==========
+    m_layout->setSpacing(4);
+    m_layout->setContentsMargins(10, 10, 10, 10);
+    m_layout->addStretch(1);
+    m_layout->addWidget(frame, 0, Qt::AlignHCenter);
     m_layout->addStretch(1);
 
-    // Connect OK button
+    // ========== Connections ==========
     connect(m_okButton, &QPushButton::clicked, this, [this]() {
         emit okClicked();
+    });
+    connect(m_cancelButton, &QPushButton::clicked, this, [this]() {
+        emit cancelClicked();  // Add this signal in your class
     });
 }
 

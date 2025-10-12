@@ -32,6 +32,7 @@ class Dialog : public QWidget {
 
  signals:
     void okClicked();
+    void cancelClicked();
 
  private:
     QVBoxLayout* m_layout;

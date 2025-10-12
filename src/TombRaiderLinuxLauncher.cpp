@@ -169,6 +169,10 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
         ui->stackedWidget->setCurrentWidget(
                 ui->stackedWidget->findChild<QWidget*>("select"));
     });
+    connect(m_dialogWidget, &Dialog::cancelClicked, this, [this]() {
+        ui->stackedWidget->setCurrentWidget(
+                ui->stackedWidget->findChild<QWidget*>("select"));
+    });
 
 
     ui->Tabs->setTabEnabled(
