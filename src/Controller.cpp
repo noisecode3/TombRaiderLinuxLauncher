@@ -142,6 +142,10 @@ const InfoData Controller::getInfo(int id) {
     return model.getInfo(id);
 }
 
+const bool Controller::deleteZip(int id) {
+    return model.deleteZip(id);
+}
+
 const QString Controller::getWalkthrough(int id) {
     return model.getWalkthrough(id);
 }

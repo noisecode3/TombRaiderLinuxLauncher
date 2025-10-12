@@ -15,6 +15,7 @@
 #include "../src/globalTypes.hpp"
 #include "ui_TombRaiderLinuxLauncher.h"
 #include <QLineEdit>
+#include <qlogging.h>
 
 TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     : QMainWindow(parent) {
@@ -158,8 +159,15 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     m_dialogWidget = new Dialog(ui->dialog);
     ui->verticalLayout_17->addWidget(m_dialogWidget);
     connect(m_dialogWidget, &Dialog::okClicked, this, [this]() {
-        qDebug() << "OK clicked, selected:" << m_dialogWidget->selectedOption();
-        // handle it here
+        const QString selected = m_dialogWidget->selectedOption();
+        qDebug() << "OK clicked, selected:" << selected;
+        if (selected == "Remove zip file") {
+            controller.deleteZip(levelListProxy->getLid(m_current));
+        } else if (selected == "Remove Level") {
+            // fileManager.removeFileOrDirectory(testLevel);
+        }
+        ui->stackedWidget->setCurrentWidget(
+                ui->stackedWidget->findChild<QWidget*>("select"));
     });
 
 
@@ -245,6 +253,7 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
 }
 
 InstalledStatus TombRaiderLinuxLauncher::getInstalled() {
+    // TODO: read from disk all the id.TRLE and Original.id directories.
     QStringList keys = g_settings.allKeys();
     InstalledStatus list;
     for (const auto &key : std::as_const(keys)) {
@@ -369,23 +378,25 @@ void TombRaiderLinuxLauncher::levelDirSelected(qint64 id) {
         int state = controller.getItemState(id);
         // Activate or deactivate pushbuttons based on the selected item
         qDebug() << "Selected: " << id << Qt::endl;
-        // if state == 1 then only activate link button
-        // if state == 2 then only activate link and info button
-        // if state == 0 then only activate download button
+        // if state == 0 We dont have (id).TRLE directory
+        // if state == 1 We dont have Original.TR(id) directory
+        // if state == 2 we have Original.TR(id) if id was negative or (id).TRLE
         // if state == -1 then de-activate all buttons
-
         if (state == 1) {
             ui->pushButtonRun->setEnabled(true);
             ui->pushButtonInfo->setEnabled(false);
-            ui->pushButtonDownload->setEnabled(false);
+            ui->pushButtonDownload->setEnabled(true);
+            ui->pushButtonDownload->setText("Remove");
         } else if (state == 2) {
             ui->pushButtonRun->setEnabled(true);
             ui->pushButtonInfo->setEnabled(true);
-            ui->pushButtonDownload->setEnabled(false);
+            ui->pushButtonDownload->setEnabled(true);
+            ui->pushButtonDownload->setText("Remove");
         } else if (state == 0) {
             ui->pushButtonRun->setEnabled(false);
             ui->pushButtonInfo->setEnabled(true);
             ui->pushButtonDownload->setEnabled(true);
+            ui->pushButtonDownload->setText("Download and install");
         } else {
             ui->pushButtonRun->setEnabled(false);
             ui->pushButtonInfo->setEnabled(false);
@@ -399,22 +410,8 @@ void TombRaiderLinuxLauncher::onCurrentItemChanged(
     m_current = levelListProxy->mapToSource(current);
     if (m_current.isValid()) {
         qint64 id = levelListProxy->getLid(m_current);
+        levelDirSelected(id);
         ui->lcdNumberLevelID->display(QString::number(id));
-        if (levelListProxy->getItemType(m_current)) {  // its the original game
-            if (levelListProxy->getInstalled(m_current)) {
-                ui->pushButtonRun->setEnabled(true);
-                ui->pushButtonDownload->setEnabled(false);
-                ui->pushButtonDownload->setText("Remove");
-
-            } else {
-                ui->pushButtonRun->setEnabled(false);
-                ui->pushButtonDownload->setText("Download and install");
-                ui->pushButtonDownload->setEnabled(true);
-            }
-            ui->pushButtonInfo->setEnabled(false);
-        } else {
-            levelDirSelected(id);
-        }
         ui->lineEditEnvironmentVariables->setEnabled(true);
         ui->lineEditEnvironmentVariables->setText(
             g_settings.value(QString("level%1/EnvironmentVariables")
@@ -563,20 +560,36 @@ void TombRaiderLinuxLauncher::runningLevelDone() {
 void TombRaiderLinuxLauncher::downloadClicked() {
     if (m_current.isValid()) {
         qint64 id = levelListProxy->getLid(m_current);
-        qDebug() << "void TombRaiderLinuxLauncher" <<
-                    "::downloadClicked() qint64 id: " << id;
-        ui->listViewLevels->setEnabled(false);
-        ui->groupBoxSearch->setEnabled(false);
-        ui->groupBoxFilter->setEnabled(false);
-        ui->groupBoxToggle->setEnabled(false);
-        ui->groupBoxSort->setEnabled(false);
-        ui->progressBar->setValue(0);
-        ui->stackedWidgetBar->setCurrentWidget(
-            ui->stackedWidgetBar->findChild<QWidget*>("progress"));
-        if (levelListProxy->getItemType(m_current)) {
-            controller.setupGame(id);
+        int state = controller.getItemState(id);
+        if (state  > 0) {
+            // TODO: add the ability to remove the level without its save files
+            QString text(
+                "Select what you want to remove.\n"
+                "For now we can only remove the zip file.\n"
+            );
+            m_dialogWidget->setMessage(text);
+            m_dialogWidget->setOptions(QStringList()
+                    << "Remove zip file");
+
+            ui->stackedWidget->setCurrentWidget(
+                ui->stackedWidget->findChild<QWidget*>("dialog"));
+
         } else {
-            controller.setupLevel(id);
+            qDebug() << "void TombRaiderLinuxLauncher" <<
+                        "::downloadClicked() qint64 id: " << id;
+            ui->listViewLevels->setEnabled(false);
+            ui->groupBoxSearch->setEnabled(false);
+            ui->groupBoxFilter->setEnabled(false);
+            ui->groupBoxToggle->setEnabled(false);
+            ui->groupBoxSort->setEnabled(false);
+            ui->progressBar->setValue(0);
+            ui->stackedWidgetBar->setCurrentWidget(
+                ui->stackedWidgetBar->findChild<QWidget*>("progress"));
+            if (levelListProxy->getItemType(m_current)) {
+                controller.setupGame(id);
+            } else {
+                controller.setupLevel(id);
+            }
         }
     }
 }
@@ -690,16 +703,10 @@ void TombRaiderLinuxLauncher::workTick() {
                 g_settings.setValue(
                         QString("installed/game%1").arg(id),
                         "true");
-                ui->pushButtonRun->setEnabled(true);
-                ui->pushButtonInfo->setEnabled(false);
-                ui->pushButtonDownload->setEnabled(false);
             } else {
                 g_settings.setValue(
                         QString("installed/level%1").arg(id),
                         "true");
-                ui->pushButtonRun->setEnabled(true);
-                ui->pushButtonInfo->setEnabled(true);
-                ui->pushButtonDownload->setEnabled(false);
             }
             ui->stackedWidgetBar->setCurrentWidget(
                 ui->stackedWidgetBar->findChild<QWidget*>("navigate"));
@@ -708,6 +715,7 @@ void TombRaiderLinuxLauncher::workTick() {
             ui->groupBoxFilter->setEnabled(true);
             ui->groupBoxToggle->setEnabled(true);
             ui->groupBoxSort->setEnabled(true);
+            levelDirSelected(id);
         }
     }
 }
@@ -783,15 +791,13 @@ void TombRaiderLinuxLauncher::LevelSaveClicked() {
     if (m_current.isValid()) {
         qint64 id = levelListProxy->getLid(m_current);
 
-        // settings.setValue(QString("level%1/CustomCommand")
-        //     .arg(id), ui->lineEditCustomCommand->text());
-
         g_settings.setValue(QString("level%1/EnvironmentVariables")
             .arg(id), ui->lineEditEnvironmentVariables->text());
 
         g_settings.setValue(QString("level%1/RunnerType")
             .arg(id), ui->comboBoxRunnerType->currentIndex());
     }
+    ui->pushButtonRun->setText(ui->comboBoxRunnerType->currentText());
 }
 
 void TombRaiderLinuxLauncher::LevelResetClicked() {

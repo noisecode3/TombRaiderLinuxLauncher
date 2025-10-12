@@ -23,10 +23,30 @@ Dialog::Dialog(QWidget *parent)
       m_buttonGroup(new QButtonGroup(this)),
       m_okButton(new QPushButton("OK", this))
 {
-    m_layout->addWidget(m_label);
-    m_layout->addWidget(m_optionContainer);
-    m_layout->addWidget(m_okButton);
+    // Remove or reduce spacing between widgets
+    m_layout->setSpacing(4);  // smaller space between widgets
+    m_layout->setContentsMargins(10, 10, 10, 10);
 
+    // Add stretch to push content to vertical center
+    m_layout->addStretch(1);
+
+    // Label (centered)
+    m_label->setAlignment(Qt::AlignCenter);
+    m_layout->addWidget(m_label, 0, Qt::AlignHCenter);
+
+    // Option container (centered and compact)
+    m_optionLayout->setContentsMargins(0, 0, 0, 0);
+    m_optionLayout->setSpacing(4);
+    m_optionContainer->setLayout(m_optionLayout);
+    m_layout->addWidget(m_optionContainer, 0, Qt::AlignHCenter);
+
+    // OK Button (centered, fixed width)
+    m_okButton->setFixedWidth(80);
+    m_layout->addWidget(m_okButton, 0, Qt::AlignHCenter);
+
+    m_layout->addStretch(1);
+
+    // Connect OK button
     connect(m_okButton, &QPushButton::clicked, this, [this]() {
         emit okClicked();
     });
@@ -34,6 +54,7 @@ Dialog::Dialog(QWidget *parent)
 
 void Dialog::setMessage(const QString &text) {
     m_label->setText(text);
+    this->adjustSize();
 }
 
 void Dialog::setOptions(const QStringList &options) {
@@ -47,15 +68,19 @@ void Dialog::setOptions(const QStringList &options) {
 
     if (options.isEmpty()) {
         m_optionContainer->hide();
-        return;
+    } else {
+        m_optionContainer->show();
+        for (quint64 i = 0; i < options.size(); i++) {
+            QRadioButton *rb = new QRadioButton(options.at(i));
+            if (i == 0) {
+                rb->setChecked(true);
+            }
+            m_buttonGroup->addButton(rb);
+            m_optionLayout->addWidget(rb);
+        }
     }
 
-    m_optionContainer->show();
-    for (const QString &opt : options) {
-        QRadioButton *rb = new QRadioButton(opt);
-        m_buttonGroup->addButton(rb);
-        m_optionLayout->addWidget(rb);
-    }
+    this->adjustSize();
 }
 
 QString Dialog::selectedOption() const {

@@ -43,6 +43,7 @@ class Controller : public QObject {
     int checkGameDirectory(int id);
     void getList(QVector<QSharedPointer<ListItemData>>* list);
     const InfoData getInfo(int id);
+    const bool deleteZip(int id);
     const QString getWalkthrough(int id);
     bool link(int id);
     int getItemState(int id);
