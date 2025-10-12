@@ -1545,7 +1545,14 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLCDNumber" name="lcdNumberLevelID"/>
+                      <widget class="QLCDNumber" name="lcdNumberLevelID">
+                       <property name="frameShadow">
+                        <enum>QFrame::Shadow::Plain</enum>
+                       </property>
+                       <property name="segmentStyle">
+                        <enum>QLCDNumber::SegmentStyle::Flat</enum>
+                       </property>
+                      </widget>
                      </item>
                      <item>
                       <spacer name="horizontalSpacer_2">
@@ -1589,13 +1596,19 @@
                  </layout>
                 </widget>
                </item>
-               <item>
+               <item alignment="Qt::AlignmentFlag::AlignLeft">
                 <widget class="QWidget" name="levelControl" native="true">
                  <layout class="QHBoxLayout" name="horizontalLayout_14">
                   <item>
                    <widget class="QCommandLinkButton" name="commandLinkButtonLSSave">
                     <property name="enabled">
                      <bool>false</bool>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>160</width>
+                      <height>16777215</height>
+                     </size>
                     </property>
                     <property name="text">
                      <string>Save</string>
@@ -1606,6 +1619,12 @@
                    <widget class="QCommandLinkButton" name="commandLinkButtonLSReset">
                     <property name="enabled">
                      <bool>false</bool>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>160</width>
+                      <height>16777215</height>
+                     </size>
                     </property>
                     <property name="text">
                      <string>Reset</string>
@@ -1633,6 +1652,15 @@
                </item>
                <item>
                 <widget class="QTableWidget" name="tableWidgetSetup">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="sizeAdjustPolicy">
+                  <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
+                 </property>
                  <attribute name="horizontalHeaderVisible">
                   <bool>true</bool>
                  </attribute>
@@ -1676,10 +1704,29 @@
                 </widget>
                </item>
                <item>
+                <spacer name="verticalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignLeft">
                 <widget class="QWidget" name="globalControl" native="true">
                  <layout class="QHBoxLayout" name="horizontalLayout_15">
                   <item>
                    <widget class="QCommandLinkButton" name="commandLinkButtonGSSave">
+                    <property name="maximumSize">
+                     <size>
+                      <width>160</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>Save</string>
                     </property>
@@ -1687,6 +1734,12 @@
                   </item>
                   <item>
                    <widget class="QCommandLinkButton" name="commandLinkButtonGSReset">
+                    <property name="maximumSize">
+                     <size>
+                      <width>160</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>Reset</string>
                     </property>
