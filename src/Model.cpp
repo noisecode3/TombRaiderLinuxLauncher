@@ -345,6 +345,9 @@ void Model::getLevel(int id) {
                 qDebug() << "unpackLevel failed";
             }
         }
+        if (g_settings.value("DeleteZip").toBool()) {
+            deleteZip(id);
+        }
     }
 }
 

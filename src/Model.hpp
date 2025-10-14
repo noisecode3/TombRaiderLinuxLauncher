@@ -30,6 +30,7 @@
 #include "../src/Network.hpp"
 #include "../src/Runner.hpp"
 #include "../src/PyRunner.hpp"
+#include "../src/settings.hpp"
 
 class InstructionManager : public QObject {
     Q_OBJECT
@@ -103,6 +104,8 @@ class Model : public QObject {
     Data& data;
     FileManager& fileManager;
     Downloader& downloader;
+
+    QSettings& g_settings = getSettingsInstance();
 
     Model();
     ~Model();

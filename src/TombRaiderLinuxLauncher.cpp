@@ -354,6 +354,9 @@ void TombRaiderLinuxLauncher::readSavedSettings() {
     const QString levelPathValue = g_settings.value("levelPath").toString();
     ui->tableWidgetSetup->item(1, 0)->setText(levelPathValue);
     qDebug() << "Read level path value:" << levelPathValue;
+    const bool deleteZip = g_settings.value("DeleteZip").toBool();
+    ui->checkBoxDeleteZip->setChecked(deleteZip);
+    qDebug() << "Read level DeleteZip (after download):" << deleteZip;
     controller.setup();
 }
 
@@ -782,6 +785,9 @@ void TombRaiderLinuxLauncher::GlobalSaveClicked() {
         g_settings.setValue("gamePath" , newGamePath);
         controller.setup();
     }
+
+    const bool newDeleteZip = ui->checkBoxDeleteZip->isChecked();
+    g_settings.setValue("DeleteZip" , newDeleteZip);
 }
 
 void TombRaiderLinuxLauncher::GlobalResetClicked() {

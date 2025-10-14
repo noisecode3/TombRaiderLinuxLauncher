@@ -1365,7 +1365,7 @@
             <item>
              <widget class="QFrame" name="frameLevelSetup">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::Shape::StyledPanel</enum>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_13">
                <item>
@@ -1640,7 +1640,7 @@
             <item>
              <widget class="QFrame" name="frameGlobalSetup">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::Shape::StyledPanel</enum>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
@@ -1701,6 +1701,19 @@
                    <string/>
                   </property>
                  </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="widgetDeleteZip" native="true">
+                 <layout class="QHBoxLayout" name="horizontalLayout_9">
+                  <item>
+                   <widget class="QCheckBox" name="checkBoxDeleteZip">
+                    <property name="text">
+                     <string>Detlete Zip file after level download</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </widget>
                </item>
                <item>
