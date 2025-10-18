@@ -67,7 +67,9 @@ class Model : public QObject {
     void checkCommonFiles(QList<int>* games);
     int checkGameDirectory(int id);
     int checkLevelDirectory(int id);
+    bool checkZip(int id);
     bool deleteZip(int id);
+    bool deleteLevel(int id);
     bool backupSaveFiles(int id);
     void getList(QVector<QSharedPointer<ListItemData>>* list);
     void getCoverList(QVector<QSharedPointer<ListItemData>> tiems);

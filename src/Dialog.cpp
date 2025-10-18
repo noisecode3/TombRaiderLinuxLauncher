@@ -89,8 +89,12 @@ void Dialog::setOptions(const QStringList &options) {
 
     if (options.isEmpty()) {
         m_optionContainer->hide();
+    } else if (options.size() == 1) {
+        m_optionContainer->hide();
+        m_oneOptionHolder = options.at(0);
     } else {
         m_optionContainer->show();
+        m_oneOptionHolder.clear();
         for (quint64 i = 0; i < options.size(); i++) {
             QRadioButton *rb = new QRadioButton(options.at(i));
             if (i == 0) {
@@ -100,12 +104,18 @@ void Dialog::setOptions(const QStringList &options) {
             m_optionLayout->addWidget(rb);
         }
     }
-
     this->adjustSize();
+    this->updateGeometry();
 }
 
 QString Dialog::selectedOption() const {
-    auto btn = m_buttonGroup->checkedButton();
-    return btn ? btn->text() : QString();
+    QString result;
+    if (m_oneOptionHolder.isEmpty()) {
+        auto btn = m_buttonGroup->checkedButton();
+        result = btn ? btn->text() : QString();
+    } else {
+        result = m_oneOptionHolder;
+    }
+    return result;
 }
 

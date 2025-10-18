@@ -75,9 +75,9 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     void runClicked();
 
     /**
-     * Triggered by the "Download" button.
+     * Triggered by the "Download" or "Remove" button.
      */
-    void downloadClicked();
+    void downloadOrRemoveClicked();
 
     /**
      * Opens the Info thru the navigation bar.

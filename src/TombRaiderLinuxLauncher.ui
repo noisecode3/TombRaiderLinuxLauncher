@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1289</width>
-    <height>860</height>
+    <width>1280</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1573,7 +1573,7 @@
                   <item>
                    <widget class="QLabel" name="label">
                     <property name="text">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Info&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Runs system Wine/Proton from RESOURCEDIR/lid.TREL&lt;br/&gt;Set environment variables like:&lt;br/&gt;WINEDLLOVERRIDES=&amp;quot;winmm=n,b;ddraw=n,b&amp;quot; WINEFSYNC=&amp;quot;1&amp;quot;&lt;br/&gt;&lt;br/&gt;With Umu-launcher:&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'monospace'; font-size:12pt;&quot;&gt;WINEPREFIX=&amp;quot;~/.tombfix&amp;quot; PROTONPATH=&amp;quot;~/GE-Proton8-27/proton&amp;quot;&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;&lt;br/&gt;With Lutris (check &lt;/span&gt;&lt;span style=&quot; font-family:'monospace'; font-size:12pt;&quot;&gt;lutris -h&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;):&lt;br/&gt;Use game ID, e.g., &lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-style:italic;&quot;&gt;tomb-raider-2&lt;/span&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;&lt;br/&gt;With Bash:&lt;br/&gt;Executes RESOURCEDIR/lid.TREL/start.sh&lt;br/&gt;&lt;br/&gt;With Link:&lt;br/&gt;Creates symlink to RESOURCEDIR/lid.TREL/game.exe in GAMEDIR&lt;br/&gt;Choose correct game type&lt;br/&gt;&lt;br/&gt;Link and Exit: links then exits&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;&lt;br/&gt;Link and Launch Steam: also launches Steam game based on level type &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Info&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Runs system Wine/Proton from RESOURCEDIR/lid.TREL&lt;br/&gt;Set environment variables like:&lt;br/&gt;WINEDLLOVERRIDES=&amp;quot;winmm=n,b;ddraw=n,b&amp;quot; WINEFSYNC=&amp;quot;1&amp;quot;&lt;br/&gt;&lt;br/&gt;With Umu-launcher:&lt;br/&gt;&lt;span style=&quot; font-family:'monospace';&quot;&gt;WINEPREFIX=&amp;quot;~/.tombfix&amp;quot; PROTONPATH=&amp;quot;~/GE-Proton8-27/proton&amp;quot;&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;With Lutris (check &lt;span style=&quot; font-family:'monospace';&quot;&gt;lutris -h&lt;/span&gt;):&lt;br/&gt;Use game ID, e.g., &lt;span style=&quot; font-style:italic;&quot;&gt;tomb-raider-2&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;With Bash:&lt;br/&gt;Executes RESOURCEDIR/lid.TREL/start.sh&lt;br/&gt;&lt;br/&gt;With Link:&lt;br/&gt;Creates symlink to RESOURCEDIR/lid.TREL/game.exe in GAMEDIR&lt;br/&gt;Choose correct game type&lt;br/&gt;&lt;br/&gt;Link and Exit: links then exits&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;Link and Launch Steam: also launches Steam game based on level type&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                    </widget>
                   </item>

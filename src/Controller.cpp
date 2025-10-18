@@ -142,8 +142,16 @@ const InfoData Controller::getInfo(int id) {
     return model.getInfo(id);
 }
 
+const bool Controller::checkZip(int id) {
+    return model.checkZip(id);
+}
+
 const bool Controller::deleteZip(int id) {
     return model.deleteZip(id);
+}
+
+const bool Controller::deleteLevel(int id) {
+    return model.deleteLevel(id);
 }
 
 const QString Controller::getWalkthrough(int id) {

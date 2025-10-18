@@ -254,6 +254,17 @@ void Model::setupGame(int id) {
     }
 }
 
+bool Model::checkZip(int id) {
+    bool status = false;
+    ZipData zipData = data.getDownload(id);
+    Path path(Path::resource);
+    path << zipData.m_fileName;
+    if (path.isFile()) {
+        status = true;
+    }
+    return status;
+}
+
 bool Model::deleteZip(int id) {
     bool status = false;
     ZipData zipData = data.getDownload(id);
@@ -265,8 +276,38 @@ bool Model::deleteZip(int id) {
     return status;
 }
 
-bool backupSaveFiles(int id) {
+bool Model::deleteLevel(int id) {
     bool status = false;
+    if (id != 0) {
+        Path path = Path(Path::resource);
+        fileManager.addLevelDir(path, id);
+        Path testPath = Path(Path::resource);
+        Q_ASSERT_WITH_TRACE(path.get() != testPath.get());
+
+        quint64 error = fileManager.removeFileOrDirectory(path);
+        if (error == 0) {
+            status = true;
+        }
+
+        if (id<0) {
+            g_settings.setValue(
+                    QString("installed/game%1").arg(-id),
+                    "fales");
+        } else {
+            g_settings.setValue(
+                    QString("installed/level%1").arg(id),
+                    "false");
+        }
+    }
+
+    return status;
+}
+
+bool Model::backupSaveFiles(int id) {
+    bool status = false;
+    Path path = Path(Path::resource);
+    fileManager.addLevelDir(path, id);
+    QStringList list = fileManager.getSaveFiles(path);
     return status;
 }
 

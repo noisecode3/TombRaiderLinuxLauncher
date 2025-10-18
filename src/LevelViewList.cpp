@@ -90,6 +90,11 @@ void LevelListModel::setInstalled(const QModelIndex &index) {
     item.m_installed = true;
 }
 
+void LevelListModel::clearInstalled(const QModelIndex &index) {
+    ListItemData &item = *m_levels[index.row()];
+    item.m_installed = false;
+}
+
 QVariant LevelListModel::data(const QModelIndex &index, int role) const {
     QVariant result;
 
@@ -190,58 +195,65 @@ bool LevelListProxy::getInstalled(const QModelIndex &i) const {
 }
 
 void LevelListProxy::setClassFilter(const QString &c) {
+    beginFilterChange();
     if (c == m_all) {
         m_class = 0;
     } else {
         m_class = StaticData::getClassID().at(c);
     }
-    invalidateFilter();
+    endFilterChange();
 }
 
 void LevelListProxy::setTypeFilter(const QString &t) {
+    beginFilterChange();
     if (t == m_all) {
         m_type = 0;
     } else {
         m_type = StaticData::getTypeID().at(t);
     }
-    invalidateFilter();
+    endFilterChange();
 }
 
 void LevelListProxy::setDifficultyFilter(const QString &d) {
+    beginFilterChange();
     if (d == m_all) {
         m_difficulty = 0;
     } else {
         m_difficulty = StaticData::getDifficultyID().at(d);
     }
-    invalidateFilter();
+    endFilterChange();
 }
 
 void LevelListProxy::setDurationFilter(const QString &d) {
+    beginFilterChange();
     if(d == m_all) {
         m_duration = 0;
     } else {
         m_duration = StaticData::getDurationID().at(d);
     }
-    invalidateFilter();
+    endFilterChange();
 }
 
 void LevelListProxy::setSearchFilter(const QString &s) {
+    beginFilterChange();
     m_search = s;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void LevelListProxy::setSearchType(const QString &t) {
+    beginFilterChange();
     if (t == "Level") {
         m_searchType = 0;
     } else if (t ==  "Author") {
         m_searchType = 1;
     }
-    invalidateFilter();
+    endFilterChange();
 }
 
 void LevelListProxy::setInstalledFilter(bool on) {
+    beginFilterChange();
     m_installed = on;
-    invalidateFilter();
+    endFilterChange();
 }
 
 void LevelListProxy::setSortMode(SortMode mode) {

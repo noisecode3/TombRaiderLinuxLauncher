@@ -74,6 +74,7 @@ class LevelListModel : public QAbstractListModel {
     void setScrollChanged(QModelIndexList list);
     void setInstalled(const QModelIndex &index);
 
+    void clearInstalled(const QModelIndex &index);
     quint64 indexInBounds(quint64 index) const;
     bool stop() const;
     void updateCovers(quint64 a, quint64 b);

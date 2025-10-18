@@ -26,7 +26,7 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     // List tab
     connect(ui->pushButtonRun, SIGNAL(clicked()), this, SLOT(runClicked()));
     connect(ui->pushButtonDownload, SIGNAL(clicked()),
-        this, SLOT(downloadClicked()));
+        this, SLOT(downloadOrRemoveClicked()));
     connect(ui->pushButtonInfo, SIGNAL(clicked()), this, SLOT(infoClicked()));
     connect(ui->pushButtonWalkthrough, SIGNAL(clicked()),
         this, SLOT(walkthroughClicked()));
@@ -161,10 +161,25 @@ TombRaiderLinuxLauncher::TombRaiderLinuxLauncher(QWidget *parent)
     connect(m_dialogWidget, &Dialog::okClicked, this, [this]() {
         const QString selected = m_dialogWidget->selectedOption();
         qDebug() << "OK clicked, selected:" << selected;
-        if (selected == "Remove zip file") {
-            controller.deleteZip(levelListProxy->getLid(m_current));
-        } else if (selected == "Remove Level") {
-            // fileManager.removeFileOrDirectory(testLevel);
+
+        const quint64 lid = levelListProxy->getLid(m_current);
+        const bool type = levelListProxy->getItemType(m_current);
+
+        if (selected == "Remove Level and zip files" ||
+                selected == "Remove zip file") {
+            controller.deleteZip(lid);
+        }
+
+        if (selected == "Remove Level and zip files" ||
+                selected == "Remove just Level files") {
+            if (controller.deleteLevel(lid)) {
+                levelListModel->clearInstalled(m_current);
+                if (ui->checkBoxInstalled->isChecked()) {
+                    levelListProxy->setInstalledFilter(true);
+                } else {
+                    ui->pushButtonDownload->setText("Download and install");
+                }
+            }
         }
         ui->stackedWidget->setCurrentWidget(
                 ui->stackedWidget->findChild<QWidget*>("select"));
@@ -257,7 +272,6 @@ void TombRaiderLinuxLauncher::generateList(const QList<int>& availableGames) {
 }
 
 InstalledStatus TombRaiderLinuxLauncher::getInstalled() {
-    // TODO: read from disk all the id.TRLE and Original.id directories.
     QStringList keys = g_settings.allKeys();
     InstalledStatus list;
     for (const auto &key : std::as_const(keys)) {
@@ -564,19 +578,31 @@ void TombRaiderLinuxLauncher::runningLevelDone() {
     ui->checkBoxSetup->setEnabled(true);
 }
 
-void TombRaiderLinuxLauncher::downloadClicked() {
+void TombRaiderLinuxLauncher::downloadOrRemoveClicked() {
     if (m_current.isValid()) {
         qint64 id = levelListProxy->getLid(m_current);
         int state = controller.getItemState(id);
         if (state  > 0) {
             // TODO: add the ability to remove the level without its save files
-            QString text(
-                "Select what you want to remove.\n"
-                "For now we can only remove the zip file.\n"
-            );
-            m_dialogWidget->setMessage(text);
-            m_dialogWidget->setOptions(QStringList()
-                    << "Remove zip file");
+            if (controller.checkZip(id)) {
+                QString text(
+                    "Select what you want to remove.\n"
+                    "If you remove the level now you remove the level save files.\n"
+                );
+                m_dialogWidget->setMessage(text);
+                m_dialogWidget->setOptions(QStringList()
+                        << "Remove Level and zip files"
+                        << "Remove just Level files"
+                        << "Remove zip file");
+            } else {
+                QString text(
+                    "Select OK select to continue to remove level.\n"
+                    "If you remove the level now you remove the level save files.\n"
+                );
+                m_dialogWidget->setMessage(text);
+                m_dialogWidget->setOptions(QStringList()
+                        << "Remove just Level files");
+            }
 
             ui->stackedWidget->setCurrentWidget(
                 ui->stackedWidget->findChild<QWidget*>("dialog"));

@@ -41,6 +41,7 @@ class Dialog : public QWidget {
     QVBoxLayout* m_optionLayout;
     QButtonGroup* m_buttonGroup;
     QPushButton* m_okButton;
+    QString m_oneOptionHolder;
 };
 
 #endif  // SRC_DIALOG_HPP_

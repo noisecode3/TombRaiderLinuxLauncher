@@ -351,3 +351,19 @@ void FileManager::addLevelDir(Path& path, quint64 id) {
         path <<  QString("%1.TRLE").arg(id);
     }
 }
+
+QStringList FileManager::getSaveFiles(Path& path) {
+    QStringList result;
+    QRegularExpression re("savegame\\.\\d+", QRegularExpression::CaseInsensitiveOption);
+
+    QDirIterator it(path.get(), QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        QFileInfo fi = it.fileInfo();
+        if (re.match(fi.fileName()).hasMatch()) {
+            result << fi.filePath();
+        }
+    }
+
+    return result;
+}
