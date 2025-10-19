@@ -129,11 +129,14 @@ class StickAxis:  # pylint: disable=too-few-public-methods
         self.ui = ui
         self.last_state = 0
         self.threshold = threshold
+        self.threshold_comp = 0
         self.output_key = output_key
 
     def handle(self, value):
         """Handle axis values."""
         tr1, tr2 = self.threshold
+        tr1 += self.threshold_comp
+        tr2 -= self.threshold_comp
         neg_key, pos_key = self.output_key
 
         if value < tr1:
@@ -158,10 +161,12 @@ class StickAxis:  # pylint: disable=too-few-public-methods
             if self.last_state == -1:
                 self.ui.write(e.EV_KEY, neg_key, 0)
                 self.last_state = 0
+                self.threshold_comp = 0
                 self.ui.syn()
             elif self.last_state == 1:
                 self.ui.write(e.EV_KEY, pos_key, 0)
                 self.last_state = 0
+                self.threshold_comp = 0
                 self.ui.syn()
 
 
@@ -193,6 +198,8 @@ class Stick:  # pylint: disable=too-few-public-methods
         """Handle the events."""
         if event.code == self.event_x:
             self.x_axis.handle(event.value)
+            if self.y_axis.last_state != 0:
+                self.y_axis.threshold_comp = abs(event.value-127)
         elif event.code == self.event_y:
             self.y_axis.handle(event.value)
 
