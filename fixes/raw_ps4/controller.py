@@ -142,20 +142,22 @@ class StickAxis:  # pylint: disable=too-few-public-methods
         if value < tr1:
             if self.last_state == -1:
                 return
-            if self.last_state == 1:
-                self.ui.write(e.EV_KEY, pos_key, 0)
-            self.ui.write(e.EV_KEY, neg_key, 1)
-            self.last_state = -1
-            self.ui.syn()
+            if self.threshold_comp == 0:
+                if self.last_state == 1:
+                    self.ui.write(e.EV_KEY, pos_key, 0)
+                self.ui.write(e.EV_KEY, neg_key, 1)
+                self.last_state = -1
+                self.ui.syn()
 
         elif value > tr2:
             if self.last_state == 1:
                 return
-            if self.last_state == -1:
-                self.ui.write(e.EV_KEY, neg_key, 0)
-            self.ui.write(e.EV_KEY, pos_key, 1)
-            self.last_state = 1
-            self.ui.syn()
+            if self.threshold_comp == 0:
+                if self.last_state == -1:
+                    self.ui.write(e.EV_KEY, neg_key, 0)
+                self.ui.write(e.EV_KEY, pos_key, 1)
+                self.last_state = 1
+                self.ui.syn()
 
         else:
             if self.last_state == -1:
