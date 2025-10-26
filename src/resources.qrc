@@ -2,9 +2,10 @@
   <qresource>
     <file>icons/down-arrow.svg</file>
     <file>icons/up-arrow.svg</file>
-    <file>pictures/Lara.jpg</file>
+    <file>pictures/Lara.png</file>
     <file>pictures/Lara2.jpg</file>
     <file>pictures/Lara3.jpg</file>
+    <file>pictures/Lara4.png</file>
     <file>pictures/Tomb_Raider_I.jpg</file>
     <file>pictures/Tomb_Raider_IUB.jpg</file>
     <file>pictures/Tomb_Raider_II.jpg</file>

@@ -466,5 +466,5 @@ void CardItemDelegate::paint(QPainter *painter,
 
 QSize CardItemDelegate::sizeHint(
         const QStyleOptionViewItem&, const QModelIndex&) const  {
-    return QSize(600, 180);
+    return QSize(590, 180);
 }

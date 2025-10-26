@@ -208,6 +208,88 @@
                          <number>4</number>
                         </property>
                         <item>
+                         <widget class="QLabel" name="labelType">
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="minimumSize">
+                           <size>
+                            <width>40</width>
+                            <height>25</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>80</width>
+                            <height>25</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QComboBox" name="comboBoxType">
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="minimumSize">
+                           <size>
+                            <width>65</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>65</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string> - All -</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR1</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR2</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR3</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR4</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TR5</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>TEN</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
+                        <item>
                          <widget class="QLabel" name="labelClass">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -512,88 +594,6 @@
                           <item>
                            <property name="text">
                             <string>very challenging</string>
-                           </property>
-                          </item>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="labelType">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="minimumSize">
-                           <size>
-                            <width>40</width>
-                            <height>25</height>
-                           </size>
-                          </property>
-                          <property name="maximumSize">
-                           <size>
-                            <width>80</width>
-                            <height>25</height>
-                           </size>
-                          </property>
-                          <property name="text">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QComboBox" name="comboBoxType">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="minimumSize">
-                           <size>
-                            <width>65</width>
-                            <height>0</height>
-                           </size>
-                          </property>
-                          <property name="maximumSize">
-                           <size>
-                            <width>65</width>
-                            <height>16777215</height>
-                           </size>
-                          </property>
-                          <item>
-                           <property name="text">
-                            <string> - All -</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>TR1</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>TR2</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>TR3</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>TR4</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>TR5</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>TEN</string>
                            </property>
                           </item>
                          </widget>
@@ -914,12 +914,6 @@
               <property name="dragDropMode">
                <enum>QAbstractItemView::DragDropMode::NoDragDrop</enum>
               </property>
-              <property name="iconSize">
-               <size>
-                <width>320</width>
-                <height>240</height>
-               </size>
-              </property>
               <property name="verticalScrollMode">
                <enum>QAbstractItemView::ScrollMode::ScrollPerItem</enum>
               </property>
@@ -973,9 +967,21 @@
                 </property>
                 <item>
                  <widget class="QPushButton" name="pushButtonRun">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>0</width>
+                    <width>242</width>
+                    <height>32</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>242</width>
                     <height>32</height>
                    </size>
                   </property>
@@ -993,9 +999,21 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButtonInfo">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>0</width>
+                    <width>242</width>
+                    <height>32</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>242</width>
                     <height>32</height>
                    </size>
                   </property>
@@ -1006,9 +1024,21 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="filterButton">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>242</width>
+                    <height>32</height>
+                   </size>
+                  </property>
                   <property name="maximumSize">
                    <size>
-                    <width>16777215</width>
+                    <width>242</width>
                     <height>32</height>
                    </size>
                   </property>
@@ -1019,9 +1049,21 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButtonDownload">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>127</width>
+                    <width>242</width>
+                    <height>32</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>242</width>
                     <height>32</height>
                    </size>
                   </property>
@@ -1080,8 +1122,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>538</width>
-                 <height>70</height>
+                 <width>1238</width>
+                 <height>693</height>
                 </rect>
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1184,9 +1226,21 @@
                </property>
                <item>
                 <widget class="QPushButton" name="infoBackButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
-                   <width>0</width>
+                   <width>242</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>242</width>
                    <height>32</height>
                   </size>
                  </property>
@@ -1197,9 +1251,21 @@
                </item>
                <item>
                 <widget class="QPushButton" name="pushButtonWalkthrough">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
-                   <width>0</width>
+                   <width>242</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>242</width>
                    <height>32</height>
                   </size>
                  </property>
@@ -1207,6 +1273,22 @@
                   <string>Walkthrough</string>
                  </property>
                 </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Policy::Expanding</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </widget>
@@ -1261,9 +1343,21 @@
                </property>
                <item>
                 <widget class="QPushButton" name="walkthroughBackButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
-                   <width>0</width>
+                   <width>242</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>242</width>
                    <height>32</height>
                   </size>
                  </property>
@@ -1271,6 +1365,22 @@
                   <string>Back</string>
                  </property>
                 </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_9">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Policy::Expanding</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </widget>
@@ -1364,6 +1474,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
              <widget class="QFrame" name="frameLevelSetup">
+              <property name="minimumSize">
+               <size>
+                <width>617</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="frameShape">
                <enum>QFrame::Shape::StyledPanel</enum>
               </property>
@@ -1536,6 +1652,18 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widgetLevelID" native="true">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>42</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>42</height>
+                     </size>
+                    </property>
                     <layout class="QHBoxLayout" name="horizontalLayout_17">
                      <item>
                       <widget class="QLabel" name="labelLevelID">
@@ -1546,6 +1674,18 @@
                      </item>
                      <item>
                       <widget class="QLCDNumber" name="lcdNumberLevelID">
+                       <property name="minimumSize">
+                        <size>
+                         <width>64</width>
+                         <height>23</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>64</width>
+                         <height>23</height>
+                        </size>
+                       </property>
                        <property name="frameShadow">
                         <enum>QFrame::Shadow::Plain</enum>
                        </property>
@@ -1573,25 +1713,9 @@
                   <item>
                    <widget class="QLabel" name="label">
                     <property name="text">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Info&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Runs system Wine/Proton from RESOURCEDIR/lid.TREL&lt;br/&gt;Set environment variables like:&lt;br/&gt;WINEDLLOVERRIDES=&amp;quot;winmm=n,b;ddraw=n,b&amp;quot; WINEFSYNC=&amp;quot;1&amp;quot;&lt;br/&gt;&lt;br/&gt;With Umu-launcher:&lt;br/&gt;&lt;span style=&quot; font-family:'monospace';&quot;&gt;WINEPREFIX=&amp;quot;~/.tombfix&amp;quot; PROTONPATH=&amp;quot;~/GE-Proton8-27/proton&amp;quot;&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;With Lutris (check &lt;span style=&quot; font-family:'monospace';&quot;&gt;lutris -h&lt;/span&gt;):&lt;br/&gt;Use game ID, e.g., &lt;span style=&quot; font-style:italic;&quot;&gt;tomb-raider-2&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;With Bash:&lt;br/&gt;Executes RESOURCEDIR/lid.TREL/start.sh&lt;br/&gt;&lt;br/&gt;With Link:&lt;br/&gt;Creates symlink to RESOURCEDIR/lid.TREL/game.exe in GAMEDIR&lt;br/&gt;Choose correct game type&lt;br/&gt;&lt;br/&gt;Link and Exit: links then exits&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;Link and Launch Steam: also launches Steam game based on level type&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Info&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Runs system Wine/Proton from RESOURCEDIR/lid.TREL&lt;br/&gt;Set environment variables like:&lt;br/&gt;WINEDLLOVERRIDES=&amp;quot;winmm=n,b;ddraw=n,b&amp;quot; WINEFSYNC=&amp;quot;1&amp;quot;&lt;br/&gt;&lt;br/&gt;With Umu-launcher:&lt;br/&gt;&lt;span style=&quot; font-family:'monospace';&quot;&gt;WINEPREFIX=&amp;quot;~/.tombfix&amp;quot; PROTONPATH=&amp;quot;~/GE-Proton8-27/proton&amp;quot;&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;With Lutris (check &lt;span style=&quot; font-family:'monospace';&quot;&gt;lutris -h&lt;/span&gt;):&lt;br/&gt;Use game ID, e.g., &lt;span style=&quot; font-style:italic;&quot;&gt;tomb-raider-2&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;With Bash:&lt;br/&gt;Executes RESOURCEDIR/lid.TREL/start.sh (-setup might be in $1)&lt;br/&gt;&lt;br/&gt;With Link:&lt;br/&gt;Creates symlink to RESOURCEDIR/lid.TREL/game.exe in GAMEDIR&lt;br/&gt;Choose correct game type&lt;br/&gt;&lt;br/&gt;Link and Exit: links then exits&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;Link and Launch Steam: also launches Steam game based on level type&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                    </widget>
-                  </item>
-                  <item>
-                   <spacer name="verticalSpacerLevelSetup">
-                    <property name="orientation">
-                     <enum>Qt::Orientation::Vertical</enum>
-                    </property>
-                    <property name="sizeType">
-                     <enum>QSizePolicy::Policy::Maximum</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>100000</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                  </layout>
                 </widget>
@@ -1613,6 +1737,9 @@
                     <property name="text">
                      <string>Save</string>
                     </property>
+                    <property name="icon">
+                     <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -1628,6 +1755,9 @@
                     </property>
                     <property name="text">
                      <string>Reset</string>
+                    </property>
+                    <property name="icon">
+                     <iconset theme="QIcon::ThemeIcon::DocumentRevert"/>
                     </property>
                    </widget>
                   </item>
@@ -1661,6 +1791,15 @@
                  <property name="sizeAdjustPolicy">
                   <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
                  </property>
+                 <property name="tabKeyNavigation">
+                  <bool>false</bool>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+                 </property>
+                 <property name="supportedDragActions">
+                  <set>Qt::DropAction::IgnoreAction</set>
+                 </property>
                  <attribute name="horizontalHeaderVisible">
                   <bool>true</bool>
                  </attribute>
@@ -1678,12 +1817,17 @@
                  </attribute>
                  <row>
                   <property name="text">
-                   <string>GAMEDIR</string>
+                   <string notr="true">GAMEDIR</string>
                   </property>
                  </row>
                  <row>
                   <property name="text">
-                   <string>RESOURCEDIR</string>
+                   <string notr="true">EXTRAGAMEDIR</string>
+                  </property>
+                 </row>
+                 <row>
+                  <property name="text">
+                   <string notr="true">RESOURCEDIR</string>
                   </property>
                  </row>
                  <column>
@@ -1693,12 +1837,26 @@
                  </column>
                  <item row="0" column="0">
                   <property name="text">
-                   <string/>
+                   <string notr="true"/>
+                  </property>
+                  <property name="flags">
+                   <set>ItemIsEditable|ItemIsEnabled</set>
                   </property>
                  </item>
                  <item row="1" column="0">
                   <property name="text">
-                   <string/>
+                   <string notr="true"/>
+                  </property>
+                  <property name="flags">
+                   <set>ItemIsEditable|ItemIsEnabled</set>
+                  </property>
+                 </item>
+                 <item row="2" column="0">
+                  <property name="text">
+                   <string notr="true"/>
+                  </property>
+                  <property name="flags">
+                   <set>ItemIsEditable|ItemIsEnabled</set>
                   </property>
                  </item>
                 </widget>
@@ -1717,17 +1875,128 @@
                 </widget>
                </item>
                <item>
-                <spacer name="verticalSpacer_2">
+                <widget class="QWidget" name="widgetDefaultEnvironmentVariables" native="true">
+                 <layout class="QHBoxLayout" name="horizontalLayout_18">
+                  <item>
+                   <widget class="QLabel" name="labelDefaultEnvironmentVariables">
+                    <property name="text">
+                     <string>Default Environment Variables/Options</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEditDefaultEnvironmentVariables"/>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="widgetDefaultRunnerType" native="true">
+                 <layout class="QHBoxLayout" name="horizontalLayout_19">
+                  <item>
+                   <widget class="QLabel" name="labelDefaultRunnerType">
+                    <property name="text">
+                     <string>Default Runner Type</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="comboBoxDefaultRunnerType">
+                    <property name="minimumSize">
+                     <size>
+                      <width>120</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>Umu-launcher</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Wine</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Lutris</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Link and launch Lutris</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Link and launch Steam</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Link and exit</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Just link</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Bash</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacerDefaultRunnerType">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacerGlobalSetup">
                  <property name="orientation">
                   <enum>Qt::Orientation::Vertical</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
-                   <height>40</height>
+                   <height>10000</height>
                   </size>
                  </property>
                 </spacer>
+               </item>
+               <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignBottom">
+                <widget class="QLabel" name="labelGlobalSetupPicture">
+                 <property name="maximumSize">
+                  <size>
+                   <width>451</width>
+                   <height>338</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string notr="true"/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap resource="resources.qrc">:/pictures/Lara4.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
                </item>
                <item alignment="Qt::AlignmentFlag::AlignLeft">
                 <widget class="QWidget" name="globalControl" native="true">
@@ -1743,6 +2012,9 @@
                     <property name="text">
                      <string>Save</string>
                     </property>
+                    <property name="icon">
+                     <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -1755,6 +2027,9 @@
                     </property>
                     <property name="text">
                      <string>Reset</string>
+                    </property>
+                    <property name="icon">
+                     <iconset theme="QIcon::ThemeIcon::DocumentRevert"/>
                     </property>
                    </widget>
                   </item>
@@ -1786,7 +2061,13 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/pictures/Lara.jpg&quot; width=&quot;454&quot; height=&quot;616&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string notr="true"/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap resource="resources.qrc">:/pictures/Lara.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -1797,8 +2078,8 @@
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
-                   <width>20</width>
-                   <height>40</height>
+                   <width>0</width>
+                   <height>0</height>
                   </size>
                  </property>
                 </spacer>
@@ -1809,6 +2090,13 @@
             <item>
              <widget class="QWidget" name="setupInput" native="true">
               <layout class="QVBoxLayout" name="verticalLayout_9">
+               <item>
+                <widget class="QLabel" name="labelSetupDirectoryInfo">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;The path must not contain escape sequences.&lt;br/&gt;For example, “TombRaider\ \(III\)/” should be written as “TombRaider (III)/”.&lt;br/&gt;It should also be a full path, meaning it must start with “/”.&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Example: &lt;span style=&quot; font-family:'monospace';&quot;&gt;/home/lara/.steam/steam/steamapps/common/TombRaider (III)/&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;The default values should already be correct.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
                <item>
                 <widget class="QWidget" name="gamePathContainer" native="true">
                  <property name="maximumSize">
@@ -1826,7 +2114,14 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="gamePathEdit"/>
+                   <widget class="QLineEdit" name="gamePathEdit">
+                    <property name="minimumSize">
+                     <size>
+                      <width>620</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -1834,7 +2129,43 @@
                <item>
                 <widget class="QLabel" name="labelGameDirectoryInfo">
                  <property name="text">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;The path must be without escape sequences. &lt;/p&gt;&lt;p align=&quot;center&quot;&gt;For example “TombRaider\ \(III\)/” should be “TombRaider (III)/”&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;and it should be a full path. That is it should start with “/”.&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;Ex. /home/lara/.steam/steam/steamapps/common/TombRaider (III)/&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;This is usually the Steam “common” folder:&lt;br/&gt;&lt;span style=&quot; font-family:'monospace';&quot;&gt;/home/username/.steam/steam/steamapps/common&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="extraGamePathContainer" native="true">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>42</height>
+                  </size>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_20">
+                  <item>
+                   <widget class="QLabel" name="extraGamePathLabel">
+                    <property name="text">
+                     <string>Extra Game Directory</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="extraGamePathEdit">
+                    <property name="minimumSize">
+                     <size>
+                      <width>588</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="labelExtraGameDirectoryInfo">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;This is where you would install Core Design games from a CD:&lt;br/&gt;&lt;span style=&quot; font-family:'monospace';&quot;&gt;/home/username/.wine/drive_c/Program Files (x86)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
@@ -1855,7 +2186,14 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="levelPathEdit"/>
+                   <widget class="QLineEdit" name="levelPathEdit">
+                    <property name="minimumSize">
+                     <size>
+                      <width>624</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
@@ -1870,16 +2208,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial'; color:#000000;&quot;&gt;In this directory custom maps and backups of game files will be saved.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial'; color:#000000;&quot;&gt;trle.net’s custom maps each have there own game directory&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial'; color:#000000;&quot;&gt;with custom files and most likely a different build/modification for every map.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="setOptions">
-                 <property name="text">
-                  <string>set options</string>
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;In this directory, custom level and game save files will be stored.&lt;br /&gt;A database for indexing file and level data will also be stored here.&lt;br /&gt;Each custom map from trle.net has its own game directory,&lt;br /&gt;with custom asset files and various builds or modifications for every map.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
@@ -1890,14 +2219,43 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
-                   <width>20</width>
-                   <height>40</height>
+                   <width>0</width>
+                   <height>0</height>
                   </size>
                  </property>
                 </spacer>
                </item>
+               <item>
+                <widget class="QPushButton" name="setOptions">
+                 <property name="maximumSize">
+                  <size>
+                   <width>242</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>set options</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacerSetupOptions">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Policy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -1945,7 +2303,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;h3 style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:large; font-weight:600;&quot;&gt;About&lt;/span&gt;&lt;/h3&gt;
 &lt;h4 style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:medium; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;&lt;/h4&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Welcome to the &lt;span style=&quot; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;! This application is designed to provide a streamlined and convenient way to launch your favorite Tomb Raider games on Linux. Currently, the launcher supports Tomb Raider 1-5, trle.net and TEN at the moment.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Welcome to the &lt;span style=&quot; font-weight:600;&quot;&gt;Tomb Raider Linux Launcher&lt;/span&gt;! This application is designed to provide a streamlined and convenient way to launch your favorite Tomb Raider games on Linux. Currently, the launcher supports Tomb Raider 1-6 everything from Core Design, trle.net and TEN at the moment.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Our aim is to enhance your gaming experience by offering a user-friendly interface that simplifies game management and launching. The launcher is still a work in progress, and we are actively working on adding support for more games and improving functionality.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Stay tuned for updates and new features as we continue to develop and refine the Tomb Raider Linux Launcher. Your feedback and suggestions are always welcome to help us create the best possible tool for Tomb Raider fans.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Thank you for using the Tomb Raider Linux Launcher!&lt;/p&gt;
@@ -1975,6 +2333,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <header>LevelViewList.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

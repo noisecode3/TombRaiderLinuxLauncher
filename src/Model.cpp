@@ -172,6 +172,9 @@ void Model::run(RunnerOptions options) {
         m_runner.addArguments(QStringList() << arument);
     } else if (options.command == BASH) {
         m_runner.addArguments(QStringList() << "start.sh");
+        if (options.setup) {
+            m_runner.addArguments(QStringList() << "-setup");
+        }
     }
 
     m_runner.setCurrentWorkingDirectory(path.get());
