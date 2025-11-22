@@ -19,7 +19,7 @@
 #include <QtCore>
 #include <QByteArray>
 #include <QDataStream>
-#include <QtLogging>
+#include <qlogging.h>
 #include "../miniz/miniz.h"  // IWYU pragma: keep
 #include "../miniz/miniz_zip.h"
 #include "../src/gameFileTreeData.hpp"

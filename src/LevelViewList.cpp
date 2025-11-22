@@ -195,65 +195,114 @@ bool LevelListProxy::getInstalled(const QModelIndex &i) const {
 }
 
 void LevelListProxy::setClassFilter(const QString &c) {
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#else
     beginFilterChange();
+#endif
     if (c == m_all) {
         m_class = 0;
     } else {
         m_class = StaticData::getClassID().at(c);
     }
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+    invalidateFilter();
+#else
     endFilterChange();
+#endif
 }
 
 void LevelListProxy::setTypeFilter(const QString &t) {
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#else
     beginFilterChange();
+#endif
     if (t == m_all) {
         m_type = 0;
     } else {
         m_type = StaticData::getTypeID().at(t);
     }
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+    invalidateFilter();
+#else
     endFilterChange();
+#endif
 }
 
 void LevelListProxy::setDifficultyFilter(const QString &d) {
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#else
     beginFilterChange();
+#endif
     if (d == m_all) {
         m_difficulty = 0;
     } else {
         m_difficulty = StaticData::getDifficultyID().at(d);
     }
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+    invalidateFilter();
+#else
     endFilterChange();
+#endif
 }
 
 void LevelListProxy::setDurationFilter(const QString &d) {
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#else
     beginFilterChange();
+#endif
     if(d == m_all) {
         m_duration = 0;
     } else {
         m_duration = StaticData::getDurationID().at(d);
     }
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+    invalidateFilter();
+#else
     endFilterChange();
+#endif
 }
 
 void LevelListProxy::setSearchFilter(const QString &s) {
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#else
     beginFilterChange();
+#endif
     m_search = s;
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+    invalidateFilter();
+#else
     endFilterChange();
+#endif
 }
 
 void LevelListProxy::setSearchType(const QString &t) {
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#else
     beginFilterChange();
+#endif
     if (t == "Level") {
         m_searchType = 0;
     } else if (t ==  "Author") {
         m_searchType = 1;
     }
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+    invalidateFilter();
+#else
     endFilterChange();
+#endif
 }
 
 void LevelListProxy::setInstalledFilter(bool on) {
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#else
     beginFilterChange();
+#endif
     m_installed = on;
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+    invalidateFilter();
+#else
     endFilterChange();
+#endif
 }
 
 void LevelListProxy::setSortMode(SortMode mode) {

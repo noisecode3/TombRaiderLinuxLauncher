@@ -69,17 +69,26 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure")
     )
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure")
-    message(STATUS "Running autoconf to prepare libbacktrace")
-    execute_process(
-        COMMAND bash "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure"
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/libbacktrace"
-        RESULT_VARIABLE AUTOCONF_RESULT
-    )
-    if(NOT AUTOCONF_RESULT EQUAL 0)
-        message(
-            FATAL_ERROR
-            "Autoconf failed with exit code ${AUTOCONF_RESULT}"
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/Makefile")
+        message(STATUS "Running autoconf to prepare libbacktrace")
+        execute_process(
+            COMMAND bash "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure"
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/libbacktrace"
+            RESULT_VARIABLE AUTOCONF_RESULT
         )
+        if(NOT AUTOCONF_RESULT EQUAL 0)
+            message(
+                FATAL_ERROR
+                "Autoconf failed with exit code ${AUTOCONF_RESULT}"
+            )
+        endif()
+        if(UBUNTU)
+            execute_process(
+                COMMAND bash -c
+                "sed -i 's|^SHELL = /bin/sh$|SHELL = /bin/bash|' Makefile"
+                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/libbacktrace"
+            )
+        endif()
     endif()
     execute_process(
         COMMAND make
@@ -176,13 +185,24 @@ set(INCLUDE_DIR
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(COMPILE_MICROS)
+
+if(UBUNTU)
+    list(APPEND COMPILE_MICROS
+        UBUNTU
+    )
+endif()
+
 if(TEST)
     enable_testing()
     set(SOURCES ${SOURCES_MC} ${SOURCES_TESTS})
     add_executable(${PROJECT_NAME}Test ${SOURCES})
     add_test(NAME ${PROJECT_NAME}Test COMMAND ${PROJECT_NAME}Test)
     target_link_libraries(${PROJECT_NAME}Test PUBLIC ${LINK_COMMON} Qt6::Test)
-    target_include_directories(${PROJECT_NAME}Test PRIVATE ${INCLUDE_DIR} test)
+    target_include_directories(${PROJECT_NAME}Test PRIVATE ${INCLUDE_DIR}
+        ${COMPILE_MICROS}
+        test
+    )
     target_compile_definitions(${PROJECT_NAME}Test PRIVATE TEST)
     set_target_properties(${PROJECT_NAME}Test PROPERTIES
         CXX_STANDARD 17
@@ -206,6 +226,7 @@ else()
     add_executable(${PROJECT_NAME} ${SOURCES})
     target_link_libraries(${PROJECT_NAME} PUBLIC ${LINK_COMMON} ${LINK_GUI})
     target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ${COMPILE_MICROS})
     set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON

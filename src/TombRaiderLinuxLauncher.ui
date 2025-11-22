@@ -1797,9 +1797,6 @@
                  <property name="selectionMode">
                   <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
                  </property>
-                 <property name="supportedDragActions">
-                  <set>Qt::DropAction::IgnoreAction</set>
-                 </property>
                  <attribute name="horizontalHeaderVisible">
                   <bool>true</bool>
                  </attribute>
