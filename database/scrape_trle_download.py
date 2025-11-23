@@ -371,7 +371,7 @@ def get_zip_file_info(lid):
 
             elif redirect_url.startswith("https://trcustoms.org/levels/") and \
                     redirect_url.split("/")[-1].isdigit():
-                api_url = f"https://trcustoms.org/api/levels/{redirect_url.split("/")[-1]}/"
+                api_url = f"https://trcustoms.org/api/levels/{redirect_url.split('/')[-1]}/"
                 trcustoms_level_dict = scrape_common.get_json(api_url)
                 files = [_get_trcustoms_download_info(trcustoms_level_dict)]
 
