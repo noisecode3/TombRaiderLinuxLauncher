@@ -249,7 +249,7 @@
                           <property name="maximumSize">
                            <size>
                             <width>65</width>
-                            <height>16777215</height>
+                            <height>1024</height>
                            </size>
                           </property>
                           <item>
@@ -331,7 +331,7 @@
                           <property name="maximumSize">
                            <size>
                             <width>150</width>
-                            <height>16777215</height>
+                            <height>1024</height>
                            </size>
                           </property>
                           <item>
@@ -568,7 +568,7 @@
                           <property name="maximumSize">
                            <size>
                             <width>150</width>
-                            <height>16777215</height>
+                            <height>1024</height>
                            </size>
                           </property>
                           <item>
@@ -634,7 +634,7 @@
                           <property name="maximumSize">
                            <size>
                             <width>100</width>
-                            <height>16777215</height>
+                            <height>1024</height>
                            </size>
                           </property>
                           <item>
@@ -1731,7 +1731,7 @@
                     <property name="maximumSize">
                      <size>
                       <width>160</width>
-                      <height>16777215</height>
+                      <height>1024</height>
                      </size>
                     </property>
                     <property name="text">
@@ -1750,7 +1750,7 @@
                     <property name="maximumSize">
                      <size>
                       <width>160</width>
-                      <height>16777215</height>
+                      <height>1024</height>
                      </size>
                     </property>
                     <property name="text">
@@ -1971,7 +1971,7 @@
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
-                   <height>10000</height>
+                   <height>10</height>
                   </size>
                  </property>
                 </spacer>
@@ -2003,7 +2003,7 @@
                     <property name="maximumSize">
                      <size>
                       <width>160</width>
-                      <height>16777215</height>
+                      <height>1024</height>
                      </size>
                     </property>
                     <property name="text">
@@ -2019,7 +2019,7 @@
                     <property name="maximumSize">
                      <size>
                       <width>160</width>
-                      <height>16777215</height>
+                      <height>1024</height>
                      </size>
                     </property>
                     <property name="text">
@@ -2075,8 +2075,8 @@
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
-                   <width>0</width>
-                   <height>0</height>
+                   <width>20</width>
+                   <height>40</height>
                   </size>
                  </property>
                 </spacer>
@@ -2098,7 +2098,7 @@
                 <widget class="QWidget" name="gamePathContainer" native="true">
                  <property name="maximumSize">
                   <size>
-                   <width>16777215</width>
+                   <width>1024</width>
                    <height>42</height>
                   </size>
                  </property>
@@ -2134,7 +2134,7 @@
                 <widget class="QWidget" name="extraGamePathContainer" native="true">
                  <property name="maximumSize">
                   <size>
-                   <width>16777215</width>
+                   <width>1024</width>
                    <height>42</height>
                   </size>
                  </property>
@@ -2170,7 +2170,7 @@
                 <widget class="QWidget" name="levelPathContainer" native="true">
                  <property name="maximumSize">
                   <size>
-                   <width>16777215</width>
+                   <width>1024</width>
                    <height>42</height>
                   </size>
                  </property>
@@ -2187,7 +2187,7 @@
                     <property name="minimumSize">
                      <size>
                       <width>624</width>
-                      <height>0</height>
+                      <height>10</height>
                      </size>
                     </property>
                    </widget>
@@ -2216,8 +2216,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
-                   <width>0</width>
-                   <height>0</height>
+                   <width>20</width>
+                   <height>40</height>
                   </size>
                  </property>
                 </spacer>
@@ -2227,7 +2227,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <property name="maximumSize">
                   <size>
                    <width>242</width>
-                   <height>16777215</height>
+                   <height>1024</height>
                   </size>
                  </property>
                  <property name="text">
@@ -2248,8 +2248,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>0</width>
-                <height>0</height>
+                <width>20</width>
+                <height>40</height>
                </size>
               </property>
              </spacer>

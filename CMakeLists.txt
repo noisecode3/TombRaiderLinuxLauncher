@@ -82,13 +82,11 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure")
                 "Autoconf failed with exit code ${AUTOCONF_RESULT}"
             )
         endif()
-        if(UBUNTU)
-            execute_process(
-                COMMAND bash -c
-                "sed -i 's|^SHELL = /bin/sh$|SHELL = /bin/bash|' Makefile"
-                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/libbacktrace"
-            )
-        endif()
+        execute_process(
+            COMMAND bash -c
+            "sed -i 's|^SHELL = /bin/sh$|SHELL = /bin/bash|' Makefile"
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/libbacktrace"
+        )
     endif()
     execute_process(
         COMMAND make
