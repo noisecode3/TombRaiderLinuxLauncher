@@ -198,23 +198,49 @@ def list_downloads(lid):
 
 
 class TailSync:
-    """Match sync 5 records tails and add new records."""
+    """Match sync record rows and add new records or delete old."""
 
     def __init__(self):
         """Set default member variables."""
         self.local = []
         self.trle = []
 
-        self.local_offset = 0
-        self.trle_offset = 0
+        self.local_page_offset = 0
+        self.trle_page_offset = 0
 
     def match_record(self, a, b):
         """trle.net record data matching."""
-        keys = ['trle_id', 'author', 'title', 'difficulty', 'duration', 'class', 'type', 'release']
+        keys = [
+            'trle_id',
+            #  'author',
+            'title',
+            'difficulty',
+            'duration',
+            'class',
+            'type',
+            'release'
+        ]
         return all(a.get(k) == b.get(k) for k in keys)
 
-    def match_tails(self, match_size=5, max_pages=100):
-        """Find a tail match between local and trle databases based ids."""
+    def match_tails(self, match_size=4, max_pages=20):
+        """
+        Find a tail match between local and trle databases based ids.
+
+        This checks every level id in orderd steps aginst a batch of local ids.
+        When it finds ONE of at least match_size*5 known local ids then it
+        jumps forward that number of ids, but now there is a problem, trle.net
+        can have deleted previous known level ids. So we have to go back
+        a number of steps to match the tails. This is true becouse trle will
+        not add records in between old records, only remove or update.
+        The end of the tail is the point where some records needs to be chacked
+        again, updated, deleted or added to the local database. We match aginst
+        a batch of known ids not in a specific sequence but based on a jump,
+        not order.
+
+        match_size is the tail=n*5 and overshot=n*2+1
+        tail is the number of most recent ids from the local databases
+        overshot is the steps the alogorithm look backwards after the jump
+        """
 
         def get_local_page_and_extend(offset):
             con = database_make_connection()
@@ -228,66 +254,67 @@ class TailSync:
             self.trle.extend(page)
             return len(page)
 
-        def ensure_data(index_local, index_trle):
-            """Ensure enough items are available from each database."""
-            # Load local pages if needed
-            while index_local + match_size > len(self.local):
-                self.local_offset += 1
-                print(f"Loading local page at offset {self.local_offset}")
-                if self.local_offset >= max_pages or \
-                        get_local_page_and_extend(self.local_offset) == 0:
-                    return False
-
-            # Load trle pages if needed
-            while index_trle + match_size > len(self.trle):
-                self.trle_offset += 1
-                print(f"Loading trle page at offset {self.trle_offset}")
-                if self.trle_offset >= max_pages or get_trle_page_and_extend(self.trle_offset) == 0:
-                    return False
-
-            return True
-
-        def ids_match(offset_local, offset_trle):
-            """Compare sequences of trle_ids from both lists."""
-            if not ensure_data(offset_local, offset_trle):
-                return False
-
-            for i in range(match_size):
+        def batch_ids_match(match_size, offset_trle):
+            """Compare a batch of local trle ids to one online trle id."""
+            for i in range(match_size*5):
                 try:
-                    local_id = int(self.local[offset_local + i]['trle_id'])
-                    trle_id = int(self.trle[offset_trle + i]['trle_id'])
-                    if local_id != trle_id:
-                        return False
+                    local_id = int(self.local[i]['trle_id'])
+                    trle_id = int(self.trle[offset_trle]['trle_id'])
+                    if local_id == trle_id:
+                        return True
                 except IndexError:
+                    print(f"IndexError at local[{i}] and trle[{offset_trle}]")
                     return False
-            return True
+            return False
 
+        def overshot_ids_match(match_size, offset_trle):
+            """Compare one to one backwards from local trle ids to one online trle id."""
+            for i in range(match_size*2+1):
+                for j in range(match_size*5):
+                    try:
+                        overshot_index = offset_trle + match_size*5 - i - 1
+                        trle_id = int(self.trle[overshot_index]['trle_id'])
+                        local_id = int(self.local[match_size*5 - j - 1]['trle_id'])
+                        if local_id == trle_id:
+                            print(f"Match found at local[{match_size*5 - j - 1}] and trle[{overshot_index}]")
+                            return (match_size*5 - j - 1, overshot_index)
+                    except IndexError:
+                        print(f"IndexError at local[{match_size*5 - j}]"
+                              " and trle[{offset_trle + match_size*5 - i}]")
+                        return None
+            return None
         # Load initial data
-        get_local_page_and_extend(self.local_offset)
-        get_trle_page_and_extend(self.trle_offset)
+        get_local_page_and_extend(self.local_page_offset*20)
+
+        # Load local pages if needed
+        while match_size*5 > len(self.local):
+            self.local_page_offset += 1
+            print(f"Loading local page at offset {self.local_page_offset}")
+            if self.local_page_offset >= max_pages or \
+                    get_local_page_and_extend(self.local_page_offset*20) == 0:
+                break
+
+        get_trle_page_and_extend(self.trle_page_offset*20)
 
         i = 0
         while True:
-            if i + match_size > len(self.local):
-                # Try to load more local data
-                if not ensure_data(i, 0):
+            # If we run out of trle data, load more
+            if match_size*5 + i > len(self.trle):
+                self.trle_page_offset += 1
+                print(f"Loading trle page at offset {self.trle_page_offset}")
+                if self.trle_page_offset >= max_pages or \
+                        get_trle_page_and_extend(self.trle_page_offset*20) == 0:
                     break
 
-            for j in range(len(self.trle) - match_size + 1):
-                if ids_match(i, j):
-                    print(f"Match found at local[{i}] and trle[{j}]")
-                    return (i, j)
+            if batch_ids_match(match_size, i):
+                id_match = overshot_ids_match(match_size, i)
+                if id_match is not None:
+                    return id_match
+
             i += 1
 
-            # If we run out of trle data, load more
-            if len(self.trle) - match_size < 1:
-                added = get_trle_page_and_extend(self.trle_offset + 1)
-                self.trle_offset += 1
-                if added == 0 or self.trle_offset >= max_pages:
-                    break
-
         print("❌ No match found after paging.")
-        return None
+        sys.exit(1)
 
     def run(self):
         """
@@ -297,35 +324,74 @@ class TailSync:
         2. Add new records from remote page after the match.
         3. Update or delete unmatched local records after the match.
         """
-        local_start, remote_start = self.match_tails()
-        tail_count = 5
+        con = database_make_connection()
 
-        # Stage 1: Check and update mismatched records
-        for i in range(tail_count):
+        def check_local_trle_id(trle_id):
+            result = tombll_read.database_level_id(trle_id, con)
+            if isinstance(result, int):
+                return True
+            return False
+
+        def has_multivalued_field(trle_id):
+            result = tombll_read.has_multivalued_field(trle_id, con)
+            if isinstance(result, int):
+                return result
+            return 0
+
+        def go_to_next_id(index, array):
+            current_id = array[index]['trle_id']
+            i = index
+
+            while i < len(array) and array[i]['trle_id'] == current_id:
+                i -= 1
+
+            return i
+
+        # get a tail of local records matching a point on trle records
+        # from old known records to new, when local_start == 0 we have
+        # only new records left.
+        local_start, remote_start = self.match_tails()
+
+        # update mismatched and remove missing records from trle to local
+        i = local_start
+        j = remote_start
+        while 0 < i:
             try:
-                local = self.local[local_start + i]
-                remote = self.trle[remote_start + i]
+                local = self.local[i]
+                remote = self.trle[j]
             except IndexError:
-                print(f"IndexError self.local[{local_start + i}] self.trle[{remote_start + i}]")
+                print(f"IndexError self.local[{i}] self.trle[{j}]")
                 sys.exit(1)
 
             if not self.match_record(local, remote):
-                update_level(local['trle_id'])
+                if local['trle_id'] == remote['trle_id']:
+                    # some attributes was chagned we update
+                    # this usally happens when a level is new
+                    update_level(local['trle_id'])
+                else:
+                    # we asume the level was deleted but it might
+                    # apear as a new level later (moved record)
+                    remove_level(local['trle_id'])
 
-        # Stage 2: Add new remote records
-        existing_ids = {ids['trle_id'] for ids in self.local}
-        for remote in self.trle[:remote_start]:
-            if remote['trle_id'] not in existing_ids:
+            # we can hit a multivalued row usually its just different authors
+            # but could be class also, but its rare. or we go just one record step
+            i = go_to_next_id(i, self.local)
+            j = go_to_next_id(j, self.trle)
+
+        while 0 < j:
+            j -= 1
+            try:
+                remote = self.trle[j]
+            except IndexError:
+                print(f"IndexError self.trle[{j}]")
+                sys.exit(1)
+
+            if check_local_trle_id(remote['trle_id']):
+                update_level(remote['trle_id'])
+            else:
                 add_level_card(remote['trle_id'])
 
-        # Stage 3: Check unmatched local records
-        for local in self.local[:local_start]:
-            exists = any(r['trle_id'] == local['trle_id'] for r in self.trle)
-            if exists:
-                update_level(local['trle_id'])
-            else:
-                remove_level(local['trle_id'])
-
+        con.close()
 
 
 def sync_cards():

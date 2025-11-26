@@ -29,8 +29,6 @@ def database_author_list(level_id, con):
         JOIN Author ON AuthorList.authorID = Author.AuthorID
         WHERE AuthorList.levelID = ?
     '''
-
-    # Fetch all rows from the executed query
     return tombll_common.query_return_everything(query, (level_id, ), con)
 
 
@@ -56,8 +54,6 @@ def database_level_list(con):
         JOIN Author ON AuthorList.authorID = Author.AuthorID
         GROUP BY Level.LevelID
     '''
-
-    # Fetch all rows from the executed query
     return tombll_common.query_return_everything(query, None, con)
 
 
@@ -84,8 +80,6 @@ def database_zip_list(level_id, con):
         WHERE Level.LevelID = ?
         GROUP BY Zip.ZipID
     '''
-
-    # Fetch all rows from the executed query
     return tombll_common.query_return_everything(query, (level_id, ), con)
 
 
@@ -109,6 +103,35 @@ def database_level_id(trle_id, con):
         WHERE Info.trleID = ?
     '''
     return tombll_common.query_return_id(query, (trle_id, ), con)
+
+
+def has_multivalued_field(trle_id, con):
+    """
+    Get level number of records form TRLE lid that would show on a page.
+
+    This function queries the 'Info' table using the given `trle_id` to determine
+    the number of rows.
+
+    Args:
+        trle_id (int or str): The TRLE level ID to target.
+        con (sqlite3.Connection): An active SQLite database connection.
+
+    Returns:
+        int: rows for a level ID if it exists in the database, None otherwise.
+    """
+    query = '''
+        SELECT COUNT(*)
+        FROM Info
+        INNER JOIN Level ON (Info.InfoID = Level.infoID)
+        INNER JOIN AuthorList ON (Level.LevelID = AuthorList.levelID)
+        INNER JOIN Author ON (Author.AuthorID = AuthorList.authorID)
+        LEFT JOIN InfoDifficulty ON (InfoDifficulty.InfoDifficultyID = Info.difficulty)
+        LEFT JOIN InfoDuration ON (InfoDuration.InfoDurationID = Info.duration)
+        INNER JOIN InfoType ON (InfoType.InfoTypeID = Info.type)
+        LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
+        WHERE Info.trleID = ?
+    '''
+    return tombll_common.query_return_everything(query, (trle_id, ), con)
 
 
 def database_author_ids(level_id, con):
@@ -178,8 +201,6 @@ def database_picture_ids(level_id, con):
         JOIN Screens ON Level.LevelID = Screens.levelID
         WHERE Level.LevelID = ?
     '''
-
-    # Fetch all rows from the executed query
     return tombll_common.query_return_everything(query, (level_id, ), con)
 
 
@@ -212,16 +233,16 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
     page['offset'] = offset
     result = []
 
-    page['records_total'] = tombll_common.query_return_everything("""
+    page['records_total'] = tombll_common.query_return_everything('''
         SELECT COUNT(*)
         FROM Info
         INNER JOIN Level ON Info.InfoID = Level.infoID
         INNER JOIN AuthorList ON Level.LevelID = AuthorList.levelID
         INNER JOIN Author ON Author.AuthorID = AuthorList.authorID
-    """, None, con)[0][0]
+    ''', None, con)[0][0]
 
     if sort_latest_first:
-        result = tombll_common.query_return_everything("""
+        result = tombll_common.query_return_everything('''
             SELECT
                 Info.trleID,
                 Author.value,
@@ -241,9 +262,9 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
             LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
             ORDER BY Info.release DESC, Info.trleID DESC
             LIMIT ? OFFSET ?
-            """, (limit, offset), con)
+            ''', (limit, offset), con)
     else:
-        result = tombll_common.query_return_everything("""
+        result = tombll_common.query_return_everything('''
             SELECT
                 Info.trleID,
                 Author.value,
@@ -263,7 +284,7 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
             LEFT JOIN InfoClass ON (InfoClass.InfoClassID = Info.class)
             ORDER BY Info.release ASC, Info.trleID ASC
             LIMIT ? OFFSET ?
-            """, (limit, offset), con)
+            ''', (limit, offset), con)
 
     for row in result:
         level = data_factory.make_trle_level_data()
@@ -282,7 +303,7 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
 
 def trle_cover_picture(trle_id, con):
     """Get TRLE cover picture."""
-    return tombll_common.query_return_everything("""
+    query = '''
         SELECT
             Picture.data
         FROM Info
@@ -290,4 +311,5 @@ def trle_cover_picture(trle_id, con):
         INNER JOIN Screens ON (Level.LevelID = Screens.levelID)
         INNER JOIN Picture ON (Screens.pictureID = Picture.PictureID)
         WHERE Info.trleID = ? AND Screens.position = 0
-        """, (trle_id, ), con)[0][0]
+    '''
+    return tombll_common.query_return_everything(query, (trle_id, ), con)[0][0]
