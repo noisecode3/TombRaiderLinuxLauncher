@@ -1755,18 +1755,6 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>115</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>115</height>
-                  </size>
-                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
