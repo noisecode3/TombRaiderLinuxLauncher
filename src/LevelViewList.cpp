@@ -195,7 +195,7 @@ bool LevelListProxy::getInstalled(const QModelIndex &i) const {
 }
 
 void LevelListProxy::setClassFilter(const QString &c) {
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 #else
     beginFilterChange();
 #endif
@@ -204,7 +204,7 @@ void LevelListProxy::setClassFilter(const QString &c) {
     } else {
         m_class = StaticData::getClassID().at(c);
     }
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     invalidateFilter();
 #else
     endFilterChange();
@@ -212,7 +212,7 @@ void LevelListProxy::setClassFilter(const QString &c) {
 }
 
 void LevelListProxy::setTypeFilter(const QString &t) {
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 #else
     beginFilterChange();
 #endif
@@ -221,7 +221,7 @@ void LevelListProxy::setTypeFilter(const QString &t) {
     } else {
         m_type = StaticData::getTypeID().at(t);
     }
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     invalidateFilter();
 #else
     endFilterChange();
@@ -229,7 +229,7 @@ void LevelListProxy::setTypeFilter(const QString &t) {
 }
 
 void LevelListProxy::setDifficultyFilter(const QString &d) {
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 #else
     beginFilterChange();
 #endif
@@ -238,7 +238,7 @@ void LevelListProxy::setDifficultyFilter(const QString &d) {
     } else {
         m_difficulty = StaticData::getDifficultyID().at(d);
     }
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     invalidateFilter();
 #else
     endFilterChange();
@@ -246,7 +246,7 @@ void LevelListProxy::setDifficultyFilter(const QString &d) {
 }
 
 void LevelListProxy::setDurationFilter(const QString &d) {
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 #else
     beginFilterChange();
 #endif
@@ -255,7 +255,7 @@ void LevelListProxy::setDurationFilter(const QString &d) {
     } else {
         m_duration = StaticData::getDurationID().at(d);
     }
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     invalidateFilter();
 #else
     endFilterChange();
@@ -263,12 +263,12 @@ void LevelListProxy::setDurationFilter(const QString &d) {
 }
 
 void LevelListProxy::setSearchFilter(const QString &s) {
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 #else
     beginFilterChange();
 #endif
     m_search = s;
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     invalidateFilter();
 #else
     endFilterChange();
@@ -276,7 +276,7 @@ void LevelListProxy::setSearchFilter(const QString &s) {
 }
 
 void LevelListProxy::setSearchType(const QString &t) {
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 #else
     beginFilterChange();
 #endif
@@ -285,7 +285,7 @@ void LevelListProxy::setSearchType(const QString &t) {
     } else if (t ==  "Author") {
         m_searchType = 1;
     }
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     invalidateFilter();
 #else
     endFilterChange();
@@ -293,12 +293,12 @@ void LevelListProxy::setSearchType(const QString &t) {
 }
 
 void LevelListProxy::setInstalledFilter(bool on) {
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
 #else
     beginFilterChange();
 #endif
     m_installed = on;
-#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 2)
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     invalidateFilter();
 #else
     endFilterChange();
