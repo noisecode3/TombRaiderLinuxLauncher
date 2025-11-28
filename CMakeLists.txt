@@ -18,13 +18,31 @@ find_package(Qt6 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
 
 find_package(CURL REQUIRED)
 
-# Add miniz as a subdirectory
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
-    message(STATUS "Submodule 'libs/miniz' not found. Updating submodules...")
+# Static libs
+function(update_submodules)
     execute_process(
         COMMAND git submodule update --init --recursive
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        RESULT_VARIABLE res1
     )
+    if(NOT res1 EQUAL 0)
+        message(FATAL_ERROR "Failed to update submodules.")
+    endif()
+
+    execute_process(
+        COMMAND git config submodule.libs/miniz.ignore all
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+    execute_process(
+        COMMAND git config submodule.libs/libbacktrace.ignore all
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endfunction()
+
+# Add miniz as a subdirectory
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
+    message(STATUS "Submodule 'libs/miniz' not found. Updating submodules...")
+    update_submodules()
     file(READ "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" MINIZ_CMAKE)
     string(REPLACE "cmake_minimum_required(VERSION 3.5)"
         "cmake_minimum_required(VERSION 3.16)"
@@ -40,10 +58,7 @@ add_subdirectory(libs/miniz)
 # Add LIEF as a subdirectory
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/LIEF/CMakeLists.txt")
     message(STATUS "Submodule 'libs/LIEF' not found. Updating submodules...")
-    execute_process(
-        COMMAND git submodule update --init --recursive
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    )
+    update_submodules()
 endif()
 set(LIEF_INSTALL OFF CACHE BOOL "Disable installation of LIEF")
 set(LIEF_PYTHON_API OFF)
@@ -63,10 +78,7 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure")
     message(STATUS
         "Submodule 'libs/libbacktrace' not found. Updating submodules..."
     )
-    execute_process(
-        COMMAND git submodule update --init --recursive
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    )
+    update_submodules()
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/configure")
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/libbacktrace/Makefile")
@@ -258,6 +270,16 @@ if(NOT TEST)
         ${CMAKE_SOURCE_DIR}/database/tombll_update.py
         ${CMAKE_SOURCE_DIR}/database/tombll_view.py
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
+    )
+
+    install(FILES
+        ${CMAKE_SOURCE_DIR}/resources/TombRaiderLinuxLauncher.desktop
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications
+    )
+
+    install(
+        FILES ${CMAKE_SOURCE_DIR}/resources/TombRaiderLinuxLauncher.png
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/1024x1024/apps
     )
 
     if(NOT NO_DATABASE)

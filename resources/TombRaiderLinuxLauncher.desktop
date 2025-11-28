@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Tomb Raider Linux Launcher
+Comment=Play Tomb Raider Custom Levels and Tomb Raider Core Design games
+Exec=%h/.local/bin/TombRaiderLinuxLauncher
+Icon=TombRaiderLinuxLauncher
+Terminal=false
+Type=Application
+Categories=Game;
