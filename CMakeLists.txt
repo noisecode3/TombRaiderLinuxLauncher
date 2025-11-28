@@ -272,15 +272,30 @@ if(NOT TEST)
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
     )
 
+    set(RESOURCES_SOURCE "${CMAKE_SOURCE_DIR}/resources")
+    set(RESOURCES_BINARY "${CMAKE_BINARY_DIR}/resources")
+
+    configure_file(
+        ${RESOURCES_SOURCE}/applications/TombRaiderLinuxLauncher.desktop
+        ${RESOURCES_BINARY}/applications/TombRaiderLinuxLauncher.desktop
+        @ONLY
+    )
+
+
     install(FILES
-        ${CMAKE_SOURCE_DIR}/resources/TombRaiderLinuxLauncher.desktop
+        ${RESOURCES_BINARY}/applications/TombRaiderLinuxLauncher.desktop
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications
     )
 
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/resources/TombRaiderLinuxLauncher.png
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/1024x1024/apps
-    )
+    set(ICON_SIZES 1024 512 256 192 128 96 72 64 48 40 36 32 24 22 20 16)
+    foreach(RES IN LISTS ICON_SIZES)
+        set(ICON_SOURCE "${RESOURCES_SOURCE}/icons/hicolor/${RES}x${RES}")
+        set(ICON_OUT "${ICON_SOURCE}/apps/TombRaiderLinuxLauncher.png")
+        set(ICON_DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor")
+        install(FILES ${ICON_OUT}
+            DESTINATION ${ICON_DESTINATION}/${RES}x${RES}/apps
+        )
+    endforeach()
 
     if(NOT NO_DATABASE)
         install(FILES
