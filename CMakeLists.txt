@@ -275,12 +275,12 @@ if(NOT TEST)
     set(RESOURCES_SOURCE "${CMAKE_SOURCE_DIR}/resources")
     set(RESOURCES_BINARY "${CMAKE_BINARY_DIR}/resources")
 
+    set(INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
     configure_file(
         ${RESOURCES_SOURCE}/applications/TombRaiderLinuxLauncher.desktop
         ${RESOURCES_BINARY}/applications/TombRaiderLinuxLauncher.desktop
         @ONLY
     )
-
 
     install(FILES
         ${RESOURCES_BINARY}/applications/TombRaiderLinuxLauncher.desktop
