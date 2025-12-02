@@ -113,7 +113,7 @@ struct ExecutableNames {
             {3, "tomb3.exe"},
             {4, "tomb4.exe"},
             {5, "PCTOMB5.EXE"},
-            {6, "Launcher.exe"},
+            {6, "TombEngine.exe"},
             {7, "tombub.exe"},
             {8, "tomb2.EXE"},
             {9, "tr3gold.exe"},

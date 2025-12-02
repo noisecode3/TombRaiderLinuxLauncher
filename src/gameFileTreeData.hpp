@@ -66,7 +66,11 @@ struct StaticTrees {
                     "DATA",
                 }),
             },
-            QVector<GameFileTree*>{},  // [6] Placeholder (empty)
+            QVector<GameFileTree*>{  // [6] TEN
+                new GameFileTree(QStringList{
+                    "PLUGINS",
+                }),
+            },
         }}
     {}
     ~StaticTrees() {

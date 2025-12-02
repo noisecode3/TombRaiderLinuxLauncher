@@ -14,9 +14,6 @@ cmake \
 
 cd ..
 
-git config submodule.libs/miniz.ignore all
-git config submodule.libs/libbacktrace.ignore all
-
 ./build.sh
 
 #clangd complain
