@@ -68,7 +68,7 @@ struct StaticTrees {
             },
             QVector<GameFileTree*>{  // [6] TEN
                 new GameFileTree(QStringList{
-                    "PLUGINS",
+                    "TOMBENGINE.EXE",
                 }),
             },
         }}
