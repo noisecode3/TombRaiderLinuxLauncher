@@ -153,6 +153,18 @@ set(SOURCES_MC
     src/PyRunner.hpp
     src/Runner.cpp
     src/Runner.hpp
+    src/view/About.h
+    src/view/About.cpp
+    src/view/Controller.h
+    src/view/Controller.cpp
+    src/view/Levels.h
+    src/view/Levels.cpp
+    src/view/Modding.h
+    src/view/Modding.cpp
+    src/view/Setup.h
+    src/view/Setup.cpp
+    src/view/Ui.h
+    src/view/Ui.cpp
     src/assert.hpp
     src/binary.hpp
     src/binary.cpp

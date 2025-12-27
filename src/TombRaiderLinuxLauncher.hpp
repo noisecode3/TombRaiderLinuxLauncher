@@ -27,6 +27,7 @@
 #include <QVector>
 #include <QString>
 
+#include "../src/view/Ui.h"
 #include "../src/settings.hpp"
 #include "../src/CommandLineParser.hpp"
 #include "../src/Controller.hpp"
@@ -39,9 +40,9 @@ struct InstalledStatus {
     QHash<quint64, bool> trle;
 };
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class TombRaiderLinuxLauncher; }
-QT_END_NAMESPACE
+//QT_BEGIN_NAMESPACE
+// namespace Ui { class TombRaiderLinuxLauncher; }
+//QT_END_NAMESPACE
 
 /** @mainpage TombRaiderLinuxLauncher
  *
@@ -216,12 +217,15 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     Controller& controller = Controller::getInstance();
     QSettings& g_settings = getSettingsInstance();
     StartupSetting m_ss;
-    Ui::TombRaiderLinuxLauncher *ui;
     LoadingIndicator* m_loadingIndicatorWidget;
     Dialog* m_dialogWidget;
     QString m_loadingDoneGoTo;
     QList<int> m_availableGames;
     QModelIndex m_current;
+    Ui* ui;
 };
+
+
+
 
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_
