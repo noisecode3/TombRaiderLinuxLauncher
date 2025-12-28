@@ -193,7 +193,7 @@ public:
     FilterGroupBoxFilter *filterGroupBoxFilter;
     FilterGroupBoxSearch *filterGroupBoxSearch;
 private:
-    QVBoxLayout *layout{nullptr};
+    QHBoxLayout *layout{nullptr};
 };
 
 class FilterSecondInputRow : public QWidget
@@ -210,7 +210,7 @@ public:
     FilterGroupBoxSort *filterGroupBoxSort;
     FilterGroupBoxToggle *filterGroupBoxToggle;
 private:
-    QVBoxLayout* layout{nullptr};
+    QHBoxLayout *layout{nullptr};
 };
 
 class Filter : public QWidget
@@ -250,7 +250,7 @@ public:
     QPushButton *pushButtonInfo{nullptr};
     QPushButton *pushButtonRun{nullptr};
 private:
-    QHBoxLayout* layout{nullptr};
+    QHBoxLayout *layout{nullptr};
 };
 
 class ProgressWidgetBar : public QWidget
@@ -263,9 +263,9 @@ public:
      * └── progressWidgetBar ->
      */
     explicit ProgressWidgetBar(QWidget *parent);
-    QProgressBar* progressBar{nullptr};
+    QProgressBar *progressBar{nullptr};
 private:
-    QHBoxLayout* layout{nullptr};
+    QHBoxLayout *layout{nullptr};
 };
 
 class StackedWidgetBar : public QStackedWidget
@@ -278,9 +278,9 @@ public:
      * ├── navigateWidgetBar ->
      * └── progressWidgetBar ->
      */
-    explicit StackedWidgetBar(QWidget* parent);
-    NavigateWidgetBar* navigateWidgetBar{nullptr};
-    ProgressWidgetBar* progressWidgetBar{nullptr};
+    explicit StackedWidgetBar(QWidget *parent);
+    NavigateWidgetBar *navigateWidgetBar{nullptr};
+    ProgressWidgetBar *progressWidgetBar{nullptr};
 };
 
 class Select : public QWidget
@@ -294,12 +294,12 @@ public:
      * ├── levelViewList
      * └── stackedWidgetBar ->
      */
-    explicit Select(QWidget* parent);
-    Filter* filter{nullptr};
-    LevelViewList* levelViewList{nullptr};
-    StackedWidgetBar* stackedWidgetBar{nullptr};
+    explicit Select(QWidget *parent);
+    Filter *filter{nullptr};
+    LevelViewList *levelViewList{nullptr};
+    StackedWidgetBar *stackedWidgetBar{nullptr};
 private:
-    QVBoxLayout* layout{nullptr};
+    QVBoxLayout *layout{nullptr};
 };
 
 class WalkthroughBar : public QWidget
@@ -311,7 +311,7 @@ public:
      * WalkthroughBar
      * └── walkthroughBackButton
      */
-    explicit WalkthroughBar(QWidget* parent);
+    explicit WalkthroughBar(QWidget *parent);
     QPushButton *walkthroughBackButton{nullptr};
 private:
     QHBoxLayout *layout{nullptr};
@@ -327,11 +327,11 @@ public:
      * ├── walkthroughWebEngineView
      * └── walkthroughBar ->
      */
-    explicit Walkthrough(QWidget* parent);
+    explicit Walkthrough(QWidget *parent);
     QWebEngineView *walkthroughWebEngineView{nullptr};
     WalkthroughBar *walkthroughBar{nullptr};
 private:
-    QVBoxLayout* layout{nullptr};
+    QVBoxLayout *layout{nullptr};
 };
 
 class UiLevels : public QWidget
@@ -348,15 +348,15 @@ public:
      *      ├── Select ->
      *      └── Walkthrought ->
      */
-    explicit UiLevels(QWidget* parent);
-    QStackedWidget* stackedWidget{nullptr};
-    UiDialog* dialog{nullptr};
-    Info* info{nullptr};
-    Loading* loading{nullptr};
-    Select* select{nullptr};
-    Walkthrough* walkthough{nullptr};
+    explicit UiLevels(QWidget *parent);
+    QStackedWidget *stackedWidget{nullptr};
+    UiDialog *dialog{nullptr};
+    Info *info{nullptr};
+    Loading *loading{nullptr};
+    Select *select{nullptr};
+    Walkthrough *walkthough{nullptr};
 private:
-    QGridLayout* layout{nullptr};
+    QGridLayout *layout{nullptr};
 };
 
 #endif // LEVELS_H

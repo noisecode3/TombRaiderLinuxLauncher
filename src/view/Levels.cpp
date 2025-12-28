@@ -2,6 +2,8 @@
 #include "LevelViewList.hpp"
 #include <qcheckbox.h>
 #include <qlabel.h>
+#include <qlayoutitem.h>
+#include <qnamespace.h>
 #include <qradiobutton.h>
 #include <qwidget.h>
 #include <qboxlayout.h>
@@ -42,8 +44,8 @@ UiDialog::UiDialog(QWidget *parent)
 {
     setObjectName("dialog");
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 }
 
 Info::Info(QWidget *parent)
@@ -51,8 +53,8 @@ Info::Info(QWidget *parent)
 {
     setObjectName("info");
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     infoContent = new InfoContent(this);
     layout->addWidget(infoContent);
@@ -66,8 +68,8 @@ InfoContent::InfoContent(QWidget *parent)
     : QWidget(parent)
 {
     layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     coverListWidget = new QListWidget(this);
     layout->addWidget(coverListWidget);
@@ -80,8 +82,8 @@ InfoBar::InfoBar(QWidget *parent)
     : QWidget(parent)
 {
     layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     pushButtonWalkthrough = new QPushButton(this);
     layout->addWidget(pushButtonWalkthrough);
@@ -95,8 +97,8 @@ Loading::Loading(QWidget *parent)
 {
     setObjectName("loading");
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 }
 
 Walkthrough::Walkthrough(QWidget *parent)
@@ -104,8 +106,8 @@ Walkthrough::Walkthrough(QWidget *parent)
 {
     setObjectName("walkthrough");
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     walkthroughWebEngineView = new QWebEngineView(this);
     layout->addWidget(walkthroughWebEngineView);
@@ -118,8 +120,8 @@ WalkthroughBar::WalkthroughBar(QWidget *parent)
     : QWidget(parent)
 {
     layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     walkthroughBackButton = new QPushButton(this);
     layout->addWidget(walkthroughBackButton);
@@ -130,17 +132,28 @@ Select::Select(QWidget *parent)
 {
     setObjectName("select");
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     filter = new Filter(this);
-    layout->addWidget(filter);
+    layout->addWidget(filter, 0);
 
     levelViewList = new LevelViewList(this);
-    layout->addWidget(levelViewList);
+    levelViewList->setViewMode(QListView::ListMode);
+    levelViewList->setFlow(QListView::LeftToRight);
+    levelViewList->setWrapping(true);
+
+    levelViewList->setResizeMode(QListView::ResizeMode::Fixed);
+    levelViewList->setUniformItemSizes(true);
+
+    levelViewList->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+    levelViewList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    levelViewList->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    layout->addWidget(levelViewList, 1);
 
     stackedWidgetBar = new StackedWidgetBar(this);
-    layout->addWidget(stackedWidgetBar);
+    layout->addWidget(stackedWidgetBar, 0);
 }
 
 Filter::Filter(QWidget *parent)
@@ -148,8 +161,8 @@ Filter::Filter(QWidget *parent)
 {
     setObjectName("filter");
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     filterFirstInputRow = new FilterFirstInputRow(this);
     layout->addWidget(filterFirstInputRow);
@@ -161,40 +174,48 @@ Filter::Filter(QWidget *parent)
 FilterFirstInputRow::FilterFirstInputRow(QWidget *parent)
     : QWidget(parent)
 {
-    layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    filterGroupBoxFilter = new FilterGroupBoxFilter(this);
-    layout->addWidget(filterGroupBoxFilter);
+    layout = new QHBoxLayout(this);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     filterGroupBoxSearch = new FilterGroupBoxSearch(this);
     layout->addWidget(filterGroupBoxSearch);
+
+    filterGroupBoxFilter = new FilterGroupBoxFilter(this);
+    layout->addWidget(filterGroupBoxFilter);
 }
 
 FilterSecondInputRow::FilterSecondInputRow(QWidget *parent)
     : QWidget(parent)
 {
-    layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    filterGroupBoxSort = new FilterGroupBoxSort(this);
-    layout->addWidget(filterGroupBoxSort);
+    layout = new QHBoxLayout(this);
+    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setSpacing(8);
 
     filterGroupBoxToggle = new FilterGroupBoxToggle(this);
     layout->addWidget(filterGroupBoxToggle);
+    layout->addSpacerItem(
+    new QSpacerItem(0, 0,
+        QSizePolicy::Expanding,
+        QSizePolicy::Minimum)
+    );
+    filterGroupBoxSort = new FilterGroupBoxSort(this);
+    layout->addWidget(filterGroupBoxSort);
 }
 
 FilterGroupBoxSearch::FilterGroupBoxSearch(QWidget *parent)
     : QGroupBox(parent)
 {
     setObjectName("filterGroupBoxSearch");
+    setTitle("Search");
     layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setSpacing(6);
 
     comboBoxSearch = new QComboBox(this);
+    comboBoxSearch->addItems(QStringList()
+        << "Level" << "Author"
+        );
     layout->addWidget(comboBoxSearch);
 
     lineEditSearch = new QLineEdit(this);
@@ -205,21 +226,17 @@ FilterGroupBoxFilter::FilterGroupBoxFilter(QWidget *parent)
     : QGroupBox(parent)
 {
     setObjectName("filterGroupBoxFilter");
+    setTitle("Filter");
     layout = new QHBoxLayout(this);
-    layout->setContentsMargins(6, 6, 6, 6);
-    layout->setSpacing(8);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(6);
 
     labelType = new QLabel(tr("Type"), this);
     layout->addWidget(labelType);
 
     comboBoxType = new QComboBox(this);
     comboBoxType->addItems(QStringList()
-        << "TR1"
-        << "TR2"
-        << "TR3"
-        << "TR4"
-        << "TR5"
-        << "TEN"
+        << " - All -" << "TR1" << "TR2" << "TR3" << "TR4" << "TR5" << "TEN"
     );
     layout->addWidget(comboBoxType);
 
@@ -270,14 +287,15 @@ FilterGroupBoxToggle::FilterGroupBoxToggle(QWidget *parent)
     : QGroupBox(parent)
 {
     setObjectName("filterGroupBoxToggle");
+    setTitle("Show");
     layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setSpacing(6);
 
-    checkBoxInstalled = new QCheckBox(this);
+    checkBoxInstalled = new QCheckBox(tr("Core Design Games"), this);
     layout->addWidget(checkBoxInstalled);
 
-    checkBoxOriginal = new QCheckBox(this);
+    checkBoxOriginal = new QCheckBox(tr("Installed Only"), this);
     layout->addWidget(checkBoxOriginal);
 }
 
@@ -285,9 +303,10 @@ FilterGroupBoxSort::FilterGroupBoxSort(QWidget *parent)
     : QGroupBox(parent)
 {
     setObjectName("filterGroupBoxSort");
+    setTitle("Sort");
     layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setSpacing(6);
 
     radioButtonLevelName = new QRadioButton(tr("Level Name"), this);
     layout->addWidget(radioButtonLevelName);
@@ -315,6 +334,7 @@ NavigateWidgetBar::NavigateWidgetBar(QWidget *parent)
     layout = new QHBoxLayout(this);
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    //setMaximumHeight(20);
 
     pushButtonRun = new QPushButton(("Run"), this);
     layout->addWidget(pushButtonRun);
