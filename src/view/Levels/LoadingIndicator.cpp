@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../src/LoadingIndicator.hpp"
+#include "view/Levels/LoadingIndicator.hpp"
 #include <QPainter>
 #include <QtMath>
 

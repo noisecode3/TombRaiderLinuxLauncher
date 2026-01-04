@@ -27,18 +27,8 @@
 #include <QVector>
 #include <QString>
 
-#include "../src/view/Ui.h"
-#include "../src/settings.hpp"
+#include "../src/view/Ui.hpp"
 #include "../src/CommandLineParser.hpp"
-#include "../src/Controller.hpp"
-#include "../src/LevelViewList.hpp"
-#include "../src/LoadingIndicator.hpp"
-#include "../src/Dialog.hpp"
-
-struct InstalledStatus {
-    QHash<quint64, bool> game;
-    QHash<quint64, bool> trle;
-};
 
 //QT_BEGIN_NAMESPACE
 // namespace Ui { class TombRaiderLinuxLauncher; }
@@ -73,159 +63,136 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     /**
      * Triggered by the "Run" button.
      */
-    void runClicked();
+    // void runClicked();
 
     /**
      * Triggered by the "Download" or "Remove" button.
      */
-    void downloadOrRemoveClicked();
+    // void downloadOrRemoveClicked();
 
     /**
      * Opens the Info thru the navigation bar.
      */
-    void infoClicked();
+    // void infoClicked();
 
     /**
      * Opens the Walkthrough thru the navigation bar.
      */
-    void walkthroughClicked();
+    // void walkthroughClicked();
 
     /**
      * Returns to the first navigation state, the list.
      */
-    void backClicked();
+    // void backClicked();
 
     /**
      * Opens the first-time setup options clicked.
      */
-    void setOptionsClicked();
+    // void setOptionsClicked();
 
     /**
      * Updates button states based on selected menu level.
      */
-    void onCurrentItemChanged(
-            const QModelIndex &current, const QModelIndex &previous);
+    // void onCurrentItemChanged(
+    //         const QModelIndex &current, const QModelIndex &previous);
 
     /**
      *  Try loading 100 more levels cards by calling for more cover pictures.
      */
-    void loadMoreCovers();
+    // void loadMoreCovers();
 
     /**
      * Updates progress by 1% of total work steps.
      */
-    void workTick();
+    // void workTick();
 
     /**
      * Displays an error dialog for a curl download error.
      */
-    void downloadError(int status);
+    // void downloadError(int status);
 
     /**
      * Switch back to level list or info page after network/python work.
      */
-    void updateLevelDone();
+    // void updateLevelDone();
 
     /**
      * Switch back to list selection state after running the game.
      */
-    void runningLevelDone();
+    // void runningLevelDone();
 
     /**
      * Generates the initial level list after file analysis.
      */
-    void generateList(const QList<int>& availableGames);
+    // void generateList(const QList<int>& availableGames);
 
     /**
      * Sorts the list by title.
      */
-    void sortByTitle();
+    // void sortByTitle();
 
     /**
      * Sorts the list by difficulty.
      */
-    void sortByDifficulty();
+    // void sortByDifficulty();
 
     /**
      * Sorts the list by duration.
      */
-    void sortByDuration();
+    // void sortByDuration();
 
     /**
      * Sorts the list by level class.
      */
-    void sortByClass();
+    // void sortByClass();
 
     /**
      * Sorts the list by type.
      */
-    void sortByType();
+    // void sortByType();
 
     /**
      * Sorts the list by release date.
      */
-    void sortByReleaseDate();
+    // void sortByReleaseDate();
 
-    void filterByClass(const QString& class_);
-    void filterByType(const QString& type);
-    void filterByDifficulty(const QString& difficulty);
-    void filterByDuration(const QString& duration);
-    void showtOriginal();
-    void GlobalSaveClicked();
-    void GlobalResetClicked();
-    void LevelSaveClicked();
-    void LevelResetClicked();
 
  private:
     /**
      * 
      */
-    void setList();
+    // void setList();
+
 
     /**
      * 
      */
-    InstalledStatus getInstalled();
-
-    /**
-     * 
-     */
-    void levelDirSelected(qint64 id);
+    // void levelDirSelected(qint64 id);
 
     /**
      * Configures game and level directories.
      */
-    void setup();
+    // void setup();
 
     /**
      * Loads saved settings.
      */
-    void readSavedSettings();
+    // void readSavedSettings();
 
     /**
      * Pars input string to string list.
      */
-    QStringList parsToArg(const QString& str);
+    // QStringList parsToArg(const QString& str);
 
     /**
      * Pars input string to list of environment variables.
      */
-    QVector<QPair<QString, QString>> parsToEnv(const QString& str);
+    // QVector<QPair<QString, QString>> parsToEnv(const QString& str);
 
-    LevelListModel *levelListModel;
-    LevelListProxy *levelListProxy;
-    Controller& controller = Controller::getInstance();
-    QSettings& g_settings = getSettingsInstance();
+    // Controller& controller = Controller::getInstance();
+    // QSettings& g_settings = getSettingsInstance();
     StartupSetting m_ss;
-    LoadingIndicator* m_loadingIndicatorWidget;
-    Dialog* m_dialogWidget;
-    QString m_loadingDoneGoTo;
-    QList<int> m_availableGames;
-    QModelIndex m_current;
     Ui* ui;
 };
-
-
-
 
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_

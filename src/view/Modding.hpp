@@ -1,5 +1,5 @@
-#ifndef MODDING_H
-#define MODDING_H
+#ifndef MODDING_HPP_
+#define MODDING_HPP_
 
 #include <QWidget>
 #include <QGridLayout>
@@ -16,4 +16,4 @@ private:
     QGridLayout *layout{nullptr};
 };
 
-#endif // MODDING_H
+#endif // MODDING_HPP_

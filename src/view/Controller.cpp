@@ -1,4 +1,4 @@
-#include "Controller.h"
+#include "view/Controller.hpp"
 
 UiController::UiController(QWidget *parent)
     : QWidget{parent}

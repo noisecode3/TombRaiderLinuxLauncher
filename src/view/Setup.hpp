@@ -1,6 +1,8 @@
-#ifndef SETUP_H
-#define SETUP_H
+#ifndef SETUP_HPP_
+#define SETUP_HPP_
 
+#include "../src/settings.hpp"
+#include "../src/Controller.hpp"
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -362,8 +364,18 @@ public:
     QStackedWidget *stackedWidget{nullptr};
     FirstTime *firstTime{nullptr};
     Settings *settings{nullptr};
+
+    QString getRunnerTypeState();
+    void setState(qint64 id);
+    void downloadClicked(qint64 id);
+    void readSavedSettings();
 private:
+    void setOptionsClicked();
+    void GlobalSaveClicked();
+    void GlobalResetClicked();
     QVBoxLayout *layout{nullptr};
+    QSettings& g_settings = getSettingsInstance();
+    Controller& controller = Controller::getInstance();
 };
 
-#endif // SETUP_H
+#endif // SETUP_HPP_

@@ -1,4 +1,4 @@
-#include "Setup.h"
+#include "Setup.hpp"
 #include <qnamespace.h>
 
 UiSetup::UiSetup(QWidget *parent)
@@ -19,6 +19,178 @@ UiSetup::UiSetup(QWidget *parent)
     settings = new Settings(stackedWidget);
     stackedWidget->addWidget(settings);
     stackedWidget->setCurrentWidget(settings);
+
+}
+
+
+void UiSetup::readSavedSettings() {
+    const QString gamePath = g_settings.value("gamePath").toString();
+    QTableWidget* table = this->settings->frameGlobalSetup->tableWidgetGlobalSetup;
+    table->item(0, 0)->setText(gamePath);
+    qDebug() << "Read game path value:" << gamePath;
+
+    const QString extraGamePath = g_settings.value("extraGamePath").toString();
+    table->item(1, 0)->setText(extraGamePath);
+    qDebug() << "Read extra game path value:" << extraGamePath;
+
+    const QString levelPath = g_settings.value("levelPath").toString();
+    table->item(2, 0)->setText(levelPath);
+    qDebug() << "Read level path value:" << levelPath;
+
+    WidgetDeleteZip* widgetDeleteZip = this->settings->frameGlobalSetup->widgetDeleteZip;
+    const bool deleteZip = g_settings.value("DeleteZip").toBool();
+    widgetDeleteZip->checkBoxDeleteZip->setChecked(deleteZip);
+    qDebug() << "Read level DeleteZip (after download) value:" << deleteZip;
+
+    WidgetDefaultEnvironmentVariables* widgetDefaultEnvironmentVariables =
+        this->settings->frameGlobalSetup->widgetDefaultEnvironmentVariables;
+    const QString defaultEnvironmentVariables =
+            g_settings.value("defaultEnvironmentVariables").toString();
+    widgetDefaultEnvironmentVariables->lineEditDefaultEnvironmentVariables->
+            setText(defaultEnvironmentVariables);
+    qDebug() << "Read defaultEnvironmentVariables value:"
+            << defaultEnvironmentVariables;
+
+    WidgetDefaultRunnerType* widgetDefaultRunnerType =
+        this->settings->frameGlobalSetup->widgetDefaultRunnerType;
+    const quint64 defaultRunnerType =
+            g_settings.value("defaultRunnerType").toInt();
+    widgetDefaultRunnerType->comboBoxDefaultRunnerType->setCurrentIndex(defaultRunnerType);
+    qDebug() << "Read defaultRunnerType value:" << defaultRunnerType;
+
+    controller.setup();
+}
+
+void UiSetup::downloadClicked(qint64 id) {
+    this->settings->frameLevelSetup->frameLevelSetupSettings->
+        widgetEnvironmentVariables->lineEditEnvironmentVariables->setText(
+            g_settings.value("defaultEnvironmentVariables").toString());
+    g_settings.setValue(QString("level%1/EnvironmentVariables")
+            .arg(id), this->settings->frameLevelSetup->frameLevelSetupSettings->
+        widgetEnvironmentVariables->lineEditEnvironmentVariables->text());
+
+    this->settings->frameLevelSetup->frameLevelSetupSettings->
+        widgetRunnerType->comboBoxRunnerType->setCurrentIndex(
+            g_settings.value("defaultRunnerType").toInt());
+    g_settings.setValue(QString("level%1/RunnerType")
+            .arg(id), this->settings->frameLevelSetup->frameLevelSetupSettings->
+        widgetRunnerType->comboBoxRunnerType->currentIndex());
+
+}
+
+void UiSetup::setOptionsClicked() {
+    SetupInput* setupInput = this->firstTime->setupInput;
+    QString gamePath =  setupInput->gamePathContainer->gamePathEdit->text();
+    QString extraGamePath = setupInput->extraGamePathContainer->extraGamePathEdit->text();
+    QString levelPath = setupInput->levelPathContainer->levelPathEdit->text();
+    g_settings.setValue("gamePath", gamePath);
+    g_settings.setValue("extraGamePath", extraGamePath);
+    g_settings.setValue("levelPath", levelPath);
+    g_settings.setValue("setup", "yes");
+
+    this->settings->frameGlobalSetup->
+            tableWidgetGlobalSetup->item(0, 0)->setText(gamePath);
+    this->settings->frameGlobalSetup->
+            tableWidgetGlobalSetup->item(1, 0)->setText(extraGamePath);
+    this->settings->frameGlobalSetup->
+            tableWidgetGlobalSetup->item(2, 0)->setText(levelPath);
+    /*
+    ui->tabs->setTabEnabled(ui->tabs->indexOf(
+            ui->tabs->findChild<QWidget*>("Levels")), true);
+    ui->tabs->setTabEnabled(ui->tabs->indexOf(
+            ui->tabs->findChild<QWidget*>("Modding")), false);
+    ui->tabs->show();
+    ui->tabs->setCurrentIndex(ui->tabs->indexOf(
+            ui->tabs->findChild<QWidget*>("Levels")));
+    ui->setup->stackedWidget->setCurrentWidget(
+            ui->setup->stackedWidget->findChild<QWidget*>("settings"));
+
+    */
+    readSavedSettings();
+}
+
+void UiSetup::GlobalSaveClicked() {
+    const QString newGamePath =
+        this->settings->frameGlobalSetup->
+                tableWidgetGlobalSetup->item(0, 0)->text();
+    const QString newExtraGamePath =
+        this->settings->frameGlobalSetup->
+                tableWidgetGlobalSetup->item(1, 0)->text();
+    const QString newLevelPath =
+        this->settings->frameGlobalSetup->
+                tableWidgetGlobalSetup->item(2, 0)->text();
+
+    const QString oldGamePath = g_settings.value("gamePath").toString();
+    const QString oldExtraGamePath = g_settings.value("extraGamePath").toString();
+    const QString oldLevelPath = g_settings.value("levelPath").toString();
+
+    if ((newGamePath != oldGamePath) ||
+            (newExtraGamePath != oldExtraGamePath) ||
+            (newLevelPath != oldLevelPath)) {
+        g_settings.setValue("gamePath" , newGamePath);
+        g_settings.setValue("extraGamePath" , newExtraGamePath);
+        g_settings.setValue("levelPath" , newLevelPath);
+        controller.setup();
+    }
+
+    const bool newDeleteZip =
+        this->settings->frameGlobalSetup->
+            widgetDeleteZip->checkBoxDeleteZip->isChecked();
+    g_settings.setValue("DeleteZip" , newDeleteZip);
+
+    g_settings.setValue("defaultEnvironmentVariables",
+                        this->settings->frameGlobalSetup->widgetDefaultEnvironmentVariables->
+                        lineEditDefaultEnvironmentVariables->text());
+
+    g_settings.setValue("defaultRunnerType",
+                        this->settings->frameGlobalSetup->widgetDefaultRunnerType->
+                        comboBoxDefaultRunnerType->currentIndex());
+}
+
+void UiSetup::GlobalResetClicked() {
+    this->settings->frameGlobalSetup->
+        tableWidgetGlobalSetup->item(0, 0)->setText(
+            g_settings.value("gamePath").toString());
+    this->settings->frameGlobalSetup->
+        tableWidgetGlobalSetup->item(1, 0)->setText(
+            g_settings.value("extraGamePath").toString());
+    this->settings->frameGlobalSetup->
+        tableWidgetGlobalSetup->item(2, 0)->setText(
+            g_settings.value("levelPath").toString());
+
+    this->settings->frameGlobalSetup->
+        widgetDeleteZip->checkBoxDeleteZip->setChecked(
+            g_settings.value("DeleteZip").toBool());
+
+    this->settings->frameGlobalSetup->widgetDefaultEnvironmentVariables->
+        lineEditDefaultEnvironmentVariables->setText(
+            g_settings.value("defaultEnvironmentVariables").toString());
+
+    this->settings->frameGlobalSetup->widgetDefaultRunnerType->
+        comboBoxDefaultRunnerType->setCurrentIndex(
+            g_settings.value("defaultRunnerType").toInt());
+}
+
+void UiSetup::setState(qint64 id) {
+        FrameLevelSetupSettings* levelSettings =
+            this->settings->frameLevelSetup->frameLevelSetupSettings;
+        levelSettings->widgetLevelID->lcdNumberLevelID->display(QString::number(id));
+        levelSettings->widgetEnvironmentVariables->lineEditEnvironmentVariables->setEnabled(true);
+        levelSettings->widgetEnvironmentVariables->lineEditEnvironmentVariables->setText(
+                g_settings.value(QString("level%1/EnvironmentVariables")
+                    .arg(id)).toString());
+        levelSettings->widgetRunnerType->comboBoxRunnerType->setEnabled(true);
+        levelSettings->widgetRunnerType->comboBoxRunnerType->setCurrentIndex(
+                g_settings.value(QString("level%1/RunnerType")
+                    .arg(id)).toInt());
+        LevelControl* levelControl = this->settings->frameLevelSetup->levelControl;
+        levelControl->commandLinkButtonLSSave->setEnabled(true);
+        levelControl->commandLinkButtonLSReset->setEnabled(true);
+}
+QString UiSetup::getRunnerTypeState() {
+        FrameLevelSetupSettings* levelSettings =
+            this->settings->frameLevelSetup->frameLevelSetupSettings;
+        return levelSettings->widgetRunnerType->comboBoxRunnerType->currentText();
 }
 
 FirstTime::FirstTime(QWidget *parent)

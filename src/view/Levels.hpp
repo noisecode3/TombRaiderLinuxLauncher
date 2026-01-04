@@ -1,0 +1,187 @@
+#ifndef LEVELS_HPP_
+#define LEVELS_HPP_
+
+#include "../src/Controller.hpp"
+#include "../src/CommandLineParser.hpp"
+#include "view/Levels/LoadingIndicator.hpp"
+#include "view/Levels/LevelViewList.hpp"
+#include "view/Levels/Dialog.hpp"
+#include "view/Levels/Select.hpp"
+#include <QWidget>
+#include <QGridLayout>
+#include <QStackedWidget>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QWebEngineView>
+#include <QListWidget>
+
+
+class Loading : public QWidget
+{
+    Q_OBJECT
+public:
+    /**
+     * (ui->tabs->levels->stackedWidget)
+     * Loading
+     */
+    explicit Loading(QWidget *parent);
+private:
+    QVBoxLayout *layout{nullptr};
+};
+
+
+class InfoBar : public QWidget
+{
+    Q_OBJECT
+public:
+    /*
+     * (ui->tabs->levels->stackedWidget->info)
+     * InfoBar
+     * ├── pushButtonWalkthrough
+     * └── pushButtonBack
+     */
+    explicit InfoBar(QWidget *parent);
+    QPushButton *pushButtonWalkthrough{nullptr};
+    QPushButton *pushButtonBack{nullptr};
+private:
+    QHBoxLayout *layout{nullptr};
+};
+
+class InfoContent : public QWidget
+{
+    Q_OBJECT
+public:
+    /*
+     * (ui->tabs->levels->stackedWidget->info)
+     * InfoContent
+     * ├── coverListWidget
+     * └── infoWebEngineView
+     */
+    explicit InfoContent(QWidget *parent);
+    QListWidget *coverListWidget{nullptr};
+    QWebEngineView *infoWebEngineView{nullptr};
+private:
+    QHBoxLayout *layout{nullptr};
+};
+
+class Info : public QWidget
+{
+    Q_OBJECT
+public:
+    /*
+     * (ui->tabs->levels->stackedWidget)
+     * Info
+     * ├── infoContent ->
+     * └── infoBar ->
+     */
+    explicit Info(QWidget *parent);
+    InfoContent *infoContent{nullptr};
+    InfoBar *infoBar{nullptr};
+private:
+    QVBoxLayout *layout{nullptr};
+};
+
+class WalkthroughBar : public QWidget
+{
+    Q_OBJECT
+public:
+    /*
+     * (ui->tabs->levels->stackedWidget->walkthrough)
+     * WalkthroughBar
+     * └── walkthroughBackButton
+     */
+    explicit WalkthroughBar(QWidget *parent);
+    QPushButton *walkthroughBackButton{nullptr};
+private:
+    QHBoxLayout *layout{nullptr};
+};
+
+class Walkthrough : public QWidget
+{
+    Q_OBJECT
+public:
+    /*
+     * (ui->tabs->levels->stackedWidget)
+     * Walkthrough
+     * ├── walkthroughWebEngineView
+     * └── walkthroughBar ->
+     */
+    explicit Walkthrough(QWidget *parent);
+    QWebEngineView *walkthroughWebEngineView{nullptr};
+    WalkthroughBar *walkthroughBar{nullptr};
+private:
+    QVBoxLayout *layout{nullptr};
+};
+
+class UiLevels : public QWidget
+{
+    Q_OBJECT
+public:
+    /*
+     * (ui->tabs)
+     * Levels
+     * └── stackedWidget
+     *      ├── Dialog ->
+     *      ├── Info ->
+     *      ├── Loading ->
+     *      ├── Select ->
+     *      └── Walkthrought ->
+     */
+    explicit UiLevels(QWidget *parent);
+    QStackedWidget *stackedWidget{nullptr};
+    Dialog *dialog{nullptr};
+    Info *info{nullptr};
+    Loading *loading{nullptr};
+    LoadingIndicator* m_loadingIndicatorWidget;
+    Select *select{nullptr};
+    Walkthrough *walkthough{nullptr};
+
+    void setSortMode(LevelListProxy::SortMode mode);
+    void setItemChanged(const QModelIndex &current);
+    qint64 getItemId();
+    void setState(const QString &text);
+    void setStartupSetting(const StartupSetting startupSetting);
+    void setpushButtonRunText(const QString &text);
+    void removeClicked(qint64 id);
+    void downloadClicked(qint64 id);
+    void setupGameOrLevel(qint64 id);
+    void backClicked();
+private:
+    QSettings& g_settings = getSettingsInstance();
+    QString m_loadingDoneGoTo;
+    QList<int> m_availableGames;
+    QModelIndex m_current;
+    LevelListModel *levelListModel;
+    LevelListProxy *levelListProxy;
+    Controller& controller = Controller::getInstance();
+
+    struct InstalledStatus {
+        QHash<quint64, bool> game;
+        QHash<quint64, bool> trle;
+    };
+
+    void runClicked();
+    void workTick();
+    void updateLevelDone();
+    void walkthroughClicked();
+    void runningLevelDone();
+    QStringList parsToArg(const QString& str);
+    QVector<QPair<QString, QString>> parsToEnv(const QString& str);
+    void infoClicked();
+    void downloadOrRemoveClicked();
+    void loadMoreCovers();
+    InstalledStatus getInstalled();
+    void setList();
+    void levelDirSelected(qint64 id);
+    void generateList(const QList<int>& availableGames);
+    void callbackDialog(QString selected);
+    void setStackedWidget(const QString &qwidget);
+    QGridLayout *layout{nullptr};
+};
+
+#endif // LEVELS_HPP_

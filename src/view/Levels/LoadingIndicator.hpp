@@ -10,8 +10,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
-#pragma once
+#ifndef VIEW_LEVELS_LOADINGINDICATOR_HPP_
+#define VIEW_LEVELS_LOADINGINDICATOR_HPP_
 
 #include <QWidget>
 #include <QPropertyAnimation>
@@ -37,3 +37,4 @@ class LoadingIndicator : public QWidget {
     QPropertyAnimation* m_anim;
 };
 
+#endif // VIEW_LEVELS_LOADINGINDICATOR_HPP_

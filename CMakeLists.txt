@@ -127,51 +127,57 @@ set(SOURCES_TESTS
 )
 
 set(SOURCES_MC
-    src/CommandLineParser.hpp
     src/CommandLineParser.cpp
-    src/Controller.hpp
+    src/CommandLineParser.hpp
     src/Controller.cpp
-    src/Data.hpp
+    src/Controller.hpp
     src/Data.cpp
-    src/Dialog.hpp
-    src/Dialog.cpp
-    src/FileManager.hpp
+    src/Data.hpp
     src/FileManager.cpp
-    src/GameFileTree.hpp
+    src/FileManager.hpp
     src/GameFileTree.cpp
-    src/LevelViewList.hpp
-    src/LevelViewList.cpp
-    src/LoadingIndicator.hpp
-    src/LoadingIndicator.cpp
-    src/Model.hpp
+    src/GameFileTree.hpp
     src/Model.cpp
-    src/Network.hpp
+    src/Model.hpp
     src/Network.cpp
+    src/Network.hpp
     src/Path.cpp
     src/Path.hpp
     src/PyRunner.cpp
     src/PyRunner.hpp
     src/Runner.cpp
     src/Runner.hpp
-    src/view/About.h
     src/view/About.cpp
-    src/view/Controller.h
+    src/view/About.hpp
     src/view/Controller.cpp
-    src/view/Levels.h
+    src/view/Controller.hpp
     src/view/Levels.cpp
-    src/view/Modding.h
+    src/view/Levels.hpp
+    src/view/Levels/Dialog.cpp
+    src/view/Levels/Dialog.hpp
+    src/view/Levels/Filter.cpp
+    src/view/Levels/Filter.hpp
+    src/view/Levels/LevelViewList.cpp
+    src/view/Levels/LevelViewList.hpp
+    src/view/Levels/LoadingIndicator.cpp
+    src/view/Levels/LoadingIndicator.hpp
+    src/view/Levels/Select.cpp
+    src/view/Levels/Select.hpp
+    src/view/Levels/StackedWidgetBar.cpp
+    src/view/Levels/StackedWidgetBar.hpp
     src/view/Modding.cpp
-    src/view/Setup.h
+    src/view/Modding.hpp
     src/view/Setup.cpp
-    src/view/Ui.h
+    src/view/Setup.hpp
     src/view/Ui.cpp
+    src/view/Ui.hpp
+    src/view/staticViewData.hpp
     src/assert.hpp
-    src/binary.hpp
     src/binary.cpp
+    src/binary.hpp
     src/gameFileTreeData.hpp
     src/globalTypes.hpp
     src/main.cpp
-    src/staticViewData.hpp
 )
 
 set(SOURCES_VIEW

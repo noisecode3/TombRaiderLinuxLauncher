@@ -1,4 +1,4 @@
-#include "Modding.h"
+#include "Modding.hpp"
 
 UiModding::UiModding(QWidget *parent)
     : QWidget{parent}

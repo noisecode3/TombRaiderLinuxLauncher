@@ -1,5 +1,5 @@
-#ifndef ABOUT_H
-#define ABOUT_H
+#ifndef ABOUT_HPP_
+#define ABOUT_HPP_
 
 #include <QWidget>
 #include <QFrame>
@@ -32,4 +32,4 @@ private:
     QGridLayout *layout{nullptr};
 };
 
-#endif // ABOUT_H
+#endif // ABOUT_HPP_

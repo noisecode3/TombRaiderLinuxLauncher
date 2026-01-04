@@ -11,10 +11,11 @@
  * GNU General Public License for more details.
  */
 
-#include "../src/LevelViewList.hpp"
+#include "view/Levels/LevelViewList.hpp"
 
 #include <QDateTime>
-#include "../src/staticViewData.hpp"
+#include <QApplication>
+#include "view/staticViewData.hpp"
 #include "../src/assert.hpp"
 
 
@@ -438,6 +439,7 @@ void CardItemDelegate::paint(QPainter *painter,
     qint64 x = cardRect.left() + 10;
     qint64 y = cardRect.top() + 40;
     QRect imageRect = QRect(x, y, 160, 120);
+    painter->setBrush(QApplication::palette().color(QPalette::Text));
     painter->setBrush(QColor(0xFFCCCCCC));
     QPixmap cover = index.data(Qt::UserRole + 4).value<QPixmap>();
 

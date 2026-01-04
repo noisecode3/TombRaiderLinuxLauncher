@@ -1,5 +1,5 @@
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
+#ifndef CONTROLLER_HPP_
+#define CONTROLLER_HPP_
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -17,4 +17,4 @@ private:
     QVBoxLayout *layout{nullptr};
 };
 
-#endif // CONTROLLER_H
+#endif // CONTROLLER_HPP_

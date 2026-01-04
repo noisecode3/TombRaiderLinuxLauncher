@@ -1,4 +1,4 @@
-#include "About.h"
+#include "About.hpp"
 
 UiAbout::UiAbout(QWidget *parent)
     : QWidget(parent)
