@@ -21,7 +21,22 @@ public:
     Filter *filter{nullptr};
     LevelViewList *levelViewList{nullptr};
     StackedWidgetBar *stackedWidgetBar{nullptr};
+
+    void setItemChanged(const QModelIndex &current);
+    void setSortMode(LevelListProxy::SortMode mode);
+    void setRemovedLevel();
+    void setInstalledLevel();
+    bool getType();
+    quint64 getLid();
+    void setLevels(QVector<QSharedPointer<ListItemData>> &list);
+    bool stop();
+    void  reset();
+    QVector<QSharedPointer<ListItemData>> getDataBuffer(quint64 lenght);
+
 private:
+    QModelIndex m_current;
+    LevelListModel *levelListModel;
+    LevelListProxy *levelListProxy;
     QVBoxLayout *layout{nullptr};
 };
 

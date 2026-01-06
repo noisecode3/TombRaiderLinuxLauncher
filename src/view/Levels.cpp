@@ -14,30 +14,26 @@
 #include <qwebengineview.h>
 
 UiLevels::UiLevels(QWidget *parent)
-    : QWidget{parent}
+    : QWidget{parent},
+    stackedWidget(new QStackedWidget(this)),
+    dialog(new Dialog(stackedWidget)),
+    info(new Info(stackedWidget)),
+    loading(new Loading(stackedWidget)),
+    select(new Select(stackedWidget)),
+    walkthough(new Walkthrough(stackedWidget))
 {
     setObjectName("Levels");
     layout = new QGridLayout(this);
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
 
-    stackedWidget = new QStackedWidget(this);
     layout->addWidget(stackedWidget,0,0);
 
-    dialog = new Dialog(stackedWidget);
     stackedWidget->addWidget(dialog);
     stackedWidget->setCurrentWidget(dialog);
-
-    info = new Info(stackedWidget);
     stackedWidget->addWidget(info);
-
-    loading = new Loading(stackedWidget);
     stackedWidget->addWidget(loading);
-
-    select = new Select(stackedWidget);
     stackedWidget->addWidget(select);
-
-    walkthough = new Walkthrough(stackedWidget);
     stackedWidget->addWidget(walkthough);
 
     connect(dialog, &Dialog::cancelClicked, this, [this]() {
@@ -79,17 +75,6 @@ UiLevels::UiLevels(QWidget *parent)
             &QItemSelectionModel::currentChanged,
             this, &UiLevels::setItemChanged);
 
-    connect(filter_p->filterSecondInputRow->filterGroupBoxToggle->checkBoxInstalled, &QCheckBox::toggled,
-            levelListProxy, &LevelListProxy::setInstalledFilter);
-
-    FilterGroupBoxSearch* searchBox =
-        filter_p->filterFirstInputRow->filterGroupBoxSearch;
-    connect(searchBox->comboBoxSearch, &QComboBox::currentTextChanged,
-            levelListProxy, &LevelListProxy::setSearchType);
-
-    connect(searchBox->lineEditSearch, &QLineEdit::textChanged,
-            levelListProxy, &LevelListProxy::setSearchFilter);
-
     m_loadingIndicatorWidget = new LoadingIndicator(loading);
     //m_loadingIndicatorWidget->setFixedSize(64, 64);
     //ui->verticalLayout_15->
@@ -99,88 +84,32 @@ UiLevels::UiLevels(QWidget *parent)
             stackedWidget->findChild<QWidget*>("loading"));
     m_loadingDoneGoTo = "select";
 
+    // Arrive with next batch of level icons
+    connect(&Controller::getInstance(), SIGNAL(controllerReloadLevelList()),
+            this, SLOT(loadMoreCovers()));
 
-    FilterGroupBoxSort *sortBox = filter_p->filterSecondInputRow->filterGroupBoxSort;
-    FilterGroupBoxToggle *toggleBox = filter_p->filterSecondInputRow->filterGroupBoxToggle;
-
-    connect(sortBox->radioButtonLevelName,
-            &QRadioButton::clicked, this, [this]() {
-        levelListProxy->setSortMode(LevelListProxy::Title);
-        qDebug() << "QRadioButton LevelName clicked";
-    });
-
-    connect(sortBox->radioButtonDifficulty,
-            &QRadioButton::clicked, this, [this]() {
-        qDebug() << "QRadioButton Difficulty clicked";
-        levelListProxy->setSortMode(LevelListProxy::Difficulty);
-    });
-
-    connect(sortBox->radioButtonDuration,
-            &QRadioButton::clicked, this, [this]() {
-        qDebug() << "QRadioButton Duration clicked";
-        levelListProxy->setSortMode(LevelListProxy::Duration);
-    });
-
-    connect(sortBox->radioButtonClass,
-            &QRadioButton::clicked, this, [this]() {
-        qDebug() << "QRadioButton Class clicked";
-        levelListProxy->setSortMode(LevelListProxy::Class);
-    });
-
-    connect(sortBox->radioButtonType,
-            &QRadioButton::clicked, this, [this]() {
-        qDebug() << "QRadioButton Type clicked";
-        levelListProxy->setSortMode(LevelListProxy::Type);
-    });
-
-    connect(sortBox->radioButtonReleaseDate,
-            &QRadioButton::clicked, this, [this]() {
-        qDebug() << "QRadioButton ReleaseDate clicked";
-        levelListProxy->setSortMode(LevelListProxy::ReleaseDate);
-    });
-
-    connect(toggleBox->checkBoxInstalled,
-            &QCheckBox::clicked, this, [this]() {
-        qDebug() << "QCheckBox Installed clicked";
-        levelListProxy->setInstalledFilter(true);
-    });
-
-    connect(toggleBox->checkBoxOriginal,
-            &QCheckBox::clicked, this, [this]() {
-        qDebug() << "QCheckBox Original clicked";
-    });
-
-    FilterGroupBoxFilter *filterBox = select->filter->filterFirstInputRow->filterGroupBoxFilter;
-    FilterGroupBoxSearch *searchBox_p = select->filter->filterFirstInputRow->filterGroupBoxSearch;
-
-    connect(filterBox->comboBoxClass,
-            &QComboBox::currentTextChanged, this, [this](const QString &class_) {
-
-        levelListProxy->setClassFilter(class_);
-        qDebug() << "QComboBox Class clicked";
-    });
+    // Thread work done signal connections
+    connect(&Controller::getInstance(),
+            SIGNAL(controllerGenerateList(QList<int>)),
+            this, SLOT(generateList(QList<int>)));
 
 
-    connect(filterBox->comboBoxType,
-            &QComboBox::currentTextChanged, this, [this](const QString &type) {
-
-        levelListProxy->setTypeFilter(type);
-        qDebug() << "QComboBox Class clicked";
-    });
-
-    connect(filterBox->comboBoxDifficulty,
-            &QComboBox::currentTextChanged, this, [this](const QString &difficulty) {
-        levelListProxy->setDifficultyFilter(difficulty);
-        qDebug() << "QComboBox Class clicked";
-    });
-
-    connect(filterBox->comboBoxDuration,
-            &QComboBox::currentTextChanged, this, [this](const QString &duration) {
-        levelListProxy->setDurationFilter(duration);
-        qDebug() << "QComboBox Class clicked";
-    });
+    // Progress bar signal connection
+    connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()),
+            this, SLOT(workTick()));
 
 
+    // Error signal connections
+    connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
+            this, SLOT(downloadError(int)));
+
+    // Loading done signal connections
+    connect(&Controller::getInstance(), SIGNAL(controllerLoadingDone()),
+            this, SLOT(updateLevelDone()));
+
+    // Loading done signal connections
+    connect(&Controller::getInstance(), SIGNAL(controllerRunningDone()),
+            this, SLOT(runningLevelDone()));
 }
 void UiLevels::backClicked() {
     this->info->infoContent->infoWebEngineView->setHtml("");
@@ -218,6 +147,26 @@ InfoContent::InfoContent(QWidget *parent)
     layout->setSpacing(8);
 
     coverListWidget = new QListWidget(this);
+
+    // Get the vertical scrollbar size
+    // to center the images for all themes
+    qint64 scrollbarWidth = coverListWidget->
+             style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+    QMargins margins = coverListWidget->contentsMargins();
+    qint64 left = margins.left();
+    qint64 right = margins.right();
+
+    coverListWidget->setMinimumWidth(left+502+scrollbarWidth+right);
+    coverListWidget->setMaximumWidth(left+502+scrollbarWidth+right);
+
+    coverListWidget->setViewMode(QListView::IconMode);
+    coverListWidget->setIconSize(QSize(502, 377));
+    coverListWidget->setDragEnabled(false);
+    coverListWidget->setAcceptDrops(false);
+    coverListWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
+    coverListWidget->setDefaultDropAction(Qt::IgnoreAction);
+    coverListWidget->setSelectionMode(QAbstractItemView::NoSelection);
+
     layout->addWidget(coverListWidget);
 
     infoWebEngineView = new QWebEngineView(this);
@@ -276,8 +225,7 @@ WalkthroughBar::WalkthroughBar(QWidget *parent)
 
 
 void UiLevels::callbackDialog(QString selected) {
-    const quint64 lid = levelListProxy->getLid(m_current);
-    const bool type = levelListProxy->getItemType(m_current);
+    const quint64 lid = select->getLid();
 
     if (selected == "Remove Level and zip files" ||
             selected == "Remove zip file") {
@@ -286,19 +234,7 @@ void UiLevels::callbackDialog(QString selected) {
     if (selected == "Remove Level and zip files" ||
             selected == "Remove just Level files") {
         if (controller.deleteLevel(lid)) {
-            levelListModel->clearInstalled(m_current);
-            FilterSecondInputRow *filterSecondInputRow =
-                select->filter->filterSecondInputRow;
-            FilterGroupBoxToggle *filterGroupBoxToggle = 
-                filterSecondInputRow->filterGroupBoxToggle;
-            if (filterGroupBoxToggle->checkBoxInstalled->isChecked()) {
-                levelListProxy->setInstalledFilter(true);
-            } else {
-                NavigateWidgetBar *navigateWidgetBar =
-                    select->stackedWidgetBar->navigateWidgetBar;
-                navigateWidgetBar->
-                    pushButtonDownload->setText("Download and install");
-            }
+            select->setRemovedLevel();
         }
     }
     this->setStackedWidget("select");
@@ -335,19 +271,11 @@ void UiLevels::generateList(const QList<int>& availableGames) {
 }
 
 qint64 UiLevels::getItemId() {
-    qint64 id = 0;
-    if (m_current.isValid()) {
-        id = levelListProxy->getLid(m_current);
-    }
-    return id;
+    return select->getLid();
 }
 
 void UiLevels::setItemChanged(const QModelIndex &current) {
-    if (current.isValid()) {
-        m_current = levelListProxy->mapToSource(current);
-    } else {
-        qDebug() << "Current QModelIndex from LevelListProxy not valid";
-    }
+    select->setItemChanged(current);
 }
 
 
@@ -387,7 +315,7 @@ void UiLevels::levelDirSelected(qint64 id) {
 }
 
 void UiLevels::setSortMode(LevelListProxy::SortMode mode) {
-    levelListProxy->setSortMode(mode);
+    select->setSortMode(mode);
 }
 
 void UiLevels::setList() {
@@ -401,22 +329,21 @@ void UiLevels::setList() {
         item->m_installed = trle;
     }
 
-    levelListModel->setLevels(list);
-
+    select->setLevels(list);
     loadMoreCovers();
 }
 
 void UiLevels::loadMoreCovers() {
-    if (!levelListModel->stop()) {
+    if (!select->stop()) {
         QVector<QSharedPointer<ListItemData>> buffer =
-                levelListModel->getDataBuffer(20);
+                select->getDataBuffer(20);
         if (!buffer.isEmpty()) {
             controller.getCoverList(buffer);
         }
     }
     static bool firstTime = true;
     if (!firstTime) {
-        levelListModel->reset();
+        select->reset();
     } else {
         firstTime = false;
     }
@@ -424,55 +351,35 @@ void UiLevels::loadMoreCovers() {
 
 
 void UiLevels::infoClicked() {
-    if (m_current.isValid()) {
-        qint64 id = levelListProxy->getLid(m_current);
-        if (id != 0) {
-            InfoData info = controller.getInfo(id);
-            if (info.m_body == "" && info.m_imageList.size() == 0) {
-                m_loadingIndicatorWidget->show();
-                stackedWidget->setCurrentWidget(
-                        stackedWidget->findChild<QWidget*>("loading"));
-                controller.updateLevel(id);
-                m_loadingDoneGoTo = "info";
-                return;
-            }
-
-            this->info->infoContent->infoWebEngineView->setHtml(info.m_body);
-
-            // Get the vertical scrollbar size
-            // to center the images for all themes
-            // int scrollbarWidth = ui->infoListWidget->
-            //         style()->pixelMetric(QStyle::PM_ScrollBarExtent);
-            //QMargins margins = ui->infoListWidget->contentsMargins();
-            //int left = margins.left();
-            //int right = margins.right();
-
-            QListWidget *w = this->info->infoContent->coverListWidget;
-            //w->setMinimumWidth(left+502+scrollbarWidth+right);
-            //w->setMaximumWidth(left+502+scrollbarWidth+right);
-
-            w->setViewMode(QListView::IconMode);
-            w->setIconSize(QSize(502, 377));
-            w->setDragEnabled(false);
-            w->setAcceptDrops(false);
-            w->setDragDropMode(QAbstractItemView::NoDragDrop);
-            w->setDefaultDropAction(Qt::IgnoreAction);
-            w->setSelectionMode(QAbstractItemView::NoSelection);
-            w->clear();
-            for (int i = 0; i < info.m_imageList.size(); ++i) {
-                const QIcon &icon = info.m_imageList.at(i);
-                QListWidgetItem *item = new QListWidgetItem(icon, "");
-                item->setSizeHint(QSize(502, 377));
-                w->addItem(item);
-            }
-            this->info->infoContent->infoWebEngineView->show();
+    qint64 id = select->getLid();
+    if (id != 0) {
+        InfoData info = controller.getInfo(id);
+        if (info.m_body == "" && info.m_imageList.size() == 0) {
+            m_loadingIndicatorWidget->show();
             stackedWidget->setCurrentWidget(
-                    stackedWidget->findChild<QWidget*>("info"));
-            if (controller.getWalkthrough(id) != "") {
-                this->info->infoBar->pushButtonWalkthrough->setEnabled(true);
-            } else {
-                this->info->infoBar->pushButtonWalkthrough->setEnabled(false);
-            }
+                    stackedWidget->findChild<QWidget*>("loading"));
+            controller.updateLevel(id);
+            m_loadingDoneGoTo = "info";
+            return;
+        }
+
+        this->info->infoContent->infoWebEngineView->setHtml(info.m_body);
+
+        QListWidget *coverListWidget = this->info->infoContent->coverListWidget;
+        coverListWidget->clear();
+        for (int i = 0; i < info.m_imageList.size(); ++i) {
+            const QIcon &icon = info.m_imageList.at(i);
+            QListWidgetItem *item = new QListWidgetItem(icon, "");
+            item->setSizeHint(QSize(502, 377));
+            coverListWidget->addItem(item);
+        }
+        this->info->infoContent->infoWebEngineView->show();
+        stackedWidget->setCurrentWidget(
+                stackedWidget->findChild<QWidget*>("info"));
+        if (controller.getWalkthrough(id) != "") {
+            this->info->infoBar->pushButtonWalkthrough->setEnabled(true);
+        } else {
+            this->info->infoBar->pushButtonWalkthrough->setEnabled(false);
         }
     }
 }
@@ -519,16 +426,14 @@ void UiLevels::setStartupSetting(const StartupSetting startupSetting) {
 }
 
 void UiLevels::walkthroughClicked() {
-    if (m_current.isValid()) {
-        qint64 id = levelListProxy->getLid(m_current);
-        if (id != 0) {
-            QWebEngineView* w =
-                this->walkthough->walkthroughWebEngineView;
-            w->setHtml(controller.getWalkthrough(id));
-            w->show();
-            this->stackedWidget->setCurrentWidget(
-                    this->stackedWidget->findChild<QWidget*>("walkthrough"));
-        }
+    qint64 id = select->getLid();
+    if (id != 0) {
+        QWebEngineView* w =
+            this->walkthough->walkthroughWebEngineView;
+        w->setHtml(controller.getWalkthrough(id));
+        w->show();
+        this->stackedWidget->setCurrentWidget(
+                this->stackedWidget->findChild<QWidget*>("walkthrough"));
     }
 }
 
@@ -539,16 +444,14 @@ void UiLevels::updateLevelDone() {
         this->stackedWidget->setCurrentWidget(
                 this->stackedWidget->findChild<QWidget*>("select"));
     } else if (m_loadingDoneGoTo == "info") {
-        if (m_current.isValid()) {
-            qint64 id = levelListProxy->getLid(m_current);
-            if (id != 0) {
-                InfoData info = controller.getInfo(id);
-                if (!(info.m_body == "" && info.m_imageList.size() == 0)) {
-                    infoClicked();
-                } else {
-                    this->stackedWidget->setCurrentWidget(
-                            this->stackedWidget->findChild<QWidget*>("select"));
-                }
+        qint64 id = select->getLid();
+        if (id != 0) {
+            InfoData info = controller.getInfo(id);
+            if (!(info.m_body == "" && info.m_imageList.size() == 0)) {
+                infoClicked();
+            } else {
+                this->stackedWidget->setCurrentWidget(
+                        this->stackedWidget->findChild<QWidget*>("select"));
             }
         }
     } else {
@@ -605,7 +508,7 @@ void UiLevels::setpushButtonRunText(const QString &text) {
 }
 
 void UiLevels::setupGameOrLevel(qint64 id) {
-    if (levelListProxy->getItemType(m_current)) {
+    if (select->getType()) {
         controller.setupGame(id);
     } else {
         controller.setupLevel(id);
@@ -621,35 +524,35 @@ void UiLevels::workTick() {
         progressWidgetBar->progressBar->value() << "%";
     if (this->select->stackedWidgetBar->
             progressWidgetBar->progressBar->value() >= 100) {
-        if (m_current.isValid()) {
-            qint64 id = levelListProxy->getLid(m_current);
-            levelListModel->setInstalled(m_current);
-            if (levelListProxy->getItemType(m_current)) {
-                g_settings.setValue(
-                        QString("installed/game%1").arg(id),
-                            "true");
-            } else {
-                g_settings.setValue(
-                        QString("installed/level%1").arg(id),
-                            "true");
-            }
-            this->select->stackedWidgetBar->setCurrentWidget(
-                    this->select->stackedWidgetBar->findChild<QWidget*>("navigate"));
-            this->select->levelViewList->setEnabled(true);
-            this->select->filter->filterFirstInputRow->
-                filterGroupBoxSearch->setEnabled(true);
-            this->select->filter->filterFirstInputRow->
-                filterGroupBoxFilter->setEnabled(true);
-            this->select->filter->filterSecondInputRow->
-                filterGroupBoxToggle->setEnabled(true);
-            this->select->filter->filterSecondInputRow->
-                filterGroupBoxSort->setEnabled(true);
-            levelDirSelected(id);
+        qint64 id = select->getLid();
+        select->setInstalledLevel();
+        if (select->getType()) {
+            g_settings.setValue(
+                    QString("installed/game%1").arg(id),
+                        "true");
+        } else {
+            g_settings.setValue(
+                    QString("installed/level%1").arg(id),
+                        "true");
         }
+        this->select->stackedWidgetBar->setCurrentWidget(
+                this->select->stackedWidgetBar->findChild<QWidget*>("navigate"));
+        this->select->levelViewList->setEnabled(true);
+        this->select->filter->filterFirstInputRow->
+            filterGroupBoxSearch->setEnabled(true);
+        this->select->filter->filterFirstInputRow->
+            filterGroupBoxFilter->setEnabled(true);
+        this->select->filter->filterSecondInputRow->
+            filterGroupBoxToggle->setEnabled(true);
+        this->select->filter->filterSecondInputRow->
+            filterGroupBoxSort->setEnabled(true);
+        levelDirSelected(id);
     }
 }
 void UiLevels::runClicked() {
-    if (m_current.isValid()) {
+
+    qint64 id = select->getLid();
+    if (id != 0) {
         this->select->levelViewList->setEnabled(false);
         this->select->filter->filterFirstInputRow->
             filterGroupBoxSearch->setEnabled(false);
@@ -664,8 +567,7 @@ void UiLevels::runClicked() {
         this->select->stackedWidgetBar->navigateWidgetBar->
             checkBoxSetup->setEnabled(false);
 
-        qint64 id = levelListProxy->getLid(m_current);
-        if (levelListProxy->getItemType(m_current)) {
+        if (select->getType()) {
             id = (-1)*id;
         }
         if (id != 0) {

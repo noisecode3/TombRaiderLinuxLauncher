@@ -81,11 +81,6 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     // void walkthroughClicked();
 
     /**
-     * Returns to the first navigation state, the list.
-     */
-    // void backClicked();
-
-    /**
      * Opens the first-time setup options clicked.
      */
     // void setOptionsClicked();
@@ -95,36 +90,6 @@ class TombRaiderLinuxLauncher : public QMainWindow {
      */
     // void onCurrentItemChanged(
     //         const QModelIndex &current, const QModelIndex &previous);
-
-    /**
-     *  Try loading 100 more levels cards by calling for more cover pictures.
-     */
-    // void loadMoreCovers();
-
-    /**
-     * Updates progress by 1% of total work steps.
-     */
-    // void workTick();
-
-    /**
-     * Displays an error dialog for a curl download error.
-     */
-    // void downloadError(int status);
-
-    /**
-     * Switch back to level list or info page after network/python work.
-     */
-    // void updateLevelDone();
-
-    /**
-     * Switch back to list selection state after running the game.
-     */
-    // void runningLevelDone();
-
-    /**
-     * Generates the initial level list after file analysis.
-     */
-    // void generateList(const QList<int>& availableGames);
 
     /**
      * Sorts the list by title.

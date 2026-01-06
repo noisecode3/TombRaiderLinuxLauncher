@@ -61,30 +61,9 @@ Ui::Ui(QWidget *parent)
     connect(sslbar->commandLinkButtonLSReset, SIGNAL(clicked()),
             this, SLOT(LevelResetClicked()));
 
-    // Progress bar signal connection
-    connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()),
-            this, SLOT(workTick()));
 
-    // Arrive with next batch of level icons
-    connect(&Controller::getInstance(), SIGNAL(controllerReloadLevelList()),
-            this, SLOT(loadMoreCovers()));
 
-    // Thread work done signal connections
-    connect(&Controller::getInstance(),
-            SIGNAL(controllerGenerateList(QList<int>)),
-            this, SLOT(generateList(QList<int>)));
 
-    // Error signal connections
-    connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
-            this, SLOT(downloadError(int)));
-
-    // Loading done signal connections
-    connect(&Controller::getInstance(), SIGNAL(controllerLoadingDone()),
-            this, SLOT(updateLevelDone()));
-
-    // Loading done signal connections
-    connect(&Controller::getInstance(), SIGNAL(controllerRunningDone()),
-            this, SLOT(runningLevelDone()));
 
     // Read settings
     QString value = g_settings.value("setup").toString();
@@ -92,6 +71,7 @@ Ui::Ui(QWidget *parent)
         this->startUpSetup();
     } else {
         setup->readSavedSettings();
+        controller.setup();
     }
 }
 
@@ -187,4 +167,5 @@ void Ui::setOptionsClicked() {
             this->setup->stackedWidget->findChild<QWidget*>("settings"));
 
     setup->readSavedSettings();
+    controller.setup();
 }

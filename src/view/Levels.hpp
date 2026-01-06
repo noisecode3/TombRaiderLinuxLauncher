@@ -151,13 +151,36 @@ public:
     void downloadClicked(qint64 id);
     void setupGameOrLevel(qint64 id);
     void backClicked();
+
+public slots:
+    /**
+     * Generates the initial level list after file analysis.
+     */
+    void generateList(const QList<int>& availableGames);
+
+    /**
+     * Switch back to level list or info page after network/python work.
+     */
+    void updateLevelDone();
+
+    /**
+     *  Try loading 100 more levels cards by calling for more cover pictures.
+     */
+    void loadMoreCovers();
+
+    /**
+     * Updates progress by 1% of total work steps.
+     */
+    void workTick();
+
+    /**
+     * Switch back to list selection state after running the game.
+     */
+    void runningLevelDone();
 private:
     QSettings& g_settings = getSettingsInstance();
     QString m_loadingDoneGoTo;
     QList<int> m_availableGames;
-    QModelIndex m_current;
-    LevelListModel *levelListModel;
-    LevelListProxy *levelListProxy;
     Controller& controller = Controller::getInstance();
 
     struct InstalledStatus {
@@ -166,19 +189,14 @@ private:
     };
 
     void runClicked();
-    void workTick();
-    void updateLevelDone();
     void walkthroughClicked();
-    void runningLevelDone();
     QStringList parsToArg(const QString& str);
     QVector<QPair<QString, QString>> parsToEnv(const QString& str);
     void infoClicked();
     void downloadOrRemoveClicked();
-    void loadMoreCovers();
     InstalledStatus getInstalled();
     void setList();
     void levelDirSelected(qint64 id);
-    void generateList(const QList<int>& availableGames);
     void callbackDialog(QString selected);
     void setStackedWidget(const QString &qwidget);
     QGridLayout *layout{nullptr};
