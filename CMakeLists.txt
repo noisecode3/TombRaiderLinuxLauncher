@@ -147,31 +147,6 @@ set(SOURCES_MC
     src/PyRunner.hpp
     src/Runner.cpp
     src/Runner.hpp
-    src/view/About.cpp
-    src/view/About.hpp
-    src/view/Controller.cpp
-    src/view/Controller.hpp
-    src/view/Levels.cpp
-    src/view/Levels.hpp
-    src/view/Levels/Dialog.cpp
-    src/view/Levels/Dialog.hpp
-    src/view/Levels/Filter.cpp
-    src/view/Levels/Filter.hpp
-    src/view/Levels/LevelViewList.cpp
-    src/view/Levels/LevelViewList.hpp
-    src/view/Levels/LoadingIndicator.cpp
-    src/view/Levels/LoadingIndicator.hpp
-    src/view/Levels/Select.cpp
-    src/view/Levels/Select.hpp
-    src/view/Levels/StackedWidgetBar.cpp
-    src/view/Levels/StackedWidgetBar.hpp
-    src/view/Modding.cpp
-    src/view/Modding.hpp
-    src/view/Setup.cpp
-    src/view/Setup.hpp
-    src/view/Ui.cpp
-    src/view/Ui.hpp
-    src/view/staticViewData.hpp
     src/assert.hpp
     src/binary.cpp
     src/binary.hpp
@@ -181,9 +156,35 @@ set(SOURCES_MC
 )
 
 set(SOURCES_VIEW
+    src/view/About.cpp
+    src/view/About.hpp
+    src/view/Controller.cpp
+    src/view/Controller.hpp
+    src/view/Levels.cpp
+    src/view/Levels.hpp
+    src/view/Levels/Dialog.cpp
+    src/view/Levels/Dialog.hpp
+    src/view/Levels/Info.cpp
+    src/view/Levels/Info.hpp
+    src/view/Levels/LoadingIndicator.cpp
+    src/view/Levels/LoadingIndicator.hpp
+    src/view/Levels/Select.cpp
+    src/view/Levels/Select.hpp
+    src/view/Levels/Select/Filter.cpp
+    src/view/Levels/Select/Filter.hpp
+    src/view/Levels/Select/LevelViewList.cpp
+    src/view/Levels/Select/LevelViewList.hpp
+    src/view/Levels/Select/StackedWidgetBar.cpp
+    src/view/Levels/Select/StackedWidgetBar.hpp
+    src/view/Modding.cpp
+    src/view/Modding.hpp
+    src/view/Setup.cpp
+    src/view/Setup.hpp
+    src/view/Ui.cpp
+    src/view/Ui.hpp
+    src/view/staticViewData.hpp
     src/TombRaiderLinuxLauncher.hpp
     src/TombRaiderLinuxLauncher.cpp
-    src/TombRaiderLinuxLauncher.ui
     src/resources.qrc
 )
 

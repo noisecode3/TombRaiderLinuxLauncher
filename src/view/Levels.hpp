@@ -3,8 +3,8 @@
 
 #include "../src/Controller.hpp"
 #include "../src/CommandLineParser.hpp"
+#include "view/Levels/Info.hpp"
 #include "view/Levels/LoadingIndicator.hpp"
-#include "view/Levels/LevelViewList.hpp"
 #include "view/Levels/Dialog.hpp"
 #include "view/Levels/Select.hpp"
 #include <QWidget>
@@ -30,90 +30,6 @@ public:
      * Loading
      */
     explicit Loading(QWidget *parent);
-private:
-    QVBoxLayout *layout{nullptr};
-};
-
-
-class InfoBar : public QWidget
-{
-    Q_OBJECT
-public:
-    /*
-     * (ui->tabs->levels->stackedWidget->info)
-     * InfoBar
-     * ├── pushButtonWalkthrough
-     * └── pushButtonBack
-     */
-    explicit InfoBar(QWidget *parent);
-    QPushButton *pushButtonWalkthrough{nullptr};
-    QPushButton *pushButtonBack{nullptr};
-private:
-    QHBoxLayout *layout{nullptr};
-};
-
-class InfoContent : public QWidget
-{
-    Q_OBJECT
-public:
-    /*
-     * (ui->tabs->levels->stackedWidget->info)
-     * InfoContent
-     * ├── coverListWidget
-     * └── infoWebEngineView
-     */
-    explicit InfoContent(QWidget *parent);
-    QListWidget *coverListWidget{nullptr};
-    QWebEngineView *infoWebEngineView{nullptr};
-private:
-    QHBoxLayout *layout{nullptr};
-};
-
-class Info : public QWidget
-{
-    Q_OBJECT
-public:
-    /*
-     * (ui->tabs->levels->stackedWidget)
-     * Info
-     * ├── infoContent ->
-     * └── infoBar ->
-     */
-    explicit Info(QWidget *parent);
-    InfoContent *infoContent{nullptr};
-    InfoBar *infoBar{nullptr};
-private:
-    QVBoxLayout *layout{nullptr};
-};
-
-class WalkthroughBar : public QWidget
-{
-    Q_OBJECT
-public:
-    /*
-     * (ui->tabs->levels->stackedWidget->walkthrough)
-     * WalkthroughBar
-     * └── walkthroughBackButton
-     */
-    explicit WalkthroughBar(QWidget *parent);
-    QPushButton *walkthroughBackButton{nullptr};
-private:
-    QHBoxLayout *layout{nullptr};
-};
-
-class Walkthrough : public QWidget
-{
-    Q_OBJECT
-public:
-    /*
-     * (ui->tabs->levels->stackedWidget)
-     * Walkthrough
-     * ├── walkthroughWebEngineView
-     * └── walkthroughBar ->
-     */
-    explicit Walkthrough(QWidget *parent);
-    QWebEngineView *walkthroughWebEngineView{nullptr};
-    WalkthroughBar *walkthroughBar{nullptr};
 private:
     QVBoxLayout *layout{nullptr};
 };

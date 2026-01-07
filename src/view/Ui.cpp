@@ -1,35 +1,28 @@
 #include "view/Ui.hpp"
 
 Ui::Ui(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+    tabs(new QTabWidget(this)),
+    levels(new UiLevels(tabs)),
+    modding(new UiModding(tabs)),
+    uicontroller(new UiController(tabs)),
+    setup(new UiSetup(tabs)),
+    about(new UiAbout(tabs)),
+    layout(new QGridLayout(this))
 {
     this->setObjectName("centralwidget");
 
-    layout = new QGridLayout(this);
     layout->setContentsMargins(9, 9, 9, 9);
     layout->setSpacing(8);
-
-    tabs = new QTabWidget(this);
-
-    levels = new UiLevels(tabs);
     tabs->addTab(levels, tr("Levels"));
-
-    modding = new UiModding(tabs);
     tabs->addTab(modding, tr("Modding"));
     tabs->setTabEnabled(tabs->indexOf(
             tabs->findChild<QWidget*>("Modding")), false);
-
-    uicontroller = new UiController(tabs);
     tabs->addTab(uicontroller, tr("Controller"));
     tabs->setTabEnabled(tabs->indexOf(
             tabs->findChild<QWidget*>("Controller")), false);
-
-    setup = new UiSetup(tabs);
     tabs->addTab(setup, tr("Setup"));
-
-    about = new UiAbout(tabs);
     tabs->addTab(about, tr("About"));
-
     layout->addWidget(tabs);
 
 
@@ -49,21 +42,10 @@ Ui::Ui(QWidget *parent)
             this, SLOT(backClicked()));
     connect(sfbar->setOptions, SIGNAL(clicked()), this, SLOT(setOptionsClicked()));
 
-    GlobalControl* ssgbar = this->setup->settings->frameGlobalSetup->globalControl;
-    LevelControl* sslbar = this->setup->settings->frameLevelSetup->levelControl;
-    // Settings tab
-    connect(ssgbar->commandLinkButtonGSSave, SIGNAL(clicked()),
-            this, SLOT(GlobalSaveClicked()));
-    connect(ssgbar->commandLinkButtonGSReset, SIGNAL(clicked()),
-            this, SLOT(GlobalResetClicked()));
-    connect(sslbar->commandLinkButtonLSSave, SIGNAL(clicked()),
-            this, SLOT(LevelSaveClicked()));
-    connect(sslbar->commandLinkButtonLSReset, SIGNAL(clicked()),
-            this, SLOT(LevelResetClicked()));
-
-
-
-
+    connect(
+            this->levels->select->levelViewList->selectionModel(),
+            &QItemSelectionModel::currentChanged,
+            this, &Ui::onCurrentItemChanged);
 
     // Read settings
     QString value = g_settings.value("setup").toString();
@@ -81,6 +63,26 @@ void Ui::onCurrentItemChanged(const QModelIndex &current) {
         qint64 id = levels->getItemId();
     }
 }
+
+
+void Ui::levelSaveClicked() {
+    qint64 id = levels->select->getLid();
+    if (id != 0) {
+        setup->levelSaveClicked(id);
+    }
+    this->levels->select->stackedWidgetBar->navigateWidgetBar->pushButtonRun->setText(
+        this->setup->settings->frameLevelSetup->frameLevelSetupSettings->
+        widgetRunnerType->comboBoxRunnerType->currentText());
+}
+
+void Ui::levelResetClicked() {
+    qint64 id = levels->getItemId();
+    if (id != 0) {
+        setup->levelResetClicked(id);
+    }
+}
+
+
 
 void Ui::downloadOrRemoveClicked() {
     qint64 id = levels->getItemId();
@@ -120,40 +122,6 @@ void Ui::startUpSetup() {
             .arg(homeDir, "/.local/share/TombRaiderLinuxLauncher"));
 }
 
-void Ui::LevelSaveClicked() {
-    qint64 id = levels->getItemId();
-    if (id != 0) {
-        g_settings.setValue(QString("level%1/EnvironmentVariables")
-                .arg(id), this->setup->settings->
-                    frameLevelSetup->frameLevelSetupSettings->widgetEnvironmentVariables->
-                            lineEditEnvironmentVariables->text());
-
-        g_settings.setValue(QString("level%1/RunnerType")
-                                .arg(id), this->setup->settings->frameLevelSetup->
-                            frameLevelSetupSettings->widgetRunnerType->
-                            comboBoxRunnerType->currentIndex());
-    }
-    this->levels->select->stackedWidgetBar->navigateWidgetBar->pushButtonRun->setText(
-        this->setup->settings->frameLevelSetup->frameLevelSetupSettings->
-        widgetRunnerType->comboBoxRunnerType->currentText());
-}
-
-void Ui::LevelResetClicked() {
-    qint64 id = levels->getItemId();
-    if (id != 0) {
-        this->setup->settings->frameLevelSetup->frameLevelSetupSettings->widgetEnvironmentVariables->
-            lineEditEnvironmentVariables->setText(
-                g_settings.value(
-                    QString("level%1/EnvironmentVariables")
-                        .arg(id)).toString());
-
-        this->setup->settings->frameLevelSetup->frameLevelSetupSettings->widgetRunnerType->
-            comboBoxRunnerType->setCurrentIndex(
-                g_settings.value(
-                    QString("level%1/RunnerType")
-                        .arg(id)).toInt());
-    }
-}
 
 void Ui::setOptionsClicked() {
     this->tabs->setTabEnabled(this->tabs->indexOf(

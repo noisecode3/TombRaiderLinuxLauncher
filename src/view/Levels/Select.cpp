@@ -169,7 +169,7 @@ bool Select::stop() {
 }
 
 QVector<QSharedPointer<ListItemData>> Select::getDataBuffer(quint64 lenght) {
-    return levelListModel->getDataBuffer(20);
+    return levelListModel->getDataBuffer(lenght);
 }
 
 void  Select::reset() {

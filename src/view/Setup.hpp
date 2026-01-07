@@ -206,16 +206,18 @@ public:
     /*
      * (ui->tabs->setup->stackedWidget->settings->frameLevelSetup)
      * FrameLevelSetupSettings
+     * ├── headerLabel
      * ├── widgetEnvironmentVariables ->
      * ├── widgetRunnerType ->
      * ├── widgetLevelID ->
-     * └── label
+     * └── infoLabel
      */
     explicit FrameLevelSetupSettings(QWidget *parent);
+    QLabel *headerLabel{nullptr};
     WidgetEnvironmentVariables *widgetEnvironmentVariables{nullptr};
     WidgetRunnerType *widgetRunnerType{nullptr};
     WidgetLevelID *widgetLevelID{nullptr};
-    QLabel *label{nullptr};
+    QLabel *infoLabel{nullptr};
 private:
     QVBoxLayout *layout{nullptr};
 };
@@ -227,12 +229,10 @@ public:
     /*
      * (ui->tabs->setup->stackedWidget->settings)
      * FrameLevelSetup
-     * ├── labelLevelSetup
      * ├── frameLevelSetupSettings ->
      * └── levelControl ->
      */
     explicit FrameLevelSetup(QWidget *parent);
-    QLabel *labelLevelSetup{nullptr};
     FrameLevelSetupSettings *frameLevelSetupSettings{nullptr};
     LevelControl *levelControl{nullptr};
 private:
@@ -312,7 +312,7 @@ public:
     /*
      * (ui->tabs->setup->stackedWidget->settings)
      * FrameGlobalSetup
-     * ├── labelGlobalSetup
+     * ├── headerLabel
      * ├── tableWidgetGlobalSetup
      * ├── widgetDefaultEnvironmentVariables ->
      * ├── widgetDefaultRunnerType ->
@@ -321,7 +321,7 @@ public:
      * └── globalControl ->
      */
     explicit FrameGlobalSetup(QWidget *parent);
-    QLabel *labelGlobalSetup{nullptr};
+    QLabel *headerLabel{nullptr};
     QTableWidget *tableWidgetGlobalSetup{nullptr};
     WidgetDefaultEnvironmentVariables *widgetDefaultEnvironmentVariables{nullptr};
     WidgetDefaultRunnerType *widgetDefaultRunnerType{nullptr};
@@ -369,10 +369,15 @@ public:
     void setState(qint64 id);
     void downloadClicked(qint64 id);
     void readSavedSettings();
+
+public slots:
+    void globalSaveClicked();
+    void globalResetClicked();
+    void levelSaveClicked(qint64 id);
+    void levelResetClicked(qint64 id);
+
 private:
     void setOptionsClicked();
-    void GlobalSaveClicked();
-    void GlobalResetClicked();
     QVBoxLayout *layout{nullptr};
     QSettings& g_settings = getSettingsInstance();
     Controller& controller = Controller::getInstance();

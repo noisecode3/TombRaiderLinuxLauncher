@@ -13,12 +13,12 @@
 #ifndef VIEW_LEVELS_DIALOG_HPP_
 #define VIEW_LEVELS_DIALOG_HPP_
 
+#include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QButtonGroup>
-#include <QWidget>
 
 class Dialog : public QWidget {
     Q_OBJECT

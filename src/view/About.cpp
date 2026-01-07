@@ -1,30 +1,29 @@
 #include "About.hpp"
 
 UiAbout::UiAbout(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+    frameAbout(new FrameAbout(this)),
+    layout(new QGridLayout(this))
 {
     setObjectName("About");
 
-    layout = new QGridLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
-
-    frameAbout = new FrameAbout(this);
 
     layout->addWidget(frameAbout, 0, 0);
 }
 
 FrameAbout::FrameAbout(QWidget *parent)
-    : QFrame(parent)
+    : QFrame(parent),
+    textBrowserAbout(new QTextBrowser(this)),
+    layout(new QVBoxLayout(this))
 {
     setFrameShape(QFrame::NoFrame);
     setObjectName("frameAbout");
 
-    layout = new QVBoxLayout(this);
     layout->setContentsMargins(9, 9, 9, 9);
     layout->setSpacing(0);
 
-    textBrowserAbout = new QTextBrowser(this);
     textBrowserAbout->setObjectName("textBrowserAbout");
 
     // Size policy

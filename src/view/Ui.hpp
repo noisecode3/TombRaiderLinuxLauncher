@@ -30,13 +30,25 @@ public:
     UiLevels* levels{nullptr};
     UiModding* modding{nullptr};
     UiSetup* setup{nullptr};
+public slots:
+    /**
+     * Updates selected menu level state.
+     */
+    void onCurrentItemChanged(const QModelIndex &current);
+
+    /**
+     * Set setup level UI settings to the previous saved state.
+     */
+    void levelResetClicked();
+
+    /**
+     * Set setup level saved state to the UI .
+     */
+    void levelSaveClicked();
 private:
     Controller& controller = Controller::getInstance();
     QSettings& g_settings = getSettingsInstance();
-    void LevelResetClicked();
-    void LevelSaveClicked();
     void setOptionsClicked();
-    void onCurrentItemChanged(const QModelIndex &current);
     void startUpSetup();
     void downloadOrRemoveClicked();
     QGridLayout *layout{nullptr};

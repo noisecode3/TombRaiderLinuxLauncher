@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "view/Levels/Filter.hpp"
+#include "view/Levels/Select/Filter.hpp"
 #include <QLineEdit>
 
 Filter::Filter(QWidget *parent)

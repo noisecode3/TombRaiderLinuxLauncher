@@ -91,36 +91,6 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     // void onCurrentItemChanged(
     //         const QModelIndex &current, const QModelIndex &previous);
 
-    /**
-     * Sorts the list by title.
-     */
-    // void sortByTitle();
-
-    /**
-     * Sorts the list by difficulty.
-     */
-    // void sortByDifficulty();
-
-    /**
-     * Sorts the list by duration.
-     */
-    // void sortByDuration();
-
-    /**
-     * Sorts the list by level class.
-     */
-    // void sortByClass();
-
-    /**
-     * Sorts the list by type.
-     */
-    // void sortByType();
-
-    /**
-     * Sorts the list by release date.
-     */
-    // void sortByReleaseDate();
-
 
  private:
     /**

@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "view/Levels/StackedWidgetBar.hpp"
+#include "view/Levels/Select/StackedWidgetBar.hpp"
 
 NavigateWidgetBar::NavigateWidgetBar(QWidget *parent)
     : QWidget(parent),

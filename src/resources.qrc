@@ -2,6 +2,8 @@
   <qresource>
     <file>icons/down-arrow.svg</file>
     <file>icons/up-arrow.svg</file>
+    <file>icons/document-revert.svg</file>
+    <file>icons/document-save.svg</file>
     <file>pictures/Lara.png</file>
     <file>pictures/Lara2.jpg</file>
     <file>pictures/Lara3.jpg</file>

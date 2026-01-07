@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "view/Levels/LevelViewList.hpp"
+#include "view/Levels/Select/LevelViewList.hpp"
 
 #include <QDateTime>
 #include <QApplication>

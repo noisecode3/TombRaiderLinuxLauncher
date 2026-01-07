@@ -1,5 +1,6 @@
 #include "Setup.hpp"
 #include <qnamespace.h>
+#include <QHeaderView>
 
 UiSetup::UiSetup(QWidget *parent)
     : QWidget{parent},
@@ -18,8 +19,21 @@ UiSetup::UiSetup(QWidget *parent)
     stackedWidget->addWidget(firstTime);
     stackedWidget->addWidget(settings);
     stackedWidget->setCurrentWidget(settings);
-}
 
+
+    GlobalControl* ssgbar = this->settings->frameGlobalSetup->globalControl;
+    connect(ssgbar->commandLinkButtonGSSave, SIGNAL(clicked()),
+            this, SLOT(globalSaveClicked()));
+    connect(ssgbar->commandLinkButtonGSReset, SIGNAL(clicked()),
+            this, SLOT(globalResetClicked()));
+
+    LevelControl* sslbar = this->settings->frameLevelSetup->levelControl;
+    connect(sslbar->commandLinkButtonLSSave, SIGNAL(clicked()),
+            this, SLOT(levelSaveClicked()));
+    connect(sslbar->commandLinkButtonLSReset, SIGNAL(clicked()),
+            this, SLOT(levelResetClicked()));
+
+}
 
 void UiSetup::readSavedSettings() {
     const QString gamePath = g_settings.value("gamePath").toString();
@@ -93,7 +107,7 @@ void UiSetup::setOptionsClicked() {
             tableWidgetGlobalSetup->item(2, 0)->setText(levelPath);
 }
 
-void UiSetup::GlobalSaveClicked() {
+void UiSetup::globalSaveClicked() {
     const QString newGamePath =
         this->settings->frameGlobalSetup->
                 tableWidgetGlobalSetup->item(0, 0)->text();
@@ -131,7 +145,7 @@ void UiSetup::GlobalSaveClicked() {
             comboBoxDefaultRunnerType->currentIndex());
 }
 
-void UiSetup::GlobalResetClicked() {
+void UiSetup::globalResetClicked() {
     this->settings->frameGlobalSetup->
         tableWidgetGlobalSetup->item(0, 0)->setText(
             g_settings.value("gamePath").toString());
@@ -153,6 +167,32 @@ void UiSetup::GlobalResetClicked() {
     this->settings->frameGlobalSetup->widgetDefaultRunnerType->
         comboBoxDefaultRunnerType->setCurrentIndex(
             g_settings.value("defaultRunnerType").toInt());
+}
+
+void UiSetup::levelSaveClicked(qint64 id) {
+        g_settings.setValue(QString("level%1/EnvironmentVariables")
+                .arg(id), this->settings->
+                    frameLevelSetup->frameLevelSetupSettings->widgetEnvironmentVariables->
+                            lineEditEnvironmentVariables->text());
+
+        g_settings.setValue(QString("level%1/RunnerType")
+                                .arg(id), this->settings->frameLevelSetup->
+                            frameLevelSetupSettings->widgetRunnerType->
+                            comboBoxRunnerType->currentIndex());
+}
+
+void UiSetup::levelResetClicked(qint64 id) {
+    this->settings->frameLevelSetup->frameLevelSetupSettings->widgetEnvironmentVariables->
+        lineEditEnvironmentVariables->setText(
+            g_settings.value(
+                QString("level%1/EnvironmentVariables")
+                    .arg(id)).toString());
+
+    this->settings->frameLevelSetup->frameLevelSetupSettings->widgetRunnerType->
+        comboBoxRunnerType->setCurrentIndex(
+            g_settings.value(
+                QString("level%1/RunnerType")
+                    .arg(id)).toInt());
 }
 
 void UiSetup::setState(qint64 id) {
@@ -347,12 +387,13 @@ Settings::Settings(QWidget *parent)
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
 
-    layout->addWidget(frameGlobalSetup);
     layout->addWidget(frameLevelSetup);
+    layout->addWidget(frameGlobalSetup);
 }
 
 FrameGlobalSetup::FrameGlobalSetup(QWidget *parent)
     : QFrame(parent),
+    headerLabel(new QLabel(tr("Global"), this)),
     tableWidgetGlobalSetup(new QTableWidget(this)),
     widgetDefaultEnvironmentVariables(new WidgetDefaultEnvironmentVariables(this)),
     widgetDefaultRunnerType(new WidgetDefaultRunnerType(this)),
@@ -363,7 +404,14 @@ FrameGlobalSetup::FrameGlobalSetup(QWidget *parent)
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    this->setMinimumWidth(420);
 
+    QFont font;
+    font.setFamily("Sans");
+    font.setPointSize(20);
+    headerLabel->setFont(font);
+    headerLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    layout->addWidget(headerLabel);
 
     tableWidgetGlobalSetup->setRowCount(3);
     tableWidgetGlobalSetup->setColumnCount(1);
@@ -379,7 +427,6 @@ FrameGlobalSetup::FrameGlobalSetup(QWidget *parent)
 
     tableWidgetGlobalSetup->setTabKeyNavigation(false);
     tableWidgetGlobalSetup->setSelectionMode(QAbstractItemView::NoSelection);
-
     tableWidgetGlobalSetup->setHorizontalHeaderItem(
         0, new QTableWidgetItem(tr("Paths"))
     );
@@ -394,23 +441,25 @@ FrameGlobalSetup::FrameGlobalSetup(QWidget *parent)
         2, new QTableWidgetItem("RESOURCEDIR")
     );
 
+    tableWidgetGlobalSetup->horizontalHeader()->setStretchLastSection(true);
     for (int row = 0; row < 3; ++row) {
         QTableWidgetItem *item = new QTableWidgetItem();
         item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
         tableWidgetGlobalSetup->setItem(row, 0, item);
     }
 
-    layout->addWidget(tableWidgetGlobalSetup);
-    layout->addWidget(widgetDefaultEnvironmentVariables);
-    layout->addWidget(widgetDefaultRunnerType);
-    layout->addWidget(widgetDeleteZip);
-    layout->addWidget(labelGlobalSetupPicture);
-    layout->addWidget(globalControl);
+    layout->addWidget(tableWidgetGlobalSetup, Qt::AlignTop | Qt::AlignHCenter);
+    layout->addWidget(widgetDefaultEnvironmentVariables, Qt::AlignTop | Qt::AlignHCenter);
+    layout->addWidget(widgetDefaultRunnerType, Qt::AlignTop | Qt::AlignLeft);
+    layout->addWidget(widgetDeleteZip, Qt::AlignTop | Qt::AlignLeft);
+    layout->addWidget(labelGlobalSetupPicture, Qt::AlignBottom | Qt::AlignHCenter);
+    layout->addWidget(globalControl, Qt::AlignBottom | Qt::AlignLeft);
 }
 
 WidgetDefaultEnvironmentVariables::WidgetDefaultEnvironmentVariables(QWidget *parent)
     : QWidget(parent),
-    labelDefaultEnvironmentVariables(new QLabel(this)),
+    labelDefaultEnvironmentVariables(new QLabel(
+        tr("Default Environment Variables/Options"), this)),
     lineEditDefaultEnvironmentVariables(new QLineEdit(this)),
     layout(new QHBoxLayout(this))
 {
@@ -423,16 +472,16 @@ WidgetDefaultEnvironmentVariables::WidgetDefaultEnvironmentVariables(QWidget *pa
 
 WidgetDefaultRunnerType::WidgetDefaultRunnerType(QWidget *parent)
     : QWidget(parent),
-    labelDefaultRunnerType(new QLabel(this)),
+    labelDefaultRunnerType(new QLabel(tr("Default Runner Type"),this)),
     comboBoxDefaultRunnerType(new QComboBox(this)),
     layout(new QHBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    layout->setAlignment(Qt::AlignLeft);
 
     layout->addWidget(labelDefaultRunnerType);
 
-    comboBoxDefaultRunnerType->setMinimumHeight(120);
     comboBoxDefaultRunnerType->setEnabled(false);
     comboBoxDefaultRunnerType->addItems(QStringList()
         << "Umu-launcher"
@@ -449,7 +498,8 @@ WidgetDefaultRunnerType::WidgetDefaultRunnerType(QWidget *parent)
 
 WidgetDeleteZip::WidgetDeleteZip(QWidget *parent)
     : QWidget(parent),
-    checkBoxDeleteZip(new QCheckBox(this)),
+    checkBoxDeleteZip(new QCheckBox(
+        tr("Detlete Zip file after level download"),this)),
     layout(new QHBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
@@ -460,7 +510,6 @@ WidgetDeleteZip::WidgetDeleteZip(QWidget *parent)
 
 FrameLevelSetup::FrameLevelSetup(QWidget *parent)
     : QFrame(parent),
-    labelLevelSetup(new QLabel(this)),
     frameLevelSetupSettings(new FrameLevelSetupSettings(this)),
     levelControl(new LevelControl(this)),
     layout(new QVBoxLayout(this))
@@ -468,29 +517,35 @@ FrameLevelSetup::FrameLevelSetup(QWidget *parent)
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
 
-    layout->addWidget(labelLevelSetup);
-    layout->addWidget(frameLevelSetupSettings);
-    layout->addWidget(levelControl);
+    layout->addWidget(frameLevelSetupSettings, 1);
+    layout->addWidget(levelControl, 0, Qt::AlignBottom | Qt::AlignLeft);
 }
 
 FrameLevelSetupSettings::FrameLevelSetupSettings(QWidget *parent)
     : QFrame(parent),
+    headerLabel(new QLabel(tr("Level"), this)),
     widgetEnvironmentVariables(new WidgetEnvironmentVariables(this)),
     widgetRunnerType(new WidgetRunnerType(this)),
     widgetLevelID(new WidgetLevelID(this)),
-    label(new QLabel(this)),
+    infoLabel(new QLabel(this)),
     layout(new QVBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
 
-    layout->addWidget(widgetEnvironmentVariables);
-    layout->addWidget(widgetRunnerType);
-    layout->addWidget(widgetLevelID);
-    label->setWordWrap(true);
-    label->setAlignment(Qt::AlignCenter);
+    QFont font;
+    font.setFamily("Sans");
+    font.setPointSize(20);
+    headerLabel->setFont(font);
+    headerLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    layout->addWidget(headerLabel);
+    layout->addWidget(widgetEnvironmentVariables, Qt::AlignTop | Qt::AlignLeft);
+    layout->addWidget(widgetRunnerType, Qt::AlignTop | Qt::AlignLeft);
+    layout->addWidget(widgetLevelID, Qt::AlignTop | Qt::AlignLeft);
+    infoLabel->setWordWrap(true);
+    infoLabel->setAlignment(Qt::AlignCenter);
 
-    label->setText(
+    infoLabel->setText(
         "Runs system Wine/Proton from RESOURCEDIR/lid.TREL\n"
         "Set environment variables like:\n"
         "WINEDLLOVERRIDES=winmm=n,b;ddraw=n,b WINEFSYNC=1\n\n"
@@ -506,17 +561,19 @@ FrameLevelSetupSettings::FrameLevelSetupSettings(QWidget *parent)
         "Link and Exit: links then exits\n\n"
         "Link and Launch Steam: also launches Steam game based on level type\n"
         );
-    layout->addWidget(label);
+    layout->addWidget(infoLabel, Qt::AlignCenter);
 }
 
 WidgetEnvironmentVariables::WidgetEnvironmentVariables(QWidget* parent)
     : QWidget(parent),
-    labelEnvironmentVariables(new QLabel(this)),
+    labelEnvironmentVariables(new QLabel(
+        tr("Environment Variables/Options"), this)),
     lineEditEnvironmentVariables(new QLineEdit(this)),
     layout(new QHBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    layout->setAlignment(Qt::AlignLeft);
 
     layout->addWidget(labelEnvironmentVariables);
     layout->addWidget(lineEditEnvironmentVariables);
@@ -524,16 +581,17 @@ WidgetEnvironmentVariables::WidgetEnvironmentVariables(QWidget* parent)
 
 WidgetRunnerType::WidgetRunnerType(QWidget* parent)
     : QWidget(parent),
-    labelRunnerType(new QLabel(this)),
+    labelRunnerType(new QLabel(
+        tr("Runner Type"), this)),
     comboBoxRunnerType(new QComboBox(this)),
     layout(new QHBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    layout->setAlignment(Qt::AlignLeft);
 
     layout->addWidget(labelRunnerType);
 
-    comboBoxRunnerType->setMinimumHeight(120);
     comboBoxRunnerType->setEnabled(false);
     comboBoxRunnerType->insertItems(0, QStringList()
         << "Umu-launcher"
@@ -551,12 +609,14 @@ WidgetRunnerType::WidgetRunnerType(QWidget* parent)
 
 WidgetLevelID::WidgetLevelID(QWidget* parent)
     : QWidget(parent),
-    labelLevelID(new QLabel(this)),
+    labelLevelID(new QLabel(
+        tr("Level ID (lid)"), this)),
     lcdNumberLevelID(new QLCDNumber(this)),
     layout(new QHBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    layout->setAlignment(Qt::AlignLeft);
 
     layout->addWidget(labelLevelID);
     layout->addWidget(lcdNumberLevelID);
@@ -564,26 +624,50 @@ WidgetLevelID::WidgetLevelID(QWidget* parent)
 
 LevelControl::LevelControl(QWidget *parent)
     : QWidget(parent),
-    commandLinkButtonLSReset(new QCommandLinkButton(this)),
-    commandLinkButtonLSSave(new QCommandLinkButton(this)),
+    commandLinkButtonLSReset(new QCommandLinkButton(tr("Reset"), this)),
+    commandLinkButtonLSSave(new QCommandLinkButton(tr("Save"), this)),
     layout(new QHBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    setMaximumHeight(46);
 
+    commandLinkButtonLSReset->setFixedWidth(160);
+    QIcon resetIcon = QIcon::fromTheme(
+        "document-revert",
+        QIcon(":/icons/document-revert.svg"));
+
+    commandLinkButtonLSReset->setIcon(resetIcon);
     layout->addWidget(commandLinkButtonLSReset);
+    commandLinkButtonLSSave->setFixedWidth(160);
+    QIcon saveIcon = QIcon::fromTheme(
+        "document-save",
+        QIcon(":/icons/document-save.svg"));
+    commandLinkButtonLSSave->setIcon(saveIcon);
     layout->addWidget(commandLinkButtonLSSave);
 }
 
 GlobalControl::GlobalControl(QWidget *parent)
     : QWidget(parent),
-    commandLinkButtonGSReset(new QCommandLinkButton(this)),
-    commandLinkButtonGSSave(new QCommandLinkButton(this)),
+    commandLinkButtonGSReset(new QCommandLinkButton(tr("Reset"), this)),
+    commandLinkButtonGSSave(new QCommandLinkButton(tr("Save"), this)),
     layout(new QHBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    setMaximumHeight(46);
 
+    commandLinkButtonGSReset->setFixedWidth(160);
+    QIcon resetIcon = QIcon::fromTheme(
+        "document-revert",
+        QIcon(":/icons/document-revert.svg"));
+
+    commandLinkButtonGSReset->setIcon(resetIcon);
     layout->addWidget(commandLinkButtonGSReset);
+    commandLinkButtonGSSave->setFixedWidth(160);
+    QIcon saveIcon = QIcon::fromTheme(
+        "document-save",
+        QIcon(":/icons/document-save.svg"));
+    commandLinkButtonGSSave->setIcon(saveIcon);
     layout->addWidget(commandLinkButtonGSSave);
 }

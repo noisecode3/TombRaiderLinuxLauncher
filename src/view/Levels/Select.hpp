@@ -2,9 +2,9 @@
 #define VIEW_LEVELS_SELECT_HPP_
 #include <QWidget>
 #include <QVBoxLayout>
-#include "view/Levels/Filter.hpp"
-#include "view/Levels/LevelViewList.hpp"
-#include "view/Levels/StackedWidgetBar.hpp"
+#include "view/Levels/Select/Filter.hpp"
+#include "view/Levels/Select/LevelViewList.hpp"
+#include "view/Levels/Select/StackedWidgetBar.hpp"
 
 class Select : public QWidget
 {
