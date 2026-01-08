@@ -134,8 +134,8 @@ FilterGroupBoxFilter::FilterGroupBoxFilter(QWidget *parent)
 
 FilterGroupBoxToggle::FilterGroupBoxToggle(QWidget *parent)
     : QGroupBox(parent),
-    checkBoxInstalled(new QCheckBox(tr("Core Design Games"), this)),
-    checkBoxOriginal(new QCheckBox(tr("Installed Only"), this)),
+    checkBoxOriginal(new QCheckBox(tr("Core Design Games"), this)),
+    checkBoxInstalled(new QCheckBox(tr("Installed Only"), this)),
     layout(new QHBoxLayout(this))
 {
     setObjectName("filterGroupBoxToggle");
@@ -143,8 +143,8 @@ FilterGroupBoxToggle::FilterGroupBoxToggle(QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(6);
 
-    layout->addWidget(checkBoxInstalled);
     layout->addWidget(checkBoxOriginal);
+    layout->addWidget(checkBoxInstalled);
 }
 
 FilterGroupBoxSort::FilterGroupBoxSort(QWidget *parent)

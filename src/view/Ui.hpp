@@ -34,7 +34,9 @@ public slots:
     /**
      * Updates selected menu level state.
      */
-    void onCurrentItemChanged(const QModelIndex &current);
+    void onCurrentItemChanged(
+        const QModelIndex &current,
+        const QModelIndex &previous);
 
     /**
      * Set setup level UI settings to the previous saved state.

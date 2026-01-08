@@ -178,6 +178,9 @@ qint64 UiLevels::getItemId() {
 
 void UiLevels::setItemChanged(const QModelIndex &current) {
     select->setItemChanged(current);
+    qint64 id = select->getLid();
+    qDebug() << "setItemChanged id:" << id;
+    levelDirSelected(id);
 }
 
 

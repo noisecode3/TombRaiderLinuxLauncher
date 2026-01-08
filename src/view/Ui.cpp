@@ -57,13 +57,14 @@ Ui::Ui(QWidget *parent)
     }
 }
 
-void Ui::onCurrentItemChanged(const QModelIndex &current) {
+void Ui::onCurrentItemChanged(
+        const QModelIndex &current, const QModelIndex &previous) {
     if (current.isValid()) {
         levels->setItemChanged(current);
         qint64 id = levels->getItemId();
+        setup->setState(id);
     }
 }
-
 
 void Ui::levelSaveClicked() {
     qint64 id = levels->select->getLid();
@@ -81,8 +82,6 @@ void Ui::levelResetClicked() {
         setup->levelResetClicked(id);
     }
 }
-
-
 
 void Ui::downloadOrRemoveClicked() {
     qint64 id = levels->getItemId();
@@ -121,7 +120,6 @@ void Ui::startUpSetup() {
     setupInput->levelPathContainer->levelPathEdit->setText(QString("%1%2")
             .arg(homeDir, "/.local/share/TombRaiderLinuxLauncher"));
 }
-
 
 void Ui::setOptionsClicked() {
     this->tabs->setTabEnabled(this->tabs->indexOf(

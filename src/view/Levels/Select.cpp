@@ -93,16 +93,6 @@ Select::Select(QWidget *parent)
         levelListProxy->setSortMode(LevelListProxy::ReleaseDate);
     });
 
-    connect(toggleBox->checkBoxInstalled,
-            &QCheckBox::clicked, this, [this]() {
-        qDebug() << "QCheckBox Installed clicked";
-        levelListProxy->setInstalledFilter(true);
-    });
-
-    connect(toggleBox->checkBoxOriginal,
-            &QCheckBox::clicked, this, [this]() {
-        qDebug() << "QCheckBox Original clicked";
-    });
 
     FilterGroupBoxFilter *filterGroupBoxFilter =
         filter->filterFirstInputRow->filterGroupBoxFilter;
@@ -120,7 +110,7 @@ Select::Select(QWidget *parent)
             this,
             [this](const QString &type) {
         levelListProxy->setTypeFilter(type);
-        qDebug() << "QComboBox Class clicked";
+        qDebug() << "QComboBox Type clicked";
     });
 
     connect(filterGroupBoxFilter->comboBoxDifficulty,
@@ -128,7 +118,7 @@ Select::Select(QWidget *parent)
             this,
             [this](const QString &difficulty) {
         levelListProxy->setDifficultyFilter(difficulty);
-        qDebug() << "QComboBox Class clicked";
+        qDebug() << "QComboBox Difficulty clicked";
     });
 
     connect(filterGroupBoxFilter->comboBoxDuration,
@@ -136,7 +126,7 @@ Select::Select(QWidget *parent)
             this,
             [this](const QString &duration) {
         levelListProxy->setDurationFilter(duration);
-        qDebug() << "QComboBox Class clicked";
+        qDebug() << "QComboBox Duration clicked";
     });
 
     FilterGroupBoxToggle * filterGroupBoxToggle =
@@ -145,6 +135,11 @@ Select::Select(QWidget *parent)
             &QCheckBox::toggled,
             levelListProxy,
             &LevelListProxy::setInstalledFilter);
+
+    connect(toggleBox->checkBoxOriginal,
+            &QCheckBox::clicked, this, [this]() {
+        qDebug() << "QCheckBox Original clicked";
+    });
 
     FilterGroupBoxSearch* filterGroupBoxSearch =
         filter->filterFirstInputRow->filterGroupBoxSearch;
