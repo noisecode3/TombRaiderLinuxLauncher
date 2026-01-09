@@ -71,36 +71,4 @@ private:
     QVBoxLayout *layout{nullptr};
 };
 
-class WalkthroughBar : public QWidget
-{
-    Q_OBJECT
-public:
-    /*
-     * (ui->tabs->levels->stackedWidget->walkthrough)
-     * WalkthroughBar
-     * └── walkthroughBackButton
-     */
-    explicit WalkthroughBar(QWidget *parent);
-    QPushButton *walkthroughBackButton{nullptr};
-private:
-    QHBoxLayout *layout{nullptr};
-};
-
-class Walkthrough : public QWidget
-{
-    Q_OBJECT
-public:
-    /*
-     * (ui->tabs->levels->stackedWidget)
-     * Walkthrough
-     * ├── walkthroughWebEngineView
-     * └── walkthroughBar ->
-     */
-    explicit Walkthrough(QWidget *parent);
-    QWebEngineView *walkthroughWebEngineView{nullptr};
-    WalkthroughBar *walkthroughBar{nullptr};
-private:
-    QVBoxLayout *layout{nullptr};
-};
-
 #endif  // VIEW_LEVELS_INFO_HPP_

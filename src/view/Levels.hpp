@@ -45,8 +45,7 @@ public:
      *      ├── Dialog ->
      *      ├── Info ->
      *      ├── Loading ->
-     *      ├── Select ->
-     *      └── Walkthrought ->
+     *      └── Select ->
      */
     explicit UiLevels(QWidget *parent);
     QStackedWidget *stackedWidget{nullptr};
@@ -55,7 +54,6 @@ public:
     Loading *loading{nullptr};
     LoadingIndicator* m_loadingIndicatorWidget;
     Select *select{nullptr};
-    Walkthrough *walkthough{nullptr};
 
     void setSortMode(LevelListProxy::SortMode mode);
     void setItemChanged(const QModelIndex &current);
@@ -66,9 +64,18 @@ public:
     void removeClicked(qint64 id);
     void downloadClicked(qint64 id);
     void setupGameOrLevel(qint64 id);
-    void backClicked();
 
 public slots:
+   /**
+     * Opens the Info thru the navigation bar.
+     */
+    void infoClicked();
+
+    /**
+     * Returns to the first navigation state, the list.
+     */
+    void backClicked();
+
     /**
      * Generates the initial level list after file analysis.
      */
@@ -108,7 +115,6 @@ private:
     void walkthroughClicked();
     QStringList parsToArg(const QString& str);
     QVector<QPair<QString, QString>> parsToEnv(const QString& str);
-    void infoClicked();
     void downloadOrRemoveClicked();
     InstalledStatus getInstalled();
     void setList();

@@ -12,21 +12,21 @@
  */
 
 #include "view/Levels/Info.hpp"
+#include <qnamespace.h>
 
 Info::Info(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+    infoContent(new InfoContent(this)),
+    infoBar(new InfoBar(this))
 {
     setObjectName("info");
     layout = new QVBoxLayout(this);
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
 
-    infoContent = new InfoContent(this);
     layout->addWidget(infoContent);
-
-    infoBar = new InfoBar(this);
+    infoBar->setMaximumHeight(44);
     layout->addWidget(infoBar);
-
 }
 
 InfoContent::InfoContent(QWidget *parent)
@@ -35,6 +35,10 @@ InfoContent::InfoContent(QWidget *parent)
     layout = new QHBoxLayout(this);
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+
+    infoWebEngineView = new QWebEngineView(this);
+    infoWebEngineView->setUrl(QUrl("about:blank"));
+    layout->addWidget(infoWebEngineView);
 
     coverListWidget = new QListWidget(this);
 
@@ -58,9 +62,6 @@ InfoContent::InfoContent(QWidget *parent)
     coverListWidget->setSelectionMode(QAbstractItemView::NoSelection);
 
     layout->addWidget(coverListWidget);
-
-    infoWebEngineView = new QWebEngineView(this);
-    layout->addWidget(infoWebEngineView);
 }
 
 InfoBar::InfoBar(QWidget *parent)
@@ -70,35 +71,17 @@ InfoBar::InfoBar(QWidget *parent)
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
 
-    pushButtonWalkthrough = new QPushButton(this);
-    layout->addWidget(pushButtonWalkthrough);
-
-    pushButtonBack = new QPushButton(this);
+    pushButtonBack = new QPushButton(tr("Back"), this);
+    pushButtonBack->setFixedSize(242, 32);
     layout->addWidget(pushButtonBack);
+
+    pushButtonWalkthrough = new QPushButton(tr("Walkthrough"), this);
+    pushButtonWalkthrough->setFixedSize(242, 32);
+    layout->addWidget(pushButtonWalkthrough);
+    layout->addSpacerItem(
+    new QSpacerItem(0, 0,
+        QSizePolicy::Expanding,
+        QSizePolicy::Minimum)
+    );
 }
 
-Walkthrough::Walkthrough(QWidget *parent)
-    : QWidget(parent)
-{
-    setObjectName("walkthrough");
-    layout = new QVBoxLayout(this);
-    layout->setContentsMargins(6, 6, 6, 6);
-    layout->setSpacing(8);
-
-    walkthroughWebEngineView = new QWebEngineView(this);
-    layout->addWidget(walkthroughWebEngineView);
-
-    walkthroughBar = new WalkthroughBar(this);
-    layout->addWidget(walkthroughBar);
-}
-
-WalkthroughBar::WalkthroughBar(QWidget *parent)
-    : QWidget(parent)
-{
-    layout = new QHBoxLayout(this);
-    layout->setContentsMargins(6, 6, 6, 6);
-    layout->setSpacing(8);
-
-    walkthroughBackButton = new QPushButton(this);
-    layout->addWidget(walkthroughBackButton);
-}

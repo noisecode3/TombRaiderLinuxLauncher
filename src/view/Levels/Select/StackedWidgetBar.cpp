@@ -66,7 +66,6 @@ StackedWidgetBar::StackedWidgetBar(QWidget *parent)
     this->addWidget(progressWidgetBar);
 }
 
-
 void StackedWidgetBar::downloadError(int status) {
     this->progressWidgetBar->progressBar->setValue(0);
     this->navigateWidgetBar->pushButtonRun->setEnabled(true);
@@ -90,18 +89,5 @@ void StackedWidgetBar::downloadError(int status) {
     // msgBox.setStandardButtons(QMessageBox::Ok);
     // msgBox.setDefaultButton(QMessageBox::Ok);
     // msgBox.exec();
-}
-
-
-void StackedWidgetBar::backClicked() {
-    if (this->currentWidget() ==
-        this->findChild<QWidget*>("info")) {
-        this->setCurrentWidget(
-                this->findChild<QWidget*>("select"));
-    } else if (this->currentWidget() ==
-        this->findChild<QWidget*>("walkthrough")) {
-        this->setCurrentWidget(
-                this->findChild<QWidget*>("select"));
-    }
 }
 

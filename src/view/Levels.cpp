@@ -18,8 +18,7 @@ UiLevels::UiLevels(QWidget *parent)
     dialog(new Dialog(stackedWidget)),
     info(new Info(stackedWidget)),
     loading(new Loading(stackedWidget)),
-    select(new Select(stackedWidget)),
-    walkthough(new Walkthrough(stackedWidget))
+    select(new Select(stackedWidget))
 {
     setObjectName("Levels");
     layout = new QGridLayout(this);
@@ -33,7 +32,6 @@ UiLevels::UiLevels(QWidget *parent)
     stackedWidget->addWidget(info);
     stackedWidget->addWidget(loading);
     stackedWidget->addWidget(select);
-    stackedWidget->addWidget(walkthough);
 
     connect(dialog, &Dialog::cancelClicked, this, [this]() {
         this->setStackedWidget("select");
@@ -87,11 +85,9 @@ UiLevels::UiLevels(QWidget *parent)
             SIGNAL(controllerGenerateList(QList<int>)),
             this, SLOT(generateList(QList<int>)));
 
-
     // Progress bar signal connection
     connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()),
             this, SLOT(workTick()));
-
 
     // Error signal connections
     connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
@@ -104,13 +100,20 @@ UiLevels::UiLevels(QWidget *parent)
     // Loading done signal connections
     connect(&Controller::getInstance(), SIGNAL(controllerRunningDone()),
             this, SLOT(runningLevelDone()));
-}
-void UiLevels::backClicked() {
-    this->info->infoContent->infoWebEngineView->setHtml("");
-    this->walkthough->walkthroughWebEngineView->setHtml("");
-    this->select->stackedWidgetBar->backClicked();
+
+    connect(this->info->infoBar->pushButtonBack, SIGNAL(clicked()),
+            this, SLOT(backClicked()));
+
+    connect(this->select->stackedWidgetBar->navigateWidgetBar->pushButtonInfo,
+            SIGNAL(clicked()), this, SLOT(infoClicked()));
 }
 
+void UiLevels::backClicked() {
+    this->info->infoContent->coverListWidget->show();
+    this->info->infoBar->pushButtonWalkthrough->show();
+    this->info->infoContent->infoWebEngineView->setHtml("");
+    this->stackedWidget->setCurrentWidget(this->findChild<QWidget*>("select"));
+}
 
 void UiLevels::setStackedWidget(const QString &qwidget) {
     this->stackedWidget->setCurrentWidget(
@@ -335,11 +338,12 @@ void UiLevels::walkthroughClicked() {
     qint64 id = select->getLid();
     if (id != 0) {
         QWebEngineView* w =
-            this->walkthough->walkthroughWebEngineView;
+            this->info->infoContent->infoWebEngineView;
+
+        this->info->infoContent->coverListWidget->hide();
+        this->info->infoBar->pushButtonWalkthrough->hide();
         w->setHtml(controller.getWalkthrough(id));
         w->show();
-        this->stackedWidget->setCurrentWidget(
-                this->stackedWidget->findChild<QWidget*>("walkthrough"));
     }
 }
 

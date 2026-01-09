@@ -34,13 +34,13 @@ Ui::Ui(QWidget *parent)
     connect(nbar->pushButtonRun, SIGNAL(clicked()), this, SLOT(runClicked()));
     connect(nbar->pushButtonDownload, SIGNAL(clicked()),
             this, SLOT(downloadOrRemoveClicked()));
-    connect(nbar->pushButtonInfo, SIGNAL(clicked()), this, SLOT(infoClicked()));
-    connect(ibar->pushButtonWalkthrough, SIGNAL(clicked()),
-            this, SLOT(walkthroughClicked()));
-    connect(ibar->pushButtonBack, SIGNAL(clicked()), this, SLOT(backClicked()));
-    connect(this->levels->walkthough->walkthroughBar->walkthroughBackButton, SIGNAL(clicked()),
-            this, SLOT(backClicked()));
     connect(sfbar->setOptions, SIGNAL(clicked()), this, SLOT(setOptionsClicked()));
+
+    LevelControl* sslbar = setup->settings->frameLevelSetup->levelControl;
+    connect(sslbar->commandLinkButtonLSSave, SIGNAL(clicked()),
+            this, SLOT(levelSaveClicked()));
+    connect(sslbar->commandLinkButtonLSReset, SIGNAL(clicked()),
+            this, SLOT(levelResetClicked()));
 
     connect(
             this->levels->select->levelViewList->selectionModel(),

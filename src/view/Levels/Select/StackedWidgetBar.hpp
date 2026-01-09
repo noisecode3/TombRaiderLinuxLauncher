@@ -62,17 +62,12 @@ public:
     explicit StackedWidgetBar(QWidget *parent);
     NavigateWidgetBar *navigateWidgetBar{nullptr};
     ProgressWidgetBar *progressWidgetBar{nullptr};
-
 public slots:
     /**
      * Displays an error dialog for a curl download error.
      */
     void downloadError(int status);
 
-    /**
-     * Returns to the first navigation state, the list.
-     */
-    void backClicked();
 };
 
 

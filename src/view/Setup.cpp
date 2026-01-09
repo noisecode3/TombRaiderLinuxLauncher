@@ -27,12 +27,6 @@ UiSetup::UiSetup(QWidget *parent)
     connect(ssgbar->commandLinkButtonGSReset, SIGNAL(clicked()),
             this, SLOT(globalResetClicked()));
 
-    LevelControl* sslbar = this->settings->frameLevelSetup->levelControl;
-    connect(sslbar->commandLinkButtonLSSave, SIGNAL(clicked()),
-            this, SLOT(levelSaveClicked()));
-    connect(sslbar->commandLinkButtonLSReset, SIGNAL(clicked()),
-            this, SLOT(levelResetClicked()));
-
 }
 
 void UiSetup::readSavedSettings() {
@@ -128,7 +122,7 @@ void UiSetup::globalSaveClicked() {
         g_settings.setValue("gamePath" , newGamePath);
         g_settings.setValue("extraGamePath" , newExtraGamePath);
         g_settings.setValue("levelPath" , newLevelPath);
-        controller.setup();
+        controller.setup();  //TODO: reload covers
     }
 
     const bool newDeleteZip =
@@ -482,7 +476,6 @@ WidgetDefaultRunnerType::WidgetDefaultRunnerType(QWidget *parent)
 
     layout->addWidget(labelDefaultRunnerType);
 
-    comboBoxDefaultRunnerType->setEnabled(false);
     comboBoxDefaultRunnerType->addItems(QStringList()
         << "Umu-launcher"
         << "Wine"
@@ -575,6 +568,7 @@ WidgetEnvironmentVariables::WidgetEnvironmentVariables(QWidget* parent)
     layout->setSpacing(8);
     layout->setAlignment(Qt::AlignLeft);
 
+    lineEditEnvironmentVariables->setEnabled(false);
     layout->addWidget(labelEnvironmentVariables);
     layout->addWidget(lineEditEnvironmentVariables);
 }
@@ -617,6 +611,7 @@ WidgetLevelID::WidgetLevelID(QWidget* parent)
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
     layout->setAlignment(Qt::AlignLeft);
+    lcdNumberLevelID->setFixedSize(64, 23);
 
     layout->addWidget(labelLevelID);
     layout->addWidget(lcdNumberLevelID);
