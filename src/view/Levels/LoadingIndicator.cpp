@@ -59,3 +59,5 @@ void LoadingIndicator::hideEvent(QHideEvent* event) {
     QWidget::hideEvent(event);
     m_anim->stop();
 }
+
+

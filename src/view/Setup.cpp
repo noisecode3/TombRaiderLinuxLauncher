@@ -443,11 +443,17 @@ FrameGlobalSetup::FrameGlobalSetup(QWidget *parent)
     }
 
     layout->addWidget(tableWidgetGlobalSetup, Qt::AlignTop | Qt::AlignHCenter);
-    layout->addWidget(widgetDefaultEnvironmentVariables, Qt::AlignTop | Qt::AlignHCenter);
+    layout->addWidget(widgetDefaultEnvironmentVariables, Qt::AlignTop | Qt::AlignLeft);
     layout->addWidget(widgetDefaultRunnerType, Qt::AlignTop | Qt::AlignLeft);
     layout->addWidget(widgetDeleteZip, Qt::AlignTop | Qt::AlignLeft);
-    layout->addWidget(labelGlobalSetupPicture, Qt::AlignBottom | Qt::AlignHCenter);
-    layout->addWidget(globalControl, Qt::AlignBottom | Qt::AlignLeft);
+    layout->addSpacerItem(
+    new QSpacerItem(10, 10,
+        QSizePolicy::Minimum,
+        QSizePolicy::Expanding)
+    );
+    labelGlobalSetupPicture->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
+    layout->addWidget(labelGlobalSetupPicture);
+    layout->addWidget(globalControl, Qt::AlignBottom);
 }
 
 WidgetDefaultEnvironmentVariables::WidgetDefaultEnvironmentVariables(QWidget *parent)
@@ -459,6 +465,7 @@ WidgetDefaultEnvironmentVariables::WidgetDefaultEnvironmentVariables(QWidget *pa
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    setMaximumHeight(46);
 
     layout->addWidget(labelDefaultEnvironmentVariables);
     layout->addWidget(lineEditDefaultEnvironmentVariables);
@@ -472,6 +479,7 @@ WidgetDefaultRunnerType::WidgetDefaultRunnerType(QWidget *parent)
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    setMaximumHeight(46);
     layout->setAlignment(Qt::AlignLeft);
 
     layout->addWidget(labelDefaultRunnerType);
@@ -497,6 +505,7 @@ WidgetDeleteZip::WidgetDeleteZip(QWidget *parent)
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    setMaximumHeight(46);
 
     layout->addWidget(checkBoxDeleteZip);
 }
@@ -532,9 +541,14 @@ FrameLevelSetupSettings::FrameLevelSetupSettings(QWidget *parent)
     headerLabel->setFont(font);
     headerLabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     layout->addWidget(headerLabel);
-    layout->addWidget(widgetEnvironmentVariables, Qt::AlignTop | Qt::AlignLeft);
-    layout->addWidget(widgetRunnerType, Qt::AlignTop | Qt::AlignLeft);
-    layout->addWidget(widgetLevelID, Qt::AlignTop | Qt::AlignLeft);
+    layout->addWidget(widgetEnvironmentVariables);
+    layout->addWidget(widgetRunnerType);
+    layout->addWidget(widgetLevelID);
+    layout->addSpacerItem(
+    new QSpacerItem(10, 10,
+        QSizePolicy::Minimum,
+        QSizePolicy::Expanding)
+    );
     infoLabel->setWordWrap(true);
     infoLabel->setAlignment(Qt::AlignCenter);
 
@@ -554,7 +568,12 @@ FrameLevelSetupSettings::FrameLevelSetupSettings(QWidget *parent)
         "Link and Exit: links then exits\n\n"
         "Link and Launch Steam: also launches Steam game based on level type\n"
         );
-    layout->addWidget(infoLabel, Qt::AlignCenter);
+    layout->addWidget(infoLabel);
+    layout->addSpacerItem(
+    new QSpacerItem(10, 10,
+        QSizePolicy::Minimum,
+        QSizePolicy::Expanding)
+    );
 }
 
 WidgetEnvironmentVariables::WidgetEnvironmentVariables(QWidget* parent)
@@ -566,6 +585,7 @@ WidgetEnvironmentVariables::WidgetEnvironmentVariables(QWidget* parent)
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    setMaximumHeight(46);
     layout->setAlignment(Qt::AlignLeft);
 
     lineEditEnvironmentVariables->setEnabled(false);
@@ -582,6 +602,7 @@ WidgetRunnerType::WidgetRunnerType(QWidget* parent)
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    setMaximumHeight(46);
     layout->setAlignment(Qt::AlignLeft);
 
     layout->addWidget(labelRunnerType);
@@ -665,4 +686,9 @@ GlobalControl::GlobalControl(QWidget *parent)
         QIcon(":/icons/document-save.svg"));
     commandLinkButtonGSSave->setIcon(saveIcon);
     layout->addWidget(commandLinkButtonGSSave);
+    layout->addSpacerItem(
+    new QSpacerItem(10, 10,
+        QSizePolicy::Expanding,
+        QSizePolicy::Minimum)
+    );
 }

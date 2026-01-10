@@ -30,7 +30,11 @@ public:
      * Loading
      */
     explicit Loading(QWidget *parent);
+
+    void show();
+    void hide();
 private:
+    LoadingIndicator* m_loadingIndicatorWidget;
     QVBoxLayout *layout{nullptr};
 };
 
@@ -52,7 +56,6 @@ public:
     Dialog *dialog{nullptr};
     Info *info{nullptr};
     Loading *loading{nullptr};
-    LoadingIndicator* m_loadingIndicatorWidget;
     Select *select{nullptr};
 
     void setSortMode(LevelListProxy::SortMode mode);
@@ -70,6 +73,11 @@ public slots:
      * Opens the Info thru the navigation bar.
      */
     void infoClicked();
+
+    /**
+     * Opens the Walkthrough thru the navigation bar.
+     */
+    void walkthroughClicked();
 
     /**
      * Returns to the first navigation state, the list.
@@ -112,7 +120,6 @@ private:
     };
 
     void runClicked();
-    void walkthroughClicked();
     QStringList parsToArg(const QString& str);
     QVector<QPair<QString, QString>> parsToEnv(const QString& str);
     void downloadOrRemoveClicked();

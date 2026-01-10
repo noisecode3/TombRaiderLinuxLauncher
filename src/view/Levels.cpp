@@ -28,8 +28,13 @@ UiLevels::UiLevels(QWidget *parent)
     layout->addWidget(stackedWidget,0,0);
 
     stackedWidget->addWidget(dialog);
-    stackedWidget->setCurrentWidget(dialog);
     stackedWidget->addWidget(info);
+
+    loading->show();
+    stackedWidget->setCurrentWidget(
+            stackedWidget->findChild<QWidget*>("loading"));
+    m_loadingDoneGoTo = "select";
+
     stackedWidget->addWidget(loading);
     stackedWidget->addWidget(select);
 
@@ -67,15 +72,6 @@ UiLevels::UiLevels(QWidget *parent)
     connect(dialog, &Dialog::setLevelsState,
         this, &UiLevels::callbackDialog);
 
-    m_loadingIndicatorWidget = new LoadingIndicator(loading);
-    //m_loadingIndicatorWidget->setFixedSize(64, 64);
-    //ui->verticalLayout_15->
-    //        addWidget(m_loadingIndicatorWidget, 0, Qt::AlignCenter);
-    m_loadingIndicatorWidget->show();
-    stackedWidget->setCurrentWidget(
-            stackedWidget->findChild<QWidget*>("loading"));
-    m_loadingDoneGoTo = "select";
-
     // Arrive with next batch of level icons
     connect(&Controller::getInstance(), SIGNAL(controllerReloadLevelList()),
             this, SLOT(loadMoreCovers()));
@@ -106,6 +102,9 @@ UiLevels::UiLevels(QWidget *parent)
 
     connect(this->select->stackedWidgetBar->navigateWidgetBar->pushButtonInfo,
             SIGNAL(clicked()), this, SLOT(infoClicked()));
+    
+    connect(this->info->infoBar->pushButtonWalkthrough,
+            SIGNAL(clicked()), this, SLOT(walkthroughClicked()));
 }
 
 void UiLevels::backClicked() {
@@ -127,6 +126,18 @@ Loading::Loading(QWidget *parent)
     layout = new QVBoxLayout(this);
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
+    m_loadingIndicatorWidget = new LoadingIndicator(this);
+    m_loadingIndicatorWidget->setFixedSize(64, 64);
+    layout->addWidget(m_loadingIndicatorWidget, 0, Qt::AlignCenter);
+
+}
+
+void Loading::show() {
+    m_loadingIndicatorWidget->show();
+}
+
+void Loading::hide() {
+    m_loadingIndicatorWidget->hide();
 }
 
 void UiLevels::callbackDialog(QString selected) {
@@ -263,7 +274,7 @@ void UiLevels::infoClicked() {
     if (id != 0) {
         InfoData info = controller.getInfo(id);
         if (info.m_body == "" && info.m_imageList.size() == 0) {
-            m_loadingIndicatorWidget->show();
+            loading->show();
             stackedWidget->setCurrentWidget(
                     stackedWidget->findChild<QWidget*>("loading"));
             controller.updateLevel(id);
@@ -348,7 +359,7 @@ void UiLevels::walkthroughClicked() {
 }
 
 void UiLevels::updateLevelDone() {
-    m_loadingIndicatorWidget->hide();
+    loading->hide();
     if (m_loadingDoneGoTo == "select") {
         setList();
         this->stackedWidget->setCurrentWidget(
