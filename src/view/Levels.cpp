@@ -30,12 +30,11 @@ UiLevels::UiLevels(QWidget *parent)
     stackedWidget->addWidget(dialog);
     stackedWidget->addWidget(info);
 
+    stackedWidget->addWidget(loading);
     loading->show();
-    stackedWidget->setCurrentWidget(
-            stackedWidget->findChild<QWidget*>("loading"));
+    stackedWidget->setCurrentWidget(loading);
     m_loadingDoneGoTo = "select";
 
-    stackedWidget->addWidget(loading);
     stackedWidget->addWidget(select);
 
     connect(dialog, &Dialog::cancelClicked, this, [this]() {
@@ -105,6 +104,31 @@ UiLevels::UiLevels(QWidget *parent)
     
     connect(this->info->infoBar->pushButtonWalkthrough,
             SIGNAL(clicked()), this, SLOT(walkthroughClicked()));
+}
+
+void UiLevels::downloadError(int status) {
+    select->stackedWidgetBar->progressWidgetBar->progressBar->setValue(0);
+    select->stackedWidgetBar->navigateWidgetBar->pushButtonRun->setEnabled(true);
+    select->stackedWidgetBar->navigateWidgetBar->pushButtonInfo->setEnabled(true);
+    select->stackedWidgetBar->navigateWidgetBar->pushButtonDownload->setEnabled(true);
+    select->stackedWidgetBar->setCurrentWidget(
+            this->findChild<QWidget*>("navigateWidgetBar"));
+    // ui->levels->select->levelViewList->setEnabled(true);
+    // QMessageBox msgBox;
+    // msgBox.setWindowTitle("Error");
+    if (status == 1) {
+        qDebug() << "No internet";
+    //     msgBox.setText("No internet");
+    } else if (status == 2) {
+        qDebug() << "You seem to be missing ssl keys";
+    //     msgBox.setText("You seem to be missing ssl keys");
+    } else {
+        qDebug() << "Could not connect";
+    //     msgBox.setText("Could not connect");
+    }
+    // msgBox.setStandardButtons(QMessageBox::Ok);
+    // msgBox.setDefaultButton(QMessageBox::Ok);
+    // msgBox.exec();
 }
 
 void UiLevels::backClicked() {
@@ -419,7 +443,7 @@ void UiLevels::downloadClicked(qint64 id) {
     select->filter->filterSecondInputRow->filterGroupBoxSort->setEnabled(false);
     select->stackedWidgetBar->progressWidgetBar->progressBar->setValue(0);
     select->stackedWidgetBar->setCurrentWidget(
-            select->stackedWidgetBar->findChild<QWidget*>("progress"));
+            select->stackedWidgetBar->findChild<QWidget*>("progressWidgetBar"));
 
 }
 
@@ -457,7 +481,7 @@ void UiLevels::workTick() {
                         "true");
         }
         this->select->stackedWidgetBar->setCurrentWidget(
-                this->select->stackedWidgetBar->findChild<QWidget*>("navigate"));
+                this->select->stackedWidgetBar->findChild<QWidget*>("navigateWidgetBar"));
         this->select->levelViewList->setEnabled(true);
         this->select->filter->filterFirstInputRow->
             filterGroupBoxSearch->setEnabled(true);

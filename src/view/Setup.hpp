@@ -369,6 +369,7 @@ public:
     void setState(qint64 id);
     void downloadClicked(qint64 id);
     void readSavedSettings();
+    void setOptionsClicked();
 
 public slots:
     void globalSaveClicked();
@@ -377,7 +378,6 @@ public slots:
     void levelResetClicked(qint64 id);
 
 private:
-    void setOptionsClicked();
     QVBoxLayout *layout{nullptr};
     QSettings& g_settings = getSettingsInstance();
     Controller& controller = Controller::getInstance();

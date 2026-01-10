@@ -66,28 +66,3 @@ StackedWidgetBar::StackedWidgetBar(QWidget *parent)
     this->addWidget(progressWidgetBar);
 }
 
-void StackedWidgetBar::downloadError(int status) {
-    this->progressWidgetBar->progressBar->setValue(0);
-    this->navigateWidgetBar->pushButtonRun->setEnabled(true);
-    this->navigateWidgetBar->pushButtonInfo->setEnabled(true);
-    this->navigateWidgetBar->pushButtonDownload->setEnabled(true);
-    this->setCurrentWidget(
-            this->findChild<QWidget*>("navigate"));
-    // ui->levels->select->levelViewList->setEnabled(true);
-    // QMessageBox msgBox;
-    // msgBox.setWindowTitle("Error");
-    if (status == 1) {
-        qDebug() << "No internet";
-    //     msgBox.setText("No internet");
-    } else if (status == 2) {
-        qDebug() << "You seem to be missing ssl keys";
-    //     msgBox.setText("You seem to be missing ssl keys");
-    } else {
-        qDebug() << "Could not connect";
-    //     msgBox.setText("Could not connect");
-    }
-    // msgBox.setStandardButtons(QMessageBox::Ok);
-    // msgBox.setDefaultButton(QMessageBox::Ok);
-    // msgBox.exec();
-}
-

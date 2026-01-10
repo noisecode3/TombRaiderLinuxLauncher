@@ -47,12 +47,18 @@ public slots:
      * Set setup level saved state to the UI .
      */
     void levelSaveClicked();
+
+    /**
+     * Opens the first-time setup options clicked.
+     */
+    void setOptionsClicked();
+
+    void downloadOrRemoveClicked();
+
 private:
     Controller& controller = Controller::getInstance();
     QSettings& g_settings = getSettingsInstance();
-    void setOptionsClicked();
     void startUpSetup();
-    void downloadOrRemoveClicked();
     QGridLayout *layout{nullptr};
 };
 

@@ -108,6 +108,11 @@ public slots:
      * Switch back to list selection state after running the game.
      */
     void runningLevelDone();
+
+    /**
+     * Displays an error dialog for a curl download error.
+     */
+    void downloadError(int status);
 private:
     QSettings& g_settings = getSettingsInstance();
     QString m_loadingDoneGoTo;
@@ -122,7 +127,6 @@ private:
     void runClicked();
     QStringList parsToArg(const QString& str);
     QVector<QPair<QString, QString>> parsToEnv(const QString& str);
-    void downloadOrRemoveClicked();
     InstalledStatus getInstalled();
     void setList();
     void levelDirSelected(qint64 id);

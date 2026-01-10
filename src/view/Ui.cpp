@@ -129,9 +129,7 @@ void Ui::setOptionsClicked() {
     this->tabs->show();
     this->tabs->setCurrentIndex(this->tabs->indexOf(
             this->tabs->findChild<QWidget*>("Levels")));
-    this->setup->stackedWidget->setCurrentWidget(
-            this->setup->stackedWidget->findChild<QWidget*>("settings"));
-
+    this->setup->setOptionsClicked();
     setup->readSavedSettings();
     controller.setup();
 }

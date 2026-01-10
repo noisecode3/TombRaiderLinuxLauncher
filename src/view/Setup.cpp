@@ -92,13 +92,8 @@ void UiSetup::setOptionsClicked() {
     g_settings.setValue("extraGamePath", extraGamePath);
     g_settings.setValue("levelPath", levelPath);
     g_settings.setValue("setup", "yes");
-
-    this->settings->frameGlobalSetup->
-            tableWidgetGlobalSetup->item(0, 0)->setText(gamePath);
-    this->settings->frameGlobalSetup->
-            tableWidgetGlobalSetup->item(1, 0)->setText(extraGamePath);
-    this->settings->frameGlobalSetup->
-            tableWidgetGlobalSetup->item(2, 0)->setText(levelPath);
+    this->stackedWidget->setCurrentWidget(
+            this->stackedWidget->findChild<QWidget*>("settings"));
 }
 
 void UiSetup::globalSaveClicked() {
@@ -378,6 +373,7 @@ Settings::Settings(QWidget *parent)
     frameLevelSetup(new FrameLevelSetup(this)),
     layout(new QHBoxLayout(this))
 {
+    setObjectName("settings");
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
 
