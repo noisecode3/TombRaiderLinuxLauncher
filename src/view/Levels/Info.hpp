@@ -50,6 +50,8 @@ public:
     explicit InfoContent(QWidget *parent);
     QListWidget *coverListWidget{nullptr};
     QWebEngineView *infoWebEngineView{nullptr};
+
+    void setWebEngineTheme();
 private:
     QHBoxLayout *layout{nullptr};
 };

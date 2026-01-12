@@ -13,6 +13,9 @@
 
 #include "view/Levels/Info.hpp"
 #include <qnamespace.h>
+#include <QWebEngineScript>
+#include <QWebEngineProfile>
+#include <QWebEngineScriptCollection>
 
 Info::Info(QWidget *parent)
     : QWidget(parent),
@@ -29,6 +32,64 @@ Info::Info(QWidget *parent)
     layout->addWidget(infoBar);
 }
 
+void InfoContent::setWebEngineTheme()
+{
+    QPalette pal = infoWebEngineView->palette();
+    QColor bg   = pal.color(QPalette::Base);
+    QColor text = pal.color(QPalette::Text);
+
+    QWebEngineScript script;
+    script.setName("qt-theme");
+    script.setInjectionPoint(QWebEngineScript::DocumentCreation);
+    script.setWorldId(QWebEngineScript::MainWorld);
+    script.setRunsOnSubFrames(true);
+
+    script.setSourceCode(QString(R"(
+(function applyQtTheme() {
+
+    // Vänta tills <html> faktiskt finns
+    if (!document.documentElement) {
+        requestAnimationFrame(applyQtTheme);
+        return;
+    }
+
+    // Se till att <head> finns
+    let head = document.head;
+    if (!head) {
+        head = document.createElement('head');
+        document.documentElement.appendChild(head);
+    }
+
+    // Återanvänd style om den redan finns
+    let style = document.getElementById('qt-theme-style');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'qt-theme-style';
+        head.appendChild(style);
+    }
+
+    // Trusted Types-safe: använd textContent
+    style.textContent = `
+        html, body {
+            background-color: %1 !important;
+            color: %2 !important;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: %1;
+        }
+
+    `;
+})();
+)").arg(bg.name(), text.name()));
+
+
+    QWebEngineProfile::defaultProfile()
+        ->scripts()->insert(script);
+}
+
+
+
 InfoContent::InfoContent(QWidget *parent)
     : QWidget(parent)
 {
@@ -37,7 +98,13 @@ InfoContent::InfoContent(QWidget *parent)
     layout->setSpacing(8);
 
     infoWebEngineView = new QWebEngineView(this);
-    infoWebEngineView->setUrl(QUrl("about:blank"));
+    setWebEngineTheme();
+
+    infoWebEngineView->setHtml(
+        "<!doctype html><html><body></body></html>",
+        QUrl("qrc:/")
+        );
+
     layout->addWidget(infoWebEngineView);
 
     coverListWidget = new QListWidget(this);
