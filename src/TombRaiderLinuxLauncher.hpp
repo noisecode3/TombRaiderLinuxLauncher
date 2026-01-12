@@ -27,21 +27,12 @@
 #include <QVector>
 #include <QString>
 
-#include "../src/settings.hpp"
+#include "../src/view/Ui.hpp"
 #include "../src/CommandLineParser.hpp"
-#include "../src/Controller.hpp"
-#include "../src/LevelViewList.hpp"
-#include "../src/LoadingIndicator.hpp"
-#include "../src/Dialog.hpp"
 
-struct InstalledStatus {
-    QHash<quint64, bool> game;
-    QHash<quint64, bool> trle;
-};
-
-QT_BEGIN_NAMESPACE
-namespace Ui { class TombRaiderLinuxLauncher; }
-QT_END_NAMESPACE
+//QT_BEGIN_NAMESPACE
+// namespace Ui { class TombRaiderLinuxLauncher; }
+//QT_END_NAMESPACE
 
 /** @mainpage TombRaiderLinuxLauncher
  *
@@ -72,156 +63,71 @@ class TombRaiderLinuxLauncher : public QMainWindow {
     /**
      * Triggered by the "Run" button.
      */
-    void runClicked();
+    // void runClicked();
 
     /**
      * Triggered by the "Download" or "Remove" button.
      */
-    void downloadOrRemoveClicked();
+    // void downloadOrRemoveClicked();
 
     /**
      * Opens the Info thru the navigation bar.
      */
-    void infoClicked();
+    // void infoClicked();
 
     /**
      * Opens the Walkthrough thru the navigation bar.
      */
-    void walkthroughClicked();
-
-    /**
-     * Returns to the first navigation state, the list.
-     */
-    void backClicked();
+    // void walkthroughClicked();
 
     /**
      * Opens the first-time setup options clicked.
      */
-    void setOptionsClicked();
+    // void setOptionsClicked();
 
     /**
      * Updates button states based on selected menu level.
      */
-    void onCurrentItemChanged(
-            const QModelIndex &current, const QModelIndex &previous);
+    // void onCurrentItemChanged(
+    //         const QModelIndex &current, const QModelIndex &previous);
 
-    /**
-     *  Try loading 100 more levels cards by calling for more cover pictures.
-     */
-    void loadMoreCovers();
-
-    /**
-     * Updates progress by 1% of total work steps.
-     */
-    void workTick();
-
-    /**
-     * Displays an error dialog for a curl download error.
-     */
-    void downloadError(int status);
-
-    /**
-     * Switch back to level list or info page after network/python work.
-     */
-    void updateLevelDone();
-
-    /**
-     * Switch back to list selection state after running the game.
-     */
-    void runningLevelDone();
-
-    /**
-     * Generates the initial level list after file analysis.
-     */
-    void generateList(const QList<int>& availableGames);
-
-    /**
-     * Sorts the list by title.
-     */
-    void sortByTitle();
-
-    /**
-     * Sorts the list by difficulty.
-     */
-    void sortByDifficulty();
-
-    /**
-     * Sorts the list by duration.
-     */
-    void sortByDuration();
-
-    /**
-     * Sorts the list by level class.
-     */
-    void sortByClass();
-
-    /**
-     * Sorts the list by type.
-     */
-    void sortByType();
-
-    /**
-     * Sorts the list by release date.
-     */
-    void sortByReleaseDate();
-
-    void filterByClass(const QString& class_);
-    void filterByType(const QString& type);
-    void filterByDifficulty(const QString& difficulty);
-    void filterByDuration(const QString& duration);
-    void showtOriginal();
-    void GlobalSaveClicked();
-    void GlobalResetClicked();
-    void LevelSaveClicked();
-    void LevelResetClicked();
 
  private:
     /**
      * 
      */
-    void setList();
+    // void setList();
+
 
     /**
      * 
      */
-    InstalledStatus getInstalled();
-
-    /**
-     * 
-     */
-    void levelDirSelected(qint64 id);
+    // void levelDirSelected(qint64 id);
 
     /**
      * Configures game and level directories.
      */
-    void setup();
+    // void setup();
 
     /**
      * Loads saved settings.
      */
-    void readSavedSettings();
+    // void readSavedSettings();
 
     /**
      * Pars input string to string list.
      */
-    QStringList parsToArg(const QString& str);
+    // QStringList parsToArg(const QString& str);
 
     /**
      * Pars input string to list of environment variables.
      */
-    QVector<QPair<QString, QString>> parsToEnv(const QString& str);
+    // QVector<QPair<QString, QString>> parsToEnv(const QString& str);
 
-    LevelListModel *levelListModel;
-    LevelListProxy *levelListProxy;
-    Controller& controller = Controller::getInstance();
-    QSettings& g_settings = getSettingsInstance();
+    // Controller& controller = Controller::getInstance();
+    // QSettings& g_settings = getSettingsInstance();
     StartupSetting m_ss;
-    Ui::TombRaiderLinuxLauncher *ui;
-    LoadingIndicator* m_loadingIndicatorWidget;
-    Dialog* m_dialogWidget;
-    QString m_loadingDoneGoTo;
-    QList<int> m_availableGames;
-    QModelIndex m_current;
+    Ui* ui;
 };
 
 #endif  // SRC_TOMBRAIDERLINUXLAUNCHER_HPP_

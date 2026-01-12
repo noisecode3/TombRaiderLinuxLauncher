@@ -11,8 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../src/Dialog.hpp"
-
+#include "view/Levels/Dialog.hpp"
 
 Dialog::Dialog(QWidget *parent)
     : QWidget(parent),
@@ -23,6 +22,8 @@ Dialog::Dialog(QWidget *parent)
       m_buttonGroup(new QButtonGroup(this)),
       m_okButton(new QPushButton("OK", this))
 {
+    setObjectName("dialog");
+
     // ========== Frame to hold content ==========
     QFrame *frame = new QFrame(this);
     frame->setFrameShape(QFrame::StyledPanel);
@@ -66,10 +67,9 @@ Dialog::Dialog(QWidget *parent)
 
     // ========== Connections ==========
     connect(m_okButton, &QPushButton::clicked, this, [this]() {
-        emit okClicked();
-    });
-    connect(m_cancelButton, &QPushButton::clicked, this, [this]() {
-        emit cancelClicked();  // Add this signal in your class
+        const QString selected = this->selectedOption();
+        qDebug() << "OK clicked, selected:" << selected;
+        emit setLevelsState(selected);
     });
 }
 

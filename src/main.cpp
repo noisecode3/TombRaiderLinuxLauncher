@@ -59,14 +59,14 @@ int main(int argc, char *argv[]) {
         QApplication::setApplicationName("TombRaiderLinuxLauncher");
 
         CommandLineParser clp("APP");
-        const StartupSetting ss = clp.process(app.arguments());
+        const StartupSetting startupSetting = clp.process(app.arguments());
 
         status = clp.getProcessStatus();
         if (status == 0) {
             // Construct the main window object
             TombRaiderLinuxLauncher w;
-            w.setStartupSetting(ss);
-            if (ss.fullscreen == true) {
+            w.setStartupSetting(startupSetting);
+            if (startupSetting.fullscreen == true) {
                 w.showFullScreen();
             } else {
                 w.show();

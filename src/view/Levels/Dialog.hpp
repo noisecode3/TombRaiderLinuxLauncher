@@ -10,21 +10,24 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+#ifndef VIEW_LEVELS_DIALOG_HPP_
+#define VIEW_LEVELS_DIALOG_HPP_
 
-#ifndef SRC_DIALOG_HPP_
-#define SRC_DIALOG_HPP_
-
+#include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QButtonGroup>
-#include <QWidget>
 
 class Dialog : public QWidget {
     Q_OBJECT
 
  public:
+    /*
+     * (ui->tabs->levels->stackedWidget)
+     * UiDialog
+     */
     explicit Dialog(QWidget* parent);
     void setMessage(const QString &text);
     void setOptions(const QStringList &options);
@@ -32,6 +35,7 @@ class Dialog : public QWidget {
 
  signals:
     void okClicked();
+    void setLevelsState(QString qwidget);
     void cancelClicked();
 
  private:
@@ -44,4 +48,4 @@ class Dialog : public QWidget {
     QString m_oneOptionHolder;
 };
 
-#endif  // SRC_DIALOG_HPP_
+#endif  // VIEW_LEVELS_DIALOG_HPP_

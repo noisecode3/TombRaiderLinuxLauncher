@@ -11,8 +11,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef SRC_LEVELVIEWLIST_HPP_
-#define SRC_LEVELVIEWLIST_HPP_
+#ifndef VIEW_LEVELS_LEVELVIEWLIST_HPP_
+#define VIEW_LEVELS_LEVELVIEWLIST_HPP_
 
 #include <QListWidgetItem>
 #include <QStyledItemDelegate>
@@ -168,4 +168,4 @@ class CardItemDelegate : public QStyledItemDelegate {
             const QStyleOptionViewItem&, const QModelIndex&) const override;
 };
 
-#endif  // SRC_LEVELVIEWLIST_HPP_
+#endif  // VIEW_LEVELS_LEVELVIEWLIST_HPP_

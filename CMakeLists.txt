@@ -14,7 +14,7 @@ else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Test Widgets WebEngineWidgets Svg Sql REQUIRED)
 
 find_package(CURL REQUIRED)
 
@@ -127,26 +127,20 @@ set(SOURCES_TESTS
 )
 
 set(SOURCES_MC
-    src/CommandLineParser.hpp
     src/CommandLineParser.cpp
-    src/Controller.hpp
+    src/CommandLineParser.hpp
     src/Controller.cpp
-    src/Data.hpp
+    src/Controller.hpp
     src/Data.cpp
-    src/Dialog.hpp
-    src/Dialog.cpp
-    src/FileManager.hpp
+    src/Data.hpp
     src/FileManager.cpp
-    src/GameFileTree.hpp
+    src/FileManager.hpp
     src/GameFileTree.cpp
-    src/LevelViewList.hpp
-    src/LevelViewList.cpp
-    src/LoadingIndicator.hpp
-    src/LoadingIndicator.cpp
-    src/Model.hpp
+    src/GameFileTree.hpp
     src/Model.cpp
-    src/Network.hpp
+    src/Model.hpp
     src/Network.cpp
+    src/Network.hpp
     src/Path.cpp
     src/Path.hpp
     src/PyRunner.cpp
@@ -154,18 +148,43 @@ set(SOURCES_MC
     src/Runner.cpp
     src/Runner.hpp
     src/assert.hpp
-    src/binary.hpp
     src/binary.cpp
+    src/binary.hpp
     src/gameFileTreeData.hpp
     src/globalTypes.hpp
     src/main.cpp
-    src/staticViewData.hpp
 )
 
 set(SOURCES_VIEW
+    src/view/About.cpp
+    src/view/About.hpp
+    src/view/Controller.cpp
+    src/view/Controller.hpp
+    src/view/Levels.cpp
+    src/view/Levels.hpp
+    src/view/Levels/Dialog.cpp
+    src/view/Levels/Dialog.hpp
+    src/view/Levels/Info.cpp
+    src/view/Levels/Info.hpp
+    src/view/Levels/LoadingIndicator.cpp
+    src/view/Levels/LoadingIndicator.hpp
+    src/view/Levels/Select.cpp
+    src/view/Levels/Select.hpp
+    src/view/Levels/Select/Filter.cpp
+    src/view/Levels/Select/Filter.hpp
+    src/view/Levels/Select/LevelViewList.cpp
+    src/view/Levels/Select/LevelViewList.hpp
+    src/view/Levels/Select/StackedWidgetBar.cpp
+    src/view/Levels/Select/StackedWidgetBar.hpp
+    src/view/Modding.cpp
+    src/view/Modding.hpp
+    src/view/Setup.cpp
+    src/view/Setup.hpp
+    src/view/Ui.cpp
+    src/view/Ui.hpp
+    src/view/staticViewData.hpp
     src/TombRaiderLinuxLauncher.hpp
     src/TombRaiderLinuxLauncher.cpp
-    src/TombRaiderLinuxLauncher.ui
     src/resources.qrc
 )
 
@@ -173,6 +192,7 @@ set(LINK_COMMON
     Qt6::Core
     Qt6::Widgets
     Qt6::WebEngineWidgets
+    Qt6::Svg
     Qt6::Sql
     miniz
     LIEF::LIEF
