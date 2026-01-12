@@ -22,7 +22,7 @@ Filter::Filter(QWidget *parent)
 {
     setObjectName("filter");
     layout->setContentsMargins(6, 6, 6, 6);
-    layout->setSpacing(8);
+    layout->setSpacing(0);
 
     layout->addWidget(filterFirstInputRow);
     layout->addWidget(filterSecondInputRow);
@@ -35,7 +35,7 @@ FilterFirstInputRow::FilterFirstInputRow(QWidget *parent)
     filterGroupBoxFilter(new FilterGroupBoxFilter(this)),
     layout(new QHBoxLayout(this))
 {
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
     layout->addWidget(filterGroupBoxSearch);
@@ -48,7 +48,7 @@ FilterSecondInputRow::FilterSecondInputRow(QWidget *parent)
     filterGroupBoxSort(new FilterGroupBoxSort(this)),
     layout(new QHBoxLayout(this))
 {
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
     layout->addWidget(filterGroupBoxToggle);

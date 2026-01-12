@@ -24,21 +24,26 @@ NavigateWidgetBar::NavigateWidgetBar(QWidget *parent)
 
 {
     setObjectName("navigateWidgetBar");
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
     //setMaximumHeight(20);
 
     // Set init state
     pushButtonRun->setEnabled(false);
+    pushButtonRun->setFixedSize(242, 32);
     layout->addWidget(pushButtonRun);
+
     layout->addWidget(checkBoxSetup);
 
+    pushButtonFilter->setFixedSize(242, 32);
     layout->addWidget(pushButtonFilter);
 
     pushButtonInfo->setEnabled(false);
+    pushButtonInfo->setFixedSize(242, 32);
     layout->addWidget(pushButtonInfo);
 
     pushButtonDownload->setEnabled(false);
+    pushButtonDownload->setFixedSize(242, 32);
     layout->addWidget(pushButtonDownload);
 }
 
@@ -48,7 +53,7 @@ ProgressWidgetBar::ProgressWidgetBar(QWidget *parent)
     layout(new QHBoxLayout(this))
 {
     setObjectName("progressWidgetBar");
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
     layout->addWidget(progressBar);

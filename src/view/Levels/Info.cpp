@@ -100,7 +100,7 @@ InfoContent::InfoContent(QWidget *parent)
     : QWidget(parent)
 {
     layout = new QHBoxLayout(this);
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
     infoWebEngineView = new QWebEngineView(this);
@@ -144,7 +144,7 @@ InfoBar::InfoBar(QWidget *parent)
     : QWidget(parent)
 {
     layout = new QHBoxLayout(this);
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
     pushButtonBack = new QPushButton(tr("Back"), this);

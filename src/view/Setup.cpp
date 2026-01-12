@@ -11,7 +11,7 @@ UiSetup::UiSetup(QWidget *parent)
     setObjectName("Setup");
 
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
     layout->addWidget(stackedWidget);
@@ -200,6 +200,7 @@ void UiSetup::setState(qint64 id) {
         levelControl->commandLinkButtonLSSave->setEnabled(true);
         levelControl->commandLinkButtonLSReset->setEnabled(true);
 }
+
 QString UiSetup::getRunnerTypeState() {
         FrameLevelSetupSettings* levelSettings =
             this->settings->frameLevelSetup->frameLevelSetupSettings;
@@ -374,7 +375,7 @@ Settings::Settings(QWidget *parent)
     layout(new QHBoxLayout(this))
 {
     setObjectName("settings");
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
     layout->addWidget(frameLevelSetup);
