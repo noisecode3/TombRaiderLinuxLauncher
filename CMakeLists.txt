@@ -14,7 +14,7 @@ else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 COMPONENTS Core Gui Test Widgets WebEngineWidgets Sql REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Test Widgets WebEngineWidgets Svg Sql REQUIRED)
 
 find_package(CURL REQUIRED)
 
@@ -192,6 +192,7 @@ set(LINK_COMMON
     Qt6::Core
     Qt6::Widgets
     Qt6::WebEngineWidgets
+    Qt6::Svg
     Qt6::Sql
     miniz
     LIEF::LIEF

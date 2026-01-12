@@ -32,6 +32,7 @@ public:
     bool stop();
     void  reset();
     QVector<QSharedPointer<ListItemData>> getDataBuffer(quint64 lenght);
+    void downloadingState(bool state);
 
 private:
     QModelIndex m_current;

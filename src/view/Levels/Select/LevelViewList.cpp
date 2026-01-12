@@ -14,7 +14,6 @@
 #include "view/Levels/Select/LevelViewList.hpp"
 
 #include <QDateTime>
-#include <QApplication>
 #include "view/staticViewData.hpp"
 #include "../src/assert.hpp"
 
@@ -424,11 +423,16 @@ void CardItemDelegate::paint(QPainter *painter,
     painter->setRenderHint(QPainter::Antialiasing);
     QRectF cardRect = option.rect.adjusted(4, 4, -4, -4);
     QColor bgColor;
+    QColor fgColor;
+
     if (selected) {
+        fgColor = palette.color(QPalette::HighlightedText);
         bgColor = palette.color(QPalette::Highlight);
     } else if (hovered) {
+        fgColor = palette.color(QPalette::ButtonText);
         bgColor = palette.color(QPalette::AlternateBase);
     } else {
+        fgColor = palette.color(QPalette::ButtonText);
         bgColor = palette.color(QPalette::Base);
     }
     painter->setBrush(bgColor);
@@ -439,8 +443,7 @@ void CardItemDelegate::paint(QPainter *painter,
     qint64 x = cardRect.left() + 10;
     qint64 y = cardRect.top() + 40;
     QRect imageRect = QRect(x, y, 160, 120);
-    painter->setBrush(QApplication::palette().color(QPalette::Text));
-    painter->setBrush(QColor(0xFFCCCCCC));
+    painter->setBrush(palette.color(QPalette::Base));
     QPixmap cover = index.data(Qt::UserRole + 4).value<QPixmap>();
 
     if (!cover.isNull()) {
@@ -457,7 +460,7 @@ void CardItemDelegate::paint(QPainter *painter,
     QFont boldFont = option.font;
     boldFont.setBold(true);
     painter->setFont(boldFont);
-    painter->setPen(Qt::black);
+    painter->setPen(fgColor);
 
     QString title = index.data(Qt::DisplayRole).toString();
     point.setX(imageRect.left());

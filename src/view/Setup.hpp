@@ -15,6 +15,8 @@
 #include <QLCDNumber>
 #include <QTableWidget>
 #include <QCommandLinkButton>
+#include <QtSvg/QSvgRenderer>
+
 
 class LevelPathContainer : public QWidget
 {
@@ -142,6 +144,7 @@ public:
     QCommandLinkButton *commandLinkButtonLSReset{nullptr};
     QCommandLinkButton *commandLinkButtonLSSave{nullptr};
 private:
+    QIcon themeIcon(QString iconPath);
     QHBoxLayout *layout{nullptr};
 };
 
@@ -252,6 +255,7 @@ public:
     explicit GlobalControl(QWidget *parent);
     QCommandLinkButton *commandLinkButtonGSReset{nullptr};
     QCommandLinkButton *commandLinkButtonGSSave{nullptr};
+    QIcon themeIcon(QString iconPath);
 private:
     QHBoxLayout *layout{nullptr};
 };

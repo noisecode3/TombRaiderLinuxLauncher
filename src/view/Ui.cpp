@@ -31,7 +31,6 @@ Ui::Ui(QWidget *parent)
     NavigateWidgetBar* nbar = this->levels->select->stackedWidgetBar->navigateWidgetBar;
     InfoBar* ibar = this->levels->info->infoBar;
     SetupInput* sfbar = this->setup->firstTime->setupInput;
-    connect(nbar->pushButtonRun, SIGNAL(clicked()), this, SLOT(runClicked()));
     connect(nbar->pushButtonDownload, SIGNAL(clicked()),
             this, SLOT(downloadOrRemoveClicked()));
     connect(sfbar->setOptions, SIGNAL(clicked()), this, SLOT(setOptionsClicked()));

@@ -211,3 +211,24 @@ void Select::setSortMode(LevelListProxy::SortMode mode) {
     levelListProxy->setSortMode(mode);
 }
 
+
+void Select::downloadingState(bool state) {
+    this->levelViewList->setEnabled(state);
+    this->filter->filterFirstInputRow->
+        filterGroupBoxSearch->setEnabled(state);
+    this->filter->filterFirstInputRow->
+        filterGroupBoxFilter->setEnabled(state);
+    this->filter->filterSecondInputRow->
+        filterGroupBoxToggle->setEnabled(state);
+    this->filter->filterSecondInputRow->
+        filterGroupBoxSort->setEnabled(state);
+    this->stackedWidgetBar->navigateWidgetBar->
+        pushButtonRun->setEnabled(state);
+    this->stackedWidgetBar->navigateWidgetBar->
+        checkBoxSetup->setEnabled(state);
+    this->stackedWidgetBar->navigateWidgetBar->
+        pushButtonDownload->setEnabled(state);
+    this->stackedWidgetBar->navigateWidgetBar->
+        pushButtonFilter->setEnabled(state);
+}
+

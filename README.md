@@ -30,7 +30,7 @@ Ensure the following are installed on your Linux desktop:
 - `Qt6`
 
 ```shell
-sudo pacman -S qt6-wayland qt6-webengine qt6-imageformats
+sudo pacman -S qt6-wayland qt6-webengine qt6-imageformats qt6-svg
 ```
 
 ### Build

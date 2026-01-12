@@ -99,11 +99,14 @@ UiLevels::UiLevels(QWidget *parent)
     connect(this->info->infoBar->pushButtonBack, SIGNAL(clicked()),
             this, SLOT(backClicked()));
 
+    connect(this->info->infoBar->pushButtonWalkthrough,
+            SIGNAL(clicked()), this, SLOT(walkthroughClicked()));
+
     connect(this->select->stackedWidgetBar->navigateWidgetBar->pushButtonInfo,
             SIGNAL(clicked()), this, SLOT(infoClicked()));
     
-    connect(this->info->infoBar->pushButtonWalkthrough,
-            SIGNAL(clicked()), this, SLOT(walkthroughClicked()));
+    connect(this->select->stackedWidgetBar->navigateWidgetBar->pushButtonRun,
+            SIGNAL(clicked()), this, SLOT(runClicked()));
 }
 
 void UiLevels::downloadError(int status) {
@@ -436,11 +439,8 @@ void UiLevels::downloadClicked(qint64 id) {
              << id;
 
     // Set ui state for downloading
-    select->levelViewList->setEnabled(false);
-    select->filter->filterFirstInputRow->filterGroupBoxSearch->setEnabled(false);
-    select->filter->filterFirstInputRow->filterGroupBoxFilter->setEnabled(false);
-    select->filter->filterSecondInputRow->filterGroupBoxToggle->setEnabled(false);
-    select->filter->filterSecondInputRow->filterGroupBoxSort->setEnabled(false);
+    //
+    select->downloadingState(false);
     select->stackedWidgetBar->progressWidgetBar->progressBar->setValue(0);
     select->stackedWidgetBar->setCurrentWidget(
             select->stackedWidgetBar->findChild<QWidget*>("progressWidgetBar"));
@@ -482,36 +482,14 @@ void UiLevels::workTick() {
         }
         this->select->stackedWidgetBar->setCurrentWidget(
                 this->select->stackedWidgetBar->findChild<QWidget*>("navigateWidgetBar"));
-        this->select->levelViewList->setEnabled(true);
-        this->select->filter->filterFirstInputRow->
-            filterGroupBoxSearch->setEnabled(true);
-        this->select->filter->filterFirstInputRow->
-            filterGroupBoxFilter->setEnabled(true);
-        this->select->filter->filterSecondInputRow->
-            filterGroupBoxToggle->setEnabled(true);
-        this->select->filter->filterSecondInputRow->
-            filterGroupBoxSort->setEnabled(true);
+        this->select->downloadingState(true);
         levelDirSelected(id);
     }
 }
 void UiLevels::runClicked() {
-
     qint64 id = select->getLid();
     if (id != 0) {
-        this->select->levelViewList->setEnabled(false);
-        this->select->filter->filterFirstInputRow->
-            filterGroupBoxSearch->setEnabled(false);
-        this->select->filter->filterFirstInputRow->
-            filterGroupBoxFilter->setEnabled(false);
-        this->select->filter->filterSecondInputRow->
-            filterGroupBoxToggle->setEnabled(false);
-        this->select->filter->filterSecondInputRow->
-            filterGroupBoxSort->setEnabled(false);
-        this->select->stackedWidgetBar->navigateWidgetBar->
-            pushButtonRun->setEnabled(false);
-        this->select->stackedWidgetBar->navigateWidgetBar->
-            checkBoxSetup->setEnabled(false);
-
+        this->select->downloadingState(false);
         if (select->getType()) {
             id = (-1)*id;
         }
@@ -583,20 +561,7 @@ void UiLevels::runClicked() {
 }
 
 void UiLevels::runningLevelDone() {
-    this->select->levelViewList->setEnabled(true);
-
-    this->select->filter->filterFirstInputRow->
-        filterGroupBoxSearch->setEnabled(true);
-    this->select->filter->filterFirstInputRow->
-        filterGroupBoxFilter->setEnabled(true);
-    this->select->filter->filterSecondInputRow->
-        filterGroupBoxToggle->setEnabled(true);
-    this->select->filter->filterSecondInputRow->
-        filterGroupBoxSort->setEnabled(true);
-    this->select->stackedWidgetBar->navigateWidgetBar->
-        pushButtonRun->setEnabled(true);
-    this->select->stackedWidgetBar->navigateWidgetBar->
-        checkBoxSetup->setEnabled(true);
+    this->select->downloadingState(true);
 }
 
 QStringList UiLevels::parsToArg(const QString& str) {

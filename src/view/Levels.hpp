@@ -113,6 +113,11 @@ public slots:
      * Displays an error dialog for a curl download error.
      */
     void downloadError(int status);
+
+    /**
+     * Triggered by the "Run" button.
+     */
+    void runClicked();
 private:
     QSettings& g_settings = getSettingsInstance();
     QString m_loadingDoneGoTo;
@@ -124,7 +129,6 @@ private:
         QHash<quint64, bool> trle;
     };
 
-    void runClicked();
     QStringList parsToArg(const QString& str);
     QVector<QPair<QString, QString>> parsToEnv(const QString& str);
     InstalledStatus getInstalled();

@@ -629,9 +629,47 @@ WidgetLevelID::WidgetLevelID(QWidget* parent)
     layout->setSpacing(8);
     layout->setAlignment(Qt::AlignLeft);
     lcdNumberLevelID->setFixedSize(64, 23);
+    lcdNumberLevelID->setFrameShadow(QFrame::Shadow::Plain);
+    lcdNumberLevelID->setSegmentStyle(QLCDNumber::SegmentStyle::Flat);
 
     layout->addWidget(labelLevelID);
     layout->addWidget(lcdNumberLevelID);
+}
+
+QIcon LevelControl::themeIcon(QString iconPath) {
+    QSize size = QSize(126, 126);
+    QPixmap pixmap(size);
+    pixmap.fill(Qt::transparent);
+
+    QSvgRenderer renderer(iconPath);
+    if (renderer.isValid()) {
+        QPainter painter(&pixmap);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        renderer.render(&painter, pixmap.rect());
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        QColor buttonText = this->palette().color(QPalette::ButtonText);
+        painter.fillRect(pixmap.rect(), buttonText);
+        painter.end();
+    }
+    return QIcon(pixmap);
+}
+
+QIcon GlobalControl::themeIcon(QString iconPath) {
+    QSize size = QSize(126, 126);
+    QPixmap pixmap(size);
+    pixmap.fill(Qt::transparent);
+
+    QSvgRenderer renderer(iconPath);
+    if (renderer.isValid()) {
+        QPainter painter(&pixmap);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        renderer.render(&painter, pixmap.rect());
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        QColor buttonText = this->palette().color(QPalette::ButtonText);
+        painter.fillRect(pixmap.rect(), buttonText);
+        painter.end();
+    }
+    return QIcon(pixmap);
 }
 
 LevelControl::LevelControl(QWidget *parent)
@@ -645,17 +683,22 @@ LevelControl::LevelControl(QWidget *parent)
     setMaximumHeight(46);
 
     commandLinkButtonLSReset->setFixedWidth(160);
-    QIcon resetIcon = QIcon::fromTheme(
-        "document-revert",
-        QIcon(":/icons/document-revert.svg"));
+    QIcon resetIcon = QIcon::fromTheme(QIcon::ThemeIcon::DocumentRevert);
+    if (resetIcon.isNull()) {
+        resetIcon = themeIcon(":/icons/document-revert.svg");
+    }
 
     commandLinkButtonLSReset->setIcon(resetIcon);
+    commandLinkButtonLSReset->setEnabled(false);
     layout->addWidget(commandLinkButtonLSReset);
+
     commandLinkButtonLSSave->setFixedWidth(160);
-    QIcon saveIcon = QIcon::fromTheme(
-        "document-save",
-        QIcon(":/icons/document-save.svg"));
+    QIcon saveIcon = QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave);
+    if (saveIcon.isNull()) {
+        saveIcon = themeIcon(":/icons/document-save.svg");
+    }
     commandLinkButtonLSSave->setIcon(saveIcon);
+    commandLinkButtonLSSave->setEnabled(false);
     layout->addWidget(commandLinkButtonLSSave);
 }
 
@@ -670,16 +713,17 @@ GlobalControl::GlobalControl(QWidget *parent)
     setMaximumHeight(46);
 
     commandLinkButtonGSReset->setFixedWidth(160);
-    QIcon resetIcon = QIcon::fromTheme(
-        "document-revert",
-        QIcon(":/icons/document-revert.svg"));
-
+    QIcon resetIcon = QIcon::fromTheme("document-revert");
+    if (resetIcon.isNull()) {
+        resetIcon = themeIcon(":/icons/document-revert.svg");
+    }
     commandLinkButtonGSReset->setIcon(resetIcon);
     layout->addWidget(commandLinkButtonGSReset);
     commandLinkButtonGSSave->setFixedWidth(160);
-    QIcon saveIcon = QIcon::fromTheme(
-        "document-save",
-        QIcon(":/icons/document-save.svg"));
+    QIcon saveIcon = QIcon::fromTheme("document-save");
+    if (saveIcon.isNull()) {
+        saveIcon = themeIcon(":/icons/document-save.svg");
+    }
     commandLinkButtonGSSave->setIcon(saveIcon);
     layout->addWidget(commandLinkButtonGSSave);
     layout->addSpacerItem(
