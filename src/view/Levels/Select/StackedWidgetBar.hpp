@@ -64,6 +64,4 @@ public:
     ProgressWidgetBar *progressWidgetBar{nullptr};
 };
 
-
-
 #endif // VIEW_LEVELS_STACKEDWIDGET_HPP_

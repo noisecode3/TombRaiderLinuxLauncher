@@ -19,6 +19,7 @@
 #include <QRadioButton>
 #include <QWebEngineView>
 #include <QListWidget>
+#include <QtSvg/QSvgRenderer>
 
 
 class Loading : public QWidget

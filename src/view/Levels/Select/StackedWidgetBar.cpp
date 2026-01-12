@@ -26,7 +26,6 @@ NavigateWidgetBar::NavigateWidgetBar(QWidget *parent)
     setObjectName("navigateWidgetBar");
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
-    //setMaximumHeight(20);
 
     // Set init state
     pushButtonRun->setEnabled(false);

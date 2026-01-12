@@ -11,6 +11,7 @@
 #include <qpushbutton.h>
 #include <qlineedit.h>
 #include <qwebengineview.h>
+#include <QtSvg/QSvgRenderer>
 
 UiLevels::UiLevels(QWidget *parent)
     : QWidget{parent},
@@ -46,14 +47,45 @@ UiLevels::UiLevels(QWidget *parent)
 
     QPushButton *pushButtonFilter =
         select->stackedWidgetBar->navigateWidgetBar->pushButtonFilter;
+
+        QSize size = QSize(16, 16);
+        QPixmap pixmap(size);
+        pixmap.fill(Qt::transparent);
+
+        QSvgRenderer renderer(QString(":/icons/down-arrow.svg"));
+        if (renderer.isValid()) {
+            QPainter painter(&pixmap);
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            renderer.render(&painter, pixmap.rect());
+            painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            QColor buttonText = this->palette().color(QPalette::ButtonText);
+            painter.fillRect(pixmap.rect(), buttonText);
+            painter.end();
+        }
+        QIcon arrowDownIcon = QIcon(pixmap);
+
+
+        QPixmap pixmap1(size);
+        pixmap1.fill(Qt::transparent);
+
+        QSvgRenderer renderer1(QString(":/icons/up-arrow.svg"));
+        if (renderer1.isValid()) {
+            QPainter painter(&pixmap1);
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            renderer1.render(&painter, pixmap1.rect());
+            painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            QColor buttonText = this->palette().color(QPalette::ButtonText);
+            painter.fillRect(pixmap1.rect(), buttonText);
+            painter.end();
+        }
+        QIcon arrowUpIcon = QIcon(pixmap1);
+
+
     connect(pushButtonFilter, &QPushButton::clicked,
-            this, [filter_p, pushButtonFilter]() -> void {
+            this, [filter_p, pushButtonFilter,
+            arrowDownIcon, arrowUpIcon]() -> void {
         bool isVisible = !filter_p->isVisible();
         filter_p->setVisible(isVisible);
-
-        QIcon arrowDownIcon(":/icons/down-arrow.svg");
-        QIcon arrowUpIcon(":/icons/up-arrow.svg");
-
         if (isVisible) {
             pushButtonFilter->setIcon(arrowUpIcon);
         } else {
@@ -61,8 +93,6 @@ UiLevels::UiLevels(QWidget *parent)
         }
         pushButtonFilter->setIconSize(QSize(16, 16));
     });
-
-    QIcon arrowDownIcon(":/icons/down-arrow.svg");
 
     pushButtonFilter->setIcon(arrowDownIcon);
     pushButtonFilter->setIconSize(QSize(16, 16));
