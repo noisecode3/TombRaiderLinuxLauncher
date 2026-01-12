@@ -45,43 +45,49 @@ void InfoContent::setWebEngineTheme()
     script.setRunsOnSubFrames(true);
 
     script.setSourceCode(QString(R"(
-(function applyQtTheme() {
+    (function applyQtTheme() {
 
-    // Vänta tills <html> faktiskt finns
-    if (!document.documentElement) {
-        requestAnimationFrame(applyQtTheme);
-        return;
-    }
-
-    // Se till att <head> finns
-    let head = document.head;
-    if (!head) {
-        head = document.createElement('head');
-        document.documentElement.appendChild(head);
-    }
-
-    // Återanvänd style om den redan finns
-    let style = document.getElementById('qt-theme-style');
-    if (!style) {
-        style = document.createElement('style');
-        style.id = 'qt-theme-style';
-        head.appendChild(style);
-    }
-
-    // Trusted Types-safe: använd textContent
-    style.textContent = `
-        html, body {
-            background-color: %1 !important;
-            color: %2 !important;
+        // Dont run without document
+        if (!document.documentElement) {
+            requestAnimationFrame(applyQtTheme);
+            return;
         }
 
-        ::-webkit-scrollbar-track {
-            background: %1;
+        // make sure there is a <head>
+        let head = document.head;
+        if (!head) {
+            head = document.createElement('head');
+            document.documentElement.appendChild(head);
         }
 
-    `;
-})();
-)").arg(bg.name(), text.name()));
+        let style = document.getElementById('qt-theme-style');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'qt-theme-style';
+            head.appendChild(style);
+         }
+
+        // Trusted Types-safe: use textContent
+        style.textContent = `
+            html, body {
+                background-color: %1 !important;
+                color: %2 !important;
+            }
+
+            html {
+                scrollbar-color: %2 %1;
+            }
+
+            /* fallback old Chromium */
+            ::-webkit-scrollbar-track {
+                background: %1;
+            }
+            ::-webkit-scrollbar-thumb {
+                background-color: %2;
+            }
+
+        `;
+    })();)").arg(bg.name(), text.name()));
 
 
     QWebEngineProfile::defaultProfile()
@@ -98,6 +104,9 @@ InfoContent::InfoContent(QWidget *parent)
     layout->setSpacing(8);
 
     infoWebEngineView = new QWebEngineView(this);
+    infoWebEngineView->page()->setBackgroundColor(
+        palette().color(QPalette::Base)
+    );
     setWebEngineTheme();
 
     infoWebEngineView->setHtml(
