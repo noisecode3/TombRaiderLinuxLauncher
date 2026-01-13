@@ -59,17 +59,9 @@ void LevelViewList::paintEvent(QPaintEvent *event)
 void LevelViewList::resizeEvent(QResizeEvent *event)
 {
     QListView::resizeEvent(event);
-
-    qint64 rows = width() / 590;
-    if (rows < 1) {
-        return;
-    }
-    if (rows != m_rows) {
-        m_rows = rows;
-        LevelListProxy* proxy = qobject_cast<LevelListProxy *>(model());
-        Q_ASSERT_WITH_TRACE(proxy != nullptr);
-        proxy->update();
-    }
+    LevelListProxy* proxy = qobject_cast<LevelListProxy *>(model());
+    Q_ASSERT_WITH_TRACE(proxy != nullptr);
+    proxy->update();
 }
 
 QModelIndexList LevelViewList::visibleIndexes(QAbstractProxyModel* proxy) const
