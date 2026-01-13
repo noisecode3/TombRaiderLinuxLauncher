@@ -26,16 +26,6 @@ Select::Select(QWidget *parent)
     layout->addWidget(filter, 0);
 
     levelViewList = new LevelViewList(this);
-    levelViewList->setViewMode(QListView::ListMode);
-    levelViewList->setFlow(QListView::LeftToRight);
-    levelViewList->setWrapping(true);
-
-    levelViewList->setResizeMode(QListView::ResizeMode::Fixed);
-    levelViewList->setUniformItemSizes(true);
-
-    levelViewList->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    levelViewList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    levelViewList->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     levelListModel = new LevelListModel(this);
     levelListProxy = new LevelListProxy(this);

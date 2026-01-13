@@ -21,6 +21,17 @@
 LevelViewList::LevelViewList(QWidget *parent)
     : QListView(parent)
 {
+    setViewMode(QListView::ListMode);
+    setFlow(QListView::LeftToRight);
+    setWrapping(true);
+
+    setResizeMode(QListView::ResizeMode::Fixed);
+    setUniformItemSizes(true);
+
+    setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
     m_coversLoaded = false;
     m_proxyCoversFirst = false;
 }
@@ -42,6 +53,22 @@ void LevelViewList::paintEvent(QPaintEvent *event)
     QListView::paintEvent(event);
     if (m_proxyCoversFirst == true) {
         updateVisibleItems();
+    }
+}
+
+void LevelViewList::resizeEvent(QResizeEvent *event)
+{
+    QListView::resizeEvent(event);
+
+    qint64 rows = width() / 590;
+    if (rows < 1) {
+        return;
+    }
+    if (rows != m_rows) {
+        m_rows = rows;
+        LevelListProxy* proxy = qobject_cast<LevelListProxy *>(model());
+        Q_ASSERT_WITH_TRACE(proxy != nullptr);
+        proxy->update();
     }
 }
 
@@ -67,6 +94,7 @@ void LevelViewList::updateVisibleItems()
     LevelListModel* model = qobject_cast<LevelListModel*>(proxy->sourceModel());
     Q_ASSERT_WITH_TRACE( model != nullptr);
     if (model->stop()) {
+        m_proxyCoversFirst = false;
         m_coversLoaded = true;
     } else {
         model->setScrollChanged(visibleIndexes(proxy));
@@ -175,6 +203,10 @@ void LevelListModel::reset() {
 
 bool LevelListModel::stop() const {
     return m_viewItems.isEmpty() && (m_cursor_b >= m_levels.size());
+}
+
+void LevelListProxy::update() {
+    emit layoutChanged();
 }
 
 quint64 LevelListProxy::getLid(const QModelIndex &i) const {

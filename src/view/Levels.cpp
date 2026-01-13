@@ -584,6 +584,9 @@ void UiLevels::runClicked() {
             } else if (type == 7) {
                 options.id = id;
                 options.command = BASH;
+                options.setup =
+                    this->select->stackedWidgetBar->
+                        navigateWidgetBar->checkBoxSetup->isChecked();
                 controller.run(options);
             }
         }

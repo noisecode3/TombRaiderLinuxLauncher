@@ -32,12 +32,14 @@ public:
 protected:
     void scrollContentsBy(int dx, int dy) override;
     void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
 private:
     void updateVisibleItems();
     QModelIndexList visibleIndexes(QAbstractProxyModel* proxy) const;
     bool m_coversLoaded;
     bool m_proxyCoversFirst;
+    qint64 m_rows;
 };
 
 
@@ -107,6 +109,7 @@ class LevelListProxy : public QSortFilterProxyModel {
         m_installed(false),
         m_sortMode(ReleaseDate)
     {}
+    void update();
 
     quint64 getLid(const QModelIndex &i) const;
     bool getItemType(const QModelIndex &i) const;
