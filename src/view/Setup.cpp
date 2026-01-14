@@ -20,7 +20,6 @@ UiSetup::UiSetup(QWidget *parent)
     stackedWidget->addWidget(settings);
     stackedWidget->setCurrentWidget(settings);
 
-
     GlobalControl* ssgbar = this->settings->frameGlobalSetup->globalControl;
     connect(ssgbar->commandLinkButtonGSSave, SIGNAL(clicked()),
             this, SLOT(globalSaveClicked()));
@@ -217,9 +216,11 @@ FirstTime::FirstTime(QWidget *parent)
 
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
-
+    layout->addStretch(1);
     layout->addWidget(setupImage);
+    layout->addSpacing(24);
     layout->addWidget(setupInput);
+    layout->addStretch(1);
 }
 
 SetupImage::SetupImage(QWidget *parent)
@@ -229,15 +230,15 @@ SetupImage::SetupImage(QWidget *parent)
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
-    this->setMinimumWidth(620);
 
     QPixmap pix(":/pictures/Lara.png");
 
     lara->setPixmap(pix);
     lara->setFixedSize(pix.size());
-    lara->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-
+    lara->setAlignment(Qt::AlignCenter);
     layout->addWidget(lara);
+
+
 }
 
 GamePathContainer::GamePathContainer(QWidget *parent)
@@ -250,8 +251,6 @@ GamePathContainer::GamePathContainer(QWidget *parent)
     layout->setSpacing(8);
 
     layout->addWidget(gamePathLabel);
-
-    gamePathEdit->setMaximumWidth(553);
     layout->addWidget(gamePathEdit);
 
     this->setMaximumHeight(42);
@@ -267,8 +266,6 @@ ExtraGamePathContainer::ExtraGamePathContainer(QWidget *parent)
     layout->setSpacing(8);
 
     layout->addWidget(extraGamePathLabel);
-
-    extraGamePathEdit->setMaximumWidth(521);
     layout->addWidget(extraGamePathEdit);
 
     this->setMaximumHeight(42);
@@ -284,8 +281,6 @@ LevelPathContainer::LevelPathContainer(QWidget *parent)
     layout->setSpacing(8);
 
     layout->addWidget(levelPathLabel);
-
-    levelPathEdit->setMaximumWidth(571);
     layout->addWidget(levelPathEdit);
 
     this->setMaximumHeight(42);
@@ -305,7 +300,12 @@ SetupInput::SetupInput(QWidget *parent)
 {
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(8);
-    this->setMaximumWidth(556);
+    setMinimumWidth(700);
+    layout->addSpacerItem(
+    new QSpacerItem(6, 6,
+        QSizePolicy::Minimum,
+        QSizePolicy::Expanding)
+    );
 
     QFont font;
     font.setFamily("Sans");
@@ -362,7 +362,11 @@ SetupInput::SetupInput(QWidget *parent)
     layout->addWidget(labelLevelDirectoryInfo);
 
     layout->addWidget(levelPathContainer);
-
+    layout->addSpacerItem(
+    new QSpacerItem(6, 6,
+        QSizePolicy::Minimum,
+        QSizePolicy::Expanding)
+    );
     setOptions->setMinimumSize(0, 32);
     setOptions->setMaximumSize(242, 32);
     layout->addWidget(setOptions, Qt::AlignBottom);

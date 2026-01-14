@@ -94,8 +94,6 @@ void InfoContent::setWebEngineTheme()
         ->scripts()->insert(script);
 }
 
-
-
 InfoContent::InfoContent(QWidget *parent)
     : QWidget(parent)
 {
