@@ -595,7 +595,7 @@ def update_tombll_zip_files_to_database(zip_files, level_id, con):
     database_zip_files = tombll_read.database_zip_list(level_id, con)
 
     # Build sets for fast comparison
-    current_set = set((z[1], z[4]) for z in database_zip_files)  # (name, url)
+    current_set = set((z[0], z[3]) for z in database_zip_files)  # (name, url)
     new_set = set((z['name'], z['url']) for z in zip_files)
 
     # Find new files to add (using set difference)
