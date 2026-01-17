@@ -1,4 +1,5 @@
 #include "view/Levels.hpp"
+#include "view/Levels/Select/StackedWidgetBar.hpp"
 #include <qapplication.h>
 #include <qcheckbox.h>
 #include <qlabel.h>
@@ -19,7 +20,10 @@ UiLevels::UiLevels(QWidget *parent)
     dialog(new Dialog(stackedWidget)),
     info(new Info(stackedWidget)),
     loading(new Loading(stackedWidget)),
-    select(new Select(stackedWidget))
+    select(new Select(stackedWidget)),
+    m_listSet(false),
+    m_wasDownloading(false),
+    m_wasDownloadingTimes(0)
 {
     setObjectName("Levels");
     layout = new QGridLayout(this);
@@ -118,6 +122,9 @@ UiLevels::UiLevels(QWidget *parent)
     connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
             this, SLOT(downloadError(int)));
 
+    connect(&Controller::getInstance(), SIGNAL(controllerFileError(int)),
+            this, SLOT(fileError(int)));
+
     // Loading done signal connections
     connect(&Controller::getInstance(), SIGNAL(controllerLoadingDone()),
             this, SLOT(updateLevelDone()));
@@ -140,28 +147,78 @@ UiLevels::UiLevels(QWidget *parent)
 }
 
 void UiLevels::downloadError(int status) {
+    select->downloadingState(true);
     select->stackedWidgetBar->progressWidgetBar->progressBar->setValue(0);
-    select->stackedWidgetBar->navigateWidgetBar->pushButtonRun->setEnabled(true);
-    select->stackedWidgetBar->navigateWidgetBar->pushButtonInfo->setEnabled(true);
-    select->stackedWidgetBar->navigateWidgetBar->pushButtonDownload->setEnabled(true);
-    select->stackedWidgetBar->setCurrentWidget(
-            this->findChild<QWidget*>("navigateWidgetBar"));
-    // ui->levels->select->levelViewList->setEnabled(true);
-    // QMessageBox msgBox;
-    // msgBox.setWindowTitle("Error");
+    select->setCurrentWidgetBar(StackedWidgetBar::Navigate);
+    select->levelViewList->setEnabled(true);
+    dialog->setOptions(QStringList());
+
     if (status == 1) {
-        qDebug() << "No internet";
-    //     msgBox.setText("No internet");
+        dialog->setMessage(QString(
+            "No internet"
+        ));
+        this->setStackedWidget("dialog");
     } else if (status == 2) {
-        qDebug() << "You seem to be missing ssl keys";
-    //     msgBox.setText("You seem to be missing ssl keys");
+        dialog->setMessage(QString(
+            "The remote server's SSL certificate bad or out of date"
+        ));
+        this->setStackedWidget("dialog");
+    } else if (status == 3) {
+        dialog->setMessage(QString(
+            "Curl error"
+        ));
+        this->setStackedWidget("dialog");
+    } else if (status == 4) {
+        dialog->setMessage(QString(
+            "Downloaded zip is empty"
+        ));
+        this->setStackedWidget("dialog");
+    } else if (status == 5) {
+        if (m_wasDownloadingTimes < 1) {
+            m_wasDownloadingTimes++;
+            m_wasDownloading = true;
+            qint64 lid = select->getLid();
+            controller.updateLevel(lid);
+            loading->show();
+            this->setStackedWidget("loading");
+        }
     } else {
-        qDebug() << "Could not connect";
-    //     msgBox.setText("Could not connect");
+        dialog->setMessage(QString(
+            "Could not connect or get the file"
+        ));
+        this->setStackedWidget("dialog");
     }
-    // msgBox.setStandardButtons(QMessageBox::Ok);
-    // msgBox.setDefaultButton(QMessageBox::Ok);
-    // msgBox.exec();
+}
+
+void UiLevels::fileError(int status) {
+    select->downloadingState(true);
+    select->stackedWidgetBar->progressWidgetBar->progressBar->setValue(0);
+    select->setCurrentWidgetBar(StackedWidgetBar::Navigate);
+    select->levelViewList->setEnabled(true);
+    dialog->setOptions(QStringList());
+
+    if (status == 1) {
+        dialog->setMessage(QString(
+            "Failed to open zip file for writing"
+        ));
+    } else if (status == 2) {
+        dialog->setMessage(QString(
+            "Failed to get file info"
+        ));
+    } else if (status == 3) {
+        dialog->setMessage(QString(
+            "Failed to create directory"
+        ));
+    } else if (status == 4) {
+        dialog->setMessage(QString(
+            "Failed to extract file"
+        ));
+    } else {
+        dialog->setMessage(QString(
+            "Could not handle the file"
+        ));
+    }
+    this->setStackedWidget("dialog");
 }
 
 void UiLevels::backClicked() {
@@ -210,6 +267,7 @@ void UiLevels::callbackDialog(QString selected) {
             select->setRemovedLevel();
         }
     }
+
     this->setStackedWidget("select");
 }
 
@@ -295,6 +353,7 @@ void UiLevels::setSortMode(LevelListProxy::SortMode mode) {
 }
 
 void UiLevels::setList() {
+    m_listSet = true;
     QVector<QSharedPointer<ListItemData>> list;
     controller.getList(&list);
     InstalledStatus installedStatus = getInstalled();
@@ -418,9 +477,14 @@ void UiLevels::walkthroughClicked() {
 void UiLevels::updateLevelDone() {
     loading->hide();
     if (m_loadingDoneGoTo == "select") {
-        setList();
-        this->stackedWidget->setCurrentWidget(
-                this->stackedWidget->findChild<QWidget*>("select"));
+        if (!m_listSet) {
+            setList();
+        }
+        if (m_wasDownloading) {
+            emit downloadOrRemoveClickedSignal();
+            m_wasDownloading = false;
+        }
+        setStackedWidget("select");
     } else if (m_loadingDoneGoTo == "info") {
         qint64 id = select->getLid();
         if (id != 0) {
@@ -428,8 +492,7 @@ void UiLevels::updateLevelDone() {
             if (!(info.m_body == "" && info.m_imageList.size() == 0)) {
                 infoClicked();
             } else {
-                this->stackedWidget->setCurrentWidget(
-                        this->stackedWidget->findChild<QWidget*>("select"));
+                setStackedWidget("select");
             }
         }
     } else {
@@ -459,8 +522,7 @@ void UiLevels::removeClicked(qint64 id) {
                 << "Remove just Level files");
     }
 
-    stackedWidget->setCurrentWidget(
-            stackedWidget->findChild<QWidget*>("dialog"));
+    this->setStackedWidget("dialog");
 }
 
 void UiLevels::downloadClicked(qint64 id) {
@@ -472,8 +534,7 @@ void UiLevels::downloadClicked(qint64 id) {
     //
     select->downloadingState(false);
     select->stackedWidgetBar->progressWidgetBar->progressBar->setValue(0);
-    select->stackedWidgetBar->setCurrentWidget(
-            select->stackedWidgetBar->findChild<QWidget*>("progressWidgetBar"));
+    select->setCurrentWidgetBar(StackedWidgetBar::Progress);
 
 }
 
@@ -510,9 +571,9 @@ void UiLevels::workTick() {
                     QString("installed/level%1").arg(id),
                         "true");
         }
-        this->select->stackedWidgetBar->setCurrentWidget(
-                this->select->stackedWidgetBar->findChild<QWidget*>("navigateWidgetBar"));
-        this->select->downloadingState(true);
+
+        select->setCurrentWidgetBar(StackedWidgetBar::Navigate);
+        select->downloadingState(true);
         levelDirSelected(id);
     }
 }

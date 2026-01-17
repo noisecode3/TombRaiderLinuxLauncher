@@ -12,6 +12,7 @@
  */
 
 #include "view/Levels/Select.hpp"
+#include "view/Levels/Select/StackedWidgetBar.hpp"
 #include <qlineedit.h>
 
 Select::Select(QWidget *parent)
@@ -201,9 +202,15 @@ void Select::setSortMode(LevelListProxy::SortMode mode) {
     levelListProxy->setSortMode(mode);
 }
 
+void Select::setCurrentWidgetBar(const StackedWidgetBar::index i) {
+    this->stackedWidgetBar->setCurrentWidgetIndex(i);
+}
 
 void Select::downloadingState(bool state) {
+    // Level list
     this->levelViewList->setEnabled(state);
+
+    // Filter
     this->filter->filterFirstInputRow->
         filterGroupBoxSearch->setEnabled(state);
     this->filter->filterFirstInputRow->
@@ -212,6 +219,8 @@ void Select::downloadingState(bool state) {
         filterGroupBoxToggle->setEnabled(state);
     this->filter->filterSecondInputRow->
         filterGroupBoxSort->setEnabled(state);
+
+    // Bar
     this->stackedWidgetBar->navigateWidgetBar->
         pushButtonRun->setEnabled(state);
     this->stackedWidgetBar->navigateWidgetBar->

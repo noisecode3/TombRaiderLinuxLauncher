@@ -203,20 +203,23 @@ bool FileManager::extractZip(ZipData zipData) {
                 qWarning() << "Failed to get file info for file" << i
                            << "in zip file" << zipFilename.get();
                 mz_zip_reader_end(&zip);
+                fileWorkErrorSignal(2);
+                cleanWorkingDir(outputFolder);
                 break;
             }
 
-            QString filename = QString::fromUtf8(file_stat.m_filename);
-            if (filename.endsWith('/') == true) {
+            QString filePathName = QString::fromUtf8(file_stat.m_filename);
+            if (filePathName.endsWith('/') == true) {
                 continue;  // Skip directories
             }
 
-            QString outFile = QString("%1%2%3").arg(outputFolder.get(), m_sep, filename);
-            qDebug() << "Extracting" << filename;
+            QString outFile = QString("%1%2%3").arg(outputFolder.get(), m_sep, filePathName);
+            qDebug() << "Extracting" << filePathName;
 
             if (!QDir().mkpath(QFileInfo(outFile).path())) {
                 qWarning() << "Failed to create directory for file" << outFile;
                 mz_zip_reader_end(&zip);
+                fileWorkErrorSignal(3);
                 break;
             }
 
@@ -225,9 +228,10 @@ bool FileManager::extractZip(ZipData zipData) {
                     i,
                     outFile.toUtf8().constData(),
                     0)) {
-                qWarning() << "Failed to extract file" << filename
+                qWarning() << "Failed to extract file" << filePathName
                            << "from zip file" << zipFilename.get();
                 mz_zip_reader_end(&zip);
+                fileWorkErrorSignal(4);
                 break;
             }
 
@@ -248,15 +252,16 @@ bool FileManager::extractZip(ZipData zipData) {
                         linkToExe(outputFolder, zipData.m_type);
                     }
                     status = true;
+                    qDebug() << "Unzip complete";
                 }
             }
         }
     } else {
+        fileWorkErrorSignal(1);
         qWarning() << "Failed to open zip file" << zipFilename.get();
     }
     // Clean up
     mz_zip_reader_end(&zip);
-    qDebug() << "Unzip complete";
     return status;
 }
 

@@ -58,6 +58,13 @@ ProgressWidgetBar::ProgressWidgetBar(QWidget *parent)
     layout->addWidget(progressBar);
 }
 
+void StackedWidgetBar::setCurrentWidgetIndex(index widget) {
+    if (index::Progress == widget)
+        this->setCurrentWidget(progressWidgetBar);
+    if (index::Navigate == widget)
+        this->setCurrentWidget(navigateWidgetBar);
+}
+
 StackedWidgetBar::StackedWidgetBar(QWidget *parent)
     : QStackedWidget(parent),
     navigateWidgetBar(new NavigateWidgetBar(this)),

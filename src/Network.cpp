@@ -168,6 +168,14 @@ void Downloader::runConnect(QFile *file, const std::string& url) {
             status = curl_easy_perform(curl);
         }
 
+        long httpCode = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+        if (httpCode != 200) {
+            m_status = 7; // http error
+            qDebug() << "HTTP error:" << httpCode;
+            emit this->networkWorkErrorSignal(5);
+        }
+
         if (status != CURLE_OK) {
             m_status = 1;  // curl error
             qDebug() << "CURL failed:" << curl_easy_strerror(status);
@@ -183,10 +191,21 @@ void Downloader::runConnect(QFile *file, const std::string& url) {
                 emit this->networkWorkErrorSignal(3);
                 QCoreApplication::processEvents();
             }
-        } else {
-            m_status = 0;
-            qDebug() << "Downloaded successfully";
         }
+
+        if (m_status == 0) {
+            file->flush();
+            if (file->size() == 0) {
+                m_status = 6;
+                qDebug() << "Error: Downloaded zip is empty (0 bytes)";
+                emit this->networkWorkErrorSignal(4);
+                QCoreApplication::processEvents();
+            } else {
+                m_status = 0;
+                qDebug() << "Downloaded successfully, size:" << file->size();
+            }
+        }
+
         curl_easy_cleanup(curl);
     }
 }

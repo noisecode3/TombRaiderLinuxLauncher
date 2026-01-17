@@ -206,6 +206,7 @@ class FileManager : public QObject {
 
  signals:
     void fileWorkTickSignal();
+    void fileWorkErrorSignal(int status);
 
  private:
     FileManager() :

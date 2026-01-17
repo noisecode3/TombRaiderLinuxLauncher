@@ -62,6 +62,11 @@ public:
     explicit StackedWidgetBar(QWidget *parent);
     NavigateWidgetBar *navigateWidgetBar{nullptr};
     ProgressWidgetBar *progressWidgetBar{nullptr};
+    enum index {
+        Navigate,
+        Progress
+    };
+    void setCurrentWidgetIndex(const index widget);
 };
 
 #endif // VIEW_LEVELS_STACKEDWIDGET_HPP_

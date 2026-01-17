@@ -33,6 +33,7 @@ public:
     void  reset();
     QVector<QSharedPointer<ListItemData>> getDataBuffer(quint64 lenght);
     void downloadingState(bool state);
+    void setCurrentWidgetBar(const StackedWidgetBar::index i);
 
 private:
     QModelIndex m_current;

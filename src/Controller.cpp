@@ -43,6 +43,10 @@ Controller::Controller() {
             this,         &Controller::controllerTickSignal,
         Qt::QueuedConnection);
 
+    connect(&fileManager, &FileManager::fileWorkErrorSignal,
+            this,        &Controller::controllerFileError,
+        Qt::QueuedConnection);
+
     connect(&downloader, &Downloader::networkWorkTickSignal,
             this,        &Controller::controllerTickSignal,
         Qt::QueuedConnection);

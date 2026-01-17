@@ -83,6 +83,29 @@ def database_zip_list(level_id, con):
     return tombll_common.query_return_everything(query, (level_id, ), con)
 
 
+def database_zip_id_list(level_id, zip_name, zip_url, con):
+    """
+    Get a list of ZIP file ids for data validation.
+
+    Args:
+        level_id (int): The ID of the level for which to retrieve ZIP files.
+        zip_name (str): Zip file name.
+        zip_url (str): Download link.
+        con (sqlite3.Connection): An active SQLite database connection.
+
+    Returns:
+        None: List of all zip files.
+    """
+    query = '''
+        SELECT Zip.ZipID
+        FROM Level
+        JOIN ZipList ON Level.LevelID = ZipList.levelID
+        JOIN Zip ON ZipList.zipID = Zip.ZipID
+        WHERE Level.LevelID = ? AND Zip.url = ? AND Zip.name = ?
+    '''
+    return tombll_common.query_return_everything(query,
+            (level_id, zip_url, zip_name), con)
+
 def database_level_id(trle_id, con):
     """
     Get level ID form TRLE lid.

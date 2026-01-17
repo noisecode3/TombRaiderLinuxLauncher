@@ -116,14 +116,26 @@ public slots:
     void downloadError(int status);
 
     /**
+     * Displays an error dialog for a file Qt/miniz unpack error.
+     */
+    void fileError(int status);
+
+    /**
      * Triggered by the "Run" button.
      */
     void runClicked();
+
+signals:
+    void downloadOrRemoveClickedSignal();
+
 private:
     QSettings& g_settings = getSettingsInstance();
-    QString m_loadingDoneGoTo;
-    QList<int> m_availableGames;
     Controller& controller = Controller::getInstance();
+    QList<int> m_availableGames;
+    QString m_loadingDoneGoTo;
+    bool m_wasDownloading;
+    qint64 m_wasDownloadingTimes;
+    bool m_listSet;
 
     struct InstalledStatus {
         QHash<quint64, bool> game;

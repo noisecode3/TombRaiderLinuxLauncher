@@ -598,19 +598,21 @@ def update_tombll_zip_files_to_database(zip_files, level_id, con):
     current_set = set((z[0], z[3]) for z in database_zip_files)  # (name, url)
     new_set = set((z['name'], z['url']) for z in zip_files)
 
-    # Find new files to add (using set difference)
+    # REMOVE
+    to_remove = current_set - new_set
+    for name, url in to_remove:
+        for d in database_zip_files:
+            if (d[0], d[3]) == (name, url):
+                list = tombll_read.database_zip_id_list(level_id, name, url, con)
+                for item in list:
+                    tombll_delete.database_zip_file(item[0], level_id, con)
+                break
+
+    # ADD
     to_add = new_set - current_set
     for name, url in to_add:
         zip_file = next(z for z in zip_files if (z['name'], z['url']) == (name, url))
         tombll_create.database_zip_file(zip_file, level_id, con)
-
-    # Find files to remove (using set difference)
-    to_remove = current_set - new_set
-    for name, url in to_remove:
-        for d in database_zip_files:
-            if (d[1], d[4]) == (name, url):
-                tombll_delete.database_zip_file(d[0], level_id, con)
-                break
 
 
 def update_tombll_json_to_database(data, level_id, con):

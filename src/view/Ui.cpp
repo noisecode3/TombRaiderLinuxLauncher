@@ -33,6 +33,9 @@ Ui::Ui(QWidget *parent)
     SetupInput* sfbar = this->setup->firstTime->setupInput;
     connect(nbar->pushButtonDownload, SIGNAL(clicked()),
             this, SLOT(downloadOrRemoveClicked()));
+    connect(levels, SIGNAL(downloadOrRemoveClickedSignal()),
+            this, SLOT(downloadOrRemoveClicked()));
+
     connect(sfbar->setOptions, SIGNAL(clicked()), this, SLOT(setOptionsClicked()));
 
     LevelControl* sslbar = setup->settings->frameLevelSetup->levelControl;

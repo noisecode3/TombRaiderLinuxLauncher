@@ -54,6 +54,7 @@ class Controller : public QObject {
     void controllerGenerateList(const QList<int>& availableGames);
     void controllerTickSignal();
     void controllerDownloadError(int status);
+    void controllerFileError(int status);
     void controllerReloadLevelList();
     void controllerLoadingDone();
     void controllerRunningDone();
