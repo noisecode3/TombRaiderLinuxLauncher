@@ -9,5 +9,6 @@ PROTONPATH="$HOME/.steam/steam/compatibilitytools.d/GE-Proton10-28" umu-run dgVo
 
 # Now run them all with umu-run
 PROTONPATH="/home/fullUserName/.steam/steam/compatibilitytools.d/GE-Proton10-28" WINEDLLOVERRIDES="ddraw=n" MESA_SHADER_CACHE="1"
+# For some reason overiding D3DImm.dll like this WINEDLLOVERRIDES="ddraw=n;d3dimm" just for the setup window
 
 # Create or destroy the link to the DDraw.dll next to the exe file as you like
