@@ -1,12 +1,13 @@
-Put the file ~/.local/share/lutris/runtime/dgvoodoo2/v2.8.2/dgVoodoo.conf
-It has helped me fix some crashes from using default dgVoodoo.conf
-Here's what was changed:
-    DirectX:
-            ForceVerticalSync: true
-            Resolution: max_qhd_isf
-            VRAM: 256
-            dgVoodooWatermark: false
-    General:
-            CaptureMouse: false
-            FullScreenMode: false
-            ScalingMode: stretched_ar
+# lets say you put DDraw.dll and dgVoodooCpl.exe in:
+cd $HOME/.local/share/TombRaiderLinuxLauncher
+
+# lets say you level id is 3377:
+ln -s $HOME/.local/share/TombRaiderLinuxLauncher/DDraw.dll $HOME/.local/share/TombRaiderLinuxLauncher/3377.TRLE/
+
+# dgVoodoo2 81.3 saves config in the wineprefix
+PROTONPATH="$HOME/.steam/steam/compatibilitytools.d/GE-Proton10-28" umu-run dgVoodooCpl.exe
+
+# Now run them all with umu-run
+PROTONPATH="/home/fullUserName/.steam/steam/compatibilitytools.d/GE-Proton10-28" WINEDLLOVERRIDES="ddraw=n" MESA_SHADER_CACHE="1"
+
+# Create or destroy the link to the DDraw.dll next to the exe file as you like
