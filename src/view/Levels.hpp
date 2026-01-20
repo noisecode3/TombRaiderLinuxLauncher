@@ -149,6 +149,7 @@ private:
     void levelDirSelected(qint64 id);
     void callbackDialog(QString selected);
     void setStackedWidget(const QString &qwidget);
+    void environmentVariablesHome(QString &str);
     QGridLayout *layout{nullptr};
 };
 

@@ -577,6 +577,15 @@ void UiLevels::workTick() {
         levelDirSelected(id);
     }
 }
+
+void UiLevels::environmentVariablesHome(QString &path) {
+    const QString home = QDir::homePath();
+    path.replace("$HOME", home);
+    if (path.startsWith("~")) {
+        path.replace(0, 1, home);
+    }
+}
+
 void UiLevels::runClicked() {
     qint64 id = select->getLid();
     if (id != 0) {
@@ -587,6 +596,7 @@ void UiLevels::runClicked() {
         if (id != 0) {
             qint64 type = g_settings.value(
                     QString("level%1/RunnerType").arg(id)).toInt();
+
             QString input = g_settings.value(
                     QString("level%1/EnvironmentVariables").arg(id)).toString();
 
@@ -684,6 +694,9 @@ QVector<QPair<QString, QString>>
         QPair<QString, QString> env;
         env.first = match.captured(1);  // VARIABLE
         env.second = match.captured(2);  // "some text here"
+        if (env.first == "WINEPREFIX" || env.first == "PROTONPATH") {
+            environmentVariablesHome(env.second);
+        }
         envList.append(env);
     }
     return envList;
