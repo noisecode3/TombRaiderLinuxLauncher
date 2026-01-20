@@ -192,12 +192,16 @@ public:
      * (ui->tabs->setup->stackedWidget->settings->
      * 		frameLevelSetup->frameLevelSetupSettings)
      * LevelControl
+     * ├── labelRunnerType
      * ├── comboBoxRunnerType
-     * └── labelRunnerType
+     * ├── labelWinePath
+     * └── lineEditWinePath
      */
     explicit WidgetRunnerType(QWidget* parent);
-    QComboBox *comboBoxRunnerType{nullptr};
     QLabel *labelRunnerType{nullptr};
+    QComboBox *comboBoxRunnerType{nullptr};
+    QLabel *labelWinePath{nullptr};
+    QLineEdit *lineEditWinePath{nullptr};
 private:
     QHBoxLayout *layout{nullptr};
 };

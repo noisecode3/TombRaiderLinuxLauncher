@@ -33,6 +33,7 @@ const quint64 Runner::getStatus() {
 void Runner::clear() {
     m_arguments.clear();
     m_env.clear();
+    m_winePath.clear();
     m_env.insert(QProcessEnvironment::systemEnvironment());
     m_cwd.clear();
     m_command = 0;
@@ -73,6 +74,10 @@ QString Runner::getCommandString(const quint64 cmd) {
     return result;
 }
 
+void Runner::setWinePath(const QString& path) {
+    m_winePath = path;
+}
+
 void Runner::run() {
     if (m_isRunning) {
         qWarning() << "[Runner] Already running!";
@@ -85,7 +90,11 @@ void Runner::run() {
 
     process.setWorkingDirectory(m_cwd);
     process.setProcessEnvironment(m_env);
-    process.setProgram(getCommandString(m_command));
+    if (m_winePath.isEmpty() == true) {
+        process.setProgram(getCommandString(m_command));
+    } else {
+        process.setProgram(m_winePath);
+    }
     process.setArguments(m_arguments);
     process.setProcessChannelMode(QProcess::MergedChannels);
 

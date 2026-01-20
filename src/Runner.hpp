@@ -25,6 +25,7 @@ class Runner : public QObject {
     void run();
     const quint64 getStatus();
     void clear();
+    void setWinePath(const QString& path);
     void setProgram(const quint64 command);
     void setCurrentWorkingDirectory(const QString& dir);
     void addEnvironmentVariable(const QPair<QString, QString> env);
@@ -35,6 +36,7 @@ class Runner : public QObject {
     QProcessEnvironment m_env;
     QStringList m_arguments;
     QString m_cwd;
+    QString m_winePath;
     quint64 m_command;
     quint64 m_status;
     bool m_isRunning;

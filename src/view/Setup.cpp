@@ -158,15 +158,17 @@ void UiSetup::globalResetClicked() {
 }
 
 void UiSetup::levelSaveClicked(qint64 id) {
-        g_settings.setValue(QString("level%1/EnvironmentVariables")
-                .arg(id), this->settings->
-                    frameLevelSetup->frameLevelSetupSettings->widgetEnvironmentVariables->
-                            lineEditEnvironmentVariables->text());
+        g_settings.setValue(QString("level%1/EnvironmentVariables").arg(id),
+            this->settings->frameLevelSetup->frameLevelSetupSettings->
+            widgetEnvironmentVariables->lineEditEnvironmentVariables->text());
 
-        g_settings.setValue(QString("level%1/RunnerType")
-                                .arg(id), this->settings->frameLevelSetup->
-                            frameLevelSetupSettings->widgetRunnerType->
-                            comboBoxRunnerType->currentIndex());
+        g_settings.setValue(QString("level%1/RunnerType").arg(id),
+            this->settings->frameLevelSetup->frameLevelSetupSettings->
+            widgetRunnerType->comboBoxRunnerType->currentIndex());
+
+        g_settings.setValue(QString("level%1/RunnerWinePath").arg(id),
+            this->settings->frameLevelSetup->frameLevelSetupSettings->
+            widgetRunnerType->lineEditWinePath->text());
 }
 
 void UiSetup::levelResetClicked(qint64 id) {
@@ -181,6 +183,12 @@ void UiSetup::levelResetClicked(qint64 id) {
             g_settings.value(
                 QString("level%1/RunnerType")
                     .arg(id)).toInt());
+
+    this->settings->frameLevelSetup->frameLevelSetupSettings->
+        widgetRunnerType->lineEditWinePath->setText(
+            g_settings.value(
+                QString("level%1/RunnerWinePath")
+                    .arg(id)).toString());
 }
 
 void UiSetup::setState(qint64 id) {
@@ -195,6 +203,9 @@ void UiSetup::setState(qint64 id) {
         levelSettings->widgetRunnerType->comboBoxRunnerType->setCurrentIndex(
                 g_settings.value(QString("level%1/RunnerType")
                     .arg(id)).toInt());
+        levelSettings->widgetRunnerType->lineEditWinePath->setText(
+                g_settings.value(QString("level%1/RunnerWinePath")
+                    .arg(id)).toString());
         LevelControl* levelControl = this->settings->frameLevelSetup->levelControl;
         levelControl->commandLinkButtonLSSave->setEnabled(true);
         levelControl->commandLinkButtonLSReset->setEnabled(true);
@@ -599,6 +610,8 @@ WidgetRunnerType::WidgetRunnerType(QWidget* parent)
     labelRunnerType(new QLabel(
         tr("Runner Type"), this)),
     comboBoxRunnerType(new QComboBox(this)),
+    labelWinePath(new QLabel(tr("Wine Path"), this)),
+    lineEditWinePath(new QLineEdit(this)),
     layout(new QHBoxLayout(this))
 {
     layout->setContentsMargins(6, 6, 6, 6);
@@ -621,6 +634,25 @@ WidgetRunnerType::WidgetRunnerType(QWidget* parent)
         );
 
     layout->addWidget(comboBoxRunnerType);
+    labelWinePath->hide();
+    layout->addWidget(labelWinePath);
+    lineEditWinePath->hide();
+    layout->addWidget(lineEditWinePath);
+
+    connect(comboBoxRunnerType,
+            &QComboBox::currentTextChanged,
+            this,
+            [this](const QString &runner) {
+        if (runner == "Wine") {
+            labelWinePath->show();
+            lineEditWinePath->show();
+        } else {
+            labelWinePath->hide();
+            lineEditWinePath->hide();
+        }
+    });
+
+
 }
 
 WidgetLevelID::WidgetLevelID(QWidget* parent)

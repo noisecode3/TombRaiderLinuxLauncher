@@ -36,6 +36,7 @@ struct RunnerOptions {
     quint64 id = 0;
     quint64 steamID = 0;
     quint64 command = 0;
+    QString winePath;
     QList<QPair<QString, QString>> envList;
     QStringList arguments;
     bool setup = false;

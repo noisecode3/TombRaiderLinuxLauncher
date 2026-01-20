@@ -589,6 +589,13 @@ void UiLevels::runClicked() {
                     QString("level%1/RunnerType").arg(id)).toInt();
             QString input = g_settings.value(
                     QString("level%1/EnvironmentVariables").arg(id)).toString();
+
+            QString winePath;
+            if (type == 1) {
+                winePath = g_settings.value(
+                    QString("level%1/RunnerWinePath").arg(id)).toString();
+            }
+
             qDebug() << "Type was: " << type;
             RunnerOptions options;
 
@@ -603,6 +610,7 @@ void UiLevels::runClicked() {
             } else if (type == 1) {
                 options.id = id;
                 options.command = WINE;
+                options.winePath = winePath;
                 options.setup =
                     this->select->stackedWidgetBar->
                         navigateWidgetBar->checkBoxSetup->isChecked();

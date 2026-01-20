@@ -157,6 +157,11 @@ void Model::run(RunnerOptions options) {
             m_runner.addEnvironmentVariable(env);
         }
 
+        // Wine binary path
+        if (!options.winePath.isEmpty()|| (options.command ==  WINE )) {
+            m_runner.setWinePath(options.winePath);
+        }
+
         // Executable to run
         const quint64 type = getType(options.id);
         m_runner.addArguments(QStringList() << ExecutableNames().data[type]);
