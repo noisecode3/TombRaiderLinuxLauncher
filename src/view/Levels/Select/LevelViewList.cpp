@@ -28,6 +28,7 @@ LevelViewList::LevelViewList(QWidget *parent)
     setResizeMode(QListView::ResizeMode::Fixed);
     setUniformItemSizes(true);
 
+    setFocusPolicy(Qt::StrongFocus);
     setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);

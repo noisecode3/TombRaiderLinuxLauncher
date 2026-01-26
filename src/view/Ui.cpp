@@ -49,6 +49,60 @@ Ui::Ui(QWidget *parent)
             &QItemSelectionModel::currentChanged,
             this, &Ui::onCurrentItemChanged);
 
+    // Key shortCuts
+
+    // Focus Search
+    QAction * focusSearchAction = new QAction(this);
+    focusSearchAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S));
+    focusSearchAction->setShortcutContext(Qt::WindowShortcut);
+    connect(focusSearchAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                    this->levels->select) {
+                if (this->levels->select->filter->isHidden()) {
+                    this->levels->select->stackedWidgetBar->
+                        navigateWidgetBar->pushButtonFilter->click();
+                }
+                this->levels->select->filter->filterFirstInputRow->
+                filterGroupBoxSearch->lineEditSearch->setFocus();
+            }
+        }
+    });
+    tabs->addAction(focusSearchAction);
+
+    // Focus Level List
+    QAction * focusListAction = new QAction(this);
+    focusListAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
+    focusListAction->setShortcutContext(Qt::WindowShortcut);
+    connect(focusListAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                    this->levels->select) {
+                        this->levels->select->
+                            levelViewList->setFocus();
+            }
+        }
+    });
+    tabs->addAction(focusListAction);
+
+    // Show/Hide Filter
+    QAction * toggleFilterAction = new QAction(this);
+    toggleFilterAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_F));
+    toggleFilterAction->setShortcutContext(Qt::WindowShortcut);
+    connect(toggleFilterAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                    this->levels->select) {
+                        this->levels->select->stackedWidgetBar->
+                            navigateWidgetBar->pushButtonFilter->click();
+            }
+        }
+    });
+    tabs->addAction(toggleFilterAction);
+
     // Read settings
     QString value = g_settings.value("setup").toString();
     if (value != "yes") {

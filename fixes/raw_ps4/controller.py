@@ -4,6 +4,18 @@ import argparse
 import evdev
 from evdev import InputDevice, UInput, ecodes as e
 
+"""
+Make movement flowing and safer from mistakes, while staying modern and adaptable.
+From the dead zone, use no overlapping between movement states.
+When running or stepping back, use extreme overlapping locked in Y, but flippable within a narrow angle.
+When running, Lara shouldn’t step back unless the stick is pulled fully downward within a narrow angle.
+To jump forward-right, the player must press jump + pull forward + pull right — it cannot be mixed up with a right-side jump.
+To stop, the player must return to dead zone + pull right — it cannot be mixed up with a running forward-right input.
+With Look key activated, controls revert to classic 8-way equal-angle overlapping (traditional tank-style grid).
+Consider using time.perf_counter() for cooldown checks or pulse-style transition turns, if it doesn’t cause Lara to stutter.
+This design may not be final, and adjustments will be made as needed to improve left stick feel and responsiveness.
+"""
+
 CONTROLLER_NAMES = (
     "Wireless Controller",
     "Sony Interactive Entertainment Wireless Controller"

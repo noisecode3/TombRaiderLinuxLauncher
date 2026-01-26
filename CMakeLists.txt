@@ -14,7 +14,16 @@ else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 COMPONENTS Core Gui Test Widgets WebEngineWidgets Svg Sql REQUIRED)
+find_package(Qt6 COMPONENTS
+    Core
+    Gui
+    Test
+    Widgets
+    WebEngineWidgets
+    Svg
+    Sql
+    REQUIRED
+)
 
 find_package(CURL REQUIRED)
 
@@ -317,10 +326,19 @@ if(NOT TEST)
         )
     endforeach()
 
-    if(NOT NO_DATABASE)
-        install(FILES
-            ${CMAKE_SOURCE_DIR}/database/tombll.db
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
+
+    install(CODE "
+      set(source \"${CMAKE_SOURCE_DIR}/database/tombll.db\")
+      set(dest \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}\")
+
+      if(NOT EXISTS \"\${dest}/tombll.db\")
+        file(INSTALL
+          TYPE FILE
+          FILES \"\${source}\"
+          DESTINATION \"\${dest}\"
         )
-    endif()
+      else()
+        message(STATUS \"tombll.db already exists – skipping install\")
+      endif()
+    ")
 endif()

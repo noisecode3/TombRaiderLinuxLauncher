@@ -381,9 +381,9 @@ void UiLevels::loadMoreCovers() {
         select->reset();
     } else {
         firstTime = false;
+        select->levelViewList->setFocus();
     }
 }
-
 
 void UiLevels::infoClicked() {
     qint64 id = select->getLid();
