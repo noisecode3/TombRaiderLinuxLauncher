@@ -20,14 +20,25 @@
 Runner::Runner()
     : m_env(QProcessEnvironment::systemEnvironment()),
     m_command(0),
-    m_status(0)
-{
-    m_isRunning = false;
+    m_status(0),
+    m_process(nullptr),
+    m_isRunning(false)
+{}
 
+Runner::~Runner() {
+    delete m_process;
 }
 
 const quint64 Runner::getStatus() {
     return m_status;
+}
+
+inline bool killCondition(qint64 command) {
+    bool status = false;
+    if (command != 3) {
+        status = true;
+    }
+    return status;
 }
 
 void Runner::clear() {
@@ -78,6 +89,17 @@ void Runner::setWinePath(const QString& path) {
     m_winePath = path;
 }
 
+void Runner::stop()
+{
+    if (!m_process || m_process->state() == QProcess::NotRunning)
+        return;
+
+    m_process->terminate();
+    if (!m_process->waitForFinished(2000)) {
+        m_process->kill();
+    }
+}
+
 void Runner::run() {
     if (m_isRunning) {
         qWarning() << "[Runner] Already running!";
@@ -86,40 +108,35 @@ void Runner::run() {
     Q_ASSERT_WITH_TRACE(!m_cwd.isEmpty());
 
     m_isRunning = true;
-    QProcess process;
+    delete m_process;
+    m_process = new QProcess();
 
-    process.setWorkingDirectory(m_cwd);
-    process.setProcessEnvironment(m_env);
+    m_process->setWorkingDirectory(m_cwd);
+    m_process->setProcessEnvironment(m_env);
     if (m_winePath.isEmpty() == true) {
-        process.setProgram(getCommandString(m_command));
+        m_process->setProgram(getCommandString(m_command));
     } else {
-        process.setProgram(m_winePath);
+        m_process->setProgram(m_winePath);
     }
-    process.setArguments(m_arguments);
-    process.setProcessChannelMode(QProcess::MergedChannels);
+    m_process->setArguments(m_arguments);
+    m_process->setProcessChannelMode(QProcess::MergedChannels);
 
-    QObject::connect(&process, &QProcess::readyReadStandardOutput, [&]() {
-        QByteArray output = process.readAllStandardOutput();
+    connect(m_process, &QProcess::readyReadStandardOutput, [&]() {
+        QByteArray output = m_process->readAllStandardOutput();
         qDebug().noquote() << QString::fromUtf8(output);
     });
 
-    process.start();
+    m_process->setChildProcessModifier([]() {
+        ::setsid();
+    });
 
-    if (!process.waitForStarted()) {
-        qWarning() << "Process failed to start!";
-        qWarning() << "Error: " << process.errorString();
-        m_status = 1;
-        return;
-    }
+    connect(m_process,
+            QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this, [this](int code, QProcess::ExitStatus) {
+                m_status = (code == 0) ? 0 : 1;
+                m_isRunning = false;
+                emit runningDone();
+            });
 
-    while (process.state() != QProcess::NotRunning) {
-        process.waitForReadyRead(50);
-    }
-
-    int exitCode = process.exitCode();
-    m_status = (exitCode == 0) ? 0 : 1;
-
-    qDebug() << "[Runner] Finished with code:" << exitCode;
-
-    m_isRunning = false;
+    m_process->start();
 }

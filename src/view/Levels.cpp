@@ -1,5 +1,6 @@
 #include "view/Levels.hpp"
 #include "view/Levels/Select/StackedWidgetBar.hpp"
+#include <qabstractitemview.h>
 #include <qapplication.h>
 #include <qcheckbox.h>
 #include <qlabel.h>
@@ -365,6 +366,16 @@ void UiLevels::setList() {
     }
 
     select->setLevels(list);
+
+    // Select the first item
+    QModelIndex firstIndex = select->levelViewList->model()->index(0, 0);
+    if (firstIndex.isValid()) {
+        select->levelViewList->selectionModel()->setCurrentIndex(
+            firstIndex,
+            QItemSelectionModel::Select | QItemSelectionModel::Current
+        );
+
+    }
     loadMoreCovers();
 }
 
@@ -453,12 +464,23 @@ void UiLevels::setStartupSetting(const StartupSetting startupSetting) {
 
     if (startupSetting.sort_id != 0) {
         setProxyCoversFirst = true;
+        FilterGroupBoxSort *sortBox = select->filter->filterSecondInputRow->filterGroupBoxSort;
+        if (startupSetting.sort_id == 1) {
+            sortBox->radioButtonLevelName->click();
+        } else if (startupSetting.sort_id == 2) {
+            sortBox->radioButtonDifficulty->click();
+        } else if (startupSetting.sort_id == 3) {
+            sortBox->radioButtonDuration->click();
+        } else if (startupSetting.sort_id == 4) {
+            sortBox->radioButtonClass->click();
+        } else if (startupSetting.sort_id == 5) {
+            sortBox->radioButtonType->click();
+        }
     }
 
     if (setProxyCoversFirst == true) {
         this->select->levelViewList->setProxyCoversFirst();
     }
-
 }
 
 void UiLevels::walkthroughClicked() {
@@ -587,6 +609,10 @@ void UiLevels::environmentVariablesHome(QString &path) {
 }
 
 void UiLevels::runClicked() {
+    if (g_uistate.getRunText() == "Kill") {
+        controller.killRunner();
+        return;
+    }
     qint64 id = select->getLid();
     if (id != 0) {
         this->select->downloadingState(false);
@@ -608,6 +634,9 @@ void UiLevels::runClicked() {
 
             qDebug() << "Type was: " << type;
             RunnerOptions options;
+
+            QString pushButtionText("Kill");
+            g_uistate.setRunText(pushButtionText);
 
             if (type == 0) {
                 options.id = id;
@@ -674,6 +703,7 @@ void UiLevels::runClicked() {
 
 void UiLevels::runningLevelDone() {
     this->select->downloadingState(true);
+    g_uistate.setRunText(g_uistate.getRunnerTypeText());
 }
 
 QStringList UiLevels::parsToArg(const QString& str) {

@@ -30,6 +30,7 @@ NavigateWidgetBar::NavigateWidgetBar(QWidget *parent)
     // Set init state
     pushButtonRun->setEnabled(false);
     pushButtonRun->setFixedSize(242, 32);
+    g_uistate.initRun(pushButtonRun);
     layout->addWidget(pushButtonRun);
 
     layout->addWidget(checkBoxSetup);

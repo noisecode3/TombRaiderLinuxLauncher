@@ -30,24 +30,26 @@ public:
     /*
      * (ui->tabs->levels->stackedWidget->select->filter->filterFirstInputRow)
      * FilterGroupBoxFilter
+     * ├── labelType
+     * ├── comboBoxType
      * ├── labelClass
      * ├── comboBoxClass
      * ├── labelDifficulty
      * ├── comboBoxDifficulty
      * ├── labelDuration
-     * ├── comboBoxDuration
-     * ├── labelType
-     * └── comboBoxType
+     * └── comboBoxDuration
      */
     explicit FilterGroupBoxFilter(QWidget *parent);
+    QLabel *labelType{nullptr};
+    QComboBox *comboBoxType{nullptr};
     QLabel *labelClass{nullptr};
     QComboBox *comboBoxClass{nullptr};
     QLabel *labelDifficulty{nullptr};
     QComboBox *comboBoxDifficulty{nullptr};
     QLabel *labelDuration{nullptr};
     QComboBox *comboBoxDuration{nullptr};
-    QLabel *labelType{nullptr};
-    QComboBox *comboBoxType{nullptr};
+
+    void showFilterSelectionMenu();
 private:
     QHBoxLayout *layout{nullptr};
 };
@@ -90,7 +92,10 @@ public:
     QRadioButton *radioButtonLevelName{nullptr};
     QRadioButton *radioButtonReleaseDate{nullptr};
     QRadioButton *radioButtonType{nullptr};
+
+    void focusSelected();
 private:
+    void isSelected(QRadioButton * selected);
     QHBoxLayout *layout{nullptr};
 };
 

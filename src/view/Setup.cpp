@@ -633,6 +633,7 @@ WidgetRunnerType::WidgetRunnerType(QWidget* parent)
         << "Bash"
         );
 
+    g_uistate.initRunnerType(comboBoxRunnerType);
     layout->addWidget(comboBoxRunnerType);
     labelWinePath->hide();
     layout->addWidget(labelWinePath);

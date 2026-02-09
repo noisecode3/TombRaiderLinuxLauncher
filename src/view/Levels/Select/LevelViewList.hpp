@@ -29,10 +29,14 @@ public:
     explicit LevelViewList(QWidget *parent = nullptr);
     void setProxyCoversFirst();
 
+signals:
+    void levelViewListKeyReturn();
+
 protected:
     void scrollContentsBy(int dx, int dy) override;
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent* event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     void updateVisibleItems();

@@ -12,7 +12,10 @@
  */
 
 #include "view/Levels/Select/Filter.hpp"
+#include <QMenu>
+#include <QAction>
 #include <QLineEdit>
+#include <qnamespace.h>
 
 Filter::Filter(QWidget *parent)
     : QWidget(parent),
@@ -27,7 +30,6 @@ Filter::Filter(QWidget *parent)
     layout->addWidget(filterFirstInputRow);
     layout->addWidget(filterSecondInputRow);
 }
-
 
 FilterFirstInputRow::FilterFirstInputRow(QWidget *parent)
     : QWidget(parent),
@@ -132,6 +134,37 @@ FilterGroupBoxFilter::FilterGroupBoxFilter(QWidget *parent)
     layout->addWidget(comboBoxDuration);
 }
 
+void FilterGroupBoxFilter::showFilterSelectionMenu()
+{
+    QPoint globalPos = this->mapToGlobal(QPoint(42, 0));
+    QMenu menu;
+    // Add actions for each filter
+    QAction *classAct = menu.addAction(tr("&Class"));
+    QAction *diffAct = menu.addAction(tr("&Difficulty"));
+    QAction *durAct = menu.addAction(tr("&Duration"));
+    QAction *typeAct = menu.addAction(tr("&Type"));
+
+    // Show the menu at the given position
+    QAction *chosen = menu.exec(globalPos);
+    if (!chosen) return;
+
+    // Focus the right combo box
+    if (chosen == classAct) {
+        comboBoxClass->setFocus(Qt::ShortcutFocusReason);
+        comboBoxClass->showPopup();
+    } else if (chosen == diffAct) {
+        comboBoxDifficulty->setFocus(Qt::ShortcutFocusReason);
+        comboBoxDifficulty->showPopup();
+    } else if (chosen == durAct) {
+        comboBoxDuration->setFocus(Qt::ShortcutFocusReason);
+        comboBoxDuration->showPopup();
+    } else if (chosen == typeAct) {
+        comboBoxType->setFocus(Qt::ShortcutFocusReason);
+        comboBoxType->showPopup();
+    }
+}
+
+
 FilterGroupBoxToggle::FilterGroupBoxToggle(QWidget *parent)
     : QGroupBox(parent),
     checkBoxOriginal(new QCheckBox(tr("Core Design Games"), this)),
@@ -168,5 +201,27 @@ FilterGroupBoxSort::FilterGroupBoxSort(QWidget *parent)
     layout->addWidget(radioButtonClass);
     layout->addWidget(radioButtonType);
     layout->addWidget(radioButtonReleaseDate);
+    radioButtonReleaseDate->blockSignals(true);
+    radioButtonReleaseDate->setChecked(true);
+    radioButtonReleaseDate->blockSignals(false);
 }
 
+void FilterGroupBoxSort::isSelected(QRadioButton *selected) {
+    selected->setFocus(Qt::ShortcutFocusReason);
+}
+
+void FilterGroupBoxSort::focusSelected() {
+    if (radioButtonLevelName->isChecked()) {
+        isSelected(radioButtonLevelName);
+    } else if (radioButtonDifficulty->isChecked()) {
+        isSelected(radioButtonDifficulty);
+    } else if (radioButtonDuration->isChecked()) {
+        isSelected(radioButtonDuration);
+    } else if (radioButtonClass->isChecked()) {
+        isSelected(radioButtonClass);
+    } else if (radioButtonType->isChecked()) {
+        isSelected(radioButtonType);
+    } else if (radioButtonReleaseDate->isChecked()) {
+        isSelected(radioButtonReleaseDate);
+    }
+}

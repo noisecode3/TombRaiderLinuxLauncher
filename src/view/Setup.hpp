@@ -3,6 +3,7 @@
 
 #include "../src/settings.hpp"
 #include "../src/Controller.hpp"
+#include "view/UiState.hpp"
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -204,6 +205,7 @@ public:
     QLineEdit *lineEditWinePath{nullptr};
 private:
     QHBoxLayout *layout{nullptr};
+    UiState& g_uistate = UiState::getInstance();
 };
 
 class FrameLevelSetupSettings : public QFrame

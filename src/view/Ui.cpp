@@ -1,4 +1,6 @@
 #include "view/Ui.hpp"
+#include "view/Levels/Select/Filter.hpp"
+#include <qcombobox.h>
 
 Ui::Ui(QWidget *parent)
     : QWidget(parent),
@@ -50,7 +52,19 @@ Ui::Ui(QWidget *parent)
             this, &Ui::onCurrentItemChanged);
 
     // Key shortCuts
+    setShortCuts();
 
+    // Read settings
+    QString value = g_settings.value("setup").toString();
+    if (value != "yes") {
+        this->startUpSetup();
+    } else {
+        setup->readSavedSettings();
+        controller.setup();
+    }
+}
+
+void Ui::setShortCuts() {
     // Focus Search
     QAction * focusSearchAction = new QAction(this);
     focusSearchAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S));
@@ -71,6 +85,46 @@ Ui::Ui(QWidget *parent)
     });
     tabs->addAction(focusSearchAction);
 
+    // Search Type
+    QAction * setSearchTypeAction = new QAction(this);
+    setSearchTypeAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_T));
+    setSearchTypeAction->setShortcutContext(Qt::WindowShortcut);
+    connect(setSearchTypeAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                    this->levels->select) {
+                if (this->levels->select->filter->isHidden()) {
+                    this->levels->select->stackedWidgetBar->
+                        navigateWidgetBar->pushButtonFilter->click();
+                }
+                QComboBox *cb =
+                this->levels->select->filter->filterFirstInputRow->
+                    filterGroupBoxSearch->comboBoxSearch;
+                cb->setFocus(Qt::ShortcutFocusReason);
+                cb->showPopup();
+            }
+        }
+    });
+    tabs->addAction(setSearchTypeAction);
+
+    // Installed Only
+    QAction * setInstalledOnlyAction = new QAction(this);
+    setInstalledOnlyAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_N));
+    setInstalledOnlyAction->setShortcutContext(Qt::WindowShortcut);
+    connect(setInstalledOnlyAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                    this->levels->select) {
+                this->levels->select->filter->
+                    filterSecondInputRow->filterGroupBoxToggle->
+                        checkBoxInstalled->click();
+            }
+        }
+    });
+    tabs->addAction(setInstalledOnlyAction);
+
     // Focus Level List
     QAction * focusListAction = new QAction(this);
     focusListAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
@@ -87,6 +141,22 @@ Ui::Ui(QWidget *parent)
     });
     tabs->addAction(focusListAction);
 
+    // Toggle Setup
+    QAction * toggleSetupAction = new QAction(this);
+    toggleSetupAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_U));
+    toggleSetupAction->setShortcutContext(Qt::WindowShortcut);
+    connect(toggleSetupAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->select) {
+                    this->levels->select->stackedWidgetBar->
+                        navigateWidgetBar->checkBoxSetup->click();
+            }
+        }
+    });
+    tabs->addAction(toggleSetupAction);
+
     // Show/Hide Filter
     QAction * toggleFilterAction = new QAction(this);
     toggleFilterAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_F));
@@ -95,22 +165,116 @@ Ui::Ui(QWidget *parent)
             this, [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
-                    this->levels->select) {
-                        this->levels->select->stackedWidgetBar->
-                            navigateWidgetBar->pushButtonFilter->click();
+                        this->levels->select) {
+                    this->levels->select->stackedWidgetBar->
+                        navigateWidgetBar->pushButtonFilter->click();
             }
         }
     });
     tabs->addAction(toggleFilterAction);
 
-    // Read settings
-    QString value = g_settings.value("setup").toString();
-    if (value != "yes") {
-        this->startUpSetup();
-    } else {
-        setup->readSavedSettings();
-        controller.setup();
-    }
+    // Info
+    QAction * infoAction = new QAction(this);
+    infoAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_I));
+    infoAction->setShortcutContext(Qt::WindowShortcut);
+    connect(infoAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->select) {
+                this->levels->select->stackedWidgetBar->
+                    navigateWidgetBar->pushButtonInfo->click();
+            }
+        }
+    });
+    tabs->addAction(infoAction);
+
+    // Go Back
+    QAction * backAction = new QAction(this);
+    backAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
+    backAction->setShortcutContext(Qt::WindowShortcut);
+    connect(backAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->info) {
+                this->levels->info->infoBar->pushButtonBack->click();
+            }
+        }
+    });
+    tabs->addAction(backAction);
+
+    // Walkthrough
+    QAction * walkthroughAction = new QAction(this);
+    walkthroughAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_W));
+    walkthroughAction->setShortcutContext(Qt::WindowShortcut);
+    connect(walkthroughAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->info) {
+                this->levels->info->infoBar->pushButtonWalkthrough->click();
+            }
+        }
+    });
+    tabs->addAction(walkthroughAction);
+
+    // Select Filter
+    QAction * selectFilterAction = new QAction(this);
+    selectFilterAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Y));
+    selectFilterAction->setShortcutContext(Qt::WindowShortcut);
+    connect(selectFilterAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->select) {
+                if (this->levels->select->filter->isHidden()) {
+                    this->levels->select->stackedWidgetBar->
+                        navigateWidgetBar->pushButtonFilter->click();
+                }
+                this->levels->select->filter->filterFirstInputRow->
+                    filterGroupBoxFilter->showFilterSelectionMenu();
+            }
+        }
+    });
+    tabs->addAction(selectFilterAction);
+
+    // Select Sort
+    QAction * selectSortAction = new QAction(this);
+    selectSortAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
+    selectSortAction->setShortcutContext(Qt::WindowShortcut);
+    connect(selectSortAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->select) {
+                if (this->levels->select->filter->isHidden()) {
+                    this->levels->select->stackedWidgetBar->
+                        navigateWidgetBar->pushButtonFilter->click();
+                }
+                this->levels->select->filter->filterSecondInputRow->
+                    filterGroupBoxSort->focusSelected();
+            }
+        }
+    });
+    tabs->addAction(selectSortAction);
+
+    // Download
+    QAction * downloadAction = new QAction(this);
+    downloadAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_D));
+    downloadAction->setShortcutContext(Qt::WindowShortcut);
+    connect(downloadAction, &QAction::triggered,
+            this, [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->select) {
+                this->levels->select->stackedWidgetBar->
+                    navigateWidgetBar->pushButtonDownload->click();
+            }
+        }
+    });
+    tabs->addAction(downloadAction);
+
 }
 
 void Ui::onCurrentItemChanged(
@@ -119,6 +283,8 @@ void Ui::onCurrentItemChanged(
         levels->setItemChanged(current);
         qint64 id = levels->getItemId();
         setup->setState(id);
+        QString runnerTypeText = g_uistate.getRunnerTypeText();
+        g_uistate.setRunText(runnerTypeText);
     }
 }
 
@@ -127,9 +293,8 @@ void Ui::levelSaveClicked() {
     if (id != 0) {
         setup->levelSaveClicked(id);
     }
-    this->levels->select->stackedWidgetBar->navigateWidgetBar->pushButtonRun->setText(
-        this->setup->settings->frameLevelSetup->frameLevelSetupSettings->
-        widgetRunnerType->comboBoxRunnerType->currentText());
+    QString runnerTypeText = g_uistate.getRunnerTypeText();
+    g_uistate.setRunText(runnerTypeText);
 }
 
 void Ui::levelResetClicked() {

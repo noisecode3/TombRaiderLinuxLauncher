@@ -129,11 +129,11 @@ void Controller::getCoverList(QVector<QSharedPointer<ListItemData>> items) {
     runOnThreadDatabase([=]() { model.getCoverList(items); });
 }
 
+// UI/main thread work
 void Controller::run(RunnerOptions opptions) {
-    runOnThreadRun([=]() { model.run(opptions); });
+    model.run(opptions);
 }
 
-// UI/main thread work
 int Controller::checkGameDirectory(int id) {
     return model.checkGameDirectory(id);
 }
@@ -152,6 +152,10 @@ const bool Controller::checkZip(int id) {
 
 const bool Controller::deleteZip(int id) {
     return model.deleteZip(id);
+}
+
+void Controller::killRunner() {
+    model.killRunner();
 }
 
 const bool Controller::deleteLevel(int id) {

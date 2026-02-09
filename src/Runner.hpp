@@ -22,14 +22,19 @@ class Runner : public QObject {
 
  public:
     Runner();
+    ~Runner();
     void run();
     const quint64 getStatus();
     void clear();
+    void stop();
     void setWinePath(const QString& path);
     void setProgram(const quint64 command);
     void setCurrentWorkingDirectory(const QString& dir);
     void addEnvironmentVariable(const QPair<QString, QString> env);
     void addArguments(const QStringList& value);
+
+signals:
+    void runningDone();
 
  private:
     QString getCommandString(const quint64 cmd);
@@ -40,6 +45,7 @@ class Runner : public QObject {
     quint64 m_command;
     quint64 m_status;
     bool m_isRunning;
+    QProcess *m_process;
 };
 
 #endif  // SRC_RUNNER_HPP_

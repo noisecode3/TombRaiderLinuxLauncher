@@ -143,6 +143,15 @@ Select::Select(QWidget *parent)
             &QLineEdit::textChanged,
             levelListProxy,
             &LevelListProxy::setSearchFilter);
+
+    connect(levelViewList,
+            &LevelViewList::levelViewListKeyReturn
+            , this, [this]() {
+        QPushButton *run = this->stackedWidgetBar->navigateWidgetBar->pushButtonRun;
+        if (run->text() != "Kill" && run->isEnabled()) {
+            run->click();
+        }
+    });
 }
 
 void Select::setLevels(
@@ -221,6 +230,7 @@ void Select::downloadingState(bool state) {
         filterGroupBoxSort->setEnabled(state);
 
     // Bar
+    /*
     this->stackedWidgetBar->navigateWidgetBar->
         pushButtonRun->setEnabled(state);
     this->stackedWidgetBar->navigateWidgetBar->
@@ -229,5 +239,6 @@ void Select::downloadingState(bool state) {
         pushButtonDownload->setEnabled(state);
     this->stackedWidgetBar->navigateWidgetBar->
         pushButtonFilter->setEnabled(state);
+    */
 }
 

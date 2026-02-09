@@ -191,6 +191,8 @@ set(SOURCES_VIEW
     src/view/Setup.hpp
     src/view/Ui.cpp
     src/view/Ui.hpp
+    src/view/UiState.cpp
+    src/view/UiState.hpp
     src/view/staticViewData.hpp
     src/TombRaiderLinuxLauncher.hpp
     src/TombRaiderLinuxLauncher.cpp

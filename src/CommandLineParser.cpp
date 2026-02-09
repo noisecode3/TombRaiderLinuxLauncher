@@ -238,9 +238,9 @@ StartupSetting CommandLineParser::process(const QStringList& arguments) {
     }
 
     if (setSorts.size() == 1) {
-        qDebug() << "Sorting by:" << setSorts.first();
         settings.sort_id =
             static_cast<quint8>(sortOptions.indexOf(setSorts.first()));
+        qDebug() << "Sorting by:" << setSorts.first() << "id" << settings.sort_id;
 
     }
 

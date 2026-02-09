@@ -30,11 +30,12 @@ From here you can:
 
 ![ListView](doc/ListView.png)
 
-- [ ] Run Level (enter)
+- [x] Run Level (enter)
+- [x] Setup Level (ctrl+u)
 - [ ] Setup Tab (alt+u)
 - [x] Filter Show/Hide (ctrl+f)
-- [ ] Info (ctrl+i)
-- [ ] Download (ctrl+d)
+- [x] Info (ctrl+i)
+- [x] Download (ctrl+d)
 
 ## Filter
 
@@ -42,11 +43,11 @@ From here you can:
 
 - [x] Focus Search (ctrl+s)
 - [x] Focus Select Level (ctrl+l)
-- [ ] Search Type select (ctrl+t)
+- [x] Search Type select (ctrl+t)
 - [ ] Core Design (ctrl+o)
-- [ ] Installed Only (ctrl+n)
-- [ ] Focus Filter (ctrl+e)
-- [ ] Focus Sort (ctrl+r)
+- [x] Installed Only (ctrl+n)
+- [x] Focus Filter Menu (ctrl+y)
+- [x] Focus Sort (ctrl+r)
 
 ## Info
 
@@ -54,14 +55,14 @@ From here you can:
 
 - [ ] Focus Info content (ctrl+i)
 - [ ] Focus Cover List (ctrl+c)
-- [ ] Go to Walkthrough (ctrl+w)
-- [ ] Go Back to Level List (ctrl+b)
+- [x] Go to Walkthrough (ctrl+w)
+- [x] Go Back to Level List (ctrl+b)
 
 ## Walkthrough
 
 ![InfoWalk](doc/InfoWalk.png)
 
-- [ ] Go Back To Level List (ctrl+b)
+- [x] Go Back To Level List (ctrl+b)
 
 ## Setup
 

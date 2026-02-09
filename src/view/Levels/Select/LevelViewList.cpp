@@ -14,6 +14,7 @@
 #include "view/Levels/Select/LevelViewList.hpp"
 
 #include <QDateTime>
+#include <QKeyEvent>
 #include "view/staticViewData.hpp"
 #include "../src/assert.hpp"
 
@@ -35,6 +36,18 @@ LevelViewList::LevelViewList(QWidget *parent)
 
     m_coversLoaded = false;
     m_proxyCoversFirst = false;
+}
+
+void LevelViewList::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Return) {
+        QModelIndex idx = currentIndex();
+        if (idx.isValid()) {
+            emit levelViewListKeyReturn();
+        }
+    } else {
+        QListView::keyPressEvent(event);
+    }
 }
 
 void LevelViewList::setProxyCoversFirst() {

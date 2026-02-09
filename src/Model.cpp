@@ -22,6 +22,10 @@ Model::Model() :
         data(Data::getInstance()),
         fileManager(FileManager::getInstance()),
         downloader(Downloader::getInstance()) {
+
+    connect(&m_runner, &Runner::runningDone,
+        this,   [this]() { emit modelRunningDoneSignal(); },
+        Qt::QueuedConnection);
 }
 
 Model::~Model() {}
@@ -184,8 +188,9 @@ void Model::run(RunnerOptions options) {
 
     m_runner.setCurrentWorkingDirectory(path.get());
     m_runner.run();
-    m_runner.clear();
-    emit modelRunningDoneSignal();
+    // m_runner.clear();
+
+    //emit modelRunningDoneSignal();
 }
 
 bool Model::setLink(int id) {
@@ -429,4 +434,8 @@ const quint64 Model::getType(qint64 id) {
 
 const QString Model::getWalkthrough(int id) {
     return data.getWalkthrough(id);
+}
+
+void Model::killRunner() {
+    m_runner.stop();
 }

@@ -6,6 +6,7 @@
 #include "../view/Levels.hpp"
 #include "../view/Modding.hpp"
 #include "../view/Setup.hpp"
+#include "../view/UiState.hpp"
 #include <QWidget>
 #include <QTabWidget>
 #include <QGridLayout>
@@ -58,7 +59,9 @@ public slots:
 private:
     Controller& controller = Controller::getInstance();
     QSettings& g_settings = getSettingsInstance();
+    UiState& g_uistate = UiState::getInstance();
     void startUpSetup();
+    void setShortCuts();
     QGridLayout *layout{nullptr};
 };
 

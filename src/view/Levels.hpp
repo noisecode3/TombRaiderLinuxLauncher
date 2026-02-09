@@ -7,6 +7,7 @@
 #include "view/Levels/LoadingIndicator.hpp"
 #include "view/Levels/Dialog.hpp"
 #include "view/Levels/Select.hpp"
+#include "view/UiState.hpp"
 #include <QWidget>
 #include <QGridLayout>
 #include <QStackedWidget>
@@ -131,6 +132,7 @@ signals:
 private:
     QSettings& g_settings = getSettingsInstance();
     Controller& controller = Controller::getInstance();
+    UiState& g_uistate = UiState::getInstance();
     QList<int> m_availableGames;
     QString m_loadingDoneGoTo;
     bool m_wasDownloading;

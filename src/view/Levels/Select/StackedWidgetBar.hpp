@@ -1,6 +1,7 @@
 #ifndef VIEW_LEVELS_STACKEDWIDGET_HPP_
 #define VIEW_LEVELS_STACKEDWIDGET_HPP_
 
+#include "view/UiState.hpp"
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -31,6 +32,7 @@ public:
     QPushButton *pushButtonInfo{nullptr};
     QPushButton *pushButtonRun{nullptr};
 private:
+    UiState& g_uistate = UiState::getInstance();
     QHBoxLayout *layout{nullptr};
 };
 

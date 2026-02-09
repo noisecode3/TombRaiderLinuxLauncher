@@ -40,6 +40,7 @@ class Controller : public QObject {
     void getCoverList(QVector<QSharedPointer<ListItemData>> items);
     void run(RunnerOptions opptions);
 
+    void killRunner();
     int checkGameDirectory(int id);
     void getList(QVector<QSharedPointer<ListItemData>>* list);
     const InfoData getInfo(int id);
