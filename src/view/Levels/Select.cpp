@@ -230,15 +230,15 @@ void Select::downloadingState(bool state) {
         filterGroupBoxSort->setEnabled(state);
 
     // Bar
-    /*
-    this->stackedWidgetBar->navigateWidgetBar->
-        pushButtonRun->setEnabled(state);
     this->stackedWidgetBar->navigateWidgetBar->
         checkBoxSetup->setEnabled(state);
     this->stackedWidgetBar->navigateWidgetBar->
         pushButtonDownload->setEnabled(state);
     this->stackedWidgetBar->navigateWidgetBar->
         pushButtonFilter->setEnabled(state);
-    */
+    if (state == true) {
+        this->stackedWidgetBar->navigateWidgetBar->
+            pushButtonRun->setEnabled(state);
+    }
 }
 

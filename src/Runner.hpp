@@ -44,7 +44,7 @@ signals:
     QString m_winePath;
     quint64 m_command;
     quint64 m_status;
-    bool m_isRunning;
+    quint64 m_pgid;
     QProcess *m_process;
 };
 
