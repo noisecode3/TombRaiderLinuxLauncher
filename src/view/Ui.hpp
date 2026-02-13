@@ -31,6 +31,7 @@ public:
     UiLevels* levels{nullptr};
     UiModding* modding{nullptr};
     UiSetup* setup{nullptr};
+
 public slots:
     /**
      * Updates selected menu level state.
@@ -62,6 +63,8 @@ private:
     UiState& g_uistate = UiState::getInstance();
     void startUpSetup();
     void setShortCuts();
+    void connectShortCut(const QKeySequence& seq,
+                         std::function<void()> callback);
     QGridLayout *layout{nullptr};
 };
 

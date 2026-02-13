@@ -88,7 +88,7 @@ UiLevels::UiLevels(QWidget *parent)
 
     connect(pushButtonFilter, &QPushButton::clicked,
             this, [filter_p, pushButtonFilter,
-            arrowDownIcon, arrowUpIcon]() -> void {
+            arrowDownIcon, arrowUpIcon, this]() -> void {
         bool isVisible = !filter_p->isVisible();
         filter_p->setVisible(isVisible);
         if (isVisible) {
@@ -97,54 +97,55 @@ UiLevels::UiLevels(QWidget *parent)
             pushButtonFilter->setIcon(arrowDownIcon);
         }
         pushButtonFilter->setIconSize(QSize(16, 16));
+        this->select->levelViewList->setFocus();
     });
 
     pushButtonFilter->setIcon(arrowDownIcon);
     pushButtonFilter->setIconSize(QSize(16, 16));
 
-
     connect(dialog, &Dialog::setLevelsState,
         this, &UiLevels::callbackDialog);
 
     // Arrive with next batch of level icons
-    connect(&Controller::getInstance(), SIGNAL(controllerReloadLevelList()),
-            this, SLOT(loadMoreCovers()));
+    connect(&Controller::getInstance(), &Controller::controllerReloadLevelList,
+            this, &UiLevels::loadMoreCovers);
 
     // Thread work done signal connections
-    connect(&Controller::getInstance(),
-            SIGNAL(controllerGenerateList(QList<int>)),
-            this, SLOT(generateList(QList<int>)));
+    connect(&Controller::getInstance(), &Controller::controllerGenerateList,
+            this, &UiLevels::generateList);
 
     // Progress bar signal connection
-    connect(&Controller::getInstance(), SIGNAL(controllerTickSignal()),
-            this, SLOT(workTick()));
+    connect(&Controller::getInstance(), &Controller::controllerTickSignal,
+            this, &UiLevels::workTick);
 
     // Error signal connections
-    connect(&Controller::getInstance(), SIGNAL(controllerDownloadError(int)),
-            this, SLOT(downloadError(int)));
+    connect(&Controller::getInstance(), &Controller::controllerDownloadError,
+            this, &UiLevels::downloadError);
 
-    connect(&Controller::getInstance(), SIGNAL(controllerFileError(int)),
-            this, SLOT(fileError(int)));
-
-    // Loading done signal connections
-    connect(&Controller::getInstance(), SIGNAL(controllerLoadingDone()),
-            this, SLOT(updateLevelDone()));
+    connect(&Controller::getInstance(), &Controller::controllerFileError,
+            this, &UiLevels::fileError);
 
     // Loading done signal connections
-    connect(&Controller::getInstance(), SIGNAL(controllerRunningDone()),
-            this, SLOT(runningLevelDone()));
+    connect(&Controller::getInstance(), &Controller::controllerLoadingDone,
+            this, &UiLevels::updateLevelDone);
 
-    connect(this->info->infoBar->pushButtonBack, SIGNAL(clicked()),
-            this, SLOT(backClicked()));
+    // Loading done signal connections
+    connect(&Controller::getInstance(), &Controller::controllerRunningDone,
+            this, &UiLevels::runningLevelDone);
 
-    connect(this->info->infoBar->pushButtonWalkthrough,
-            SIGNAL(clicked()), this, SLOT(walkthroughClicked()));
+    // Buttons
+    connect(this->info->infoBar->pushButtonBack, &QPushButton::clicked,
+            this, &UiLevels::backClicked);
+
+    connect(this->info->infoBar->pushButtonWalkthrough, &QPushButton::clicked,
+            this, &UiLevels::walkthroughClicked);
 
     connect(this->select->stackedWidgetBar->navigateWidgetBar->pushButtonInfo,
-            SIGNAL(clicked()), this, SLOT(infoClicked()));
+            &QPushButton::clicked,
+            this, &UiLevels::infoClicked);
     
     connect(this->select->stackedWidgetBar->navigateWidgetBar->pushButtonRun,
-            SIGNAL(clicked()), this, SLOT(runClicked()));
+            &QPushButton::clicked, this, &UiLevels::runClicked);
 }
 
 void UiLevels::downloadError(int status) {
@@ -227,6 +228,7 @@ void UiLevels::backClicked() {
     this->info->infoBar->pushButtonWalkthrough->show();
     this->info->infoContent->infoWebEngineView->setHtml("");
     this->stackedWidget->setCurrentWidget(this->findChild<QWidget*>("select"));
+    this->select->levelViewList->setFocus();
 }
 
 void UiLevels::setStackedWidget(const QString &qwidget) {
@@ -553,11 +555,10 @@ void UiLevels::downloadClicked(qint64 id) {
              << id;
 
     // Set ui state for downloading
-    //
     select->downloadingState(false);
     select->stackedWidgetBar->progressWidgetBar->progressBar->setValue(0);
     select->setCurrentWidgetBar(StackedWidgetBar::Progress);
-
+    this->select->levelViewList->setFocus();
 }
 
 void UiLevels::setpushButtonRunText(const QString &text) {
@@ -609,6 +610,7 @@ void UiLevels::environmentVariablesHome(QString &path) {
 }
 
 void UiLevels::runClicked() {
+    this->select->levelViewList->setFocus();
     if (g_uistate.getRunText() == "Kill") {
         controller.killRunner();
         return;
@@ -704,6 +706,7 @@ void UiLevels::runClicked() {
 void UiLevels::runningLevelDone() {
     this->select->downloadingState(true);
     g_uistate.setRunText(g_uistate.getRunnerTypeText());
+    controller.clearRunner();
 }
 
 QStringList UiLevels::parsToArg(const QString& str) {

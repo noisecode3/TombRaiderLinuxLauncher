@@ -21,10 +21,10 @@ UiSetup::UiSetup(QWidget *parent)
     stackedWidget->setCurrentWidget(settings);
 
     GlobalControl* ssgbar = this->settings->frameGlobalSetup->globalControl;
-    connect(ssgbar->commandLinkButtonGSSave, SIGNAL(clicked()),
-            this, SLOT(globalSaveClicked()));
-    connect(ssgbar->commandLinkButtonGSReset, SIGNAL(clicked()),
-            this, SLOT(globalResetClicked()));
+    connect(ssgbar->commandLinkButtonGSSave, &QPushButton::clicked,
+            this, &UiSetup::globalSaveClicked);
+    connect(ssgbar->commandLinkButtonGSReset, &QPushButton::clicked,
+            this, &UiSetup::globalResetClicked);
 
 }
 

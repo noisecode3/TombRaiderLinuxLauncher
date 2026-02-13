@@ -32,7 +32,7 @@ From here you can:
 
 - [x] Run Level (enter)
 - [x] Setup Level (ctrl+u)
-- [ ] Setup Tab (alt+u)
+- [x] Setup Tab (alt+u)
 - [x] Filter Show/Hide (ctrl+f)
 - [x] Info (ctrl+i)
 - [x] Download (ctrl+d)
@@ -68,6 +68,7 @@ From here you can:
 
 ![Setup](doc/Setup.png)
 
+- [x] Level Tab (alt+l)
 - [ ] Save Level Options (ctrl+s)
 - [ ] Reset Level Options (ctrl+r)
 - [ ] Environment Variables (ctrl+e)

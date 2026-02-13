@@ -84,6 +84,7 @@ class Model : public QObject {
     const quint64 getType(qint64 id);
     const QString getWalkthrough(int id);
     void killRunner();
+    void clearRunner();
     void setup();
     void updateLevel(const int id);
     void syncLevels();

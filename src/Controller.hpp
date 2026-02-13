@@ -50,6 +50,7 @@ class Controller : public QObject {
     const QString getWalkthrough(int id);
     bool link(int id);
     int getItemState(int id);
+    void clearRunner();
 
  signals:
     void controllerGenerateList(const QList<int>& availableGames);

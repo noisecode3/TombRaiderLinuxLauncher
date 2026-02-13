@@ -136,7 +136,6 @@ FilterGroupBoxFilter::FilterGroupBoxFilter(QWidget *parent)
 
 void FilterGroupBoxFilter::showFilterSelectionMenu()
 {
-    QPoint globalPos = this->mapToGlobal(QPoint(42, 0));
     QMenu menu;
     // Add actions for each filter
     QAction *classAct = menu.addAction(tr("&Class"));
@@ -145,7 +144,7 @@ void FilterGroupBoxFilter::showFilterSelectionMenu()
     QAction *typeAct = menu.addAction(tr("&Type"));
 
     // Show the menu at the given position
-    QAction *chosen = menu.exec(globalPos);
+    QAction *chosen = menu.exec(this->mapToGlobal(QPoint(42, 0)));
     if (!chosen) return;
 
     // Focus the right combo box
@@ -163,7 +162,6 @@ void FilterGroupBoxFilter::showFilterSelectionMenu()
         comboBoxType->showPopup();
     }
 }
-
 
 FilterGroupBoxToggle::FilterGroupBoxToggle(QWidget *parent)
     : QGroupBox(parent),

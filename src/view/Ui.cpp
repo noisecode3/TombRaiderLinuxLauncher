@@ -19,35 +19,39 @@ Ui::Ui(QWidget *parent)
     tabs->addTab(levels, tr("Levels"));
     tabs->addTab(modding, tr("Modding"));
     tabs->setTabEnabled(tabs->indexOf(
-            tabs->findChild<QWidget*>("Modding")), false);
+        tabs->findChild<QWidget*>("Modding")), false);
     tabs->addTab(uicontroller, tr("Controller"));
     tabs->setTabEnabled(tabs->indexOf(
-            tabs->findChild<QWidget*>("Controller")), false);
+        tabs->findChild<QWidget*>("Controller")), false);
     tabs->addTab(setup, tr("Setup"));
     tabs->addTab(about, tr("About"));
     layout->addWidget(tabs);
 
 
-    // Button signal connections
-    // List tab
+    // Button bar signal connections
     NavigateWidgetBar* nbar = this->levels->select->stackedWidgetBar->navigateWidgetBar;
     InfoBar* ibar = this->levels->info->infoBar;
+
+    // Button signal connections
     SetupInput* sfbar = this->setup->firstTime->setupInput;
-    connect(nbar->pushButtonDownload, SIGNAL(clicked()),
-            this, SLOT(downloadOrRemoveClicked()));
-    connect(levels, SIGNAL(downloadOrRemoveClickedSignal()),
-            this, SLOT(downloadOrRemoveClicked()));
-
-    connect(sfbar->setOptions, SIGNAL(clicked()), this, SLOT(setOptionsClicked()));
-
     LevelControl* sslbar = setup->settings->frameLevelSetup->levelControl;
-    connect(sslbar->commandLinkButtonLSSave, SIGNAL(clicked()),
-            this, SLOT(levelSaveClicked()));
-    connect(sslbar->commandLinkButtonLSReset, SIGNAL(clicked()),
-            this, SLOT(levelResetClicked()));
 
-    connect(
-            this->levels->select->levelViewList->selectionModel(),
+    connect(nbar->pushButtonDownload, &QPushButton::clicked,
+            this, &Ui::downloadOrRemoveClicked);
+
+    connect(levels, &UiLevels::downloadOrRemoveClickedSignal,
+            this, &Ui::downloadOrRemoveClicked);
+
+    connect(sfbar->setOptions, &QPushButton::clicked,
+            this, &Ui::setOptionsClicked);
+
+    connect(sslbar->commandLinkButtonLSSave, &QPushButton::clicked,
+            this, &Ui::levelSaveClicked);
+
+    connect(sslbar->commandLinkButtonLSReset, &QPushButton::clicked,
+            this, &Ui::levelResetClicked);
+
+    connect(this->levels->select->levelViewList->selectionModel(),
             &QItemSelectionModel::currentChanged,
             this, &Ui::onCurrentItemChanged);
 
@@ -64,13 +68,22 @@ Ui::Ui(QWidget *parent)
     }
 }
 
+void Ui::connectShortCut(const QKeySequence& seq,
+                         std::function<void()> callback)
+{
+    QAction* action = new QAction(this);
+    action->setShortcut(seq);
+    action->setShortcutContext(Qt::WindowShortcut);
+
+    connect(action, &QAction::triggered, this, std::move(callback));
+
+    this->tabs->addAction(action);
+}
+
 void Ui::setShortCuts() {
     // Focus Search
-    QAction * focusSearchAction = new QAction(this);
-    focusSearchAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S));
-    focusSearchAction->setShortcutContext(Qt::WindowShortcut);
-    connect(focusSearchAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_S),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                     this->levels->select) {
@@ -83,14 +96,10 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(focusSearchAction);
 
     // Search Type
-    QAction * setSearchTypeAction = new QAction(this);
-    setSearchTypeAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_T));
-    setSearchTypeAction->setShortcutContext(Qt::WindowShortcut);
-    connect(setSearchTypeAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_T),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                     this->levels->select) {
@@ -106,31 +115,24 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(setSearchTypeAction);
 
     // Installed Only
-    QAction * setInstalledOnlyAction = new QAction(this);
-    setInstalledOnlyAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_N));
-    setInstalledOnlyAction->setShortcutContext(Qt::WindowShortcut);
-    connect(setInstalledOnlyAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_N),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                     this->levels->select) {
                 this->levels->select->filter->
                     filterSecondInputRow->filterGroupBoxToggle->
                         checkBoxInstalled->click();
+                this->levels->select->levelViewList->setFocus();
             }
         }
     });
-    tabs->addAction(setInstalledOnlyAction);
 
     // Focus Level List
-    QAction * focusListAction = new QAction(this);
-    focusListAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
-    focusListAction->setShortcutContext(Qt::WindowShortcut);
-    connect(focusListAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_L),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                     this->levels->select) {
@@ -139,46 +141,36 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(focusListAction);
 
     // Toggle Setup
-    QAction * toggleSetupAction = new QAction(this);
-    toggleSetupAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_U));
-    toggleSetupAction->setShortcutContext(Qt::WindowShortcut);
-    connect(toggleSetupAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_U),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->select) {
-                    this->levels->select->stackedWidgetBar->
-                        navigateWidgetBar->checkBoxSetup->click();
+                this->levels->select->stackedWidgetBar->
+                    navigateWidgetBar->checkBoxSetup->click();
+                this->levels->select->levelViewList->setFocus();
             }
         }
     });
-    tabs->addAction(toggleSetupAction);
 
     // Show/Hide Filter
-    QAction * toggleFilterAction = new QAction(this);
-    toggleFilterAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_F));
-    toggleFilterAction->setShortcutContext(Qt::WindowShortcut);
-    connect(toggleFilterAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_F),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->select) {
-                    this->levels->select->stackedWidgetBar->
-                        navigateWidgetBar->pushButtonFilter->click();
+                this->levels->select->stackedWidgetBar->
+                    navigateWidgetBar->pushButtonFilter->click();
+                this->levels->select->levelViewList->setFocus();
             }
         }
     });
-    tabs->addAction(toggleFilterAction);
 
     // Info
-    QAction * infoAction = new QAction(this);
-    infoAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_I));
-    infoAction->setShortcutContext(Qt::WindowShortcut);
-    connect(infoAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_I),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->select) {
@@ -187,14 +179,10 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(infoAction);
 
     // Go Back
-    QAction * backAction = new QAction(this);
-    backAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B));
-    backAction->setShortcutContext(Qt::WindowShortcut);
-    connect(backAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_B),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->info) {
@@ -202,14 +190,10 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(backAction);
 
     // Walkthrough
-    QAction * walkthroughAction = new QAction(this);
-    walkthroughAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_W));
-    walkthroughAction->setShortcutContext(Qt::WindowShortcut);
-    connect(walkthroughAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_W),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->info) {
@@ -217,14 +201,10 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(walkthroughAction);
 
     // Select Filter
-    QAction * selectFilterAction = new QAction(this);
-    selectFilterAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Y));
-    selectFilterAction->setShortcutContext(Qt::WindowShortcut);
-    connect(selectFilterAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_Y),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->select) {
@@ -237,14 +217,10 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(selectFilterAction);
 
     // Select Sort
-    QAction * selectSortAction = new QAction(this);
-    selectSortAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
-    selectSortAction->setShortcutContext(Qt::WindowShortcut);
-    connect(selectSortAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_R),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->select) {
@@ -257,14 +233,10 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(selectSortAction);
 
     // Download
-    QAction * downloadAction = new QAction(this);
-    downloadAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_D));
-    downloadAction->setShortcutContext(Qt::WindowShortcut);
-    connect(downloadAction, &QAction::triggered,
-            this, [this]() -> void {
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_D),
+        [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->select) {
@@ -273,8 +245,22 @@ void Ui::setShortCuts() {
             }
         }
     });
-    tabs->addAction(downloadAction);
 
+    // Level Tab
+    connectShortCut(QKeySequence(Qt::ALT | Qt::Key_L),
+        [this]() -> void {
+        if (this->tabs->currentWidget() != this->levels) {
+            this->tabs->setCurrentWidget(this->levels);
+        }
+    });
+
+    // Setup Tab
+    connectShortCut(QKeySequence(Qt::ALT | Qt::Key_U),
+        [this]() -> void {
+        if (this->tabs->currentWidget() != this->setup) {
+            this->tabs->setCurrentWidget(this->setup);
+        }
+    });
 }
 
 void Ui::onCurrentItemChanged(
@@ -354,3 +340,4 @@ void Ui::setOptionsClicked() {
     setup->readSavedSettings();
     controller.setup();
 }
+

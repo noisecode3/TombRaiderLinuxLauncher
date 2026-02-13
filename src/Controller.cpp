@@ -173,3 +173,7 @@ bool Controller::link(int id) {
 int Controller::getItemState(int id) {
     return model.getItemState(id);
 }
+
+void Controller::clearRunner() {
+    return model.clearRunner();
+}

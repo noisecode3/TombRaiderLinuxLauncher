@@ -439,3 +439,8 @@ const QString Model::getWalkthrough(int id) {
 void Model::killRunner() {
     m_runner.stop();
 }
+
+void Model::clearRunner() {
+    m_runner.clear();
+}
+

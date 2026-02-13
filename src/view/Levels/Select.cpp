@@ -152,6 +152,12 @@ Select::Select(QWidget *parent)
             run->click();
         }
     });
+
+    connect(filterGroupBoxSearch->lineEditSearch, &QLineEdit::returnPressed,
+        this, [this]() {
+        levelViewList->setFocus();
+    });
+
 }
 
 void Select::setLevels(
