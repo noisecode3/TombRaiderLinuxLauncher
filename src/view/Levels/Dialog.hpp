@@ -34,7 +34,6 @@ class Dialog : public QWidget {
     QString selectedOption() const;
 
  signals:
-    void okClicked();
     void setLevelsState(QString qwidget);
     void cancelClicked();
 

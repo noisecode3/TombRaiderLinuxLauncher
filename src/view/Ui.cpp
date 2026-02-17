@@ -1,6 +1,7 @@
 #include "view/Ui.hpp"
 #include "view/Levels/Select/Filter.hpp"
 #include <qcombobox.h>
+#include <qnamespace.h>
 
 Ui::Ui(QWidget *parent)
     : QWidget(parent),
@@ -95,6 +96,11 @@ void Ui::setShortCuts() {
                 filterGroupBoxSearch->lineEditSearch->setFocus();
             }
         }
+        // Setup save
+        if (this->tabs->currentWidget() == this->setup) {
+            this->setup->settings->frameLevelSetup->
+                levelControl->commandLinkButtonLSSave->click();
+        }
     });
 
     // Search Type
@@ -172,15 +178,21 @@ void Ui::setShortCuts() {
     connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_I),
         [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
+            // Activate info
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->select) {
                 this->levels->select->stackedWidgetBar->
                     navigateWidgetBar->pushButtonInfo->click();
             }
+            // Info text focus
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->info) {
+                this->levels->info->infoContent->infoWebEngineView->setFocus();
+            }
         }
     });
 
-    // Go Back
+    // Info/Walkthrough Go Back
     connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_B),
         [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
@@ -191,13 +203,25 @@ void Ui::setShortCuts() {
         }
     });
 
-    // Walkthrough
+    // Info Go to Walkthrough
     connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_W),
         [this]() -> void {
         if (this->tabs->currentWidget() == this->levels) {
             if (this->levels->stackedWidget->currentWidget() ==
                         this->levels->info) {
                 this->levels->info->infoBar->pushButtonWalkthrough->click();
+            }
+        }
+    });
+
+
+    // Info coverList focus
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_C),
+        [this]() -> void {
+        if (this->tabs->currentWidget() == this->levels) {
+            if (this->levels->stackedWidget->currentWidget() ==
+                        this->levels->info) {
+                this->levels->info->infoContent->coverListWidget->setFocus();
             }
         }
     });
@@ -232,6 +256,12 @@ void Ui::setShortCuts() {
                     filterGroupBoxSort->focusSelected();
             }
         }
+
+        // Setup reset
+        if (this->tabs->currentWidget() == this->setup) {
+            this->setup->settings->frameLevelSetup->
+                levelControl->commandLinkButtonLSReset->click();
+        }
     });
 
     // Download
@@ -251,6 +281,7 @@ void Ui::setShortCuts() {
         [this]() -> void {
         if (this->tabs->currentWidget() != this->levels) {
             this->tabs->setCurrentWidget(this->levels);
+            this->levels->select->levelViewList->setFocus();
         }
     });
 
@@ -259,6 +290,19 @@ void Ui::setShortCuts() {
         [this]() -> void {
         if (this->tabs->currentWidget() != this->setup) {
             this->tabs->setCurrentWidget(this->setup);
+            this->setup->settings->frameLevelSetup->
+                frameLevelSetupSettings->widgetEnvironmentVariables->
+                    lineEditEnvironmentVariables->setFocus();
+        }
+    });
+
+    // Setup environment
+    connectShortCut(QKeySequence(Qt::CTRL | Qt::Key_E),
+        [this]() -> void {
+        if (this->tabs->currentWidget() == this->setup) {
+            this->setup->settings->frameLevelSetup->
+                frameLevelSetupSettings->widgetEnvironmentVariables->
+                    lineEditEnvironmentVariables->setFocus();
         }
     });
 }

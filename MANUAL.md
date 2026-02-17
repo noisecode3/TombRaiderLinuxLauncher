@@ -53,8 +53,8 @@ From here you can:
 
 ![Info](doc/Info.png)
 
-- [ ] Focus Info content (ctrl+i)
-- [ ] Focus Cover List (ctrl+c)
+- [x] Focus Info content (ctrl+i)
+- [x] Focus Cover List (ctrl+c)
 - [x] Go to Walkthrough (ctrl+w)
 - [x] Go Back to Level List (ctrl+b)
 
@@ -69,9 +69,9 @@ From here you can:
 ![Setup](doc/Setup.png)
 
 - [x] Level Tab (alt+l)
-- [ ] Save Level Options (ctrl+s)
-- [ ] Reset Level Options (ctrl+r)
-- [ ] Environment Variables (ctrl+e)
+- [x] Save Level Options (ctrl+s)
+- [x] Reset Level Options (ctrl+r)
+- [x] Environment Variables (ctrl+e)
 
 ## Some open source modes that work well with Proton/Wine
 

@@ -71,6 +71,11 @@ Dialog::Dialog(QWidget *parent)
         qDebug() << "OK clicked, selected:" << selected;
         emit setLevelsState(selected);
     });
+
+    connect(m_cancelButton, &QPushButton::clicked, this, [this]() {
+        qDebug() << "Cancel clicked";
+        emit cancelClicked();
+    });
 }
 
 void Dialog::setMessage(const QString &text) {

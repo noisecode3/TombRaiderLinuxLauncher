@@ -43,10 +43,6 @@ UiLevels::UiLevels(QWidget *parent)
 
     stackedWidget->addWidget(select);
 
-    connect(dialog, &Dialog::cancelClicked, this, [this]() {
-        this->setStackedWidget("select");
-    });
-
     Filter* filter_p = select->filter;
     filter_p->setVisible(false);
 
@@ -96,15 +92,18 @@ UiLevels::UiLevels(QWidget *parent)
         } else {
             pushButtonFilter->setIcon(arrowDownIcon);
         }
-        pushButtonFilter->setIconSize(QSize(16, 16));
         this->select->levelViewList->setFocus();
     });
 
     pushButtonFilter->setIcon(arrowDownIcon);
-    pushButtonFilter->setIconSize(QSize(16, 16));
 
     connect(dialog, &Dialog::setLevelsState,
         this, &UiLevels::callbackDialog);
+
+    connect(dialog, &Dialog::cancelClicked,
+            this, [this](){
+        this->setStackedWidget("select");
+    });
 
     // Arrive with next batch of level icons
     connect(&Controller::getInstance(), &Controller::controllerReloadLevelList,
@@ -143,7 +142,7 @@ UiLevels::UiLevels(QWidget *parent)
     connect(this->select->stackedWidgetBar->navigateWidgetBar->pushButtonInfo,
             &QPushButton::clicked,
             this, &UiLevels::infoClicked);
-    
+
     connect(this->select->stackedWidgetBar->navigateWidgetBar->pushButtonRun,
             &QPushButton::clicked, this, &UiLevels::runClicked);
 }
@@ -558,7 +557,6 @@ void UiLevels::downloadClicked(qint64 id) {
     select->downloadingState(false);
     select->stackedWidgetBar->progressWidgetBar->progressBar->setValue(0);
     select->setCurrentWidgetBar(StackedWidgetBar::Progress);
-    this->select->levelViewList->setFocus();
 }
 
 void UiLevels::setpushButtonRunText(const QString &text) {
@@ -598,6 +596,7 @@ void UiLevels::workTick() {
         select->setCurrentWidgetBar(StackedWidgetBar::Navigate);
         select->downloadingState(true);
         levelDirSelected(id);
+        this->select->levelViewList->setFocus();
     }
 }
 
