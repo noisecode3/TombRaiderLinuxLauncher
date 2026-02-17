@@ -126,24 +126,27 @@ InfoData Data::getInfo(const int id) {
         "SELECT Level.body, Picture.data "
         "FROM Level "
         "JOIN Info ON Level.infoID = Info.InfoID "
-        "JOIN Screens ON Level.LevelID = Screens.levelID "
-        "JOIN Picture ON Screens.pictureID = Picture.PictureID "
-        "WHERE Info.trleID = :id AND Screens.position > 0 "
+        "LEFT JOIN Screens "
+        "    ON Level.LevelID = Screens.levelID "
+        "    AND Screens.position > 0 "
+        "LEFT JOIN Picture "
+        "    ON Screens.pictureID = Picture.PictureID "
+        "WHERE Info.trleID = :id "
         "ORDER BY Screens.position ASC");
     query.bindValue(":id", id);
 
     if (status) {
-        if (query.exec() == true) {
-            if (query.next() == true) {
-                QVector<QByteArray> imageList;
-                QString body = query.value("body").toString();
-                imageList.push_back(query.value("Picture.data").toByteArray());
-                while (query.next() == true) {
-                    imageList.push_back(
-                        query.value("Picture.data").toByteArray());
-                }
-                result = InfoData(body, imageList);
-            }
+        if ((query.exec() == true) && (query.next() == true)) {
+            QVector<QByteArray> imageList;
+            QString body = query.value("body").toString();
+
+            do {
+                QVariant picVar = query.value("data");
+                if (!picVar.isNull())
+                    imageList.push_back(picVar.toByteArray());
+            } while (query.next());
+
+            result = InfoData(body, imageList);
         } else {
             qDebug() << "Error executing query:" << query.lastError().text();
         }
