@@ -15,25 +15,21 @@
 #include <QMetaObject>
 
 Controller::Controller() {
-    threadDatabase.reset(new QThread());
+    threadCovers.reset(new QThread());
     threadFile.reset(new QThread());
     threadScrape.reset(new QThread());
-    threadRun.reset(new QThread());
 
-    workerDatabase.reset(new QObject());
+    workerCovers.reset(new QObject());
     workerFile.reset(new QObject());
     workerScrape.reset(new QObject());
-    workerRun.reset(new QObject());
 
-    workerDatabase->moveToThread(threadDatabase.data());
+    workerCovers->moveToThread(threadCovers.data());
     workerFile->moveToThread(threadFile.data());
     workerScrape->moveToThread(threadScrape.data());
-    workerRun->moveToThread(threadRun.data());
 
-    threadDatabase->start();
+    threadCovers->start();
     threadFile->start();
     threadScrape->start();
-    threadRun->start();
 
     connect(&model, &Model::modelTickSignal,
             this,   &Controller::controllerTickSignal,
@@ -73,19 +69,17 @@ Controller::Controller() {
 }
 
 Controller::~Controller() {
-    threadDatabase->quit();
+    threadCovers->quit();
     threadFile->quit();
     threadScrape->quit();
-    threadRun->quit();
 
-    threadDatabase->wait();
+    threadCovers->wait();
     threadFile->wait();
     threadScrape->wait();
-    threadRun->wait();
 }
 
-void Controller::runOnThreadDatabase(std::function<void()> func) {
-    QMetaObject::invokeMethod(workerDatabase.data(),
+void Controller::runOnThreadCovers(std::function<void()> func) {
+    QMetaObject::invokeMethod(workerCovers.data(),
             [func]() { func(); }, Qt::QueuedConnection);
 }
 
@@ -99,10 +93,6 @@ void Controller::runOnThreadScrape(std::function<void()> func) {
             [func]() { func(); }, Qt::QueuedConnection);
 }
 
-void Controller::runOnThreadRun(std::function<void()> func) {
-    QMetaObject::invokeMethod(workerRun.data(),
-            [func]() { func(); }, Qt::QueuedConnection);
-}
 
 // Threaded work
 void Controller::setup() {
@@ -126,7 +116,7 @@ void Controller::syncLevels() {
 }
 
 void Controller::getCoverList(QVector<QSharedPointer<ListItemData>> items) {
-    runOnThreadDatabase([=]() { model.getCoverList(items); });
+    runOnThreadCovers([=]() { model.getCoverList(items); });
 }
 
 // UI/main thread work

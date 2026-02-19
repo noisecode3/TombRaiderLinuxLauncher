@@ -14,6 +14,7 @@
 #include "../src/Data.hpp"
 
 qint64 Data::getListRowCount() {
+    QSqlDatabase db = getThreadDatabase();
     QSqlQuery query(db);
     qint64 result = 0;
 
@@ -37,8 +38,9 @@ qint64 Data::getListRowCount() {
 }
 
 QVector<QSharedPointer<ListItemData>> Data::getListItems() {
-    bool status = true;
+    QSqlDatabase db = getThreadDatabase();
     QSqlQuery query(db);
+    bool status = true;
     QVector<QSharedPointer<ListItemData>> items;
 
     status = query.prepare(
@@ -85,6 +87,7 @@ QVector<QSharedPointer<ListItemData>> Data::getListItems() {
 }
 
 void Data::getCoverPictures(QVector<QSharedPointer<ListItemData>> items) {
+    QSqlDatabase db = getThreadDatabase();
     QSqlQuery query(db);
 
     bool status = query.prepare(
@@ -118,6 +121,7 @@ void Data::getCoverPictures(QVector<QSharedPointer<ListItemData>> items) {
 }
 
 InfoData Data::getInfo(const int id) {
+    QSqlDatabase db = getThreadDatabase();
     QSqlQuery query(db);
     bool status = false;
     InfoData result;
@@ -155,6 +159,7 @@ InfoData Data::getInfo(const int id) {
 }
 
 QString Data::getWalkthrough(const int id) {
+    QSqlDatabase db = getThreadDatabase();
     QSqlQuery query(db);
     bool status = false;
     QString result = "";
@@ -181,6 +186,7 @@ QString Data::getWalkthrough(const int id) {
 }
 
 int Data::getType(const int id) {
+    QSqlDatabase db = getThreadDatabase();
     QSqlQuery query(db);
     bool status = false;
     int result = 0;
@@ -206,6 +212,7 @@ int Data::getType(const int id) {
 }
 
 ZipData Data::getDownload(const int id) {
+    QSqlDatabase db = getThreadDatabase();
     QSqlQuery query(db);
     bool status = false;
     ZipData result;
@@ -241,6 +248,7 @@ ZipData Data::getDownload(const int id) {
 }
 
 void Data::setDownloadMd5(const int id, const QString& newMd5sum) {
+    QSqlDatabase db = getThreadDatabase();
     bool status = false;
     QSqlQuery query(db);
 
@@ -269,6 +277,7 @@ void Data::setDownloadMd5(const int id, const QString& newMd5sum) {
 }
 
 QVector<FileListItem> Data::getFileList(const int id) {
+    QSqlDatabase db = getThreadDatabase();
     QSqlQuery query(db);
     QVector<FileListItem> list;
 

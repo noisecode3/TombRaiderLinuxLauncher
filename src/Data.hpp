@@ -24,6 +24,8 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QThread>
+#include <QMutex>
 
 #include "../src/assert.hpp"
 #include "Path.hpp"
@@ -447,34 +449,18 @@ class Data : public QObject {
      */
     bool initializeDatabase() {
         bool status = false;
-        Path path = Path(Path::resource);
-        path << "tombll.db";
+        m_path = Path(Path::resource);
+        m_path << "tombll.db";
 
-        // Open the file
-        if (!path.exists() || !path.isFile()) {
+        if (!m_path.exists() || !m_path.isFile()) {
             qCritical()
-                << "Error: The database path is not a regular file: " << path.get();
+                << "Error: The database path is not a regular file: "
+                << m_path.get();
             status = false;
         } else {
-            db = QSqlDatabase::addDatabase("QSQLITE");
-            db.setDatabaseName(path.get());
-            if (db.open() == true) {  // flawfinder: ignore
-                status = true;
-            } else {
-                qDebug() << "Error opening database:" << db.lastError().text();
-                status = false;
-            }
+            status = true;
         }
         return status;
-    }
-
-    /**
-     * @brief Close the connection to the main database.
-     *
-     * Dont need to be called before the application exit.
-     */
-    void releaseDatabase() {
-        db.close();
     }
 
     /**
@@ -539,11 +525,32 @@ class Data : public QObject {
 
  private:
     Data() {}
-    ~Data() {
-        db.close();
+    ~Data() {}
+
+    QSqlDatabase& getThreadDatabase() {
+        static QMutex mutex;
+        const quintptr tid = (quintptr)QThread::currentThreadId();
+
+        QMutexLocker locker(&mutex);
+
+        if (!m_connectionTable.contains(tid)) {
+            const QString name = QString("conn_%1").arg(tid);
+            QSqlDatabase db;
+            if (QSqlDatabase::contains(name)) {
+                db = QSqlDatabase::database(name);
+            } else {
+                db = QSqlDatabase::addDatabase("QSQLITE", name);
+                db.setDatabaseName(m_path.get());
+                db.open();
+            }
+            m_connectionTable.insert(tid, db);
+        }
+
+        return m_connectionTable[tid];
     }
 
-    QSqlDatabase db;
+    Path m_path = Path(Path::resource);
+    QHash<quintptr, QSqlDatabase> m_connectionTable;
     Q_DISABLE_COPY(Data)
 };
 
