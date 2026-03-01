@@ -1,21 +1,30 @@
-"""PS4 controller input handler to map controller events to keyboard keys using evdev and UInput."""
+"""
+Controller input handler to map controller events to keyboard keys using evdev and UInput.
+
+Game context-aware joystick input, Input Mapping Contexts (IMC)
+
+Make movement flowing and safer from mistakes, while staying modern and adaptable.
+From the dead zone, use no overlapping between movement states.
+When running or stepping back, use normal 8-way overlapping.
+When running, Lara shouldn’t step back unless the stick is pulled fully downward within a
+narrow angle (fully rotated). To jump forward-right, the player must press jump + pull forward +
+pull right(we ship overlapping) — so it cannot be mixed up with a right-side jump.
+To stop, the player must return to dead zone, always. From standing still Lara can now do a
+full rotation move — it cannot be mixed up with a running forward-right input. With Look key
+activated, controls revert to classic 8-way equal-angle overlapping (traditional tank-style grid).
+
+If the user want we can also fall back to classic 8-way analog stick.
+
+The rest is just simple analog trigger event on/off mappings.
+
+"""
 import sys
 import argparse
+import math
 import evdev
 from evdev import InputDevice, UInput, ecodes as e
 
-"""
-Make movement flowing and safer from mistakes, while staying modern and adaptable.
-From the dead zone, use no overlapping between movement states.
-When running or stepping back, use extreme overlapping locked in Y, but flippable within a narrow angle.
-When running, Lara shouldn’t step back unless the stick is pulled fully downward within a narrow angle.
-To jump forward-right, the player must press jump + pull forward + pull right — it cannot be mixed up with a right-side jump.
-To stop, the player must return to dead zone + pull right — it cannot be mixed up with a running forward-right input.
-With Look key activated, controls revert to classic 8-way equal-angle overlapping (traditional tank-style grid).
-Consider using time.perf_counter() for cooldown checks or pulse-style transition turns, if it doesn’t cause Lara to stutter.
-This design may not be final, and adjustments will be made as needed to improve left stick feel and responsiveness.
-"""
-
+# We test with PS4 for now but we will support all controllers.
 CONTROLLER_NAMES = (
     "Wireless Controller",
     "Sony Interactive Entertainment Wireless Controller"
@@ -28,6 +37,7 @@ class DeviceManager:
     def __init__(self):
         """Initialize UInput device and internal state."""
         self.device = None
+        self.capabilities = None
         self.ui = UInput()
 
     def get_ui(self):
@@ -126,96 +136,161 @@ class Dpad:
             self.handle_y(event.value)
 
 
-class StickAxis:  # pylint: disable=too-few-public-methods
-    """Handles one analog stick axis."""
+class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-instance-attributes
+    """Handle analog stick input."""
 
-    def __init__(self, ui, threshold, output_key):
+    def __init__(self, ui, device):
         """
-        Initialize analog Stick handler.
-
-        Args:
-            ui: The uinput device.
-            threshold: Tuple of (low_threshold, high_threshold).
-            output_key: Tuple of (negative_key, positive_key), e.g. (KEY_LEFT, KEY_RIGHT).
-        """
-        self.ui = ui
-        self.last_state = 0
-        self.threshold = threshold
-        self.threshold_comp = 0
-        self.output_key = output_key
-
-    def handle(self, value):
-        """Handle axis values."""
-        tr1, tr2 = self.threshold
-        tr1 += self.threshold_comp
-        tr2 -= self.threshold_comp
-        neg_key, pos_key = self.output_key
-
-        if value < tr1:
-            if self.last_state == -1:
-                return
-            if self.threshold_comp == 0:
-                if self.last_state == 1:
-                    self.ui.write(e.EV_KEY, pos_key, 0)
-                self.ui.write(e.EV_KEY, neg_key, 1)
-                self.last_state = -1
-                self.ui.syn()
-
-        elif value > tr2:
-            if self.last_state == 1:
-                return
-            if self.threshold_comp == 0:
-                if self.last_state == -1:
-                    self.ui.write(e.EV_KEY, neg_key, 0)
-                self.ui.write(e.EV_KEY, pos_key, 1)
-                self.last_state = 1
-                self.ui.syn()
-
-        else:
-            if self.last_state == -1:
-                self.ui.write(e.EV_KEY, neg_key, 0)
-                self.last_state = 0
-                self.threshold_comp = 0
-                self.ui.syn()
-            elif self.last_state == 1:
-                self.ui.write(e.EV_KEY, pos_key, 0)
-                self.last_state = 0
-                self.threshold_comp = 0
-                self.ui.syn()
-
-
-class Stick:  # pylint: disable=too-few-public-methods
-    """Handles analog stick input."""
-
-    def __init__(self, ui):
-        """
-        Initialize analog Stick handler.
+        Initialize left joystick handler.
 
         Args:
             ui: The uinput device.
         """
         self.ui = ui
-        self.event_x = e.ABS_X
-        self.event_y = e.ABS_Y
 
-        self.x_axis = StickAxis(
-            ui,
-            threshold=(53, 202),
-            output_key=(e.KEY_LEFT, e.KEY_RIGHT)
-        )
-        self.y_axis = StickAxis(
-            ui, threshold=(63, 192),
-            output_key=(e.KEY_UP, e.KEY_DOWN)
-        )
+        # Read real hardware ranges
+        abs_x = device.absinfo(e.ABS_X)
+        abs_y = device.absinfo(e.ABS_Y)
+
+        self.center_y = (abs_y.min + abs_y.max) / 2.0
+        self.half_range_y = (abs_y.max - abs_y.min) / 2.0
+
+        self.center_x = (abs_x.min + abs_x.max) / 2.0
+        self.half_range_x = (abs_x.max - abs_x.min) / 2.0
+
+        self.threshold = 0.85   # activation threshold
+        self.hysteresis = 0.05  # prevents flicker
+
+        self.current_x = 0.0
+        self.current_y = 0.0
+
+        self.state = {
+            "deadzone": False,
+            "up": False,
+            "right": False,
+            "left": False,
+            "down": False,
+        }
+
+    def normalize_x(self, value):
+        """Map any axis range to -1 .. 1."""
+        return (value - self.center_x) / self.half_range_x
+
+    def normalize_y(self, value):
+        """Map any axis range to -1 .. 1."""
+        return -(value - self.center_y) / self.half_range_y
 
     def handle_event(self, event):
         """Handle the events."""
-        if event.code == self.event_x:
-            self.x_axis.handle(event.value)
-            if self.y_axis.last_state != 0:
-                self.y_axis.threshold_comp = abs(event.value-127)
-        elif event.code == self.event_y:
-            self.y_axis.handle(event.value)
+        if event.code == e.ABS_X:
+            self.current_x = self.normalize_x(event.value)
+
+        elif event.code == e.ABS_Y:
+            self.current_y = self.normalize_y(event.value)
+
+        self.process()
+
+    def process(self):
+        """Generate lengt from middle and if over threashold also angle."""
+        radius = math.hypot(self.current_x, self.current_y)
+
+        # Apply hysteresis to prevent threshold flicker
+        if radius > self.threshold:
+            angle = math.degrees(math.atan2(self.current_y, self.current_x))
+            self.handle_state(True, angle)
+
+        else:
+            if radius < (self.threshold - self.hysteresis):
+                self.handle_state(False, 0)
+
+    def handle_state(self, active, angle):  # pylint: disable=too-many-statements too-many-branches
+        """Handle the states for the arrow keys."""
+        if not active:
+            if not self.state["deadzone"]:
+                self.state["deadzone"] = True
+                if self.state["up"]:
+                    self.state["up"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_UP, 0)
+                if self.state["right"]:
+                    self.state["right"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+                if self.state["left"]:
+                    self.state["left"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+                if self.state["down"]:
+                    self.state["down"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
+                self.ui.syn()
+            return
+
+        #       (Up)
+        #        90°
+        # 135°           45°
+        #   \           /
+        # 180°         0° (Right)
+        #   /           \
+        # -135°        -45°
+        #       -90°
+        #      (Down)
+
+        sector_point_right_up = 45
+        sector_point_left_up = 135
+        sector_point_right_down = -45
+        sector_point_left_down = -135
+        # print(f"angle={angle}")
+        self.state["deadzone"] = False
+
+        # Up
+        if sector_point_right_up < angle < sector_point_left_up:
+            if not self.state["up"]:
+                self.state["up"] = True
+                if self.state["right"]:
+                    self.state["right"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+                if self.state["left"]:
+                    self.state["left"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+                if self.state["down"]:
+                    self.state["down"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
+                self.ui.write(e.EV_KEY, e.KEY_UP, 1)
+                self.ui.syn()
+
+        # Right
+        elif sector_point_right_down < angle < sector_point_right_up:
+            if not self.state["right"]:
+                self.state["right"] = True
+                if self.state["left"]:
+                    self.state["left"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 1)
+                self.ui.syn()
+
+        # Left
+        elif (-180 < angle < sector_point_left_down) or (180 > angle > sector_point_left_up):
+            if not self.state["left"]:
+                self.state["left"] = True
+                if self.state["right"]:
+                    self.state["right"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+                self.ui.write(e.EV_KEY, e.KEY_LEFT, 1)
+                self.ui.syn()
+
+        # Down
+        elif sector_point_left_down < angle < sector_point_right_down:
+            if not self.state["down"]:
+                self.state["down"] = True
+                if self.state["right"]:
+                    self.state["right"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+                if self.state["left"]:
+                    self.state["left"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+                if self.state["up"]:
+                    self.state["up"] = False
+                    self.ui.write(e.EV_KEY, e.KEY_UP, 0)
+                self.ui.write(e.EV_KEY, e.KEY_DOWN, 1)
+                self.ui.syn()
 
 
 class Trigger:  # pylint: disable=too-few-public-methods
@@ -284,7 +359,7 @@ class Key:  # pylint: disable=too-few-public-methods
 class Controller:
     """Manages input mappings for a game controller."""
 
-    def __init__(self, ui):
+    def __init__(self, ui, device):
         """
         Initialize the Controller with input handlers.
 
@@ -294,6 +369,7 @@ class Controller:
         self.abs_handlers = []
         self.key_handlers = []
         self.ui = ui
+        self.device = device
 
     def add_dpad(self):
         """Add D-pad handler."""
@@ -301,7 +377,7 @@ class Controller:
 
     def add_stick(self):
         """Add analog stick handler."""
-        self.abs_handlers.append(Stick(self.ui))
+        self.abs_handlers.append(StickIMC(self.ui, self.device))
 
     def add_trigger(self, event, keyout):
         """
@@ -349,7 +425,7 @@ class Preset:
         self.manager = DeviceManager()
         self.device = self.manager.set_device()
         self.ui = self.manager.get_ui()
-        self.controller = Controller(self.ui)
+        self.controller = Controller(self.ui, self.device)
 
     def get_controller(self):
         """

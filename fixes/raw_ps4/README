@@ -1,9 +1,7 @@
-Developed for but can work with others, it should but there is no garantee
-Playstation DualShock4 controller hw_version=0x0000b418 fw_version=0x0000a00b
-
-I could not get Dpad to work with this API but the Sticks works.
-I use the Dpad only around edges but can play without it.
 This is just a way to take the kernel RAW when everything else is not working
+
+It support PS4, the plan is to support everything. Customizing input and output
+and work with all controllers.
 
 The quick way:
 sudo modprobe uinput
@@ -50,5 +48,3 @@ It should look like:
 crw-rw---- 1 root input 10, 223 Feb  1 4:20 /dev/uinput
 
 If it still says crw-------, reboot.
-
-Now your Python script should be able to read/write to /dev/uinput without sudo! 🚀
