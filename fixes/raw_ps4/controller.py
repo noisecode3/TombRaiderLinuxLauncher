@@ -139,12 +139,22 @@ class Dpad:
 class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-instance-attributes
     """Handle analog stick input."""
 
-    def __init__(self, ui, device):
+    def __init__(self, ui, device, classic_overlap=False):
         """
         Initialize left joystick handler.
 
         Args:
             ui: The uinput device.
+
+                (Up)
+                 90°
+           135°       45°
+
+         180°            0° (Right)
+
+          -135°     -45°
+               -90°
+              (Down)
         """
         self.ui = ui
 
@@ -158,11 +168,13 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
         self.center_x = (abs_x.min + abs_x.max) / 2.0
         self.half_range_x = (abs_x.max - abs_x.min) / 2.0
 
-        self.threshold = 0.85   # activation threshold
+        self.threshold = 0.9    # activation threshold
         self.hysteresis = 0.05  # prevents flicker
 
         self.current_x = 0.0
         self.current_y = 0.0
+
+        self.classic_overlap = classic_overlap
 
         self.state = {
             "deadzone": False,
@@ -170,7 +182,12 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
             "right": False,
             "left": False,
             "down": False,
+            "look": [False],
         }
+
+    def set_look(self, look):
+        """Set reference to lool state."""
+        self.state["look"] = look
 
     def normalize_x(self, value):
         """Map any axis range to -1 .. 1."""
@@ -197,47 +214,46 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
         # Apply hysteresis to prevent threshold flicker
         if radius > self.threshold:
             angle = math.degrees(math.atan2(self.current_y, self.current_x))
-            self.handle_state(True, angle)
+            if self.classic_overlap or self.state["look"][0]:
+                self.handle_state_classic(True, angle)
+            else:
+                self.handle_state(True, angle)
 
         else:
             if radius < (self.threshold - self.hysteresis):
-                self.handle_state(False, 0)
+                if self.classic_overlap or self.state["look"][0]:
+                    self.handle_state_classic(False, 0)
+                else:
+                    self.handle_state(False, 0)
+
+    def set_deadzone(self):
+        """Deactivate all arrow keys."""
+        if not self.state["deadzone"]:
+            self.state["deadzone"] = True
+            if self.state["up"]:
+                self.state["up"] = False
+                self.ui.write(e.EV_KEY, e.KEY_UP, 0)
+            if self.state["right"]:
+                self.state["right"] = False
+                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+            if self.state["left"]:
+                self.state["left"] = False
+                self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+            if self.state["down"]:
+                self.state["down"] = False
+                self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
+            self.ui.syn()
 
     def handle_state(self, active, angle):  # pylint: disable=too-many-statements too-many-branches
         """Handle the states for the arrow keys."""
         if not active:
-            if not self.state["deadzone"]:
-                self.state["deadzone"] = True
-                if self.state["up"]:
-                    self.state["up"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_UP, 0)
-                if self.state["right"]:
-                    self.state["right"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-                if self.state["left"]:
-                    self.state["left"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-                if self.state["down"]:
-                    self.state["down"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
-                self.ui.syn()
+            self.set_deadzone()
             return
-
-        #       (Up)
-        #        90°
-        # 135°           45°
-        #   \           /
-        # 180°         0° (Right)
-        #   /           \
-        # -135°        -45°
-        #       -90°
-        #      (Down)
 
         sector_point_right_up = 45
         sector_point_left_up = 135
         sector_point_right_down = -45
         sector_point_left_down = -135
-        # print(f"angle={angle}")
         self.state["deadzone"] = False
 
         # Up
@@ -267,7 +283,8 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
                 self.ui.syn()
 
         # Left
-        elif (-180 < angle < sector_point_left_down) or (180 > angle > sector_point_left_up):
+        elif (-180 < angle < sector_point_left_down) or \
+                (180 > angle > sector_point_left_up):
             if not self.state["left"]:
                 self.state["left"] = True
                 if self.state["right"]:
@@ -290,6 +307,67 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
                     self.state["up"] = False
                     self.ui.write(e.EV_KEY, e.KEY_UP, 0)
                 self.ui.write(e.EV_KEY, e.KEY_DOWN, 1)
+                self.ui.syn()
+
+    def handle_state_classic(self, active, angle):  # pylint: disable=too-many-statements too-many-branches
+        """Handle the states for the arrow keys."""
+        if not active:
+            self.set_deadzone()
+            return
+
+        size_up = 135
+        size_right = 135
+        size_left = 135
+        size_down = 135
+        print(f"angle={angle}")
+        self.state["deadzone"] = False
+
+        # Up
+        if 90-size_up/2 < angle < 90+size_up/2:
+            if not self.state["up"]:
+                self.state["up"] = True
+                self.ui.write(e.EV_KEY, e.KEY_UP, 1)
+                self.ui.syn()
+        else:
+            if self.state["up"]:
+                self.state["up"] = False
+                self.ui.write(e.EV_KEY, e.KEY_UP, 0)
+                self.ui.syn()
+
+        # Right
+        if -size_right/2 < angle < size_right/2:
+            if not self.state["right"]:
+                self.state["right"] = True
+                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 1)
+                self.ui.syn()
+        else:
+            if self.state["right"]:
+                self.state["right"] = False
+                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+                self.ui.syn()
+
+        # Left
+        if angle < -180+size_left/2 or angle > 180-size_left/2:
+            if not self.state["left"]:
+                self.state["left"] = True
+                self.ui.write(e.EV_KEY, e.KEY_LEFT, 1)
+                self.ui.syn()
+        else:
+            if self.state["left"]:
+                self.state["left"] = False
+                self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+                self.ui.syn()
+
+        # Down
+        if -90-size_down/2 < angle < -90+size_down/2:
+            if not self.state["down"]:
+                self.state["down"] = True
+                self.ui.write(e.EV_KEY, e.KEY_DOWN, 1)
+                self.ui.syn()
+        else:
+            if self.state["down"]:
+                self.state["down"] = False
+                self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
                 self.ui.syn()
 
 
@@ -343,6 +421,11 @@ class Key:  # pylint: disable=too-few-public-methods
         self.ui = ui
         self.button_code = button_code
         self.keyout = keyout
+        self.look = None
+
+    def set_look(self, look):
+        """Set reference to lool state."""
+        self.look = look
 
     def handle_event(self, event):
         """
@@ -352,6 +435,12 @@ class Key:  # pylint: disable=too-few-public-methods
             event: An evdev input event.
         """
         if event.code == self.button_code:
+            if self.look is not None:
+                if event.value == 1:
+                    self.look[0] = True
+                else:
+                    self.look[0] = False
+
             self.ui.write(e.EV_KEY, self.keyout, event.value)
             self.ui.syn()
 
@@ -370,6 +459,7 @@ class Controller:
         self.key_handlers = []
         self.ui = ui
         self.device = device
+        self.look = [False]
 
     def add_dpad(self):
         """Add D-pad handler."""
@@ -377,7 +467,9 @@ class Controller:
 
     def add_stick(self):
         """Add analog stick handler."""
-        self.abs_handlers.append(StickIMC(self.ui, self.device))
+        stick = StickIMC(self.ui, self.device)
+        stick.set_look(self.look)
+        self.abs_handlers.append(stick)
 
     def add_trigger(self, event, keyout):
         """
@@ -400,7 +492,12 @@ class Controller:
             event: The gamepad button code.
             keyout: The keyboard key code to emit.
         """
-        self.key_handlers.append(Key(self.ui, event, keyout))
+        if keyout == e.KEY_KP0:
+            key = Key(self.ui, event, keyout)
+            key.set_look(self.look)
+            self.key_handlers.append(key)
+        else:
+            self.key_handlers.append(Key(self.ui, event, keyout))
 
     def process_event(self, event):
         """
