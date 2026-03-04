@@ -21,6 +21,7 @@ The rest is just simple analog trigger event on/off mappings.
 import sys
 import argparse
 import math
+import time
 import evdev
 from evdev import InputDevice, UInput, ecodes as e
 
@@ -168,8 +169,10 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
         self.center_x = (abs_x.min + abs_x.max) / 2.0
         self.half_range_x = (abs_x.max - abs_x.min) / 2.0
 
-        self.threshold = 0.9    # activation threshold
+        self.threshold = 0.95   # activation threshold
         self.hysteresis = 0.05  # prevents flicker
+        self.deadzone_delay = 0.2
+        self.deadzone_enter_time = None
 
         self.current_x = 0.0
         self.current_y = 0.0
@@ -230,6 +233,8 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
         """Deactivate all arrow keys."""
         if not self.state["deadzone"]:
             self.state["deadzone"] = True
+            self.deadzone_enter_time = time.monotonic()
+
             if self.state["up"]:
                 self.state["up"] = False
                 self.ui.write(e.EV_KEY, e.KEY_UP, 0)
@@ -244,17 +249,22 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
                 self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
             self.ui.syn()
 
-    def handle_state(self, active, angle):  # pylint: disable=too-many-statements too-many-branches
+    # pylint: disable=too-many-statements too-many-branches
+    def handle_state(self, active, angle):
         """Handle the states for the arrow keys."""
         if not active:
             self.set_deadzone()
             return
 
+        if self.state["deadzone"]:
+            if time.monotonic() - self.deadzone_enter_time < self.deadzone_delay:
+                return
+            self.state["deadzone"] = False
+
         sector_point_right_up = 45
         sector_point_left_up = 135
         sector_point_right_down = -45
         sector_point_left_down = -135
-        self.state["deadzone"] = False
 
         # Up
         if sector_point_right_up < angle < sector_point_left_up:
@@ -309,17 +319,22 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
                 self.ui.write(e.EV_KEY, e.KEY_DOWN, 1)
                 self.ui.syn()
 
-    def handle_state_classic(self, active, angle):  # pylint: disable=too-many-statements too-many-branches
+    # pylint: disable=too-many-statements too-many-branches
+    def handle_state_classic(self, active, angle):
         """Handle the states for the arrow keys."""
         if not active:
             self.set_deadzone()
             return
 
-        size_up = 142
-        size_right = 142
-        size_left = 142
-        size_down = 142
-        self.state["deadzone"] = False
+        if self.state["deadzone"]:
+            if time.monotonic() - self.deadzone_enter_time < self.deadzone_delay:
+                return
+            self.state["deadzone"] = False
+
+        size_up = 138
+        size_right = 138
+        size_left = 138
+        size_down = 138
 
         # Up
         if 90-size_up/2 < angle < 90+size_up/2:
