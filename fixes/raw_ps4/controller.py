@@ -315,11 +315,10 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
             self.set_deadzone()
             return
 
-        size_up = 135
-        size_right = 135
-        size_left = 135
-        size_down = 135
-        print(f"angle={angle}")
+        size_up = 142
+        size_right = 142
+        size_left = 142
+        size_down = 142
         self.state["deadzone"] = False
 
         # Up
@@ -465,9 +464,9 @@ class Controller:
         """Add D-pad handler."""
         self.abs_handlers.append(Dpad(self.ui))
 
-    def add_stick(self):
+    def add_stick(self, classic):
         """Add analog stick handler."""
-        stick = StickIMC(self.ui, self.device)
+        stick = StickIMC(self.ui, self.device, classic_overlap=classic)
         stick.set_look(self.look)
         self.abs_handlers.append(stick)
 
@@ -547,11 +546,11 @@ class Preset:
             print("\nExiting.")
 
 
-def _ps4():
+def _ps4(overlap):
     preset = Preset()
     controller = preset.get_controller()
     controller.add_dpad()
-    controller.add_stick()
+    controller.add_stick(classic=overlap)
     controller.add_trigger(e.ABS_Z, e.KEY_DOT)
     controller.add_trigger(e.ABS_RZ, e.KEY_SLASH)
     controller.add_key(e.BTN_EAST, e.KEY_END)
@@ -576,7 +575,7 @@ def _only_ps4_share():
 def _only_left_stick():
     preset = Preset()
     controller = preset.get_controller()
-    controller.add_stick()
+    controller.add_stick(classic=False)
     preset.read_loop()
 
 
@@ -588,7 +587,7 @@ def _main():
     parser.add_argument(
         "mode",
         type=str,
-        choices=["ps4", "only-ps4-share", "only-left-stick"],
+        choices=["ps4", "ps4-overlap", "only-ps4-share", "only-left-stick"],
         help="Select input mapping mode",
     )
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
@@ -596,7 +595,9 @@ def _main():
     args = parser.parse_args()
 
     if args.mode == "ps4":
-        _ps4()
+        _ps4(False)
+    if args.mode == "ps4-overlap":
+        _ps4(True)
     elif args.mode == "only-ps4-share":
         _only_ps4_share()
     elif args.mode == "only-left-stick":
