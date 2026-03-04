@@ -8,10 +8,14 @@ From the dead zone, use no overlapping between movement states.
 When running or stepping back, use normal 8-way overlapping.
 When running, Lara shouldn’t step back unless the stick is pulled fully downward within a
 narrow angle (fully rotated). To jump forward-right, the player must press jump + pull forward +
-pull right(we ship overlapping) — so it cannot be mixed up with a right-side jump.
+pull right (no full overlapping) — so it cannot be mixed up with a right-side jump.
 To stop, the player must return to dead zone, always. From standing still Lara can now do a
 full rotation move — it cannot be mixed up with a running forward-right input. With Look key
 activated, controls revert to classic 8-way equal-angle overlapping (traditional tank-style grid).
+We need to add pulse upp and down activation of left and right arrow keys.
+Like in music we go 2/4 of 120 bpm - I think this matches Laras steps.
+No liner scale on this, it cant make Lara stutter, its better to fade out.
+Pulse is based on angle.
 
 If the user want we can also fall back to classic 8-way analog stick.
 
