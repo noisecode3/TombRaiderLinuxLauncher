@@ -26,6 +26,7 @@ import sys
 import argparse
 import math
 import time
+import threading
 import evdev
 from evdev import InputDevice, UInput, ecodes as e
 
@@ -141,6 +142,72 @@ class Dpad:
             self.handle_y(event.value)
 
 
+class APRGenerator:
+    """Arrow-keys press and release generator."""
+
+    def __init__(self, ui):
+        """Initialize interval, key direction and event handler."""
+        self.press_interval = 0.1
+        self.release_interval = 0.1
+        self.direction = None
+        self.running = False
+        self.wakeup = threading.Event()
+        self.ui = ui
+
+    def set_speed(self, interval):
+        """Set different interval, and wakeup."""
+        self.press_interval = interval
+        self.release_interval = 0.3 - interval
+        self.wakeup.set()
+
+    def start(self, direction):
+        """Set key direction and start the thread."""
+        if not self.running:
+            self.running = True
+            self.direction = direction
+            threading.Thread(target=self._run, daemon=True).start()
+
+    def stop(self):
+        """Reset and stop."""
+        self.running = False
+        self.wakeup.set()
+        self.generate_release()
+
+    def generate_press(self):
+        """Press the key."""
+        if self.direction == "left":
+            self.ui.write(e.EV_KEY, e.KEY_LEFT, 1)
+        elif self.direction == "right":
+            self.ui.write(e.EV_KEY, e.KEY_RIGHT, 1)
+        self.ui.syn()
+
+    def generate_release(self):
+        """Release the key."""
+        if self.direction == "left":
+            self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+        elif self.direction == "right":
+            self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+        self.ui.syn()
+
+    def _run(self):
+        cycle_start = time.monotonic()
+
+        while self.running:
+
+            now = time.monotonic()
+            phase = (now - cycle_start) % 0.3
+
+            if phase < self.press_interval:
+                self.generate_press()
+                wait = self.press_interval - phase
+            else:
+                self.generate_release()
+                wait = 0.3 - phase
+
+            self.wakeup.wait(wait)
+            self.wakeup.clear()
+
+
 class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-instance-attributes
     """Handle analog stick input."""
 
@@ -191,6 +258,8 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
             "down": False,
             "look": [False],
         }
+
+        self.apr_generator = APRGenerator(ui)
 
     def set_look(self, look):
         """Set reference to lool state."""
@@ -251,6 +320,8 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
             if self.state["down"]:
                 self.state["down"] = False
                 self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
+            if self.apr_generator.running:
+                self.apr_generator.stop()
             self.ui.syn()
 
     # pylint: disable=too-many-statements too-many-branches
@@ -272,19 +343,31 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
 
         # Up
         if sector_point_right_up < angle < sector_point_left_up:
-            if not self.state["up"]:
-                self.state["up"] = True
-                if self.state["right"]:
-                    self.state["right"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-                if self.state["left"]:
-                    self.state["left"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-                if self.state["down"]:
-                    self.state["down"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
-                self.ui.write(e.EV_KEY, e.KEY_UP, 1)
-                self.ui.syn()
+            if angle > 105:
+                self.apr_generator.set_speed(0.3*((angle-105)/30))
+                if not self.apr_generator.running:
+                    self.apr_generator.start("left")
+
+            elif angle < 75:
+                self.apr_generator.set_speed(-0.3*((angle-75)/30))
+                if not self.apr_generator.running:
+                    self.apr_generator.start("right")
+            else:
+                if not self.state["up"]:
+                    self.state["up"] = True
+                    if self.state["right"]:
+                        self.state["right"] = False
+                        self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+                    if self.state["left"]:
+                        self.state["left"] = False
+                        self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+                    if self.state["down"]:
+                        self.state["down"] = False
+                        self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
+                    self.ui.write(e.EV_KEY, e.KEY_UP, 1)
+                    self.ui.syn()
+                if self.apr_generator.running:
+                    self.apr_generator.stop()
 
         # Right
         elif sector_point_right_down < angle < sector_point_right_up:
@@ -293,6 +376,8 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
                 if self.state["left"]:
                     self.state["left"] = False
                     self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
+                if self.apr_generator.running:
+                    self.apr_generator.stop()
                 self.ui.write(e.EV_KEY, e.KEY_RIGHT, 1)
                 self.ui.syn()
 
@@ -304,6 +389,8 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
                 if self.state["right"]:
                     self.state["right"] = False
                     self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
+                if self.apr_generator.running:
+                    self.apr_generator.stop()
                 self.ui.write(e.EV_KEY, e.KEY_LEFT, 1)
                 self.ui.syn()
 
@@ -320,6 +407,8 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
                 if self.state["up"]:
                     self.state["up"] = False
                     self.ui.write(e.EV_KEY, e.KEY_UP, 0)
+                if self.apr_generator.running:
+                    self.apr_generator.stop()
                 self.ui.write(e.EV_KEY, e.KEY_DOWN, 1)
                 self.ui.syn()
 
