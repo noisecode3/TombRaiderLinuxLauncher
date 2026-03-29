@@ -43,6 +43,7 @@ settings_build () {
     print "    python-pycurl python-tqdm python-cryptography python-beautifulsoup4 python-pillow"
     print "    umu-launcher protontricks wine-staging winetricks lutris steam gamemode"
     print "    lib32-vulkan-radeon vulkan-tools"
+    print "    kvantum qt6ct"
     print ")"
     skip=1
     next
