@@ -7,7 +7,27 @@ SCRIPT_DIR="$(pwd)"
 git clone https://github.com/Kron4ek/Conty
 cd Conty
 
-settings_mininal () {
+awk '
+/run_in_chroot pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com/ {
+    print "curl -L --retry 3 -o \"${bootstrap}/tmp/chaotic-keyring.pkg.tar.zst\" \\"
+    print "    '"'"'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'"'"'"
+    print ""
+    print "mkdir -p \"${bootstrap}/tmp/chaotic-extract\""
+    print "bsdtar -xf \"${bootstrap}/tmp/chaotic-keyring.pkg.tar.zst\" \\"
+    print "    -C \"${bootstrap}/tmp/chaotic-extract\""
+    print ""
+    print "run_in_chroot pacman-key --add /tmp/chaotic-extract/usr/share/pacman/keyrings/chaotic.gpg"
+    next
+}
+/'"'"'https:\/\/cdn-mirror\.chaotic\.cx\/chaotic-aur\/chaotic-keyring\.pkg\.tar\.zst'"'"'/ {
+    print "     '"'"'/tmp/chaotic-keyring.pkg.tar.zst'"'"' \\"
+    next
+}
+{ print }
+' create-arch-bootstrap.sh > create-arch-bootstrap.sh.tmp && mv create-arch-bootstrap.sh.tmp create-arch-bootstrap.sh
+chmod +x create-arch-bootstrap.sh
+
+settings_minimal () {
   awk '
   /^PACKAGES=\(/ {
     print "PACKAGES=("
@@ -38,12 +58,13 @@ settings_build () {
   awk '
   /^PACKAGES=\(/ {
     print "PACKAGES=("
-    print "    base-devel cmake ccache"
+    print "    base-devel cmake ccache meson"
     print "    qt6-wayland qt6-webengine qt6-imageformats qt6-svg"
     print "    python-pycurl python-tqdm python-cryptography python-beautifulsoup4 python-pillow"
     print "    umu-launcher protontricks wine-staging winetricks lutris steam gamemode"
-    print "    lib32-vulkan-radeon vulkan-tools"
+    print "    lib32-vulkan-radeon vulkan-tools vulkan-headers"
     print "    kvantum qt6ct"
+    print "    curl glib2"
     print ")"
     skip=1
     next
@@ -51,7 +72,6 @@ settings_build () {
 
   /^AUR_PACKAGES=\(/ {
     print "AUR_PACKAGES=("
-    print "    megatools"
     print ")"
     skip=2
     next
@@ -78,6 +98,16 @@ awk '
     print "chroot \"${bootstrap}\" /usr/bin/env LANG=en_US.UTF-8 TERM=xterm PATH=\"/bin:/sbin:/usr/bin:/usr/sbin\" /bin/bash -c \"\\"
     print "echo \047en_US.UTF-8 UTF-8\047 > /etc/locale.gen && locale-gen"
     print "echo \047LANG=en_US.UTF-8\047 > /etc/locale.conf"
+    print "cd /root"
+    print "curl -L -O https://xff.cz/megatools/builds/builds/megatools-1.11.5.20250706.tar.gz"
+    print "echo \04736f18f41f6e6323e34d939cb06086048 megatools-1.11.5.20250706.tar.gz\047 | md5sum -c || exit 1"
+    print "tar xvzf megatools-1.11.5.20250706.tar.gz"
+    print "rm megatools-1.11.5.20250706.tar.gz"
+    print "cd megatools-1.11.5.20250706"
+    print "meson setup --prefix /usr --libexecdir lib --sbindir bin --buildtype plain --auto-features enabled --wrap-mode nodownload -D b_pie=true -D symlinks=true build"
+    print "ninja -C build"
+    print "DESTDIR=\047/\047 ninja -C build install"
+    print "rm -fr /root/megatools-1.11.5.20250706"
     print "\""
     next
 }
@@ -86,7 +116,7 @@ awk '
 chmod +x enter-chroot-noninteractive.sh
 
 case "${1:-}" in
-  --minimal) settings_minimal ;;
+  --minimal) settings_minimal  ;;
   --devel)   settings_build ;;
   *)         settings_build ;;  # default
 esac
