@@ -17,10 +17,25 @@ awk '
     print "    -C \"${bootstrap}/tmp/chaotic-extract\""
     print ""
     print "run_in_chroot pacman-key --add /tmp/chaotic-extract/usr/share/pacman/keyrings/chaotic.gpg"
+    print ""
+    print "EXPECTED=\"EF92 5EA6 0F33 D0CB 85C4 4AD1 3056 5138 87B7 8AEB\""
+    print "ACTUAL=$(run_in_chroot pacman-key --finger 3056513887B78AEB 2>/dev/null \\"
+    print "    | grep -A1 \"pub\" \\"
+    print "    | tail -1 \\"
+    print "    | tr -s '"'"' '"'"' \\"
+    print "    | sed '"'"'s/^ //'"'"')"
+    print "if [ \"$ACTUAL\" = \"$EXPECTED\" ]; then"
+    print "    echo \"✓ Fingerprint OK\""
+    print "else"
+    print "    echo \"✗ FINGERPRINT DID NOT MATCH!\""
+    print "    echo \"  Expected: $EXPECTED\""
+    print "    echo \"  Actually got: $ACTUAL\""
+    print "    exit 1"
+    print "fi"
     next
 }
 /'"'"'https:\/\/cdn-mirror\.chaotic\.cx\/chaotic-aur\/chaotic-keyring\.pkg\.tar\.zst'"'"'/ {
-    print "     '"'"'/tmp/chaotic-keyring.pkg.tar.zst'"'"' \\"
+    print "         '"'"'/tmp/chaotic-keyring.pkg.tar.zst'"'"' \\"
     next
 }
 { print }
