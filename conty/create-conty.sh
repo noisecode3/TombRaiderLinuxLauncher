@@ -1,46 +1,55 @@
 #!/bin/bash
-set -e
-
+set -euo pipefail
 cd "$(dirname "$0")"
 SCRIPT_DIR="$(pwd)"
+CONTY_DIR="$SCRIPT_DIR/Conty"
+
+# this is done so that if we need sudo after create-arch-bootstrap.sh
+# we dont ask for password 2 times, we keep the session alive
+MAIN_PID=$$
+(
+  start=$(date +%s)
+  while kill -0 "$MAIN_PID" 2>/dev/null; do
+    now=$(date +%s)
+    [ $((now - start)) -gt 1800 ] && exit
+    sudo -n -v 2>/dev/null
+    sleep 60
+  done
+) &
+SUDO_LOOP_PID=$!
+
+# unmount any leftover chroot binds before we touch anything
+# to avoid the EPERM-storm and total system crash from rm -fr
+safe_remove_conty() {
+  local dir="$1"
+  [ -d "$dir" ] || return 0
+
+  local mounts
+  mounts=$(awk -v d="$dir" '
+    { p=$2; gsub(/\\040/," ",p);
+      if (p==d || index(p, d "/")==1) print p }
+  ' /proc/mounts 2>/dev/null | sort -r) || true
+
+  local mp
+  for mp in $mounts; do
+    sudo umount -R "$mp" 2>/dev/null || sudo umount -l "$mp" 2>/dev/null || true
+  done
+
+  sudo rm -rf --one-file-system "$dir"
+}
+
+cleanup() {
+  safe_remove_conty "$CONTY_DIR"
+  kill "$SUDO_LOOP_PID" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+# wipe any leftovers from a previous failed/partial run -
+# root.x86_64 etc. are root-owned so a plain rm won't always clear them
+safe_remove_conty "$CONTY_DIR"
 
 git clone https://github.com/Kron4ek/Conty
-cd Conty
-
-awk '
-/run_in_chroot pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com/ {
-    print "curl -L --retry 3 -o \"${bootstrap}/tmp/chaotic-keyring.pkg.tar.zst\" \\"
-    print "    '"'"'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'"'"'"
-    print ""
-    print "mkdir -p \"${bootstrap}/tmp/chaotic-extract\""
-    print "bsdtar -xf \"${bootstrap}/tmp/chaotic-keyring.pkg.tar.zst\" \\"
-    print "    -C \"${bootstrap}/tmp/chaotic-extract\""
-    print ""
-    print "run_in_chroot pacman-key --add /tmp/chaotic-extract/usr/share/pacman/keyrings/chaotic.gpg"
-    print ""
-    print "EXPECTED=\"EF92 5EA6 0F33 D0CB 85C4 4AD1 3056 5138 87B7 8AEB\""
-    print "ACTUAL=$(run_in_chroot pacman-key --finger 3056513887B78AEB 2>/dev/null \\"
-    print "    | grep -A1 \"pub\" \\"
-    print "    | tail -1 \\"
-    print "    | tr -s '"'"' '"'"' \\"
-    print "    | sed '"'"'s/^ //'"'"')"
-    print "if [ \"$ACTUAL\" = \"$EXPECTED\" ]; then"
-    print "    echo \"✓ Fingerprint OK\""
-    print "else"
-    print "    echo \"✗ FINGERPRINT DID NOT MATCH!\""
-    print "    echo \"  Expected: $EXPECTED\""
-    print "    echo \"  Actually got: $ACTUAL\""
-    print "    exit 1"
-    print "fi"
-    next
-}
-/'"'"'https:\/\/cdn-mirror\.chaotic\.cx\/chaotic-aur\/chaotic-keyring\.pkg\.tar\.zst'"'"'/ {
-    print "         '"'"'/tmp/chaotic-keyring.pkg.tar.zst'"'"' \\"
-    next
-}
-{ print }
-' create-arch-bootstrap.sh > create-arch-bootstrap.sh.tmp && mv create-arch-bootstrap.sh.tmp create-arch-bootstrap.sh
-chmod +x create-arch-bootstrap.sh
+cd "$CONTY_DIR"
 
 settings_minimal () {
   awk '
@@ -53,17 +62,14 @@ settings_minimal () {
     skip=1
     next
   }
-
   /^AUR_PACKAGES=\(/ {
     print "AUR_PACKAGES=("
     print ")"
     skip=2
     next
   }
-
   skip==1 && /^\)/ {skip=0; next}
   skip==2 && /^\)/ {skip=0; next}
-  skip==3 && /^\)/ {skip=0; next}
   skip {next}
   1
   ' settings.sh > settings.sh.tmp && mv settings.sh.tmp settings.sh
@@ -84,14 +90,12 @@ settings_build () {
     skip=1
     next
   }
-
   /^AUR_PACKAGES=\(/ {
     print "AUR_PACKAGES=("
     print ")"
     skip=2
     next
   }
-
   /^LOCALES=\(/ {
     print "LOCALES=("
     print "    en_US.UTF-8"
@@ -99,7 +103,6 @@ settings_build () {
     skip=3
     next
   }
-
   skip==1 && /^\)/ {skip=0; next}
   skip==2 && /^\)/ {skip=0; next}
   skip==3 && /^\)/ {skip=0; next}
@@ -131,43 +134,19 @@ awk '
 chmod +x enter-chroot-noninteractive.sh
 
 case "${1:-}" in
-  --minimal) settings_minimal  ;;
+  --minimal) settings_minimal ;;
   --devel)   settings_build ;;
   *)         settings_build ;;  # default
 esac
 
-# this id done so that if we need sudo after create-arch-bootstrap.sh
-# we dont ask for password 2 times, we keep the session alive
-MAIN_PID=$$
-(
-  start=$(date +%s)
-  while kill -0 "$MAIN_PID" 2>/dev/null; do
-    now=$(date +%s)
-    [ $((now - start)) -gt 1800 ] && exit
-    sudo -n -v 2>/dev/null
-    sleep 60
-  done
-) &
-SUDO_LOOP_PID=$!
-
-cleanup() {
-  kill "$SUDO_LOOP_PID" 2>/dev/null || true
-}
-trap cleanup EXIT
-
-# We create the container 
 sudo ./create-arch-bootstrap.sh
 sudo ./enter-chroot-noninteractive.sh || true
 ./create-conty.sh
 
-# clean up
-if [ ! -d "$SCRIPT_DIR/Conty" ]; then
-    echo "Error: Conty dir not found in current folder"
-    exit 1
+# pull the output out before we nuke the whole build tree
+if [ -f "$CONTY_DIR/conty.sh" ]; then
+  mv "$CONTY_DIR/conty.sh" "$SCRIPT_DIR/conty.sh"
+else
+  echo "Error: create-conty.sh didn't produce conty.sh" >&2
+  exit 1
 fi
-
-mv "$SCRIPT_DIR/Conty/conty.sh" "$SCRIPT_DIR/conty.sh" 2>/dev/null || true
-sudo rm -rf "$SCRIPT_DIR/Conty/root.x86_64"
-sudo rm -f "$SCRIPT_DIR/Conty/pkglist.x86_64.txt"
-sudo rm -f "$SCRIPT_DIR/Conty/version"
-rm -rf "$SCRIPT_DIR/Conty"
