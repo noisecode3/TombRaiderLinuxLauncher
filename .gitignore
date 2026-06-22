@@ -15,6 +15,7 @@ build
 .gdbinit
 .vscode
 .qtcreator
+.env
 .mypy_cache
 database/*.db-journal
 TombRaiderLinuxLauncher.kdev4

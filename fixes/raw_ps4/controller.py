@@ -147,8 +147,8 @@ class APRGenerator:
 
     def __init__(self, ui):
         """Initialize interval, key direction and event handler."""
-        self.press_interval = 0.1
-        self.release_interval = 0.1
+        self.press_interval = 1.0
+        self.release_interval = 1.0
         self.direction = None
         self.running = False
         self.wakeup = threading.Event()
@@ -157,7 +157,7 @@ class APRGenerator:
     def set_speed(self, interval):
         """Set different interval, and wakeup."""
         self.press_interval = interval
-        self.release_interval = 0.3 - interval
+        self.release_interval = 1.0 - interval
         self.wakeup.set()
 
     def start(self, direction):
@@ -195,17 +195,53 @@ class APRGenerator:
         while self.running:
 
             now = time.monotonic()
-            phase = (now - cycle_start) % 0.3
+            phase = (now - cycle_start) % 1.0
 
             if phase < self.press_interval:
                 self.generate_press()
                 wait = self.press_interval - phase
             else:
                 self.generate_release()
-                wait = 0.3 - phase
+                wait = 1.0 - phase
 
             self.wakeup.wait(wait)
             self.wakeup.clear()
+
+
+class ArrowButton:
+    """Arrow button state and key press/release handling."""
+
+    def __init__(self, ui, direction):
+        """Initialize an arrow button for the given direction."""
+        self.ui = ui
+        self.key = None
+        self.pressed = False
+
+        if direction == "up":
+            self.key = e.KEY_UP
+        elif direction == "right":
+            self.key = e.KEY_RIGHT
+        elif direction == "left":
+            self.key = e.KEY_LEFT
+        elif direction == "down":
+            self.key = e.KEY_DOWN
+        else:
+            print("Object Error: Unknown Direction")
+            sys.exit(1)
+
+    def set_pressed(self):
+        """Send a key press event if not already pressed."""
+        if not self.pressed:
+            self.pressed = True
+            self.ui.write(e.EV_KEY, self.key, 1)
+            self.ui.syn()
+
+    def set_release(self):
+        """Send a key release event if currently pressed."""
+        if self.pressed:
+            self.pressed = False
+            self.ui.write(e.EV_KEY, self.key, 0)
+            self.ui.syn()
 
 
 class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-instance-attributes
@@ -252,13 +288,13 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
 
         self.state = {
             "deadzone": False,
-            "up": False,
-            "right": False,
-            "left": False,
-            "down": False,
             "look": [False],
         }
 
+        self.up = ArrowButton(ui, "up")
+        self.down = ArrowButton(ui, "down")
+        self.left = ArrowButton(ui, "left")
+        self.right = ArrowButton(ui, "right")
         self.apr_generator = APRGenerator(ui)
 
     def set_look(self, look):
@@ -307,22 +343,12 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
         if not self.state["deadzone"]:
             self.state["deadzone"] = True
             self.deadzone_enter_time = time.monotonic()
-
-            if self.state["up"]:
-                self.state["up"] = False
-                self.ui.write(e.EV_KEY, e.KEY_UP, 0)
-            if self.state["right"]:
-                self.state["right"] = False
-                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-            if self.state["left"]:
-                self.state["left"] = False
-                self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-            if self.state["down"]:
-                self.state["down"] = False
-                self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
+            self.up.set_release()
+            self.down.set_release()
+            self.left.set_release()
+            self.right.set_release()
             if self.apr_generator.running:
                 self.apr_generator.stop()
-            self.ui.syn()
 
     # pylint: disable=too-many-statements too-many-branches
     def handle_state(self, active, angle):
@@ -346,71 +372,45 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
             if angle > 105:
                 self.apr_generator.set_speed(0.3*((angle-105)/30))
                 if not self.apr_generator.running:
+                    self.up.set_pressed()
                     self.apr_generator.start("left")
 
             elif angle < 75:
                 self.apr_generator.set_speed(-0.3*((angle-75)/30))
                 if not self.apr_generator.running:
+                    self.up.set_pressed()
                     self.apr_generator.start("right")
             else:
-                if not self.state["up"]:
-                    self.state["up"] = True
-                    if self.state["right"]:
-                        self.state["right"] = False
-                        self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-                    if self.state["left"]:
-                        self.state["left"] = False
-                        self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-                    if self.state["down"]:
-                        self.state["down"] = False
-                        self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
-                    self.ui.write(e.EV_KEY, e.KEY_UP, 1)
-                    self.ui.syn()
                 if self.apr_generator.running:
                     self.apr_generator.stop()
+                self.up.set_pressed()
+                self.down.set_release()
+                self.left.set_release()
+                self.right.set_release()
 
         # Right
         elif sector_point_right_down < angle < sector_point_right_up:
-            if not self.state["right"]:
-                self.state["right"] = True
-                if self.state["left"]:
-                    self.state["left"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-                if self.apr_generator.running:
-                    self.apr_generator.stop()
-                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 1)
-                self.ui.syn()
+            if self.apr_generator.running:
+                self.apr_generator.stop()
+            self.left.set_release()
+            self.right.set_pressed()
 
         # Left
         elif (-180 < angle < sector_point_left_down) or \
                 (180 > angle > sector_point_left_up):
-            if not self.state["left"]:
-                self.state["left"] = True
-                if self.state["right"]:
-                    self.state["right"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-                if self.apr_generator.running:
-                    self.apr_generator.stop()
-                self.ui.write(e.EV_KEY, e.KEY_LEFT, 1)
-                self.ui.syn()
+            if self.apr_generator.running:
+                self.apr_generator.stop()
+            self.left.set_pressed()
+            self.right.set_release()
 
         # Down
         elif sector_point_left_down < angle < sector_point_right_down:
-            if not self.state["down"]:
-                self.state["down"] = True
-                if self.state["right"]:
-                    self.state["right"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-                if self.state["left"]:
-                    self.state["left"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-                if self.state["up"]:
-                    self.state["up"] = False
-                    self.ui.write(e.EV_KEY, e.KEY_UP, 0)
-                if self.apr_generator.running:
-                    self.apr_generator.stop()
-                self.ui.write(e.EV_KEY, e.KEY_DOWN, 1)
-                self.ui.syn()
+            if self.apr_generator.running:
+                self.apr_generator.stop()
+            self.up.set_release()
+            self.down.set_pressed()
+            self.left.set_release()
+            self.right.set_release()
 
     # pylint: disable=too-many-statements too-many-branches
     def handle_state_classic(self, active, angle):
@@ -431,51 +431,27 @@ class StickIMC:  # pylint: disable=too-few-public-methods disable=too-many-insta
 
         # Up
         if 90-size_up/2 < angle < 90+size_up/2:
-            if not self.state["up"]:
-                self.state["up"] = True
-                self.ui.write(e.EV_KEY, e.KEY_UP, 1)
-                self.ui.syn()
+            self.up.set_pressed()
         else:
-            if self.state["up"]:
-                self.state["up"] = False
-                self.ui.write(e.EV_KEY, e.KEY_UP, 0)
-                self.ui.syn()
+            self.up.set_release()
 
         # Right
         if -size_right/2 < angle < size_right/2:
-            if not self.state["right"]:
-                self.state["right"] = True
-                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 1)
-                self.ui.syn()
+            self.right.set_pressed()
         else:
-            if self.state["right"]:
-                self.state["right"] = False
-                self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-                self.ui.syn()
+            self.right.set_release()
 
         # Left
         if angle < -180+size_left/2 or angle > 180-size_left/2:
-            if not self.state["left"]:
-                self.state["left"] = True
-                self.ui.write(e.EV_KEY, e.KEY_LEFT, 1)
-                self.ui.syn()
+            self.left.set_pressed()
         else:
-            if self.state["left"]:
-                self.state["left"] = False
-                self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-                self.ui.syn()
+            self.left.set_release()
 
         # Down
         if -90-size_down/2 < angle < -90+size_down/2:
-            if not self.state["down"]:
-                self.state["down"] = True
-                self.ui.write(e.EV_KEY, e.KEY_DOWN, 1)
-                self.ui.syn()
+            self.down.set_pressed()
         else:
-            if self.state["down"]:
-                self.state["down"] = False
-                self.ui.write(e.EV_KEY, e.KEY_DOWN, 0)
-                self.ui.syn()
+            self.down.set_release()
 
 
 class Trigger:  # pylint: disable=too-few-public-methods
