@@ -15,11 +15,11 @@ initial release**.
 - [x] Update button states appropriately based on context.
 - [x] Add support for launch flags (e.g. filters and sorting options).
 - [x] Implement core launching functionality for TRLE levels.
-- [ ] Implement basic keyboard navigation and shortcuts.
+- [x] Implement basic keyboard navigation and shortcuts.
 - [ ] Allow deletion of a level without removing save files.
 - [ ] 🎮 PS Controller Script:
-  - [ ] Classic tank
-  - [ ] Generic Controller mapping
+  - [x] Classic tank
+  - [x] Generic Controller mapping
   - [ ] Angular (Direction + Magnitude) State Context-Aware Left Stick
 - [ ] run all the original TR core design games.
 
