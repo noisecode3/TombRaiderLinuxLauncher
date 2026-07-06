@@ -21,7 +21,6 @@ import sys
 import argparse
 import math
 import time
-import threading
 import evdev
 from evdev import InputDevice, UInput, ecodes as e
 
@@ -124,72 +123,6 @@ class Dpad:  # pylint: disable=too-few-public-methods
             self.y.handle(self.ui, event.value)
 
 
-class APRGenerator:
-    """Arrow-keys press and release generator."""
-
-    def __init__(self, ui):
-        """Initialize interval, key direction and event handler."""
-        self.press_interval = 1.0
-        self.release_interval = 1.0
-        self.direction = None
-        self.running = False
-        self.wakeup = threading.Event()
-        self.ui = ui
-
-    def set_speed(self, interval):
-        """Set different interval, and wakeup."""
-        self.press_interval = interval
-        self.release_interval = 1.0 - interval
-        self.wakeup.set()
-
-    def start(self, direction):
-        """Set key direction and start the thread."""
-        if not self.running:
-            self.running = True
-            self.direction = direction
-            threading.Thread(target=self._run, daemon=True).start()
-
-    def stop(self):
-        """Reset and stop."""
-        self.running = False
-        self.wakeup.set()
-        self.generate_release()
-
-    def generate_press(self):
-        """Press the key."""
-        if self.direction == "left":
-            self.ui.write(e.EV_KEY, e.KEY_LEFT, 1)
-        elif self.direction == "right":
-            self.ui.write(e.EV_KEY, e.KEY_RIGHT, 1)
-        self.ui.syn()
-
-    def generate_release(self):
-        """Release the key."""
-        if self.direction == "left":
-            self.ui.write(e.EV_KEY, e.KEY_LEFT, 0)
-        elif self.direction == "right":
-            self.ui.write(e.EV_KEY, e.KEY_RIGHT, 0)
-        self.ui.syn()
-
-    def _run(self):
-        cycle_start = time.monotonic()
-
-        while self.running:
-
-            now = time.monotonic()
-            phase = (now - cycle_start) % 1.0
-
-            if phase < self.press_interval:
-                self.generate_press()
-                wait = self.press_interval - phase
-            else:
-                self.generate_release()
-                wait = 1.0 - phase
-
-            self.wakeup.wait(wait)
-            self.wakeup.clear()
-
-
 class ArrowButton:
     """Arrow button state and key press/release handling."""
 
@@ -278,7 +211,6 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
         self.down = ArrowButton(ui, "down")
         self.left = ArrowButton(ui, "left")
         self.right = ArrowButton(ui, "right")
-        self.apr_generator = APRGenerator(ui)
 
     def set_deadzone_state(self, deadzone):
         """Set reference to deadzone state."""
@@ -343,8 +275,6 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
             self.down.set_release()
             self.left.set_release()
             self.right.set_release()
-            if self.apr_generator.running:
-                self.apr_generator.stop()
 
     # pylint: disable=too-many-statements too-many-branches
     def handle_run_state(self, active, angle):
@@ -357,8 +287,6 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
                 self.down.set_release()
                 self.left.set_release()
                 self.right.set_release()
-                if self.apr_generator.running:
-                    self.apr_generator.stop()
             return
 
         if self.state["deadzone"][0]:
@@ -366,26 +294,24 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
                 return
             self.state["deadzone"][0] = False
 
-        sector_point_right_up = 65
-        sector_point_left_up = 115
-        sector_point_right_down = -65
-        sector_point_left_down = -115
+        sector_point_right_up = 45
+        sector_point_left_up = 135
+        sector_point_right_down = -45
+        sector_point_left_down = -135
 
         # Up
         if sector_point_right_up < angle < sector_point_left_up:
             if angle > 100:
-                self.apr_generator.set_speed((angle-100)/15)
-                if not self.apr_generator.running:
-                    self.up.set_pressed()
-                    self.right.set_release()
-                    self.apr_generator.start("left")
+                self.up.set_pressed()
+                self.down.set_release()
+                self.left.set_pressed()
+                self.right.set_release()
 
             elif angle < 80:
-                self.apr_generator.set_speed(-1.0*((80-angle)/15))
-                if not self.apr_generator.running:
-                    self.up.set_pressed()
-                    self.left.set_release()
-                    self.apr_generator.start("right")
+                self.up.set_pressed()
+                self.down.set_release()
+                self.left.set_release()
+                self.right.set_pressed()
             else:
                 self.up.set_pressed()
                 self.down.set_release()
@@ -394,23 +320,21 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
 
         # Right
         elif sector_point_right_down < angle < sector_point_right_up:
-            if self.apr_generator.running:
-                self.apr_generator.stop()
+            self.up.set_release()
+            self.down.set_release()
             self.left.set_release()
             self.right.set_pressed()
 
         # Left
         elif (-180 < angle < sector_point_left_down) or \
                 (180 > angle > sector_point_left_up):
-            if self.apr_generator.running:
-                self.apr_generator.stop()
+            self.up.set_release()
+            self.down.set_release()
             self.left.set_pressed()
             self.right.set_release()
 
         # Down
         elif sector_point_left_down < angle < sector_point_right_down:
-            if self.apr_generator.running:
-                self.apr_generator.stop()
             self.up.set_release()
             self.down.set_release()
             self.left.set_release()
@@ -589,6 +513,7 @@ class Key:  # pylint: disable=too-few-public-methods
         self.look = None
         self.thumb_clicked = None
         self.deadzone_state = None
+        self.thumb_clicked_last_time = time.monotonic()
 
     def set_look(self, look):
         """Set reference to look state."""
@@ -619,12 +544,12 @@ class Key:  # pylint: disable=too-few-public-methods
                     self.ui.syn()
             elif self.thumb_clicked is not None and self.button_code is e.BTN_THUMBL:
                 if event.value == 1:
-                    if self.thumb_clicked[0]:
-                        self.thumb_clicked[0] = False
+                    now = time.monotonic()
+                    if now - self.thumb_clicked_last_time < 0.6:
+                        self.thumb_clicked[0] = not self.thumb_clicked[0]
                         self.deadzone_state[0] = False
                     else:
-                        self.thumb_clicked[0] = True
-                        self.deadzone_state[0] = False
+                        self.thumb_clicked_last_time = now
             else:
                 self.ui.write(e.EV_KEY, self.keyout, event.value)
                 self.ui.syn()
