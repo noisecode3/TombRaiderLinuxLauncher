@@ -252,7 +252,6 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
             if self.classic_overlap or self.state["look"][0]:
                 self.handle_state_classic(True, angle)
             elif self.state["clicked"][0]:
-
                 self.handle_run_state(True, angle)
             else:
                 self.handle_state(True, angle)
@@ -540,8 +539,8 @@ class Key:  # pylint: disable=too-few-public-methods
                     self.look[0] = True
                 else:
                     self.look[0] = False
-                    self.ui.write(e.EV_KEY, self.keyout, event.value)
-                    self.ui.syn()
+                self.ui.write(e.EV_KEY, self.keyout, event.value)
+                self.ui.syn()
             elif self.thumb_clicked is not None and self.button_code is e.BTN_THUMBL:
                 if event.value == 1:
                     now = time.monotonic()
