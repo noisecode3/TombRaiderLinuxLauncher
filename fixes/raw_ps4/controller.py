@@ -353,10 +353,10 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
                 return
             self.state["deadzone"][0] = False
 
-        sector_point_right_up = 25
-        sector_point_left_up = 155
-        sector_point_right_down = -25
-        sector_point_left_down = -155
+        sector_point_right_up = 20
+        sector_point_left_up = 160
+        sector_point_right_down = -20
+        sector_point_left_down = -160
 
         # Up
         if sector_point_right_up < angle < sector_point_left_up:
