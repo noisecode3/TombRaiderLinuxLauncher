@@ -159,28 +159,26 @@ class ArrowButton:
             self.ui.syn()
 
 
-class StickIMC:  # pylint: disable=too-many-instance-attributes
-    """Handle analog stick input."""
+class Stick:
+    """Handle analog stick input and hold x and y."""
 
-    def __init__(self, ui, device, classic_overlap=False):
+    def __init__(self, device, abs_x, abs_y):
         """
-        Initialize left joystick handler.
+        Initialize generic joystick handler.
 
         Args:
-            ui: The uinput device.
+            device: The uinput device.
 
-                (Up)
-                 90°
-           135°       45°
-
-         180°            0° (Right)
-
-          -135°     -45°
-               -90°
-              (Down)
+                 (Up)
+                 y=1
+                  |
+                  |
+        x=-1 <----0----> x=1 (Right)
+                  |
+                  |
+                 y=-1
+                (Down)
         """
-        self.ui = ui
-
         # Read real hardware ranges
         abs_x = device.absinfo(e.ABS_X)
         abs_y = device.absinfo(e.ABS_Y)
@@ -191,38 +189,8 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
         self.center_x = (abs_x.min + abs_x.max) / 2.0
         self.half_range_x = (abs_x.max - abs_x.min) / 2.0
 
-        self.threshold = 0.95   # activation threshold
-        self.hysteresis = 0.05  # prevents flicker
-        self.deadzone_delay = 0.2
-        self.deadzone_enter_time = None
-
         self.current_x = 0.0
         self.current_y = 0.0
-
-        self.classic_overlap = classic_overlap
-
-        self.state = {
-            "deadzone": [False],
-            "look": [False],
-            "clicked": [False],
-        }
-
-        self.up = ArrowButton(ui, "up")
-        self.down = ArrowButton(ui, "down")
-        self.left = ArrowButton(ui, "left")
-        self.right = ArrowButton(ui, "right")
-
-    def set_deadzone_state(self, deadzone):
-        """Set reference to deadzone state."""
-        self.state["deadzone"] = deadzone
-
-    def set_look(self, look):
-        """Set reference to look state."""
-        self.state["look"] = look
-
-    def set_clicked(self, clicked):
-        """Set reference to clicked state."""
-        self.state["clicked"] = clicked
 
     def normalize_x(self, value):
         """Map any axis range to -1 .. 1."""
@@ -240,58 +208,123 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
         elif event.code == e.ABS_Y:
             self.current_y = self.normalize_y(event.value)
 
-        self.process()
 
-    def process(self):
+class StickVector:
+    """Handle analog stick input as a vector with threshold state."""
+
+    def __init__(self, threshold=0.95, hysteresis=0.05, deadzone_delay=0.2):
+        """
+        Initialize generic joystick handler.
+
+        Args:
+            device: The uinput device.
+
+                 (Up)
+                  90°
+            135°       45°
+
+        +-180°            0° (Right)
+
+           -135°      -45°
+                 -90°
+                (Down)
+        """
+        self.threshold = threshold
+        self.in_deadzone = False
+        self.in_deadzone_first_time = True
+        # prevents flicker
+        self.hysteresis = hysteresis
+        self.deadzone_delay = deadzone_delay
+        self.deadzone_enter_time = None
+        self.angle = 0
+
+    def process(self, current_x, current_y):
         """Generate lengt from middle and if over threashold also angle."""
-        radius = math.hypot(self.current_x, self.current_y)
+        radius = math.hypot(current_x, current_y)
+
+        # Bounce protection: right after entering the deadzone, a spring-loaded
+        # stick can overshoot back past the threshold on release. Ignore all
+        # readings for deadzone_delay seconds so that bounce can't be mistaken
+        # for a new, intentional push.
+        if self.in_deadzone and self.deadzone_enter_time is not None:
+            if time.monotonic() - self.deadzone_enter_time < self.deadzone_delay:
+                return
 
         # Apply hysteresis to prevent threshold flicker
         if radius > self.threshold:
-            angle = math.degrees(math.atan2(self.current_y, self.current_x))
-            if self.classic_overlap or self.state["look"][0]:
-                self.handle_state_classic(True, angle)
-            elif self.state["clicked"][0]:
-                self.handle_run_state(True, angle)
-            else:
-                self.handle_state(True, angle)
-
+            self.in_deadzone = False
+            self.in_deadzone_first_time = True
+            self.angle = math.degrees(math.atan2(current_y, current_x))
         else:
             if radius < (self.threshold - self.hysteresis):
-                if self.classic_overlap or self.state["look"][0]:
-                    self.handle_state_classic(False, 0)
-                elif self.state["clicked"][0]:
-                    self.handle_run_state(False, 0)
-                else:
-                    self.handle_state(False, 0)
+                if not self.in_deadzone:
+                    self.in_deadzone = True
+                    self.deadzone_enter_time = time.monotonic()
+
+
+class LeftStick:
+    """Handle analog stick input."""
+
+    def __init__(self, ui, device, classic_overlap=False):
+        """
+        Initialize left joystick handler.
+
+        Args:
+            ui: The uinput device.
+            device: The evdev controller input device.
+            classic_overlap: if set there is only a simple 8-way stateless input
+
+        """
+        self.ui = ui
+        self.stick = Stick(device, e.ABS_X, e.ABS_Y)
+        self.stick_vector = StickVector()
+
+        self.classic_overlap = classic_overlap
+
+        self.state = {
+            "look": [False],
+            "clicked": [False],
+        }
+
+        self.up = ArrowButton(ui, "up")
+        self.down = ArrowButton(ui, "down")
+        self.left = ArrowButton(ui, "left")
+        self.right = ArrowButton(ui, "right")
+
+    def set_look(self, look):
+        """Set reference to look state."""
+        self.state["look"] = look
+
+    def set_clicked(self, clicked):
+        """Set reference to clicked state."""
+        self.state["clicked"] = clicked
+
+    def handle_event(self, event):
+        """Handle the events."""
+        self.stick.handle_event(event)
+        self.stick_vector.process(self.stick.current_x, self.stick.current_y)
+        if self.classic_overlap or self.state["look"][0]:
+            self.handle_state_classic(self.stick_vector.in_deadzone, self.stick_vector.angle)
+        elif self.state["clicked"][0]:
+            self.handle_run_state(self.stick_vector.in_deadzone, self.stick_vector.angle)
+        else:
+            self.handle_state(self.stick_vector.in_deadzone, self.stick_vector.angle)
 
     def set_deadzone(self):
         """Deactivate all arrow keys."""
-        if not self.state["deadzone"][0]:
-            self.state["deadzone"][0] = True
-            self.deadzone_enter_time = time.monotonic()
-            self.up.set_release()
-            self.down.set_release()
-            self.left.set_release()
-            self.right.set_release()
+        if self.stick_vector.in_deadzone_first_time:
+            self.stick_vector.in_deadzone_first_time = False
+        self.up.set_release()
+        self.down.set_release()
+        self.left.set_release()
+        self.right.set_release()
 
     # pylint: disable=too-many-statements too-many-branches
-    def handle_run_state(self, active, angle):
+    def handle_run_state(self, in_deadzone, angle):
         """Handle the states for the arrow keys."""
-        if not active:
-            if not self.state["deadzone"][0]:
-                self.state["deadzone"][0] = True
-                self.deadzone_enter_time = time.monotonic()
-                self.up.set_pressed()
-                self.down.set_release()
-                self.left.set_release()
-                self.right.set_release()
+        if in_deadzone:
+            self.set_deadzone()
             return
-
-        if self.state["deadzone"][0]:
-            if time.monotonic() - self.deadzone_enter_time < self.deadzone_delay:
-                return
-            self.state["deadzone"][0] = False
 
         sector_point_right_up = 45
         sector_point_left_up = 135
@@ -300,13 +333,13 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
 
         # Up
         if sector_point_right_up < angle < sector_point_left_up:
-            if angle > 100:
+            if angle > 110:
                 self.up.set_pressed()
                 self.down.set_release()
                 self.left.set_pressed()
                 self.right.set_release()
 
-            elif angle < 80:
+            elif angle < 70:
                 self.up.set_pressed()
                 self.down.set_release()
                 self.left.set_release()
@@ -339,19 +372,14 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
             self.left.set_release()
             self.right.set_release()
             self.state["clicked"][0] = False
-            self.state["deadzone"][0] = False
+            self.stick_vector.in_deadzone = False
 
     # pylint: disable=too-many-statements too-many-branches
-    def handle_state(self, active, angle):
+    def handle_state(self, in_deadzone, angle):
         """Handle the states for the arrow keys."""
-        if not active:
+        if in_deadzone:
             self.set_deadzone()
             return
-
-        if self.state["deadzone"][0]:
-            if time.monotonic() - self.deadzone_enter_time < self.deadzone_delay:
-                return
-            self.state["deadzone"][0] = False
 
         sector_point_right_up = 20
         sector_point_left_up = 160
@@ -410,16 +438,11 @@ class StickIMC:  # pylint: disable=too-many-instance-attributes
                 self.right.set_release()
 
     # pylint: disable=too-many-statements too-many-branches
-    def handle_state_classic(self, active, angle):
+    def handle_state_classic(self, in_deadzone, angle):
         """Handle the states for the arrow keys."""
-        if not active:
+        if in_deadzone:
             self.set_deadzone()
             return
-
-        if self.state["deadzone"][0]:
-            if time.monotonic() - self.deadzone_enter_time < self.deadzone_delay:
-                return
-            self.state["deadzone"][0] = False
 
         size_up = 138
         size_right = 138
@@ -511,7 +534,6 @@ class Key:  # pylint: disable=too-few-public-methods
         self.keyout = keyout
         self.look = None
         self.thumb_clicked = None
-        self.deadzone_state = None
         self.thumb_clicked_last_time = time.monotonic()
 
     def set_look(self, look):
@@ -521,10 +543,6 @@ class Key:  # pylint: disable=too-few-public-methods
     def set_thumb_click(self, thumb_clicked):
         """Set reference to thumbl clicked state."""
         self.thumb_clicked = thumb_clicked
-
-    def set_deadzone_state(self, deadzone_state):
-        """Set reference to deadzone_state state."""
-        self.deadzone_state = deadzone_state
 
     def handle_event(self, event):
         """
@@ -546,7 +564,6 @@ class Key:  # pylint: disable=too-few-public-methods
                     now = time.monotonic()
                     if now - self.thumb_clicked_last_time < 0.6:
                         self.thumb_clicked[0] = not self.thumb_clicked[0]
-                        self.deadzone_state[0] = False
                     else:
                         self.thumb_clicked_last_time = now
             else:
@@ -568,7 +585,6 @@ class Controller:
         self.key_handlers = []
         self.ui = ui
         self.device = device
-        self.deadzone_state = [False]
         self.look = [False]
         self.left_stick_clicked = [False]
 
@@ -578,8 +594,7 @@ class Controller:
 
     def add_stick(self, classic=False):
         """Add analog stick handler."""
-        stick = StickIMC(self.ui, self.device, classic)
-        stick.set_deadzone_state(self.deadzone_state)
+        stick = LeftStick(self.ui, self.device, classic)
         stick.set_look(self.look)
         stick.set_clicked(self.left_stick_clicked)
         self.abs_handlers.append(stick)
@@ -608,7 +623,6 @@ class Controller:
         if (event == e.BTN_THUMBL) and (keyout is None):
             key = Key(self.ui, event, keyout)
             key.set_thumb_click(self.left_stick_clicked)
-            key.set_deadzone_state(self.deadzone_state)
             self.key_handlers.append(key)
         elif keyout == e.KEY_KP0:
             key = Key(self.ui, event, keyout)
