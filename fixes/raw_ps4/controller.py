@@ -20,6 +20,7 @@ The rest is just simple analog trigger event on/off mappings.
 import sys
 import argparse
 import math
+from dataclasses import dataclass
 import time
 import evdev
 from evdev import InputDevice, UInput, ecodes as e
@@ -62,10 +63,10 @@ class DeviceManager:
         sys.exit(1)
 
 
-class Dpad:  # pylint: disable=too-few-public-methods
+class Dpad:
     """Handles D-pad input."""
 
-    class DpadAxis:  # pylint: disable=too-few-public-methods
+    class DpadAxis:
         """Handles D-pad Axis."""
 
         def __init__(self, neg_key, pos_key):
@@ -159,6 +160,31 @@ class ArrowButton:
             self.ui.syn()
 
 
+class DirectionalButtons:
+    """A cluster of ArrowButton objects, by 4 directions."""
+
+    def __init__(self, ui):
+        """Initialize an arrow button for the given direction."""
+        self.up = ArrowButton(ui, "up")
+        self.down = ArrowButton(ui, "down")
+        self.left = ArrowButton(ui, "left")
+        self.right = ArrowButton(ui, "right")
+
+    def release_all(self):
+        """Release all four buttons, e.g. on focus loss or disconnect."""
+        for btn in (self.up, self.down, self.left, self.right):
+            btn.set_release()
+
+    def set_pressed_only(self, *directions):
+        """Press the given directions, release everything else."""
+        for name, btn in (("up", self.up), ("down", self.down),
+                          ("left", self.left), ("right", self.right)):
+            if name in directions:
+                btn.set_pressed()
+            else:
+                btn.set_release()
+
+
 class Stick:
     """Handle analog stick input and hold x and y."""
 
@@ -180,8 +206,8 @@ class Stick:
                 (Down)
         """
         # Read real hardware ranges
-        abs_x = device.absinfo(e.ABS_X)
-        abs_y = device.absinfo(e.ABS_Y)
+        abs_x = device.absinfo(abs_x)
+        abs_y = device.absinfo(abs_y)
 
         self.center_y = (abs_y.min + abs_y.max) / 2.0
         self.half_range_y = (abs_y.max - abs_y.min) / 2.0
@@ -207,6 +233,20 @@ class Stick:
 
         elif event.code == e.ABS_Y:
             self.current_y = self.normalize_y(event.value)
+
+
+@dataclass
+class SectorPoints:
+    """8-way sector angle boundaries."""
+
+    right_up: float = 20
+    sub_right_up: float = 60
+    left_up: float = 160
+    sub_left_up: float = 120
+    right_down: float = -20
+    sub_right_down: float = -60
+    left_down: float = -160
+    sub_left_down: float = -120
 
 
 class StickVector:
@@ -262,6 +302,148 @@ class StickVector:
                     self.deadzone_enter_time = time.monotonic()
 
 
+class DefaultJoystickHandle:
+    """Set controller to use Default direction detection."""
+
+    def __init__(self, direction, stick_vector, on_deadzone, sector_points):
+        """Set sector angle boundaries and callbacks for direction detection."""
+        self.direction = direction
+        self.stick_vector = stick_vector
+        self.sector_points = sector_points
+        self.on_deadzone = on_deadzone
+        self.hysteresis = 2
+        self.prev_major = None
+        self.prev_diag = None
+
+    @staticmethod
+    def _adj(threshold, prev_state, lower_state, upper_state, h):
+        """
+        Shift a boundary threshold toward whichever side we were already on.
+
+        So a value sitting right on the line doesn't flip back and forth
+        every frame due to sensor jitter.
+        threshold separates lower_state (angle < threshold) from
+        upper_state (angle > threshold).
+        """
+        if prev_state == lower_state:
+            return threshold + h
+        if prev_state == upper_state:
+            return threshold - h
+        return threshold
+
+    def handle_state(self):
+        """Handle the states for the arrow keys."""
+        if self.stick_vector.in_deadzone:
+            self.on_deadzone()
+            self.prev_major = None
+            self.prev_diag = None
+            return
+
+        angle = self.stick_vector.angle
+        sp = self.sector_points
+        h = self.hysteresis
+
+        # Recompute the four major boundaries with hysteresis applied
+        right_up = self._adj(sp.right_up, self.prev_major, "right", "up", h)
+        left_up = self._adj(sp.left_up, self.prev_major, "up", "left", h)
+        left_down = self._adj(sp.left_down, self.prev_major, "left", "down", h)
+        right_down = self._adj(sp.right_down, self.prev_major, "down", "right", h)
+
+        # Up
+        if right_up < angle < left_up:
+            self.prev_major = "up"
+            # Recompute diagonal sub-boundaries with hysteresis too
+            sub_left_up = self._adj(sp.sub_left_up, self.prev_diag, "up_center", "up_left", h)
+            sub_right_up = self._adj(sp.sub_right_up, self.prev_diag, "up_right", "up_center", h)
+            if angle > sub_left_up:
+                self.prev_diag = "up_left"
+                self.direction.set_pressed_only("up", "left")
+            elif angle < sub_right_up:
+                self.prev_diag = "up_right"
+                self.direction.set_pressed_only("up", "right")
+            else:
+                self.prev_diag = "up_center"
+                self.direction.set_pressed_only("up")
+        # Right
+        elif right_down < angle < right_up:
+            self.prev_major = "right"
+            self.prev_diag = None
+            self.direction.set_pressed_only("right")
+        # Left
+        elif (-180 < angle < left_down) or (180 > angle > left_up):
+            self.prev_major = "left"
+            self.prev_diag = None
+            self.direction.set_pressed_only("left")
+        # Down
+        elif left_down < angle < right_down:
+            self.prev_major = "down"
+            sub_left_down = self._adj(
+                sp.sub_left_down,
+                self.prev_diag,
+                "down_left",
+                "down_center",
+                h
+            )
+            sub_right_down = self._adj(
+                sp.sub_right_down,
+                self.prev_diag,
+                "down_center",
+                "down_right",
+                h
+            )
+            if angle < sub_left_down:
+                self.prev_diag = "down_left"
+                self.direction.set_pressed_only("down", "left")
+            elif angle > sub_right_down:
+                self.prev_diag = "down_right"
+                self.direction.set_pressed_only("down", "right")
+            else:
+                self.prev_diag = "down_center"
+                self.direction.set_pressed_only("down")
+
+
+class SectorSizeJoystickHandle:
+    """Set controller to use direction detection based on sector size."""
+
+    def __init__(self, direction, stick_vector, on_deadzone, sector_size=138):
+        """Set sector angle boundaries and callbacks for direction detection."""
+        self.direction = direction
+        self.stick_vector = stick_vector
+        self.sector_size = sector_size
+        self.on_deadzone = on_deadzone
+
+    def handle_state(self):
+        """Handle the states for the arrow keys."""
+        if self.stick_vector.in_deadzone:
+            self.on_deadzone()
+            return
+
+        # Up
+        if 90-self.sector_size/2 < self.stick_vector.angle < 90+self.sector_size/2:
+            self.direction.up.set_pressed()
+        else:
+            self.direction.up.set_release()
+
+        # Right
+        if -self.sector_size/2 < self.stick_vector.angle < self.sector_size/2:
+            self.direction.right.set_pressed()
+        else:
+            self.direction.right.set_release()
+
+        # Left
+        if self.stick_vector.angle < -180+self.sector_size/2 or \
+                self.stick_vector.angle > 180-self.sector_size/2:
+            self.direction.left.set_pressed()
+        else:
+            self.direction.left.set_release()
+
+        # Down
+        if -90-self.sector_size/2 < self.stick_vector.angle < -90+self.sector_size/2:
+            self.direction.down.set_pressed()
+        else:
+            self.direction.down.set_release()
+
+
 class LeftStick:
     """Handle analog stick input."""
 
@@ -278,18 +460,32 @@ class LeftStick:
         self.ui = ui
         self.stick = Stick(device, e.ABS_X, e.ABS_Y)
         self.stick_vector = StickVector()
-
-        self.classic_overlap = classic_overlap
+        self.direction = DirectionalButtons(ui)
 
         self.state = {
             "look": [False],
             "clicked": [False],
+            "classic_overlap": classic_overlap,
         }
 
-        self.up = ArrowButton(ui, "up")
-        self.down = ArrowButton(ui, "down")
-        self.left = ArrowButton(ui, "left")
-        self.right = ArrowButton(ui, "right")
+        sector_points_default = SectorPoints()
+        self.default_joystick_handle = DefaultJoystickHandle(
+            self.direction,
+            self.stick_vector,
+            self.set_deadzone,
+            sector_points_default,
+        )
+        self.sector_size_joystick_handle = SectorSizeJoystickHandle(
+            self.direction,
+            self.stick_vector,
+            self.set_deadzone,
+        )
+
+    def set_deadzone(self):
+        """Deactivate all arrow keys."""
+        if self.stick_vector.in_deadzone_first_time:
+            self.stick_vector.in_deadzone_first_time = False
+        self.direction.release_all()
 
     def set_look(self, look):
         """Set reference to look state."""
@@ -303,178 +499,15 @@ class LeftStick:
         """Handle the events."""
         self.stick.handle_event(event)
         self.stick_vector.process(self.stick.current_x, self.stick.current_y)
-        if self.classic_overlap or self.state["look"][0]:
-            self.handle_state_classic(self.stick_vector.in_deadzone, self.stick_vector.angle)
+        if self.state["classic_overlap"] or self.state["look"][0]:
+            self.sector_size_joystick_handle.handle_state()
         elif self.state["clicked"][0]:
-            self.handle_run_state(self.stick_vector.in_deadzone, self.stick_vector.angle)
+            self.auto_run_joystick_handle.handle_state()
         else:
-            self.handle_state(self.stick_vector.in_deadzone, self.stick_vector.angle)
-
-    def set_deadzone(self):
-        """Deactivate all arrow keys."""
-        if self.stick_vector.in_deadzone_first_time:
-            self.stick_vector.in_deadzone_first_time = False
-        self.up.set_release()
-        self.down.set_release()
-        self.left.set_release()
-        self.right.set_release()
-
-    # pylint: disable=too-many-statements too-many-branches
-    def handle_run_state(self, in_deadzone, angle):
-        """Handle the states for the arrow keys."""
-        if in_deadzone:
-            self.set_deadzone()
-            return
-
-        sector_point_right_up = 45
-        sector_point_left_up = 135
-        sector_point_right_down = -45
-        sector_point_left_down = -135
-
-        # Up
-        if sector_point_right_up < angle < sector_point_left_up:
-            if angle > 110:
-                self.up.set_pressed()
-                self.down.set_release()
-                self.left.set_pressed()
-                self.right.set_release()
-
-            elif angle < 70:
-                self.up.set_pressed()
-                self.down.set_release()
-                self.left.set_release()
-                self.right.set_pressed()
-            else:
-                self.up.set_pressed()
-                self.down.set_release()
-                self.left.set_release()
-                self.right.set_release()
-
-        # Right
-        elif sector_point_right_down < angle < sector_point_right_up:
-            self.up.set_release()
-            self.down.set_release()
-            self.left.set_release()
-            self.right.set_pressed()
-
-        # Left
-        elif (-180 < angle < sector_point_left_down) or \
-                (180 > angle > sector_point_left_up):
-            self.up.set_release()
-            self.down.set_release()
-            self.left.set_pressed()
-            self.right.set_release()
-
-        # Down
-        elif sector_point_left_down < angle < sector_point_right_down:
-            self.up.set_release()
-            self.down.set_release()
-            self.left.set_release()
-            self.right.set_release()
-            self.state["clicked"][0] = False
-            self.stick_vector.in_deadzone = False
-
-    # pylint: disable=too-many-statements too-many-branches
-    def handle_state(self, in_deadzone, angle):
-        """Handle the states for the arrow keys."""
-        if in_deadzone:
-            self.set_deadzone()
-            return
-
-        sector_point_right_up = 20
-        sector_point_left_up = 160
-        sector_point_right_down = -20
-        sector_point_left_down = -160
-
-        # Up
-        if sector_point_right_up < angle < sector_point_left_up:
-            if angle > 120:
-                self.up.set_pressed()
-                self.down.set_release()
-                self.left.set_pressed()
-                self.right.set_release()
-            elif angle < 60:
-                self.up.set_pressed()
-                self.down.set_release()
-                self.right.set_pressed()
-                self.left.set_release()
-            else:
-                self.up.set_pressed()
-                self.down.set_release()
-                self.left.set_release()
-                self.right.set_release()
-
-        # Right
-        elif sector_point_right_down < angle < sector_point_right_up:
-            self.left.set_release()
-            self.right.set_pressed()
-            self.up.set_release()
-            self.down.set_release()
-
-        # Left
-        elif (-180 < angle < sector_point_left_down) or \
-                (180 > angle > sector_point_left_up):
-            self.left.set_pressed()
-            self.right.set_release()
-            self.up.set_release()
-            self.down.set_release()
-
-        # Down
-        elif sector_point_left_down < angle < sector_point_right_down:
-            if angle < -120:
-                self.up.set_release()
-                self.down.set_pressed()
-                self.left.set_pressed()
-                self.right.set_release()
-            elif angle > -60:
-                self.up.set_release()
-                self.down.set_pressed()
-                self.right.set_pressed()
-                self.left.set_release()
-            else:
-                self.up.set_release()
-                self.down.set_pressed()
-                self.left.set_release()
-                self.right.set_release()
-
-    # pylint: disable=too-many-statements too-many-branches
-    def handle_state_classic(self, in_deadzone, angle):
-        """Handle the states for the arrow keys."""
-        if in_deadzone:
-            self.set_deadzone()
-            return
-
-        size_up = 138
-        size_right = 138
-        size_left = 138
-        size_down = 138
-
-        # Up
-        if 90-size_up/2 < angle < 90+size_up/2:
-            self.up.set_pressed()
-        else:
-            self.up.set_release()
-
-        # Right
-        if -size_right/2 < angle < size_right/2:
-            self.right.set_pressed()
-        else:
-            self.right.set_release()
-
-        # Left
-        if angle < -180+size_left/2 or angle > 180-size_left/2:
-            self.left.set_pressed()
-        else:
-            self.left.set_release()
-
-        # Down
-        if -90-size_down/2 < angle < -90+size_down/2:
-            self.down.set_pressed()
-        else:
-            self.down.set_release()
+            self.default_joystick_handle.handle_state()
 
 
-class Trigger:  # pylint: disable=too-few-public-methods
+class Trigger:
     """Handles analog trigger input."""
 
     def __init__(self, ui, event_code, keyout, device):
@@ -517,7 +550,7 @@ class Trigger:  # pylint: disable=too-few-public-methods
             self.ui.syn()
 
 
-class Key:  # pylint: disable=too-few-public-methods
+class Key:
     """Handles key trigger input."""
 
     def __init__(self, ui, button_code, keyout):
