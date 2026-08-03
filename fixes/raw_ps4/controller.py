@@ -17,13 +17,15 @@ If the user want we can also fall back to classic 8-way analog stick.
 The rest is just simple analog trigger event on/off mappings.
 
 """
-import sys
 import argparse
 import math
-from dataclasses import dataclass
+import sys
 import time
+from dataclasses import dataclass
+
 import evdev
-from evdev import InputDevice, UInput, ecodes as e
+from evdev import InputDevice, UInput
+from evdev import ecodes as e
 
 # We test with PS4 for now but we will support all controllers.
 CONTROLLER_NAMES = (
@@ -206,14 +208,17 @@ class Stick:
                 (Down)
         """
         # Read real hardware ranges
-        abs_x = device.absinfo(abs_x)
-        abs_y = device.absinfo(abs_y)
+        self.abs_x = abs_x
+        self.abs_y = abs_y
 
-        self.center_y = (abs_y.min + abs_y.max) / 2.0
-        self.half_range_y = (abs_y.max - abs_y.min) / 2.0
+        absinfo_x = device.absinfo(abs_x)
+        absinfo_y = device.absinfo(abs_y)
 
-        self.center_x = (abs_x.min + abs_x.max) / 2.0
-        self.half_range_x = (abs_x.max - abs_x.min) / 2.0
+        self.center_y = (absinfo_y.min + absinfo_y.max) / 2.0
+        self.half_range_y = (absinfo_y.max - absinfo_y.min) / 2.0
+
+        self.center_x = (absinfo_x.min + absinfo_x.max) / 2.0
+        self.half_range_x = (absinfo_x.max - absinfo_x.min) / 2.0
 
         self.current_x = 0.0
         self.current_y = 0.0
@@ -228,10 +233,10 @@ class Stick:
 
     def handle_event(self, event):
         """Handle the events."""
-        if event.code == e.ABS_X:
+        if event.code == self.abs_x:
             self.current_x = self.normalize_x(event.value)
 
-        elif event.code == e.ABS_Y:
+        elif event.code == self.abs_y:
             self.current_y = self.normalize_y(event.value)
 
 
@@ -263,7 +268,7 @@ class StickVector:
                   90°
             135°       45°
 
-        +-180°            0° (Right)
+        +180°            0° (Right)
 
            -135°      -45°
                  -90°
@@ -286,9 +291,9 @@ class StickVector:
         # stick can overshoot back past the threshold on release. Ignore all
         # readings for deadzone_delay seconds so that bounce can't be mistaken
         # for a new, intentional push.
-        if self.in_deadzone and self.deadzone_enter_time is not None:
-            if time.monotonic() - self.deadzone_enter_time < self.deadzone_delay:
-                return
+        if self.in_deadzone and self.deadzone_enter_time is not None \
+                and time.monotonic() - self.deadzone_enter_time < self.deadzone_delay:
+            return
 
         # Apply hysteresis to prevent threshold flicker
         if radius > self.threshold:
@@ -296,10 +301,10 @@ class StickVector:
             self.in_deadzone_first_time = True
             self.angle = math.degrees(math.atan2(current_y, current_x))
         else:
-            if radius < (self.threshold - self.hysteresis):
-                if not self.in_deadzone:
-                    self.in_deadzone = True
-                    self.deadzone_enter_time = time.monotonic()
+            if radius < (self.threshold - self.hysteresis) \
+                    and not self.in_deadzone:
+                self.in_deadzone = True
+                self.deadzone_enter_time = time.monotonic()
 
 
 class DefaultJoystickHandle:
@@ -475,6 +480,7 @@ class LeftStick:
             self.set_deadzone,
             sector_points_default,
         )
+
         self.sector_size_joystick_handle = SectorSizeJoystickHandle(
             self.direction,
             self.stick_vector,
@@ -501,10 +507,112 @@ class LeftStick:
         self.stick_vector.process(self.stick.current_x, self.stick.current_y)
         if self.state["classic_overlap"] or self.state["look"][0]:
             self.sector_size_joystick_handle.handle_state()
-        elif self.state["clicked"][0]:
-            self.auto_run_joystick_handle.handle_state()
         else:
             self.default_joystick_handle.handle_state()
+
+
+class TriggerJoystickHandle:
+    """Set controller to use direction half circle to trigger small or large medipack."""
+
+    def __init__(self, stick_vector, set_deadzone, ui):
+        """
+        Initialize left joystick handler.
+
+        Args:
+            stick_vector: Gives angle and deadzone information.
+            set_deadzone: The function to call when on_deadzone.
+            ui: The uinput device.
+
+        """
+        self.stick_vector = stick_vector
+        self.on_deadzone = set_deadzone
+        self.ui = ui
+        self.prev_angle = None
+        self.cumulative_rotation = 0.0
+        self.key = None
+        self.active = False
+
+    def handle_state(self):
+        """Handle the states for the small/large medipack trigger."""
+        if self.stick_vector.in_deadzone:
+            self.on_deadzone()
+            if self.key is not None:
+                self.ui.write(e.EV_KEY, self.key, 0)
+                self.ui.syn()
+                self.key = None
+                self.prev_angle = None
+                self.cumulative_rotation = 0.0
+                self.active = False
+            return
+
+        angle = self.stick_vector.angle
+        if self.prev_angle is None:
+            self.prev_angle = angle
+            return
+
+        delta = angle - self.prev_angle
+        if delta > 180:
+            delta -= 360
+        elif delta <= -180:
+            delta += 360
+
+        self.cumulative_rotation += delta
+        self.prev_angle = angle
+
+        if self.cumulative_rotation >= 180:
+            self.key = e.KEY_9
+            self._fire()
+        elif self.cumulative_rotation <= -180:
+            self.key = e.KEY_0
+            self._fire()
+
+    def _fire(self):
+        if not self.active:
+            self.active = True
+            self.ui.write(e.EV_KEY, self.key, 1)
+            self.ui.syn()
+
+
+class RightStick:
+    """Handle right analog stick input."""
+
+    def __init__(self, ui, device):
+        """
+        Initialize right joystick handler.
+
+        Args:
+            ui: The uinput device.
+            device: The evdev controller input device.
+
+        """
+        self.ui = ui
+        self.stick = Stick(device, e.ABS_RX, e.ABS_RY)
+        self.stick_vector = StickVector()
+
+        self.state = {
+            "clicked": [False],
+        }
+
+        self.trigger_joystick_handle = TriggerJoystickHandle(
+            self.stick_vector,
+            self.set_deadzone,
+            self.ui,
+        )
+
+    def set_deadzone(self):
+        """Deactivate all arrow keys."""
+        if self.stick_vector.in_deadzone_first_time:
+            self.stick_vector.in_deadzone_first_time = False
+
+    def set_clicked(self, clicked):
+        """Set reference to clicked state."""
+        self.state["clicked"] = clicked
+
+    def handle_event(self, event):
+        """Handle the events."""
+        self.stick.handle_event(event)
+        self.stick_vector.process(self.stick.current_x, self.stick.current_y)
+        self.trigger_joystick_handle.handle_state()
 
 
 class Trigger:
@@ -627,10 +735,12 @@ class Controller:
 
     def add_stick(self, classic=False):
         """Add analog stick handler."""
-        stick = LeftStick(self.ui, self.device, classic)
-        stick.set_look(self.look)
-        stick.set_clicked(self.left_stick_clicked)
-        self.abs_handlers.append(stick)
+        left_stick = LeftStick(self.ui, self.device, classic)
+        left_stick.set_look(self.look)
+        left_stick.set_clicked(self.left_stick_clicked)
+        self.abs_handlers.append(left_stick)
+        right_stick = RightStick(self.ui, self.device)
+        self.abs_handlers.append(right_stick)
 
     def add_trigger(self, event, keyout):
         """

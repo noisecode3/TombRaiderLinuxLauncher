@@ -7,6 +7,9 @@ Compile and run the project inside the Conty container using `conty.sh`.
 First run `create-conty.sh` here, then from the source top directory run this.
 
 ```sh
+git submodule update --init --recursive
+git config submodule.libs/miniz.ignore all
+git config submodule.libs/libbacktrace.ignore all
 mkdir build
 cd build
 ../conty/conty.sh cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/.local -DRELEASE=on ..
