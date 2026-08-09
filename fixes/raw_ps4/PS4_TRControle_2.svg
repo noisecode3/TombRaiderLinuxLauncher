@@ -5,7 +5,7 @@
    viewBox="0 0 900 480"
    version="1.1"
    id="svg38"
-   sodipodi:docname="TR4_controls_states.svg"
+   sodipodi:docname="PS4_TRControle_2.svg"
    inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -63,6 +63,12 @@
          style="fill:context-stroke;fill-rule:evenodd;stroke:none"
          id="path8-7" />
     </marker>
+    <rect
+       x="799.81635"
+       y="387.59927"
+       width="186.99046"
+       height="64.425285"
+       id="rect21" />
   </defs>
   <!-- Original controller, shifted right 150px and down 40px -->
   <g
@@ -77,13 +83,13 @@
        guidetolerance="10"
        inkscape:pageopacity="0"
        inkscape:pageshadow="2"
-       inkscape:window-width="1920"
+       inkscape:window-width="960"
        inkscape:window-height="1055"
        id="namedview80"
        showgrid="false"
        inkscape:zoom="1.9091883"
-       inkscape:cx="364.81472"
-       inkscape:cy="203.22773"
+       inkscape:cx="464.85724"
+       inkscape:cy="209.51312"
        inkscape:window-x="0"
        inkscape:window-y="25"
        inkscape:window-maximized="1"
@@ -513,7 +519,7 @@
   .ln { stroke: #444; stroke-width: 0.7; fill: none; stroke-dasharray: 3 2; }
 </style>
   <!-- === LEFT SIDE === -->
-  <!-- L2: Crouch/Duck / Zoom in -->
+  <!-- L2: Sidestep left -->
   <!-- L2 shoulder top-left corner: orig ~(180,56) shifted -> (330,96) -->
   <text
      x="119.25811"
@@ -528,13 +534,9 @@
      text-anchor="end"
      id="text2"><tspan
        sodipodi:role="line"
-       id="tspan42"
-       x="119.25811"
-       y="30.680664">Crouch / Duck</tspan><tspan
-       sodipodi:role="line"
        id="tspan43"
        x="119.25811"
-       y="44.430664">Zoom in (binoculars)</tspan></text>
+       y="30.680664">Sidestep left</tspan></text>
   <!-- L1: Walk (hold) -->
   <!-- L1 shoulder lower part: orig ~(180,70) shifted -> (330,110) -->
   <text
@@ -584,7 +586,7 @@
        sodipodi:role="line"
        x="170.63095"
        y="185.93697"
-       id="tspan38">→ right</tspan></text>
+       id="tspan38">→Turn right</tspan></text>
   <!-- D-pad L/R: Turn -->
   <!-- D-pad left arrow orig (74,125) -> (224,165) -->
   <text
@@ -600,25 +602,25 @@
   <!-- Left stick: Move -->
   <!-- Left stick orig (213,197) -> (363,237) -->
   <text
-     x="413.60443"
-     y="340.9707"
+     x="392.65311"
+     y="407.49115"
      class="lbl-b"
      text-anchor="end"
      id="text13">L stick</text>
   <text
-     x="413.60443"
-     y="353.9707"
+     x="393.17688"
+     y="419.96738"
      class="lbl"
      text-anchor="end"
      id="text14"><tspan
        sodipodi:role="line"
        id="tspan5"
-       x="413.60443"
-       y="353.9707">Move (analog)</tspan><tspan
+       x="393.17688"
+       y="419.96738">Move (analog)</tspan><tspan
        sodipodi:role="line"
        id="tspan7"
-       x="413.60443"
-       y="367.7207">Pulldown = Auto Run</tspan></text>
+       x="393.17688"
+       y="433.71738">Double-click = None by default</tspan></text>
   <!-- Select (Share button): Flare -->
   <!-- Share orig (144,65) -> (294,105) -->
   <text
@@ -634,13 +636,9 @@
      text-anchor="end"
      id="text17"><tspan
        sodipodi:role="line"
-       id="tspan44"
-       x="404.88889"
-       y="39.680664">Light / throw flare</tspan><tspan
-       sodipodi:role="line"
        id="tspan45"
        x="404.88889"
-       y="53.430664">Zoom in (binoculars)</tspan></text>
+       y="39.680664">Light / throw flare</tspan></text>
   <!-- === RIGHT SIDE === -->
   <!-- R2: Sprint -->
   <!-- R2 shoulder top-right: orig ~(413,56) -> (563,96) -->
@@ -655,13 +653,9 @@
      class="lbl"
      id="text20"><tspan
        sodipodi:role="line"
-       id="tspan47"
-       x="825.0625"
-       y="30.680664">Sprint / Dash</tspan><tspan
-       sodipodi:role="line"
        id="tspan48"
        x="825.0625"
-       y="44.430664">Swing rope</tspan></text>
+       y="30.680664">Sidestep right</tspan></text>
   <!-- R1: Walk modifier -->
   <!-- R1 lower shoulder: orig ~(413,70) -> (563,110) -->
   <text
@@ -701,7 +695,7 @@
        sodipodi:role="line"
        id="tspan50"
        x="718.98022"
-       y="150.50748">Drop flare / stow binoculars</tspan></text>
+       y="150.50748">Drop flare</tspan></text>
   <!-- Square: Jump -->
   <!-- Square orig (431,124) -> (581,164) -->
   <text
@@ -732,7 +726,7 @@
      x="749.45477"
      y="269.51797"
      class="lbl-b"
-     id="text31">Cross ✕</text>
+     id="text31">Cross ×</text>
   <text
      x="749.45477"
      y="282.51797"
@@ -801,39 +795,47 @@
      d="M 739.54243,221.60239 607.46615,168.64113"
      id="path29" />
   <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.965959;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
-     d="m 382.62792,327.63525 -6.50791,-18.60543"
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1.04193;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
+     d="m 375.48982,391.49979 -1.7529,-80.36883"
      id="path40" />
   <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.877808;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
-     d="m 174.8283,128.34378 28.7907,13.42959"
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.950561;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
+     d="m 174.97595,128.25352 28.52853,15.89266"
      id="path41" />
   <text
-     x="488.35071"
-     y="338.9707"
+     x="506.1593"
+     y="402.72894"
      class="lbl-b"
      id="text37-8"
      style="font-weight:bold;font-size:11px;font-family:Arial, sans-serif;fill:#111111">R stick</text>
   <text
-     x="488.35071"
-     y="351.9707"
+     x="506.1593"
+     y="415.72894"
      class="lbl"
      id="text38-9"
      style="font-size:11px;font-family:Arial, sans-serif;fill:#111111"><tspan
        sodipodi:role="line"
-       id="tspan1"
-       x="488.35071"
-       y="351.9707">Half left turn = F6</tspan><tspan
-       sodipodi:role="line"
        id="tspan2"
-       x="488.35071"
-       y="365.7207">Half right turn = F5</tspan><tspan
+       x="506.1593"
+       y="415.72894">CW: Large medpack</tspan><tspan
        sodipodi:role="line"
-       x="488.35071"
-       y="379.4707"
-       id="tspan3">Pull down = Extra Input</tspan></text>
+       x="506.1593"
+       y="429.65482"
+       id="tspan8">CCW: Small medpack</tspan><tspan
+       sodipodi:role="line"
+       x="506.1593"
+       y="443.58069"
+       id="tspan3">Double-click = See state shortcuts</tspan></text>
   <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.943323;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow-0)"
-     d="m 519.48892,327.05357 6.35124,-18.18137"
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1.01541;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow-0)"
+     d="m 529.8955,385.57258 1.77941,-75.19117"
      id="path40-0" />
+  <text
+     xml:space="preserve"
+     id="text21"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.6667px;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif';text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect21);display:inline;fill:#000000;stroke:#000000"
+     transform="translate(13.44401,63.021504)"><tspan
+       x="799.81641"
+       y="397.20769"
+       id="tspan9">Tomb Raider 2</tspan></text>
 </svg>

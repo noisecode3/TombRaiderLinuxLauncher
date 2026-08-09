@@ -5,7 +5,7 @@
    viewBox="0 0 900 480"
    version="1.1"
    id="svg38"
-   sodipodi:docname="TR4_controls.svg"
+   sodipodi:docname="PS4_TRControle_StateShortcuts_2.svg"
    inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -13,6 +13,18 @@
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
      id="defs38">
+    <rect
+       x="799.81634"
+       y="387.59927"
+       width="186.99046"
+       height="64.425285"
+       id="rect21" />
+    <rect
+       x="747.96184"
+       y="415.35976"
+       width="125.18409"
+       height="40.331276"
+       id="rect18" />
     <marker
        style="overflow:visible"
        id="RoundedArrow"
@@ -44,6 +56,44 @@
        apply_with_weight="true"
        only_selected="false"
        uniform="false" />
+    <marker
+       style="overflow:visible"
+       id="RoundedArrow-3"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="m -0.21114562,-4.1055728 6.42229122,3.21114561 a 1,1 90 0 1 0,1.78885438 L -0.21114562,4.1055728 A 1.236068,1.236068 31.717474 0 1 -2,3 v -6 a 1.236068,1.236068 148.28253 0 1 1.78885438,-1.1055728 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8-6" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="RoundedArrow-35"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="m -0.21114562,-4.1055728 6.42229122,3.21114561 a 1,1 90 0 1 0,1.78885438 L -0.21114562,4.1055728 A 1.236068,1.236068 31.717474 0 1 -2,3 v -6 a 1.236068,1.236068 148.28253 0 1 1.78885438,-1.1055728 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8-62" />
+    </marker>
   </defs>
   <!-- Original controller, shifted right 150px and down 40px -->
   <g
@@ -58,13 +108,13 @@
        guidetolerance="10"
        inkscape:pageopacity="0"
        inkscape:pageshadow="2"
-       inkscape:window-width="1920"
+       inkscape:window-width="960"
        inkscape:window-height="1055"
        id="namedview80"
        showgrid="false"
        inkscape:zoom="1.9091883"
-       inkscape:cx="493.66529"
-       inkscape:cy="201.65638"
+       inkscape:cx="435.5254"
+       inkscape:cy="232.03578"
        inkscape:window-x="0"
        inkscape:window-y="25"
        inkscape:window-maximized="1"
@@ -497,25 +547,21 @@
   <!-- L2: Crouch/Duck / Zoom in -->
   <!-- L2 shoulder top-left corner: orig ~(180,56) shifted -> (330,96) -->
   <text
-     x="119.25811"
+     x="99.25811"
      y="17.680664"
      class="lbl-b"
      text-anchor="end"
      id="text1">L2</text>
   <text
-     x="119.25811"
+     x="99.25811"
      y="30.680664"
      class="lbl"
      text-anchor="end"
      id="text2"><tspan
        sodipodi:role="line"
-       id="tspan42"
-       x="119.25811"
-       y="30.680664">Crouch / Duck</tspan><tspan
-       sodipodi:role="line"
        id="tspan43"
-       x="119.25811"
-       y="44.430664">Zoom in (binoculars)</tspan></text>
+       x="99.25811"
+       y="30.680664">None by default</tspan></text>
   <!-- L1: Walk (hold) -->
   <!-- L1 shoulder lower part: orig ~(180,70) shifted -> (330,110) -->
   <text
@@ -529,7 +575,7 @@
      y="30.567873"
      class="lbl"
      text-anchor="end"
-     id="text5">Look (hold)</text>
+     id="text5">None by default</text>
   <!-- D-pad Up: Run -->
   <!-- D-pad up arrow orig (129,68) -> (279,108) -->
   <!-- D-pad Down: Hop back -->
@@ -565,7 +611,7 @@
        sodipodi:role="line"
        x="170.63095"
        y="185.93697"
-       id="tspan38">→ right</tspan></text>
+       id="tspan38">→ Turn right</tspan></text>
   <!-- D-pad L/R: Turn -->
   <!-- D-pad left arrow orig (74,125) -> (224,165) -->
   <text
@@ -582,16 +628,32 @@
   <!-- Left stick orig (213,197) -> (363,237) -->
   <text
      x="413.60443"
-     y="340.10004"
+     y="362.10004"
      class="lbl-b"
      text-anchor="end"
      id="text13">L stick</text>
   <text
      x="413.60443"
-     y="353.10004"
+     y="375.10004"
      class="lbl"
      text-anchor="end"
-     id="text14">Move (analog)</text>
+     id="text14"><tspan
+       sodipodi:role="line"
+       id="tspan8"
+       x="413.60443"
+       y="375.10004">↑ Pistols</tspan><tspan
+       sodipodi:role="line"
+       x="413.60443"
+       y="388.85004"
+       id="tspan10">↓ Shotgun</tspan><tspan
+       sodipodi:role="line"
+       x="413.60443"
+       y="402.60004"
+       id="tspan3">← Automatic Pistols</tspan><tspan
+       sodipodi:role="line"
+       x="413.60443"
+       y="416.35004"
+       id="tspan4">→Uzis</tspan></text>
   <!-- Select (Share button): Flare -->
   <!-- Share orig (144,65) -> (294,105) -->
   <text
@@ -607,54 +669,42 @@
      text-anchor="end"
      id="text17"><tspan
        sodipodi:role="line"
-       id="tspan44"
-       x="404.88889"
-       y="39.680664">Light / throw flare</tspan><tspan
-       sodipodi:role="line"
        id="tspan45"
        x="404.88889"
-       y="53.430664">Zoom in (binoculars)</tspan></text>
+       y="39.680664">Save game</tspan></text>
   <!-- === RIGHT SIDE === -->
   <!-- R2: Sprint -->
   <!-- R2 shoulder top-right: orig ~(413,56) -> (563,96) -->
   <text
-     x="825.0625"
+     x="809.0625"
      y="17.680664"
      class="lbl-b"
      id="text19">R2</text>
   <text
-     x="825.0625"
+     x="809.0625"
      y="30.680664"
      class="lbl"
      id="text20"><tspan
        sodipodi:role="line"
-       id="tspan47"
-       x="825.0625"
-       y="30.680664">Sprint / Dash</tspan><tspan
-       sodipodi:role="line"
        id="tspan48"
-       x="825.0625"
-       y="44.430664">Swing rope</tspan></text>
+       x="809.0625"
+       y="30.680664">None by default</tspan></text>
   <!-- R1: Walk modifier -->
   <!-- R1 lower shoulder: orig ~(413,70) -> (563,110) -->
   <text
-     x="657.87891"
+     x="699.87891"
      y="17.567871"
      class="lbl-b"
      id="text22">R1</text>
   <text
-     x="657.87891"
+     x="693.87891"
      y="30.567871"
      class="lbl"
      id="text23"><tspan
        sodipodi:role="line"
-       id="tspan4"
-       x="657.87891"
-       y="30.567871">Walk (hold)</tspan><tspan
-       sodipodi:role="line"
-       x="657.87891"
-       y="44.317871"
-       id="tspan46">+ D-pad = Sidestep</tspan></text>
+       x="693.87891"
+       y="30.567871"
+       id="tspan46">None by default</tspan></text>
   <!-- Triangle: Draw/holster weapon -->
   <!-- Triangle orig (472,85) -> (622,125) -->
   <text
@@ -668,13 +718,9 @@
      class="lbl"
      id="text25"><tspan
        sodipodi:role="line"
-       id="tspan49"
-       x="718.98022"
-       y="136.75748">Draw / holster weapon</tspan><tspan
-       sodipodi:role="line"
        id="tspan50"
        x="718.98022"
-       y="150.50748">Drop flare / stow binoculars</tspan></text>
+       y="136.75748">None by default</tspan></text>
   <!-- Square: Jump -->
   <!-- Square orig (431,124) -> (581,164) -->
   <text
@@ -686,7 +732,7 @@
      x="743.97968"
      y="237.138"
      class="lbl"
-     id="text28">Jump (straight up)</text>
+     id="text28">None by default</text>
   <!-- Circle: Roll/Reverse -->
   <!-- Circle orig (513,124) -> (663,164) -->
   <text
@@ -698,27 +744,23 @@
      x="733.74127"
      y="192.75972"
      class="lbl"
-     id="text30">Roll / Reverse direction</text>
+     id="text30">None by default</text>
   <!-- Cross: Action -->
   <!-- Cross orig (472,164) -> (622,204) -->
   <text
      x="749.45477"
      y="269.51797"
      class="lbl-b"
-     id="text31">Cross ✕</text>
+     id="text31">Cross ×</text>
   <text
      x="749.45477"
      y="282.51797"
      class="lbl"
      id="text32"><tspan
        sodipodi:role="line"
-       id="tspan51"
-       x="749.45477"
-       y="282.51797">Action — fire, pick up,</tspan><tspan
-       sodipodi:role="line"
        id="tspan52"
        x="749.45477"
-       y="296.26797">use switches, grab</tspan></text>
+       y="282.51797">None by default</tspan></text>
   <!-- Right stick: Scroll -->
   <!-- Right stick orig (388,197) -> (538,237) -->
   <!-- Options/Start: Pause -->
@@ -732,7 +774,7 @@
      x="496.37036"
      y="39.680664"
      class="lbl"
-     id="text38">Open menu</text>
+     id="text38">Load saved game</text>
   <path
      style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.98195;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
      d="m 711.27438,118.39564 -64.95889,2.05245"
@@ -742,28 +784,20 @@
      d="M 746.44337,278.63761 642.016,219.83552"
      id="path21" />
   <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.981187;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
-     d="M 123.08305,17.801361 229.4909,95.386635"
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1.06299;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
+     d="M 103.57507,17.964856 228.97691,95.233833"
      id="path22" />
   <path
      style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.949707;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
      d="m 210.00871,16.228561 66.73115,47.838337"
      id="path23" />
   <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.986034;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
-     d="M 346.20944,59.590145 341.6803,76.492647"
-     id="path24" />
-  <path
      style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
      d="m 538.44872,45.045321 20.42753,31.426968"
      id="path25" />
   <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.96329;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
-     d="m 652.68586,17.314133 -32.60955,45.7399"
-     id="path26" />
-  <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.991738;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
-     d="M 819.71884,16.754629 671.44952,95.348361"
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.960603;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
+     d="M 803.99156,16.924125 675.40813,101.94944"
      id="path27" />
   <path
      style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.982198;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
@@ -774,11 +808,64 @@
      d="M 739.54243,221.60239 607.46615,168.64113"
      id="path29" />
   <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.965959;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
-     d="m 382.62792,327.63525 -6.50791,-18.60543"
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.890607;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
+     d="m 380.00309,346.39326 -2.76385,-37.24075"
      id="path40" />
   <path
-     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.877808;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
-     d="m 174.8283,128.34378 28.7907,13.42959"
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.991502;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
+     d="m 175.05904,128.1934 28.381,17.38101"
      id="path41" />
+  <path
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.992822;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow-3)"
+     d="M 694.63737,17.003175 621.4544,64.674577"
+     id="path23-5" />
+  <path
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.957284;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow-35)"
+     d="M 361.8715,45.996694 343.24642,77.583238"
+     id="path25-1" />
+  <text
+     x="573.60443"
+     y="360.10004"
+     class="lbl-b"
+     text-anchor="end"
+     id="text3">R stick</text>
+  <text
+     x="573.60443"
+     y="373.10004"
+     class="lbl"
+     text-anchor="end"
+     id="text6"><tspan
+       sodipodi:role="line"
+       id="tspan12"
+       x="573.60443"
+       y="373.10004">↑ Harpoon Gun</tspan><tspan
+       sodipodi:role="line"
+       x="573.60443"
+       y="386.85004"
+       id="tspan13">↓ M16</tspan><tspan
+       sodipodi:role="line"
+       x="573.60443"
+       y="400.60004"
+       id="tspan14">←Grenade Launcher</tspan><tspan
+       sodipodi:role="line"
+       x="573.60443"
+       y="414.35004"
+       id="tspan16">→ None by default</tspan></text>
+  <path
+     style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.890607;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
+     d="m 541.32819,347.44083 -0.66872,-37.24075"
+     id="path17"
+     sodipodi:nodetypes="cc" />
+  <text
+     xml:space="preserve"
+     id="text18"
+     style="text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect18);display:inline;fill:#000000;stroke:#000000" />
+  <text
+     xml:space="preserve"
+     id="text21"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.6667px;font-family:Arial, sans-serif;-inkscape-font-specification:'Arial, sans-serif';text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect21);display:inline;fill:#000000;stroke:#000000"
+     transform="translate(13.44401,63.021504)"><tspan
+       x="799.81641"
+       y="397.20769"
+       id="tspan1">Tomb Raider 2</tspan></text>
 </svg>

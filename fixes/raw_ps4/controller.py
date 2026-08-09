@@ -1,20 +1,11 @@
 """
 Controller input handler to map controller events to keyboard keys using evdev and UInput.
 
-Game context-aware joystick input, Input Mapping Contexts (IMC)
+One way game context joystick input, Input Mapping Contexts (IMC)
 
-The Joysticks have states activated when pulled down.
-Use left-stick running or stepping back, use normal 8-way overlapping.
-If left-stick pulled down it toggle Auto-Run. Lara will then run even when in dead zone
-and if pulled up and then sliglty to the sides the arrow key will pulseate untill pulled
-fully to the side. When pulled fully to the side both arrow up and side will be pulled
-down at the same time. If pulled fully back och if left-stick pulled down again, then exit
-Auto-Run mode.
+The Joysticks can have states activated when pulled down. Especially the right stick
+can active shortcuts like.
 
-
-If the user want we can also fall back to classic 8-way analog stick.
-
-The rest is just simple analog trigger event on/off mappings.
 
 """
 import argparse
@@ -355,7 +346,7 @@ class DefaultJoystickHandle:
         right_down = self._adj(sp.right_down, self.prev_major, "down", "right", h)
 
         # Up
-        if right_up < angle < left_up:
+        if left_up > angle > right_up:
             self.prev_major = "up"
             # Recompute diagonal sub-boundaries with hysteresis too
             sub_left_up = self._adj(sp.sub_left_up, self.prev_diag, "up_center", "up_left", h)
@@ -449,6 +440,67 @@ class SectorSizeJoystickHandle:
             self.direction.down.set_release()
 
 
+class FourwayTriggerJoystickHandle:
+    """Set controller to use 4 directions to trigger shortcuts."""
+
+    def __init__(self, stick_vector, set_deadzone, ui, fourway_key_list):
+        """
+        Initialize trigger joystick handler.
+
+        You'll find e.KEY_? here at /usr/include/linux/input-event-codes.h usually.
+
+        Args:
+            stick_vector: Gives angle and deadzone information.
+            set_deadzone: The function to call when on_deadzone.
+            ui: The uinput device.
+            fourway_key_list: list of 4 items, up, down, left and right.
+
+        """
+        self.stick_vector = stick_vector
+        self.on_deadzone = set_deadzone
+        self.ui = ui
+        self.clicked = None
+        self.fourway_active = None
+        self.fourway_key_list = fourway_key_list
+
+    def set_clicked_state_reference(self, clicked):
+        """Set reference to clicked state."""
+        self.clicked = clicked
+
+    def handle_state(self):
+        """Handle the states for the joystick trigger."""
+        if self.stick_vector.in_deadzone:
+            self.on_deadzone()
+            if self.fourway_active is not None:
+                self.ui.write(e.EV_KEY, self.fourway_key_list[self.fourway_active], 0)
+                self.ui.syn()
+                self.fourway_active = None
+                self.clicked[0] = False
+            return
+
+        if self.fourway_active is not None:
+            return
+
+        angle = self.stick_vector.angle
+        # Up
+        if 135 > angle > 45:
+            self._fire(0)
+        # Right
+        elif -45 < angle < 45:
+            self._fire(3)
+        # Left
+        elif (-180 < angle < -135) or (180 > angle > 135):
+            self._fire(2)
+        # Down
+        elif -135 < angle < -45:
+            self._fire(1)
+
+    def _fire(self, index):
+        self.fourway_active = index
+        self.ui.write(e.EV_KEY, self.fourway_key_list[self.fourway_active], 1)
+        self.ui.syn()
+
+
 class LeftStick:
     """Handle analog stick input."""
 
@@ -470,6 +522,7 @@ class LeftStick:
         self.state = {
             "look": [False],
             "clicked": [False],
+            "right_stick_clicked": [False],
             "classic_overlap": classic_overlap,
         }
 
@@ -487,62 +540,78 @@ class LeftStick:
             self.set_deadzone,
         )
 
+        self.fourway_trigger_joystick_handle = FourwayTriggerJoystickHandle(
+            self.stick_vector,
+            self.set_deadzone,
+            self.ui,
+            [e.KEY_1, e.KEY_2, e.KEY_3, e.KEY_4],
+        )
+
     def set_deadzone(self):
         """Deactivate all arrow keys."""
         if self.stick_vector.in_deadzone_first_time:
             self.stick_vector.in_deadzone_first_time = False
         self.direction.release_all()
 
-    def set_look(self, look):
+    def set_look_state_reference(self, look):
         """Set reference to look state."""
         self.state["look"] = look
 
-    def set_clicked(self, clicked):
+    def set_clicked_state_reference(self, clicked):
         """Set reference to clicked state."""
         self.state["clicked"] = clicked
+
+    def set_right_stick_clicked_state_reference(self, right_stick_clicked):
+        """Set reference to right stick clicked state."""
+        self.state["right_stick_clicked"] = right_stick_clicked
+        self.fourway_trigger_joystick_handle.set_clicked_state_reference(right_stick_clicked)
 
     def handle_event(self, event):
         """Handle the events."""
         self.stick.handle_event(event)
         self.stick_vector.process(self.stick.current_x, self.stick.current_y)
-        if self.state["classic_overlap"] or self.state["look"][0]:
+        if self.state["right_stick_clicked"][0]:
+            self.fourway_trigger_joystick_handle.handle_state()
+        elif self.state["classic_overlap"] or self.state["look"][0]:
             self.sector_size_joystick_handle.handle_state()
         else:
             self.default_joystick_handle.handle_state()
 
 
-class TriggerJoystickHandle:
-    """Set controller to use direction half circle to trigger small or large medipack."""
+class CircleTriggerJoystickHandle:
+    """Set controller to use half circle to trigger 2 shortcuts."""
 
-    def __init__(self, stick_vector, set_deadzone, ui):
+    def __init__(self, stick_vector, set_deadzone, ui, cw_key, ccw_key):
         """
-        Initialize left joystick handler.
+        Initialize trigger joystick handler.
 
+        You'll find e.KEY_? here at /usr/include/linux/input-event-codes.h usually.
         Args:
             stick_vector: Gives angle and deadzone information.
             set_deadzone: The function to call when on_deadzone.
             ui: The uinput device.
-
+            cw_key: clockwise trigger keycode.
+            ccw_key: counter clockwise trigger keycode
         """
         self.stick_vector = stick_vector
         self.on_deadzone = set_deadzone
         self.ui = ui
         self.prev_angle = None
         self.cumulative_rotation = 0.0
-        self.key = None
-        self.active = False
+        self.active_key = None
+        self.cw_key = cw_key
+        self.ccw_key = ccw_key
 
     def handle_state(self):
-        """Handle the states for the small/large medipack trigger."""
+        """Handle the states for the circle trigger."""
         if self.stick_vector.in_deadzone:
             self.on_deadzone()
-            if self.key is not None:
-                self.ui.write(e.EV_KEY, self.key, 0)
+            if self.active_key is not None:
+                self.ui.write(e.EV_KEY, self.active_key, 0)
                 self.ui.syn()
-                self.key = None
                 self.prev_angle = None
                 self.cumulative_rotation = 0.0
-                self.active = False
+                self.active_key = None
             return
 
         angle = self.stick_vector.angle
@@ -555,21 +624,16 @@ class TriggerJoystickHandle:
             delta -= 360
         elif delta <= -180:
             delta += 360
-
         self.cumulative_rotation += delta
         self.prev_angle = angle
 
-        if self.cumulative_rotation >= 180:
-            self.key = e.KEY_9
-            self._fire()
-        elif self.cumulative_rotation <= -180:
-            self.key = e.KEY_0
-            self._fire()
-
-    def _fire(self):
-        if not self.active:
-            self.active = True
-            self.ui.write(e.EV_KEY, self.key, 1)
+        if self.active_key is None:
+            if self.cumulative_rotation >= 180:
+                self.ui.write(e.EV_KEY, self.cw_key, 1)
+                self.active_key = self.cw_key
+            elif self.cumulative_rotation <= -180:
+                self.ui.write(e.EV_KEY, self.ccw_key, 1)
+                self.active_key = self.ccw_key
             self.ui.syn()
 
 
@@ -593,10 +657,19 @@ class RightStick:
             "clicked": [False],
         }
 
-        self.trigger_joystick_handle = TriggerJoystickHandle(
+        self.circle_trigger_joystick_handle = CircleTriggerJoystickHandle(
             self.stick_vector,
             self.set_deadzone,
             self.ui,
+            e.KEY_9,
+            e.KEY_0,
+        )
+
+        self.fourway_trigger_joystick_handle = FourwayTriggerJoystickHandle(
+            self.stick_vector,
+            self.set_deadzone,
+            self.ui,
+            [e.KEY_5, e.KEY_6, e.KEY_7, e.KEY_8],
         )
 
     def set_deadzone(self):
@@ -604,15 +677,19 @@ class RightStick:
         if self.stick_vector.in_deadzone_first_time:
             self.stick_vector.in_deadzone_first_time = False
 
-    def set_clicked(self, clicked):
+    def set_clicked_state_reference(self, clicked):
         """Set reference to clicked state."""
         self.state["clicked"] = clicked
+        self.fourway_trigger_joystick_handle.set_clicked_state_reference(clicked)
 
     def handle_event(self, event):
         """Handle the events."""
         self.stick.handle_event(event)
         self.stick_vector.process(self.stick.current_x, self.stick.current_y)
-        self.trigger_joystick_handle.handle_state()
+        if self.state["clicked"][0]:
+            self.fourway_trigger_joystick_handle.handle_state()
+        else:
+            self.circle_trigger_joystick_handle.handle_state()
 
 
 class Trigger:
@@ -700,7 +777,8 @@ class Key:
                     self.look[0] = False
                 self.ui.write(e.EV_KEY, self.keyout, event.value)
                 self.ui.syn()
-            elif self.thumb_clicked is not None and self.button_code is e.BTN_THUMBL:
+            elif self.thumb_clicked is not None \
+                    and self.button_code in (e.BTN_THUMBL, e.BTN_THUMBR):
                 if event.value == 1:
                     now = time.monotonic()
                     if now - self.thumb_clicked_last_time < 0.6:
@@ -728,6 +806,7 @@ class Controller:
         self.device = device
         self.look = [False]
         self.left_stick_clicked = [False]
+        self.right_stick_clicked = [False]
 
     def add_dpad(self):
         """Add D-pad handler."""
@@ -736,10 +815,12 @@ class Controller:
     def add_stick(self, classic=False):
         """Add analog stick handler."""
         left_stick = LeftStick(self.ui, self.device, classic)
-        left_stick.set_look(self.look)
-        left_stick.set_clicked(self.left_stick_clicked)
+        left_stick.set_look_state_reference(self.look)
+        left_stick.set_clicked_state_reference(self.left_stick_clicked)
+        left_stick.set_right_stick_clicked_state_reference(self.right_stick_clicked)
         self.abs_handlers.append(left_stick)
         right_stick = RightStick(self.ui, self.device)
+        right_stick.set_clicked_state_reference(self.right_stick_clicked)
         self.abs_handlers.append(right_stick)
 
     def add_trigger(self, event, keyout):
@@ -766,6 +847,10 @@ class Controller:
         if (event == e.BTN_THUMBL) and (keyout is None):
             key = Key(self.ui, event, keyout)
             key.set_thumb_click(self.left_stick_clicked)
+            self.key_handlers.append(key)
+        elif (event == e.BTN_THUMBR) and (keyout is None):
+            key = Key(self.ui, event, keyout)
+            key.set_thumb_click(self.right_stick_clicked)
             self.key_handlers.append(key)
         elif keyout == e.KEY_KP0:
             key = Key(self.ui, event, keyout)
@@ -828,6 +913,7 @@ def _ps4(overlap):
     controller.add_dpad()
     controller.add_stick(classic=overlap)
     controller.add_key(e.BTN_THUMBL, None)
+    controller.add_key(e.BTN_THUMBR, None)
     controller.add_trigger(e.ABS_Z, e.KEY_DOT)
     controller.add_trigger(e.ABS_RZ, e.KEY_SLASH)
     controller.add_key(e.BTN_EAST, e.KEY_END)
