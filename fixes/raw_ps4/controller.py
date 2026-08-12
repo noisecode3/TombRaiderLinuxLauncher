@@ -738,7 +738,7 @@ class Trigger:
 class Key:
     """Handles key trigger input."""
 
-    def __init__(self, ui, button_code, keyout):
+    def __init__(self, ui, button_code, keyout, shortcut_keyout=None):
         """
         Initialize the Key handler.
 
@@ -746,15 +746,25 @@ class Key:
             ui: The uinput device.
             button_code: The button event code (e.g., BTN_SOUTH).
             keyout: The key code to output (e.g., KEY_LEFTCTRL).
+            shortcut_keyout: Second special shortcut key code to output.
         """
         self.ui = ui
         self.button_code = button_code
         self.keyout = keyout
+        if shortcut_keyout is not None:
+            self.shortcut_keyout = shortcut_keyout
+        else:
+            self.shortcut_keyout = None
+        self.shortcut_state = None
         self.look = None
         self.thumb_clicked = None
         self.thumb_clicked_last_time = time.monotonic()
 
-    def set_look(self, look):
+    def set_shortcut_state_reference(self, shortcut_state):
+        """Set reference to look state."""
+        self.shortcut_state = shortcut_state
+
+    def set_look_reference(self, look):
         """Set reference to look state."""
         self.look = look
 
@@ -785,6 +795,12 @@ class Key:
                         self.thumb_clicked[0] = not self.thumb_clicked[0]
                     else:
                         self.thumb_clicked_last_time = now
+            elif self.shortcut_state is not None \
+                    and self.shortcut_state[0] is True:
+                self.ui.write(e.EV_KEY, self.shortcut_keyout, event.value)
+                self.ui.syn()
+                if event.value == 0:
+                    self.shortcut_state[0] = False
             else:
                 self.ui.write(e.EV_KEY, self.keyout, event.value)
                 self.ui.syn()
@@ -836,13 +852,14 @@ class Controller:
         """
         self.abs_handlers.append(Trigger(self.ui, event, keyout, self.device))
 
-    def add_key(self, event, keyout):
+    def add_key(self, event, keyout=None, shortcut_keyout=None):
         """
         Add digital button-to-key handler.
 
         Args:
             event: The gamepad button code.
             keyout: The keyboard key code to emit.
+            shortcut_keyout: The secondary keyboard key code to emit.
         """
         if (event == e.BTN_THUMBL) and (keyout is None):
             key = Key(self.ui, event, keyout)
@@ -854,7 +871,11 @@ class Controller:
             self.key_handlers.append(key)
         elif keyout == e.KEY_KP0:
             key = Key(self.ui, event, keyout)
-            key.set_look(self.look)
+            key.set_look_reference(self.look)
+            self.key_handlers.append(key)
+        elif keyout is not None and shortcut_keyout is not None:
+            key = Key(self.ui, event, keyout, shortcut_keyout)
+            key.set_shortcut_state_reference(self.right_stick_clicked)
             self.key_handlers.append(key)
         else:
             self.key_handlers.append(Key(self.ui, event, keyout))
@@ -912,19 +933,18 @@ def _ps4(overlap):
     controller = preset.get_controller()
     controller.add_dpad()
     controller.add_stick(classic=overlap)
-    controller.add_key(e.BTN_THUMBL, None)
-    controller.add_key(e.BTN_THUMBR, None)
+    controller.add_key(e.BTN_THUMBL)
+    controller.add_key(e.BTN_THUMBR)
     controller.add_trigger(e.ABS_Z, e.KEY_DOT)
     controller.add_trigger(e.ABS_RZ, e.KEY_SLASH)
     controller.add_key(e.BTN_EAST, e.KEY_END)
     controller.add_key(e.BTN_SOUTH, e.KEY_LEFTCTRL)
     controller.add_key(e.BTN_WEST, e.KEY_LEFTALT)
     controller.add_key(e.BTN_NORTH, e.KEY_SPACE)
-    controller.add_key(e.BTN_TL, e.KEY_KP0)
-    controller.add_key(e.BTN_TR, e.KEY_LEFTSHIFT)
-    controller.add_key(e.BTN_SELECT, e.KEY_COMMA)
-    controller.add_key(e.BTN_START, e.KEY_ESC)
-    controller.add_key(e.BTN_MODE, e.KEY_P)
+    controller.add_key(e.BTN_TL, e.KEY_KP0, e.KEY_J)
+    controller.add_key(e.BTN_TR, e.KEY_LEFTSHIFT, e.KEY_P)
+    controller.add_key(e.BTN_SELECT, e.KEY_COMMA, e.KEY_F5)
+    controller.add_key(e.BTN_START, e.KEY_ESC, e.KEY_F6)
     preset.read_loop()
 
 
