@@ -25,6 +25,8 @@ QString decideExe(const QDir& dir) {
     QString fileName;
     QStringList filters("*.exe");
     QStringList exeFiles = dir.entryList(filters, QDir::Files);
+    LIEF::PE::ParserConfig config;
+    config.parse_exports = false;
 
     for (const QString& file : exeFiles) {
         QString path = dir.filePath(file);
@@ -35,12 +37,15 @@ QString decideExe(const QDir& dir) {
 
         try {
             std::unique_ptr<LIEF::PE::Binary> binary =
-                LIEF::PE::Parser::parse(pathStr);
+                LIEF::PE::Parser::parse(pathStr, config);
 
             bool found = std::any_of(binary->imports().begin(),
                 binary->imports().end(), [](const LIEF::PE::Import& imp) {
-                    return imp.name() == "DDRAW.dll" ||
-                            imp.name() == "d3d11.dll";
+                    QString name = QString::fromStdString(imp.name());
+                    return
+                        name.compare("DDRAW.DLL", Qt::CaseInsensitive) == 0 ||
+                        name.compare("D3D11.DLL", Qt::CaseInsensitive) == 0 ||
+                        name.compare("OPENGL32.DLL", Qt::CaseInsensitive) == 0;
                 });
 
             if (found) {

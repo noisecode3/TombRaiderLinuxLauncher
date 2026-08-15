@@ -18,6 +18,16 @@ import evdev
 from evdev import InputDevice, UInput
 from evdev import ecodes as e
 
+
+class Reference:
+    def __init__(self, value):
+        self.value = value
+    def set(self, value):
+        self.value = value
+    def get(self):
+        return self.value
+
+
 # We test with PS4 for now but we will support all controllers.
 CONTROLLER_NAMES = (
     "Wireless Controller",
@@ -459,26 +469,28 @@ class FourwayTriggerJoystickHandle:
         self.stick_vector = stick_vector
         self.on_deadzone = set_deadzone
         self.ui = ui
-        self.clicked = None
-        self.fourway_active = None
+        self.clicked_state_reference = None
+        self.fourway_active_index = None
         self.fourway_key_list = fourway_key_list
 
     def set_clicked_state_reference(self, clicked):
         """Set reference to clicked state."""
-        self.clicked = clicked
+        self.clicked_state_reference = clicked
 
     def handle_state(self):
         """Handle the states for the joystick trigger."""
         if self.stick_vector.in_deadzone:
             self.on_deadzone()
-            if self.fourway_active is not None:
-                self.ui.write(e.EV_KEY, self.fourway_key_list[self.fourway_active], 0)
-                self.ui.syn()
-                self.fourway_active = None
-                self.clicked[0] = False
+            if self.fourway_active_index is not None:
+                keycode = self.fourway_key_list[self.fourway_active_index]
+                if keycode is not None:
+                    self.ui.write(e.EV_KEY, self.fourway_key_list[self.fourway_active_index], 0)
+                    self.ui.syn()
+                self.fourway_active_index = None
+                self.clicked_state_reference[0] = False
             return
 
-        if self.fourway_active is not None:
+        if self.fourway_active_index is not None:
             return
 
         angle = self.stick_vector.angle
@@ -496,9 +508,11 @@ class FourwayTriggerJoystickHandle:
             self._fire(1)
 
     def _fire(self, index):
-        self.fourway_active = index
-        self.ui.write(e.EV_KEY, self.fourway_key_list[self.fourway_active], 1)
-        self.ui.syn()
+        self.fourway_active_index = index
+        keycode = self.fourway_key_list[self.fourway_active_index]
+        if keycode is not None:
+            self.ui.write(e.EV_KEY, keycode, 1)
+            self.ui.syn()
 
 
 class LeftStick:
@@ -640,15 +654,20 @@ class CircleTriggerJoystickHandle:
 class RightStick:
     """Handle right analog stick input."""
 
-    def __init__(self, ui, device):
+    def __init__(self, ui, device, tr=3):
         """
         Initialize right joystick handler.
 
         Args:
             ui: The uinput device.
             device: The evdev controller input device.
+            tr: Tomb Raider input map type.
 
         """
+        if tr not in (1, 2, 3):
+            print("Object error: Not a good input map type")
+            sys.exit(1)
+
         self.ui = ui
         self.stick = Stick(device, e.ABS_RX, e.ABS_RY)
         self.stick_vector = StickVector()
@@ -657,20 +676,41 @@ class RightStick:
             "clicked": [False],
         }
 
+        ccw_key = None
+        cw_key = None
+        fourway_key_list = None
+        self.circle_trigger_joystick_handle = None
+        self.fourway_trigger_joystick_handle = None
+
+        if tr == 3:
+            ccw_key = e.KEY_9
+            cw_key = e.KEY_0
+            fourway_key_list = [e.KEY_5, e.KEY_6, e.KEY_7, e.KEY_8]
+
+        elif tr == 2:
+            ccw_key = e.KEY_8
+            cw_key = e.KEY_9
+            fourway_key_list = [e.KEY_5, e.KEY_6, e.KEY_7, None]
+
+        elif tr == 1:
+            ccw_key = e.KEY_F5
+            cw_key = e.KEY_F6
+
         self.circle_trigger_joystick_handle = CircleTriggerJoystickHandle(
             self.stick_vector,
             self.set_deadzone,
             self.ui,
-            e.KEY_9,
-            e.KEY_0,
+            ccw_key,
+            cw_key,
         )
 
-        self.fourway_trigger_joystick_handle = FourwayTriggerJoystickHandle(
-            self.stick_vector,
-            self.set_deadzone,
-            self.ui,
-            [e.KEY_5, e.KEY_6, e.KEY_7, e.KEY_8],
-        )
+        if tr != 1:
+            self.fourway_trigger_joystick_handle = FourwayTriggerJoystickHandle(
+                self.stick_vector,
+                self.set_deadzone,
+                self.ui,
+                fourway_key_list,
+            )
 
     def set_deadzone(self):
         """Deactivate all arrow keys."""
@@ -680,13 +720,14 @@ class RightStick:
     def set_clicked_state_reference(self, clicked):
         """Set reference to clicked state."""
         self.state["clicked"] = clicked
-        self.fourway_trigger_joystick_handle.set_clicked_state_reference(clicked)
+        if self.fourway_trigger_joystick_handle is not None:
+            self.fourway_trigger_joystick_handle.set_clicked_state_reference(clicked)
 
     def handle_event(self, event):
         """Handle the events."""
         self.stick.handle_event(event)
         self.stick_vector.process(self.stick.current_x, self.stick.current_y)
-        if self.state["clicked"][0]:
+        if self.state["clicked"][0] and self.fourway_trigger_joystick_handle is not None:
             self.fourway_trigger_joystick_handle.handle_state()
         else:
             self.circle_trigger_joystick_handle.handle_state()
@@ -695,27 +736,36 @@ class RightStick:
 class Trigger:
     """Handles analog trigger input."""
 
-    def __init__(self, ui, event_code, keyout, device):
+    def __init__(self, ui, device, event_in, keyout, shortcut_keyout=None):
         """
         Initialize the Trigger handler.
 
         Args:
-            ui: The uinput device.
-            event_code: The event code for the analog trigger (e.g., ABS_Z).
+            ui: The uinput virtual device.
+            device: The evdev controller input device.
+            event_in: The event code for the analog trigger (e.g., ABS_Z).
             keyout: The key code to output when the trigger is pressed.
+            shortcut_keyout: Second special shortcut key code to output.
         """
         self.range = 1
         self.threshold = 0.80
 
-        if event_code == e.ABS_Z:
+        if event_in == e.ABS_Z:
             abs_z = device.absinfo(e.ABS_Z)
             self.range = abs_z.max - abs_z.min
             self.threshold = 0.90
 
         self.ui = ui
-        self.event_code = event_code
+        self.event_in = event_in
         self.keyout = keyout
+        if shortcut_keyout is not None:
+            self.shortcut_keyout = shortcut_keyout
+        self.shortcut_state = None
         self.pressed = False
+
+    def set_shortcut_state_reference(self, shortcut_state):
+        """Set reference to look state."""
+        self.shortcut_state = shortcut_state
 
     def handle_event(self, event):
         """
@@ -724,13 +774,20 @@ class Trigger:
         Args:
             event: An evdev input event.
         """
-        if event.code == self.event_code:
+        if event.code == self.event_in:
             value = event.value / self.range
             if value > self.threshold and not self.pressed:
-                self.ui.write(e.EV_KEY, self.keyout, 1)
+                if self.shortcut_state is not None and self.shortcut_state[0] is True:
+                    self.ui.write(e.EV_KEY, self.shortcut_keyout, 1)
+                else:
+                    self.ui.write(e.EV_KEY, self.keyout, 1)
                 self.pressed = True
             elif value <= self.threshold and self.pressed:
-                self.ui.write(e.EV_KEY, self.keyout, 0)
+                if self.shortcut_state is not None and self.shortcut_state[0] is True:
+                    self.ui.write(e.EV_KEY, self.shortcut_keyout, 0)
+                    self.shortcut_state[0] = False
+                else:
+                    self.ui.write(e.EV_KEY, self.keyout, 0)
                 self.pressed = False
             self.ui.syn()
 
@@ -738,23 +795,21 @@ class Trigger:
 class Key:
     """Handles key trigger input."""
 
-    def __init__(self, ui, button_code, keyout, shortcut_keyout=None):
+    def __init__(self, ui, event_in, keyout, shortcut_keyout=None):
         """
         Initialize the Key handler.
 
         Args:
             ui: The uinput device.
-            button_code: The button event code (e.g., BTN_SOUTH).
+            event_in: The button event code (e.g., BTN_SOUTH).
             keyout: The key code to output (e.g., KEY_LEFTCTRL).
             shortcut_keyout: Second special shortcut key code to output.
         """
         self.ui = ui
-        self.button_code = button_code
+        self.event_in = event_in
         self.keyout = keyout
         if shortcut_keyout is not None:
             self.shortcut_keyout = shortcut_keyout
-        else:
-            self.shortcut_keyout = None
         self.shortcut_state = None
         self.look = None
         self.thumb_clicked = None
@@ -779,8 +834,8 @@ class Key:
         Args:
             event: An evdev input event.
         """
-        if event.code == self.button_code:
-            if self.look is not None and self.button_code is e.BTN_TL:
+        if event.code == self.event_in:
+            if self.look is not None and self.event_in is e.BTN_TL:
                 if event.value == 1:
                     self.look[0] = True
                 else:
@@ -788,7 +843,7 @@ class Key:
                 self.ui.write(e.EV_KEY, self.keyout, event.value)
                 self.ui.syn()
             elif self.thumb_clicked is not None \
-                    and self.button_code in (e.BTN_THUMBL, e.BTN_THUMBR):
+                    and self.event_in in (e.BTN_THUMBL, e.BTN_THUMBR):
                 if event.value == 1:
                     now = time.monotonic()
                     if now - self.thumb_clicked_last_time < 0.6:
@@ -828,18 +883,18 @@ class Controller:
         """Add D-pad handler."""
         self.abs_handlers.append(Dpad(self.ui))
 
-    def add_stick(self, classic=False):
+    def add_stick(self, classic=False, tr=3):
         """Add analog stick handler."""
         left_stick = LeftStick(self.ui, self.device, classic)
         left_stick.set_look_state_reference(self.look)
         left_stick.set_clicked_state_reference(self.left_stick_clicked)
         left_stick.set_right_stick_clicked_state_reference(self.right_stick_clicked)
         self.abs_handlers.append(left_stick)
-        right_stick = RightStick(self.ui, self.device)
+        right_stick = RightStick(self.ui, self.device, tr)
         right_stick.set_clicked_state_reference(self.right_stick_clicked)
         self.abs_handlers.append(right_stick)
 
-    def add_trigger(self, event, keyout):
+    def add_trigger(self, event, keyout, shortcut_keyout=None):
         """
         Add analog trigger handler.
 
@@ -849,8 +904,15 @@ class Controller:
         Args:
             event: The analog axis code (e.g., ABS_Z).
             keyout: The corresponding keyboard output code.
+            shortcut_keyout: The secondary keyboard key code to emit.
         """
-        self.abs_handlers.append(Trigger(self.ui, event, keyout, self.device))
+        if shortcut_keyout is not None:
+            trigger = Trigger(self.ui, self.device, event, keyout, shortcut_keyout)
+            trigger.set_shortcut_state_reference(self.right_stick_clicked)
+            self.abs_handlers.append(trigger)
+        else:
+            trigger = Trigger(self.ui, self.device, event, keyout)
+            self.abs_handlers.append(trigger)
 
     def add_key(self, event, keyout=None, shortcut_keyout=None):
         """
@@ -928,11 +990,11 @@ class Preset:
             print("\nExiting.")
 
 
-def _ps4(overlap):
+def _ps4_3to5(overlap):
     preset = Preset()
     controller = preset.get_controller()
     controller.add_dpad()
-    controller.add_stick(classic=overlap)
+    controller.add_stick(classic=overlap, tr=3)
     controller.add_key(e.BTN_THUMBL)
     controller.add_key(e.BTN_THUMBR)
     controller.add_trigger(e.ABS_Z, e.KEY_DOT)
@@ -945,6 +1007,45 @@ def _ps4(overlap):
     controller.add_key(e.BTN_TR, e.KEY_LEFTSHIFT, e.KEY_P)
     controller.add_key(e.BTN_SELECT, e.KEY_COMMA, e.KEY_F5)
     controller.add_key(e.BTN_START, e.KEY_ESC, e.KEY_F6)
+    preset.read_loop()
+
+
+def _ps4_2(overlap):
+    preset = Preset()
+    controller = preset.get_controller()
+    controller.add_dpad()
+    controller.add_stick(classic=overlap, tr=2)
+    controller.add_key(e.BTN_THUMBL)
+    controller.add_key(e.BTN_THUMBR)
+    controller.add_trigger(e.ABS_Z, e.KEY_DELETE)
+    controller.add_trigger(e.ABS_RZ, e.KEY_PAGEDOWN)
+    controller.add_key(e.BTN_EAST, e.KEY_END)
+    controller.add_key(e.BTN_SOUTH, e.KEY_LEFTCTRL)
+    controller.add_key(e.BTN_WEST, e.KEY_LEFTALT)
+    controller.add_key(e.BTN_NORTH, e.KEY_SPACE)
+    controller.add_key(e.BTN_TL, e.KEY_KP0)
+    controller.add_key(e.BTN_TR, e.KEY_LEFTSHIFT)
+    controller.add_key(e.BTN_SELECT, e.KEY_COMMA, e.KEY_F5)
+    controller.add_key(e.BTN_START, e.KEY_ESC, e.KEY_F6)
+    preset.read_loop()
+
+
+def _ps4_1(overlap):
+    preset = Preset()
+    controller = preset.get_controller()
+    controller.add_dpad()
+    controller.add_stick(classic=overlap, tr=1)
+    controller.add_key(e.BTN_THUMBL)
+    controller.add_key(e.BTN_THUMBR)
+    controller.add_trigger(e.ABS_Z, e.KEY_DELETE)
+    controller.add_trigger(e.ABS_RZ, e.KEY_PAGEDOWN)
+    controller.add_key(e.BTN_EAST, e.KEY_END)
+    controller.add_key(e.BTN_SOUTH, e.KEY_LEFTCTRL)
+    controller.add_key(e.BTN_WEST, e.KEY_LEFTALT)
+    controller.add_key(e.BTN_NORTH, e.KEY_SPACE)
+    controller.add_key(e.BTN_TL, e.KEY_KP0, e.KEY_J)
+    controller.add_key(e.BTN_TR, e.KEY_LEFTSHIFT, e.KEY_P)
+    controller.add_key(e.BTN_START, e.KEY_ESC)
     preset.read_loop()
 
 
@@ -970,17 +1071,35 @@ def _main():
     parser.add_argument(
         "mode",
         type=str,
-        choices=["ps4", "ps4-overlap", "only-ps4-share", "only-left-stick"],
+        choices=[
+            "ps4-3to4",
+            "ps4-3to4-overlap",
+            "ps4-2",
+            "ps4-2-overlap",
+            "ps4-1",
+            "ps4-1-overlap",
+            "only-ps4-share",
+            "only-left-stick",
+        ],
         help="Select input mapping mode",
     )
-    parser.add_argument('--version', action='version', version='%(prog)s 1.0')
+
+    parser.add_argument('--version', action='version', version='%(prog)s 1.0.0')
 
     args = parser.parse_args()
 
-    if args.mode == "ps4":
-        _ps4(False)
-    if args.mode == "ps4-overlap":
-        _ps4(True)
+    if args.mode == "ps4-3to4":
+        _ps4_3to5(False)
+    elif args.mode == "ps4-3to4-overlap":
+        _ps4_3to5(True)
+    if args.mode == "ps4-2":
+        _ps4_2(False)
+    elif args.mode == "ps4-2-overlap":
+        _ps4_2(True)
+    if args.mode == "ps4-1":
+        _ps4_1(False)
+    elif args.mode == "ps4-1-overlap":
+        _ps4_1(True)
     elif args.mode == "only-ps4-share":
         _only_ps4_share()
     elif args.mode == "only-left-stick":
