@@ -208,7 +208,7 @@ class RequestHandler:
                     temp_cert_path = self.set_leaf(curl)
                     curl.setopt(pycurl.SSL_VERIFYPEER, 1)
                     curl.setopt(pycurl.SSL_VERIFYHOST, 2)
-                    pinned_key = "sha256//IDksJf2xwZrYmcTR1ygf1kuLPU/M2fNbx9+egDYjjBQ="
+                    pinned_key = "sha256//2MZQEwUwltI3mozdR9BKE9Ktsi91MNSrIOEu4VipXGI="
                     curl.setopt(pycurl.PINNEDPUBLICKEY, pinned_key)
 
                 headers_list = [
