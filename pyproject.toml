@@ -1,0 +1,2 @@
+[tool.ruff.lint.isort]
+known-first-party = ["common", "dpad", "joystick", "key", "trigger"]
