@@ -56,59 +56,59 @@ class Controller:
             else:
                 raise TypeError(f"components[{i}]:'{comp_type}' returned unkown type {type(obj)!r}")
 
-            joysticks = (h for h in self.abs_handlers if isinstance(h, Joystick))
+        joysticks = (h for h in self.abs_handlers if isinstance(h, Joystick))
 
-            for j in joysticks:
+        for j in joysticks:
 
-                if j.double_click_key is not None:
+            if j.double_click_key is not None:
 
-                    jd = j.double_click_key
-                    output_key = jd["output_key"]
-                    if jd["toggle_shortcut_mode"] is not None and \
-                            jd["toggle_shortcut_mode"] is True:
-                        output_key = None
+                jd = j.double_click_key
+                output_key = jd["output_key"]
+                if jd["toggle_shortcut_mode"] is not None and \
+                        jd["toggle_shortcut_mode"] is True:
+                    output_key = None
 
-                    key_config = {
-                        "type": "key",
-                        "mapping": {
-                            "input_key": "BTN_THUMBR",
-                            "output_key": output_key,
-                            "shortcut_key": None
-                        }
+                key_config = {
+                    "type": "key",
+                    "mapping": {
+                        "input_key": "BTN_THUMBR",
+                        "output_key": output_key,
+                        "shortcut_key": None
                     }
+                }
 
-                    key = self.build_key(key_config)
-                    key.input_key = j.double_click_key["input_key"]
-                    key.thumb_key = key.input_key
+                key = self.build_key(key_config)
+                key.input_key = j.double_click_key["input_key"]
+                key.thumb_key = key.input_key
 
-                    if jd["toggle_shortcut_mode"] is not None and \
-                            jd["toggle_shortcut_mode"] is True:
-                        key.set_thumb_click(self.shortcut_state_ref)
-                        j.set_clicked_shortcut_state_reference(self.shortcut_state_ref)
+                if jd["toggle_shortcut_mode"] is not None and \
+                        jd["toggle_shortcut_mode"] is True:
+                    key.set_thumb_click(self.shortcut_state_ref)
+                    j.set_clicked_shortcut_state_reference(self.shortcut_state_ref)
 
-                    if jd["toggle_hold_output_key"] is not None and \
-                            jd["toggle_hold_output_key"] is True:
-                        pass
-
-                    self.key_handlers.append(key)
-
-                if isinstance(j.use_sector_size_for_look_key, int) and \
-                        j.use_sector_size_for_look_key in e.KEY:
-                    self.look_key = j.use_sector_size_for_look_key
-                    j.set_look_state_reference(self.look_state_ref)
-
-            triggers = (h for h in self.abs_handlers if isinstance(h, Trigger))
-            for t in triggers:
-                t.set_shortcut_state_reference(self.shortcut_state_ref)
-                if t.event_in == self.look_key:
+                if jd["toggle_hold_output_key"] is not None and \
+                        jd["toggle_hold_output_key"] is True:
                     pass
 
-            keys = (h for h in self.key_handlers if isinstance(h, Key))
-            for k in keys:
-                k.set_shortcut_state_reference(self.shortcut_state_ref)
-                if k.input_key == self.look_key:
-                    k.set_look_reference(self.look_state_ref)
-                    k.this_is_look = True
+                self.key_handlers.append(key)
+
+            if isinstance(j.use_sector_size_for_look_key, int) and \
+                    j.use_sector_size_for_look_key in e.KEY:
+                self.look_key = j.use_sector_size_for_look_key
+                j.set_look_state_reference(self.look_state_ref)
+
+        triggers = (h for h in self.abs_handlers if isinstance(h, Trigger))
+        for t in triggers:
+            t.set_shortcut_state_reference(self.shortcut_state_ref)
+            if t.event_in == self.look_key:
+                pass
+
+        keys = (h for h in self.key_handlers if isinstance(h, Key))
+        for k in keys:
+            k.set_shortcut_state_reference(self.shortcut_state_ref)
+            if k.output_key == self.look_key:
+                k.set_look_reference(self.look_state_ref)
+                k.this_is_look = True
 
     def build_dpad(self, component: dict) -> Dpad:
         """Add D-pad handler."""
