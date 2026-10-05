@@ -29,7 +29,7 @@ class Key:
             keyout: The key code to output (e.g., KEY_LEFTCTRL).
             shortcut_keyout: Second special shortcut key code to output.
 
-
+        Config example:
             {
                 "type": "key",
                 "mapping": {
@@ -49,6 +49,9 @@ class Key:
         output_key_str = mapping_dict.get("output_key")
         if output_key_str is not None:
             self.output_key = get_ecode(output_key_str, "mapping")
+            self.handle_event = self._handle_key_event
+        else:
+            self.handle_event = self._handle_thumb_event
 
         shortcut_key_str = mapping_dict.get("shortcut_key")
         if shortcut_key_str is not None:
@@ -65,40 +68,36 @@ class Key:
         self.state["shortcut_state"] = shortcut_state
 
     def set_look_reference(self, look: Reference):
-        """Set reference to look state."""
+        """Set reference to look state. Requires a key-mode handler."""
+        if self.output_key is None:
+            raise ValueError(
+                f"set_look_reference requires output_key (input_key={self.input_key}); "
+                "thumb handlers do not support look"
+            )
         self.state["look"] = look
 
     def set_thumb_click(self, thumb_clicked: Reference):
         """Set reference to thumbl clicked state."""
         self.state["thumb_clicked"] = thumb_clicked
 
-    def handle_event(self, event):
-        """
-        Handle digital button events and emit key presses/releases.
-
-        Args:
-            event: An evdev input event.
-        """
+    def _handle_key_event(self, event):
         if event.code == self.input_key:
-            if self.this_is_look is True:
-                if event.value == 1:
-                    self.state["look"].set(True)
-                else:
-                    self.state["look"].set(False)
-                self.ui.write(e.EV_KEY, self.input_key, event.value)
-                self.ui.syn()
-            elif self.thumb_key is not None and self.input_key == self.thumb_key:
-                if event.value == 1:
-                    now = time.monotonic()
-                    if now - self.thumb_clicked_last_time < 0.6:
-                        self.state["thumb_clicked"].set(not self.state["thumb_clicked"].get())
-                    else:
-                        self.thumb_clicked_last_time = now
-            elif self.state["shortcut_state"].get() is True and self.shortcut_key is not None:
-                self.ui.write(e.EV_KEY, self.shortcut_key, event.value)
-                self.ui.syn()
+            key = self.output_key
+
+            if self.this_is_look:
+                self.state["look"].set(event.value == 1)
+            elif self.state["shortcut_state"].get() and self.shortcut_key is not None:
+                key = self.shortcut_key
                 if event.value == 0:
                     self.state["shortcut_state"].set(False)
+
+            self.ui.write(e.EV_KEY, key, event.value)
+            self.ui.syn()
+
+    def _handle_thumb_event(self, event):
+        if event.code == self.input_key and event.value == 1:
+            now = time.monotonic()
+            if now - self.thumb_clicked_last_time < 0.6:
+                self.state["thumb_clicked"].set(not self.state["thumb_clicked"].get())
             else:
-                self.ui.write(e.EV_KEY, self.output_key, event.value)
-                self.ui.syn()
+                self.thumb_clicked_last_time = now

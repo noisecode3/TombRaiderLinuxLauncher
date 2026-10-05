@@ -1,5 +1,6 @@
-bs4
-pillow
-cryptography
 pycurl
 tqdm
+cryptography
+beautifulsoup4
+pillow
+evdev

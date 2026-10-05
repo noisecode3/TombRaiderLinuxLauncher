@@ -631,17 +631,14 @@ class Joystick:
             )
 
         self.double_click_key = config["double_click_key"]
-        if self.double_click_key is not None:
-            self.double_click_key["input_key"] = \
-                    get_ecode(self.double_click_key["input_key"], "double_click_key")
-            """
-                "double_click_key": {
-                    "input_key": "BTN_THUMBR",
-                    "toggle_shortcut_mode": True,
-                    "toggle_hold_output_key": False,
-                    "output_key": None
-                }
-            """
+        """
+            "double_click_key": {
+                "input_key": "BTN_THUMBR",
+                "toggle_shortcut_mode": True,
+                "toggle_hold_output_key": False,
+                "output_key": None
+            }
+        """
 
         self.state: dict[str, Reference] = {
             "clicked": Reference(False),
