@@ -136,8 +136,6 @@ def test_look_writes_output_key():
 
 def _thumb_key():
     handler, ui = make_key()
-    handler.thumb_key = e.BTN_SOUTH
-    handler.thumb_clicked_last_time = 0.0
     clicked = Reference(False)
     handler.set_thumb_click(clicked)
     return handler, ui, clicked

@@ -97,15 +97,14 @@ class Controller:
         triggers = (h for h in self.abs_handlers if isinstance(h, Trigger))
         for t in triggers:
             t.set_shortcut_state_reference(self.shortcut_state_ref)
-            if t.event_in == self.look_key:
-                pass
+            if t.keys.output == self.look_key:
+                t.set_look_reference(self.look_state_ref)
 
         keys = (h for h in self.key_handlers if isinstance(h, Key))
         for k in keys:
             k.set_shortcut_state_reference(self.shortcut_state_ref)
             if k.output_key == self.look_key:
                 k.set_look_reference(self.look_state_ref)
-                k.this_is_look = True
 
     def build_dpad(self, component: dict) -> Dpad:
         """Add D-pad handler."""
