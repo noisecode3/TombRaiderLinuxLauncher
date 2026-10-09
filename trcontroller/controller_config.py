@@ -81,7 +81,8 @@ class Controller:
                 if j.double_click_key["toggle_shortcut_mode"] is not None and \
                         j.double_click_key["toggle_shortcut_mode"] is True:
                     key.set_thumb_click(self.shortcut_state_ref)
-                    j.set_clicked_shortcut_state_reference(self.shortcut_state_ref)
+
+                j.set_clicked_shortcut_state_reference(self.shortcut_state_ref)
 
                 if j.double_click_key["toggle_hold_output_key"] is not None and \
                         j.double_click_key["toggle_hold_output_key"] is True:

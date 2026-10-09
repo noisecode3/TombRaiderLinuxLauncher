@@ -2,10 +2,8 @@
 
 Default configuration supports PS4 out of the box.
 
-> **Pre-alpha release, full of bugs.**
+> **Pre-alpha release.**
 > OBS: This is the first time I've made a modular program based on JSON.
-> The project is currently in a "broken" state and I'm not happy with it yet.
-> Every component clearly needs tests (a component = a controller/input part: key, trigger, dpad, or joystick).
 
 ## How it works
 
