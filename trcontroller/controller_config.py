@@ -62,15 +62,15 @@ class Controller:
 
             if j.double_click_key is not None:
 
-                output_key = j.double_click_key["output_key"]
-                if j.double_click_key["toggle_shortcut_mode"] is not None and \
-                        j.double_click_key["toggle_shortcut_mode"] is True:
+                output_key = j.double_click_key.output_key_str
+                if j.double_click_key.toggle_shortcut_mode is not None and \
+                        j.double_click_key.toggle_shortcut_mode is True:
                     output_key = None
 
                 key_config = {
                     "type": "key",
                     "mapping": {
-                        "input_key": j.double_click_key["input_key"],
+                        "input_key": j.double_click_key.input_key_str,
                         "output_key": output_key,
                         "shortcut_key": None
                     }
@@ -78,14 +78,14 @@ class Controller:
 
                 key = self.build_key(key_config)
 
-                if j.double_click_key["toggle_shortcut_mode"] is not None and \
-                        j.double_click_key["toggle_shortcut_mode"] is True:
+                if j.double_click_key.toggle_shortcut_mode is not None and \
+                        j.double_click_key.toggle_shortcut_mode is True:
                     key.set_thumb_click(self.shortcut_state_ref)
 
                 j.set_clicked_shortcut_state_reference(self.shortcut_state_ref)
 
-                if j.double_click_key["toggle_hold_output_key"] is not None and \
-                        j.double_click_key["toggle_hold_output_key"] is True:
+                if j.double_click_key.toggle_hold_output_key is not None and \
+                        j.double_click_key.toggle_hold_output_key is True:
                     pass
 
                 self.key_handlers.append(key)

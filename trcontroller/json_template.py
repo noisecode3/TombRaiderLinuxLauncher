@@ -39,8 +39,8 @@ def make_json_template_only_left_stick():
                     "use_sector_size_for_movement": False,
                     "use_sector_size_for_look_key": None,
                     "up": {
-                        "sub_right_up": 60.0,
                         "sub_left_up": 120.0,
+                        "sub_right_up": 60.0,
                         "size": 138.0,
                         "output_key": "KEY_UP"
                     },
@@ -57,8 +57,8 @@ def make_json_template_only_left_stick():
                         "output_key": "KEY_DOWN"
                     },
                     "left": {
-                        "left_up": 160.0,
                         "left_down": -160.0,
+                        "left_up": 160.0,
                         "size": 138.0,
                         "output_key": "KEY_LEFT"
                     }
@@ -147,8 +147,8 @@ def make_json_template(mode):
                     "use_sector_size_for_movement": False,
                     "use_sector_size_for_look_key": "KEY_KP0",
                     "up": {
-                        "sub_right_up": 60.0,
                         "sub_left_up": 120.0,
+                        "sub_right_up": 60.0,
                         "size": 138.0,
                         "output_key": "KEY_UP"
                     },
@@ -165,8 +165,8 @@ def make_json_template(mode):
                         "output_key": "KEY_DOWN"
                     },
                     "left": {
-                        "left_up": 160.0,
                         "left_down": -160.0,
+                        "left_up": 160.0,
                         "size": 138.0,
                         "output_key": "KEY_LEFT"
                     }

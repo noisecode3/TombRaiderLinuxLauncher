@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21.4)
 
 project(TombRaiderLinuxLauncher)
 
@@ -54,7 +54,7 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt")
     update_submodules()
     file(READ "${CMAKE_SOURCE_DIR}/libs/miniz/CMakeLists.txt" MINIZ_CMAKE)
     string(REPLACE "cmake_minimum_required(VERSION 3.5)"
-        "cmake_minimum_required(VERSION 3.16)"
+        "cmake_minimum_required(VERSION 3.21.4)"
         NEW_MINIZ_CMAKE
         "${MINIZ_CMAKE}"
     )

@@ -58,8 +58,13 @@ def get_key(obj, key: str, path: str, expected_type: type = dict):
     return value
 
 
-def get_ecode(name: str, path: str):
+def get_ecode(name: str, path: str) -> int:
     """Resolve a string like 'KEY_LEFT' to its evdev ecode constant."""
+    if not isinstance(name, str):
+        raise TypeError(
+            f"Config key '{path}' must be a str, got {type(name).__name__}."
+        )
+
     try:
         return getattr(e, name)
     except AttributeError as exc:

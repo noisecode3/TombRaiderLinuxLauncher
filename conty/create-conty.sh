@@ -4,20 +4,6 @@ cd "$(dirname "$0")"
 SCRIPT_DIR="$(pwd)"
 CONTY_DIR="$SCRIPT_DIR/Conty"
 
-# this is done so that if we need sudo after create-arch-bootstrap.sh
-# we dont ask for password 2 times, we keep the session alive
-MAIN_PID=$$
-(
-  start=$(date +%s)
-  while kill -0 "$MAIN_PID" 2>/dev/null; do
-    now=$(date +%s)
-    [ $((now - start)) -gt 1800 ] && exit
-    sudo -n -v 2>/dev/null
-    sleep 60
-  done
-) &
-SUDO_LOOP_PID=$!
-
 # unmount any leftover chroot binds before we touch anything
 # to avoid the EPERM-storm and total system crash from rm -fr
 safe_remove_conty() {
@@ -40,7 +26,6 @@ safe_remove_conty() {
 
 cleanup() {
   safe_remove_conty "$CONTY_DIR"
-  kill "$SUDO_LOOP_PID" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -117,7 +102,7 @@ awk '
     print "echo \047en_US.UTF-8 UTF-8\047 > /etc/locale.gen && locale-gen"
     print "echo \047LANG=en_US.UTF-8\047 > /etc/locale.conf"
     print "cd /root"
-    print "curl -L -O https://xff.cz/megatools/builds/builds/megatools-1.11.5.20250706.tar.gz"
+    print "curl -L -O https://xff.cz/megatools/builds/megatools-1.11.5.20250706.tar.gz"
     print "echo \04736f18f41f6e6323e34d939cb06086048 megatools-1.11.5.20250706.tar.gz\047 | md5sum -c || exit 1"
     print "tar xvzf megatools-1.11.5.20250706.tar.gz"
     print "rm megatools-1.11.5.20250706.tar.gz"

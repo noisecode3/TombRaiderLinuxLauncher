@@ -32,19 +32,20 @@ class Key:
 
         Args:
             ui: The uinput device.
-            event_in: The button event code (e.g., BTN_SOUTH).
-            keyout: The key code to output (e.g., KEY_LEFTCTRL).
-            shortcut_key: Second special shortcut key code to output.
+            config:
+                input_key: The button event code (e.g., BTN_SOUTH).
+                output_key: The key code to output (e.g., KEY_LEFTCTRL).
+                shortcut_key: Second special shortcut key code to output.
 
         Config example:
-            {
-                "type": "key",
-                "mapping": {
-                    "input_key": "BTN_SOUTH",
-                    "output_key": "KEY_LEFTCTRL",
-                    "shortcut_key": None
-                }
-            },
+        {
+            "type": "key",
+            "mapping": {
+                "input_key": "BTN_SOUTH",
+                "output_key": "KEY_LEFTCTRL",
+                "shortcut_key": None
+            }
+        }
 
         """
         self.ui = ui

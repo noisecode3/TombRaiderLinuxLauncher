@@ -1,4 +1,6 @@
 """Joystick mapper objects."""
+from __future__ import annotations
+
 import math
 import sys
 import time
@@ -395,6 +397,18 @@ class FourwayTriggerJoystickHandle:
 class CircleTriggerJoystickHandle:
     """Set controller to use half circle to trigger 2 shortcuts."""
 
+    cw_key: int | None = None
+    ccw_key: int | None = None
+
+    @dataclass
+    class _States:
+        active_key: int | None = None
+        start_angle: float = 90.0
+        start_tolerance: float = 45.0
+        prev_angle: float | None = None
+        cumulative_rotation: float = 0.0
+        armed: bool = True
+
     def __init__(self, stick_vector, set_deadzone, ui, cw_key, ccw_key):
         """
         Initialize trigger joystick handler.
@@ -410,54 +424,146 @@ class CircleTriggerJoystickHandle:
         self.stick_vector = stick_vector
         self.on_deadzone = set_deadzone
         self.ui = ui
-        self.prev_angle = None
-        self.cumulative_rotation = 0.0
-        self.active_key = None
+        self.state = self._States()
         self.cw_key = cw_key
         self.ccw_key = ccw_key
+        self._reset()
+
+    def _angle_diff(self, a, b):
+        """Signed shortest difference a - b in degrees, range [-180, 180)."""
+        return (a - b + 180) % 360 - 180
+
+    def _reset(self):
+        self.state.prev_angle = None
+        self.state.cumulative_rotation = 0.0
+        self.state.active_key = None
+        self.state.armed = True
 
     def handle_state(self):
-        """Handle the states for the circle trigger."""
+        """Handle the states for the circle joystick trigger."""
         if self.stick_vector.in_deadzone:
             self.on_deadzone()
-            if self.active_key is not None:
-                self.ui.write(e.EV_KEY, self.active_key, 0)
+            if self.state.active_key is not None:
+                self.ui.write(e.EV_KEY, self.state.active_key, 0)
                 self.ui.syn()
-                self.prev_angle = None
-                self.cumulative_rotation = 0.0
-                self.active_key = None
+            self._reset()
             return
 
         angle = self.stick_vector.angle
-        if self.prev_angle is None:
-            self.prev_angle = angle
+
+        if self.state.prev_angle is None:
+            self.state.prev_angle = angle
+            angle_diff = abs(self._angle_diff(angle, self.state.start_angle))
+            self.state.armed = (
+                self.state.start_angle is None or
+                angle_diff <= self.state.start_tolerance
+            )
             return
 
-        delta = angle - self.prev_angle
-        if delta > 180:
-            delta -= 360
-        elif delta <= -180:
-            delta += 360
-        self.cumulative_rotation += delta
-        self.prev_angle = angle
+        if not self.state.armed:
+            return
 
-        if self.active_key is None:
-            if self.cumulative_rotation >= 180:
-                self.ui.write(e.EV_KEY, self.cw_key, 1)
-                self.active_key = self.cw_key
-            elif self.cumulative_rotation <= -180:
-                self.ui.write(e.EV_KEY, self.ccw_key, 1)
-                self.active_key = self.ccw_key
+        self.state.cumulative_rotation += self._angle_diff(angle, self.state.prev_angle)
+        self.state.prev_angle = angle
+
+        if self.state.active_key is None:
+            if self.state.cumulative_rotation >= 180:
+                key = self.ccw_key
+            elif self.state.cumulative_rotation <= -180:
+                key = self.cw_key
+            else:
+                return
+            self.ui.write(e.EV_KEY, key, 1)
             self.ui.syn()
+            self.state.active_key = key
 
 
 class Joystick:
     """Handle analog stick input."""
 
+    ui: evdev.UInput
+    device: evdev.InputDevice
+    use_sector_size_for_look_key: int | None = None
+
+    @dataclass
+    class _Stick:
+        internal: Stick | None = None
+        vector: StickVector | None = None
+        directional_buttons: DirectionalButtons | None = None
+
+    @dataclass
+    class _Handlers:
+        default: DefaultJoystickHandle | None = None
+        sector_size: SectorSizeJoystickHandle | None = None
+        circle_trigger: CircleTriggerJoystickHandle | None = None
+        fourway_trigger: FourwayTriggerJoystickHandle | None = None
+
+    @dataclass
+    class _State:
+        clicked: Reference
+        clicked_shortcut: Reference
+        clicked_look: Reference
+        classic_overlap: bool = False
+
+    @dataclass
+    class _DoubleClickKey:
+        input_key_str: str | None = None
+        output_key_str: str | None = None
+        toggle_shortcut_mode: bool = False
+        toggle_hold_output_key: bool = False
+
     def __init__(self, ui: evdev.UInput, device: evdev.InputDevice, config: dict):
         """
         Initialize left joystick handler.
 
+        Args:
+            ui: The uinput device.
+            device: The evdev controller input device.
+            config:
+                input_x: The event code for the analog stick axis (e.g., ABS_X).
+                input_y: The event code for the analog stick axis (e.g., ABS_Y).
+                use_sector_size_for_movement: If true, only trigger by sector size.
+                use_sector_size_for_look_key: Special keycode for toggle sector size movement.
+                up, right, down, left:
+                    size: 90.0-180.0 sector size used for look and classic 8-way overlapping.
+                    output_key: output evdev keycode.
+                    sector points:
+                        sub_left_up": a
+                        sub_right_up b
+                        "right_up": c
+                        "right_down": d
+                        "sub_right_down": e
+                        "sub_left_down": f
+                        "left_down": g
+                        "left_up": h
+
+                             (Up)
+                           a  90° b
+                        135°       45°
+                       h              c
+                    +180°            0° (Right)
+                       g              d
+                       -135°      -45°
+                           f -90° e
+                            (Down)
+
+            circle_trigger_shortcuts:
+                cw_key: Clockwise starts from UP to right to down, triggering evdev keycode.
+                ccw_key: Counter clockwise starts from UP to left to down, triggering evdev keycode.
+
+            fourway_trigger_shortcuts:
+                up: The output event code like KEY_1
+                down: The output event code like KEY_2
+                left: The output event code like KEY_3
+                right: The output event code like KEY_4
+
+            double_click_key
+                input_key: The event code for the thumb click button, like BTN_THUMBL.
+                toggle_shortcut_mode: If it should toggle shortcut mode or output_key.
+                toggle_hold_output_key: if output_key should be toggle clicked.
+                output_key: The output event code.
+
+        Config example:
         {
             "type": "joystick",
             "axes": {
@@ -520,37 +626,28 @@ class Joystick:
             }
         }
 
-        Args:
-            ui: The uinput device.
-            device: The evdev controller input device.
-            classic_overlap: if set there is only a simple 8-way stateless input
-
         """
         self.ui = ui
-        self.stick = Stick(
+        self.stick = self._Stick()
+        self.stick.internal = Stick(
             device,
             get_ecode(config["axes"]["input_x"], "axes.input_x"),
             get_ecode(config["axes"]["input_y"], "axes.input_y"),
         )
-        self.direction = None
-        self.stick_vector = StickVector()
-
-        self.default_joystick_handle = None
-        self.sector_size_joystick_handle = None
-        self.circle_trigger_joystick_handle = config["circle_trigger_shortcuts"]
-        self.use_sector_size_for_look_key = None
-
+        self.stick.vector = StickVector()
+        self.handlers = self._Handlers()
+        self.state = self._State(Reference(False), Reference(False), Reference(False))
         sectors = config["sectors"]
-        self.classic_overlap = False
 
         if sectors is not None:
-            self.direction = DirectionalButtons(ui, sectors)
-            use_sector_size_for_look_key = sectors["use_sector_size_for_look_key"]
-            self.use_sector_size_for_look_key = get_ecode(use_sector_size_for_look_key, "sectors")
-            classic_overlap = sectors["use_sector_size_for_movement"]
-            if classic_overlap is None:
-                classic_overlap = False
-            self.classic_overlap = classic_overlap
+            self.stick.directional_buttons = DirectionalButtons(ui, sectors)
+            self.use_sector_size_for_look_key = get_ecode(
+                sectors["use_sector_size_for_look_key"],
+                "sectors"
+            )
+
+            if isinstance(sectors["use_sector_size_for_movement"], bool):
+                self.state.classic_overlap = sectors["use_sector_size_for_movement"]
 
             attr_sources = {
                 "sub_right_up": ("up", "sub_right_up"),
@@ -569,9 +666,9 @@ class Joystick:
                 if sectors[sector][key] is not None
             })
 
-            self.default_joystick_handle = DefaultJoystickHandle(
-                self.direction,
-                self.stick_vector,
+            self.handlers.default = DefaultJoystickHandle(
+                self.stick.directional_buttons,
+                self.stick.vector,
                 self.set_deadzone,
                 sector_points_default,
             )
@@ -593,72 +690,77 @@ class Joystick:
             if point_size is not None:
                 sector_size_input["left"] = point_size
 
-            self.sector_size_joystick_handle = SectorSizeJoystickHandle(
-                self.direction,
-                self.stick_vector,
+            self.handlers.sector_size = SectorSizeJoystickHandle(
+                self.stick.directional_buttons,
+                self.stick.vector,
                 self.set_deadzone,
                 sector_size_input,
             )
 
-        elif self.circle_trigger_joystick_handle is not None:
-            cw_key_str = self.circle_trigger_joystick_handle["cw_key"]
-            ccw_key_str = self.circle_trigger_joystick_handle["ccw_key"]
-            cw_key = get_ecode(cw_key_str, "circle_trigger_shortcuts")
-            ccw_key = get_ecode(ccw_key_str, "circle_trigger_shortcuts")
+        elif config["circle_trigger_shortcuts"] is not None:
+            cw_key = get_ecode(
+                config["circle_trigger_shortcuts"]["cw_key"],
+                "circle_trigger_shortcuts"
+            )
+            ccw_key = get_ecode(
+                config["circle_trigger_shortcuts"]["ccw_key"],
+                "circle_trigger_shortcuts"
+            )
             if (cw_key is not None) or (ccw_key is not None):
-                self.circle_trigger_joystick_handle = CircleTriggerJoystickHandle(
-                    self.stick_vector,
+                self.handlers.circle_trigger = CircleTriggerJoystickHandle(
+                    self.stick.vector,
                     self.set_deadzone,
                     self.ui,
                     cw_key,
                     ccw_key,
                 )
 
-        self.fourway_trigger_joystick_handle = None
-        fourway_trigger_shortcuts = config["fourway_trigger_shortcuts"]
-        if fourway_trigger_shortcuts is not None:
-
-            self.fourway_trigger_joystick_handle = FourwayTriggerJoystickHandle(
-                self.stick_vector,
+        if config["fourway_trigger_shortcuts"] is not None:
+            self.handlers.fourway_trigger = FourwayTriggerJoystickHandle(
+                self.stick.vector,
                 self.set_deadzone,
                 self.ui,
                 [
-                    get_ecode(fourway_trigger_shortcuts["up"], "fourway_trigger_shortcuts"),
-                    get_ecode(fourway_trigger_shortcuts["down"], "fourway_trigger_shortcuts"),
-                    get_ecode(fourway_trigger_shortcuts["left"], "fourway_trigger_shortcuts"),
-                    get_ecode(fourway_trigger_shortcuts["right"], "fourway_trigger_shortcuts")
+                    get_ecode(
+                        config["fourway_trigger_shortcuts"]["up"],
+                        "fourway_trigger_shortcuts"
+                    ),
+                    get_ecode(
+                        config["fourway_trigger_shortcuts"]["down"],
+                        "fourway_trigger_shortcuts"
+                    ),
+                    get_ecode(
+                        config["fourway_trigger_shortcuts"]["left"],
+                        "fourway_trigger_shortcuts"
+                    ),
+                    get_ecode(
+                        config["fourway_trigger_shortcuts"]["right"],
+                        "fourway_trigger_shortcuts"
+                    )
                 ],
             )
 
-        self.double_click_key = config["double_click_key"]
-        """
-            "double_click_key": {
-                "input_key": "BTN_THUMBR",
-                "toggle_shortcut_mode": True,
-                "toggle_hold_output_key": False,
-                "output_key": None
-            }
-        """
-
-        self.state: dict[str, Reference] = {
-            "clicked": Reference(False),
-            "clicked_shortcut": Reference(False),
-            "clicked_look": Reference(False),
-        }
+        self.double_click_key = self._DoubleClickKey()
+        self.double_click_key.input_key_str = config["double_click_key"]["input_key"]
+        self.double_click_key.output_key_str = config["double_click_key"]["output_key"]
+        self.double_click_key.toggle_shortcut_mode = \
+            config["double_click_key"]["toggle_shortcut_mode"]
+        self.double_click_key.toggle_hold_output_key = \
+            config["double_click_key"]["toggle_hold_output_key"]
 
     def set_deadzone(self):
         """Deactivate all arrow keys."""
-        if self.stick_vector.in_deadzone_first_time:
-            self.stick_vector.in_deadzone_first_time = False
-        if isinstance(self.direction, DirectionalButtons):
-            self.direction.release_all()
+        if self.stick.vector.in_deadzone_first_time:
+            self.stick.vector.in_deadzone_first_time = False
+        if isinstance(self.stick.directional_buttons, DirectionalButtons):
+            self.stick.directional_buttons.release_all()
 
     def set_look_state_reference(self, look: Reference):
         """Set reference to look state."""
         if isinstance(look, Reference):
             ref = look.get()
             if isinstance(ref, bool):
-                self.state["clicked_look"] = look
+                self.state.clicked_look = look
             else:
                 raise TypeError("look is not Reference(bool)")
         else:
@@ -666,23 +768,26 @@ class Joystick:
 
     def set_clicked_state_reference(self, clicked: Reference):
         """Set reference to clicked state."""
-        self.state["clicked"] = clicked
+        self.state.clicked = clicked
 
     def set_clicked_shortcut_state_reference(self, clicked_shortcut: Reference):
         """Set reference to shortcut clicked state."""
-        self.state["clicked_shortcut"] = clicked_shortcut
-        if isinstance(self.fourway_trigger_joystick_handle, FourwayTriggerJoystickHandle):
-            self.fourway_trigger_joystick_handle.set_clicked_state_reference(clicked_shortcut)
+        self.state.clicked_shortcut = clicked_shortcut
+        # if there is no FourwayTriggerJoystickHandle,
+        #    then this joytick has no use of clicked_shortcut state
+        if isinstance(self.handlers.fourway_trigger, FourwayTriggerJoystickHandle):
+            self.handlers.fourway_trigger.set_clicked_state_reference(clicked_shortcut)
 
     def handle_event(self, event):
         """Handle the events."""
-        self.stick.handle_event(event)
-        self.stick_vector.process(self.stick.current_x, self.stick.current_y)
-        if self.state["clicked_shortcut"].get():
-            self.fourway_trigger_joystick_handle.handle_state()
-        elif self.classic_overlap or self.state["clicked_look"].get():
-            self.sector_size_joystick_handle.handle_state()
-        elif self.default_joystick_handle is not None:
-            self.default_joystick_handle.handle_state()
-        elif self.circle_trigger_joystick_handle is not None:
-            self.circle_trigger_joystick_handle.handle_state()
+        self.stick.internal.handle_event(event)
+        self.stick.vector.process(self.stick.internal.current_x, self.stick.internal.current_y)
+        if self.state.clicked_shortcut.get():
+            self.handlers.fourway_trigger.handle_state()
+        elif (self.state.classic_overlap or self.state.clicked_look.get()) \
+                and self.handlers.sector_size is not None:
+            self.handlers.sector_size.handle_state()
+        elif self.handlers.default is not None:
+            self.handlers.default.handle_state()
+        elif self.handlers.circle_trigger is not None:
+            self.handlers.circle_trigger.handle_state()

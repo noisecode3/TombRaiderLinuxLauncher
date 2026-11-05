@@ -17,10 +17,10 @@ initial release**.
 - [x] Implement core launching functionality for TRLE levels.
 - [x] Implement basic keyboard navigation and shortcuts.
 - [ ] Allow deletion of a level without removing save files.
-- [ ] 🎮 PS Controller Script:
+- [x] 🎮 PS Controller Script:
   - [x] Classic tank
   - [x] Generic Controller mapping
-  - [ ] Angular (Direction + Magnitude) State Context-Aware Left Stick
+  - [x] Angular (Direction + Magnitude) State Context-Aware Left Stick
 - [ ] run all the original TR core design games.
 
 ### Code Style & Linting

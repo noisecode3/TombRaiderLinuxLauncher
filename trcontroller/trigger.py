@@ -32,6 +32,16 @@ class Trigger:
         Usually called R2/L2 or ZR/ZL. They have a range
         from 0 to 255 and are not buttons.
 
+        Args:
+            ui: The uinput virtual device.
+            device: The evdev controller input device.
+            config:
+                input_key: The event code for the analog trigger (e.g., ABS_Z).
+                output_key: The key code to output when the trigger is pressed.
+                shortcut_key: Second special shortcut key code to output.
+                threshold: A number from 0.01 to 0.99
+
+        Config example:
         {
             "type": "trigger",
             "mapping": {
@@ -41,15 +51,6 @@ class Trigger:
                 "threshold": 0.90
             }
         }
-
-        Args:
-            ui: The uinput virtual device.
-            device: The evdev controller input device.
-            config:
-                input_key: The event code for the analog trigger (e.g., ABS_Z).
-                output_key: The key code to output when the trigger is pressed.
-                shortcut_key: Second special shortcut key code to output.
-                threshold: A number from 0.01 to 0.99
         """
         self.ui = ui
         self.keys = self._Keys()

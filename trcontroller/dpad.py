@@ -50,7 +50,15 @@ class Dpad:
         """
         Initialize D-Pad handler.
 
-        config example:
+        Args:
+            ui: The uinput device.
+            config: configuration for the Dpad.
+                input_x: The event code for the analog dpad axis (e.g., ABS_HAT0X).
+                x_keys: neg_key_value (left) and pos_key_value (right) output keycodes.
+                input_y: The event code for the analog dpad axis (e.g., ABS_HAT0Y).
+                y_keys: neg_key_value (up) and pos_key_value (down) output keycodes.
+
+        Config example:
         {
             "type": "dpad",
             "axes": {
@@ -66,10 +74,6 @@ class Dpad:
                 }
             }
         }
-
-        Args:
-            ui: The uinput device.
-            config: configuration for the Dpad.
         """
         self.ui = ui
         axes = config["axes"]
