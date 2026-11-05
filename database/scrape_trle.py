@@ -1,8 +1,9 @@
 """Scraping of all data; level info, cover images and https keys."""
-import sys
-import re
 import logging
-from urllib.parse import urlencode
+import re
+import sys
+from urllib.parse import parse_qs, urlencode, urlparse
+
 from bs4 import Tag
 
 import data_factory
@@ -12,6 +13,7 @@ import scrape_trle_download
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 logging.getLogger("requests").setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def get_trle_cover_by_id(trle_id):
@@ -83,9 +85,9 @@ def get_trle_page(offset=0, sort_created_first=False):
     page['offset'] = offset
 
     # Find total records
-    span = soup.find('span', class_='navText')
-    if span:
-        page['records_total'] = int(span.text.strip().split()[0])
+    strong = soup.select_one('div.find-result-bar p strong')
+    if strong:
+        page['records_total'] = int(strong.text.strip().replace(',', ''))
     else:
         print("Total records not found")
         sys.exit(1)
@@ -101,38 +103,30 @@ def get_trle_page(offset=0, sort_created_first=False):
     return page
 
 
-def trle_page_table(table):
+def trle_page_table(rows):
     """Filter out data from the TRLE level table result."""
     levels = []
 
-    # Mapping index to level data fields
-    field_mapping = {
-        0: ('author', lambda cell: cell.get_text(strip=True)),
-        5: ('trle_id', 'title', lambda cell: (
-                    cell.find('a', href=True)['href'].split('lid=')[-1]
-                    if cell.find('a', href=True) else None, cell.get_text(strip=True)
-                )
-            ),
-        6: ('difficulty', lambda cell: cell.get_text(strip=True)),
-        7: ('duration', lambda cell: cell.get_text(strip=True)),
-        8: ('class', lambda cell: cell.get_text(strip=True)),
-        10: ('type', lambda cell: cell.get_text(strip=True)),
-        13: ('release', lambda cell: scrape_common.convert_to_iso(cell.get_text(strip=True)))
-    }
-
-    for row in table[1:]:
+    for row in rows:
         cells = row.find_all('td')
+        if len(cells) < 14:  # header row (th) or malformed
+            continue
+
         level = data_factory.make_trle_level_data()
+        level['author'] = cells[0].get_text(strip=True)
 
-        for idx, cell in enumerate(cells):
-            if idx in field_mapping:
-                if idx == 5:
-                    level['trle_id'], level['title'] = field_mapping[idx][2](cell)
-                else:
-                    field_name, extractor = field_mapping[idx]
-                    level[field_name] = extractor(cell)
+        link = cells[5].find('a', href=True)
+        if not link:
+            continue
+        level['trle_id'] = int(parse_qs(urlparse(link['href']).query)['lid'][0])
+        level['title'] = link.get_text(strip=True)
 
-        level['trle_id'] = int(level['trle_id'])
+        level['difficulty'] = cells[6].get_text(strip=True)
+        level['duration'] = cells[7].get_text(strip=True)
+        level['class'] = cells[8].get_text(strip=True)
+        level['type'] = cells[10].get_text(strip=True)
+        level['release'] = scrape_common.convert_to_iso(cells[13].get_text(strip=True))
+
         levels.append(level)
 
     return levels
@@ -230,7 +224,7 @@ def get_trle_cover(level, want_tempfile=False):
     """
     # Check if the level string is provided and valid.
     if not level:
-        logging.error("Invalid input: A valid image filename (e.g., '3175.jpg') is required.")
+        logger.error("Invalid input: A valid image filename (e.g., '3175.jpg') is required.")
         sys.exit(1)
 
     # Construct the full URL for the cover image on TRLE.net.
@@ -266,7 +260,7 @@ def get_trle_walkthrough(level_soup):
         url = 'https://www.trle.net/sc/' + walkthrough_link['href']
         print(url)
     else:
-        logging.info("Walkthrough not found")
+        logger.info("Walkthrough not found")
         return ""
 
     # Retrieves the walkthrough content by loading the walkthrough URL
@@ -404,5 +398,5 @@ def get_trle_index(title):
         return "https://www.trle.net" + anchor_tags[0]['href']
 
     # Log an error if no results are found and exit
-    logging.error("trcustoms.org only not implemented")
+    logger.error("trcustoms.org only not implemented")
     sys.exit(1)

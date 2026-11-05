@@ -1,2 +1,11 @@
 [tool.ruff.lint.isort]
-known-first-party = ["common", "dpad", "joystick", "key", "trigger"]
+known-first-party = [
+    "common",
+    "dpad",
+    "joystick",
+    "key",
+    "trigger",
+    "data_factory",
+    "scrape_common",
+    "scrape_trle_download"
+]
