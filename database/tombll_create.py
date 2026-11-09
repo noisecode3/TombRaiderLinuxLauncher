@@ -2,11 +2,18 @@
 All Insert queries.
 
 Only pure queries and sometimes json data here.
-If we can access the json array directly or use all of the data
-equal to the make_trle_tombll_data() from the data_factory to access data, we do it here.
 """
+from __future__ import annotations
+
 import logging
+
 import tombll_common
+from data_factory import Picture, TrleTombll, ZipFile
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
+logging.getLogger("requests").setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def database_author(author, level_id, con):
@@ -150,211 +157,159 @@ def database_tags(tags_array, level_id, con):
 
 
 def database_zip_file(zip_file, level_id, con):
-    """Add a ZIP file to the database, linking them with a specific level.
-
-    This function inserts a ZIP file into the Zip table if the file's attributes
-    are provided, setting any empty or missing values to `None`. It then links
-    the inserted ZIP file to the specified level in the ZipList table.
+    """Add a ZIP file to the database, linking it with a specific level.
 
     Args:
-        zip_file (dict): Dictionary of ZIP file details, with keys
-            'name', 'size', 'md5', 'url', 'version', 'release'.
-        level_id (int): The ID of the level to link ZIP files with.
+        zip_file (ZipFile): ZIP file details (name, size, md5, url, version, release).
+        level_id (int): The ID of the level to link the ZIP file with.
         con (sqlite3.Connection): SQLite database connection.
 
     Returns:
-        int: The ID of the newly inserted zip file.
+        int: The ID of the inserted or existing zip file.
     """
-    # SQL queries for selecting, inserting, and linking tags
     query_select_id = "SELECT ZipID FROM Zip WHERE name = ?"
-
-    # SQL queries for inserting ZIP file data and linking ZIP files to a level
     query_insert = '''
         INSERT INTO Zip (name, size, md5sum, url, version, release)
         VALUES (?, ?, ?, ?, ?, ?)
     '''
 
-    # Prepare arguments for inserting the ZIP file, converting empty values to None
+    # Convert empty values to None
     insert_args = (
-        tombll_common.make_empty_null(zip_file.get('name')),
-        tombll_common.make_empty_null(zip_file.get('size')),
-        tombll_common.make_empty_null(zip_file.get('md5')),
-        tombll_common.make_empty_null(zip_file.get('url')),
-        tombll_common.make_empty_null(zip_file.get('version')),
-        tombll_common.make_empty_null(zip_file.get('release'))
+        tombll_common.make_empty_null(zip_file.name),
+        tombll_common.make_empty_null(zip_file.size),
+        tombll_common.make_empty_null(zip_file.md5),
+        tombll_common.make_empty_null(zip_file.url),
+        tombll_common.make_empty_null(zip_file.version),
+        tombll_common.make_empty_null(zip_file.release),
     )
 
-    # Insert the ZIP file and get its ID
-    zip_id = tombll_common.query_return_id(query_select_id, (zip_file.get('name'), ), con)
+    zip_id = tombll_common.query_return_id(query_select_id, (zip_file.name,), con)
     if zip_id is None:
         zip_id = tombll_common.query_return_id(query_insert, insert_args, con)
 
-    # Link the ZIP file to the level in ZipList table
     query_insert_middle = "INSERT OR IGNORE INTO ZipList (zipID, levelID) VALUES (?, ?)"
-    middle_args = (zip_id, level_id)
-    tombll_common.query_run(query_insert_middle, middle_args, con)
+    tombll_common.query_run(query_insert_middle, (zip_id, level_id), con)
     return zip_id
 
 
-def database_zip_files(zip_files_array, level_id, con):
+def database_zip_files(zip_files: list[ZipFile] | None, level_id, con):
     """Add ZIP files to the database, linking them with a specific level.
 
     Args:
-        zip_files_array (list of dict): List of ZIP file details, each represented
-            as a dictionary with keys 'name', 'size', 'md5', 'url', 'version', 'release'.
+        zip_files (list[ZipFile] | None): ZIP file details; empty or None
+            means nothing to do.
         level_id (int): The ID of the level to link ZIP files with.
         con (sqlite3.Connection): SQLite database connection.
 
     Returns:
-        set of int: The set of IDs for the newly inserted zip files.
+        set[int]: IDs of the inserted or existing zip files; empty set if none.
     """
-    ids = set()
-    for zip_file in zip_files_array:
-        ids.add(database_zip_file(zip_file, level_id, con))
-    return ids
+    return {database_zip_file(zip_file, level_id, con) for zip_file in zip_files or ()}
 
 
 def database_screen(picture, level_id, con):
     """Add a screen image to the database and link it to a specific level.
 
-    This function takes the corresponding image as a .webp file, md5sum and inserts
-    it into the Picture table. It also creates an association with the specified level
-    in the Screens middle table with its position number. Picture dictionary has data(byte),
-    md5sum(str) and position(int) attributes.
-
     Args:
-        picture (dict): Picture dictionary to insert.
+        picture (Picture): Picture with data (bytes), md5sum (str), position (int).
         level_id (int): The ID of the level to link the screen image with.
         con (sqlite3.Connection): SQLite database connection.
 
     Returns:
-        int: The ID of the newly inserted screen of existing one.
+        int: The ID of the inserted or existing picture.
     """
-    # Insert the .webp image and md5sum data into the Picture table and retrieve its ID
     query_select_id = "SELECT PictureID FROM Picture WHERE md5sum = ?"
     query_insert = "INSERT OR IGNORE INTO Picture (md5sum, data) VALUES (?, ?)"
-    arg = (picture['md5sum'], picture['data'])
 
-    picture_id = tombll_common.query_return_id(query_select_id, (picture['md5sum'], ), con)
+    picture_id = tombll_common.query_return_id(query_select_id, (picture.md5sum,), con)
     if picture_id is None:
-        picture_id = tombll_common.query_return_id(query_insert, arg, con)
+        picture_id = tombll_common.query_return_id(
+            query_insert, (picture.md5sum, picture.data), con)
 
-    # Link the inserted picture to the specified level in the Screens table
     query_insert_screen = '''
         INSERT OR IGNORE
         INTO Screens (pictureID, levelID, position)
         VALUES (?, ?, ?)
     '''
-    tombll_common.query_run(query_insert_screen, (picture_id, level_id, picture['position']), con)
+    tombll_common.query_run(
+        query_insert_screen, (picture_id, level_id, picture.position), con)
     return picture_id
 
 
-def database_screens(webp_image_data_array, level_id, con):
-    """Add multiple screen images to the database and associate them with a specific level.
-
-    This function iterates over an array of large screens, adding each to the database
-    and linking it to the specified level using the `create_screen_to_database` helper function.
+def database_screens(pictures: list[Picture] | None, level_id, con):
+    """Add multiple screen images to the database and link them to a level.
 
     Args:
-        large_screens_array (list of dict): List of dict of screen images.
-        level_id (int): The ID of the level to associate the screen images with.
+        pictures (list[Picture] | None): Screen images to insert; empty or
+            None means nothing to do.
+        level_id (int): The ID of the level to associate the images with.
         con (sqlite3.Connection): SQLite database connection.
 
     Returns:
-        set of int: The set of IDs for the newly inserted screens or existing one.
+        set[int]: IDs of the inserted or existing pictures; empty set if none.
     """
-    # Iterate over each screen in the provided array and add it to the database
-    ids = set()
-    for screen in webp_image_data_array:
-        ids.add(database_screen(screen, level_id, con))
-    return ids
+    return {database_screen(picture, level_id, con) for picture in pictures or ()}
 
 
-def database_level(data, con):
+def database_level(data: TrleTombll, con):
     """Insert a level entry into the Level table and return its ID.
 
-    This function inserts a new level into the database, using information provided in the
-    `data` dictionary. It retrieves or creates an associated `infoID` using the
-    `add_info_to_database` helper function, then logs and returns the `level_id` of
-    the inserted level.
-
     Args:
-        data (dict): A dictionary containing level data, including 'body' and 'walkthrough' fields.
+        data (TrleTombll): Level data, including body and walkthrough.
         con (sqlite3.Connection): SQLite database connection.
 
     Returns:
         int: The ID of the newly inserted level.
     """
-    # SQL query to insert a new level record
     query = "INSERT INTO Level (body, walkthrough, infoID) VALUES (?, ?, ?)"
+    arg = (data.body, data.walkthrough, database_info(data, con))
 
-    # Prepare arguments for the insertion, including the infoID from `add_info_to_database`
-    arg = (
-        data.get('body'),                   # Level body content
-        data.get('walkthrough'),            # Level walkthrough content
-        database_info(data, con)  # Retrieve and create infoID
-    )
-
-    # Execute the query and get the ID of the inserted level
     level_id = tombll_common.query_return_id(query, arg, con)
-
-    # Log the current level ID for debugging or tracking purposes
-    logging.info("Current tombll level_id: %s", level_id)
-
+    logger.info("Current tombll level_id: %s", level_id)
     return level_id
 
 
-def database_info(data, con):
-    """Insert or retrieve IDs for level information attributes and add an Info record.
-
-    This function retrieves or sets IDs for various level attributes (difficulty, duration,
-    type, class) and uses them to insert a new record into the Info table.
+def database_info(data: TrleTombll, con):
+    """Insert an Info record, resolving attribute IDs first.
 
     Args:
-        data (dict): A dictionary containing level information attributes.
+        data (TrleTombll): Level information attributes.
         con (sqlite3.Connection): SQLite database connection.
 
     Returns:
-        int: The ID of the newly inserted or existing Info record.
+        int: The ID of the newly inserted Info record.
     """
-    # Retrieve or assign InfoDifficultyID, or set to None if not specified
-    info_difficulty = data.get('difficulty')
     info_difficulty_id = None
-    if info_difficulty:
+    if data.difficulty:
         query = "SELECT InfoDifficultyID FROM InfoDifficulty WHERE value = ?"
-        info_difficulty_id = tombll_common.query_return_id(query, (info_difficulty,), con)
+        info_difficulty_id = tombll_common.query_return_id(
+            query, (data.difficulty,), con)
 
-    # Retrieve or assign InfoDurationID, or set to None if not specified
-    info_duration = data.get('duration')
     info_duration_id = None
-    if info_duration:
+    if data.duration:
         query = "SELECT InfoDurationID FROM InfoDuration WHERE value = ?"
-        info_duration_id = tombll_common.query_return_id(query, (info_duration,), con)
+        info_duration_id = tombll_common.query_return_id(
+            query, (data.duration,), con)
 
-    # Retrieve or assign InfoTypeID, allowing None if not specified
-    info_type = data.get('type') or None
+    # Empty string -> None (allowed)
     query = "SELECT InfoTypeID FROM InfoType WHERE value = ?"
-    info_type_id = tombll_common.query_return_id(query, (info_type,), con)
+    info_type_id = tombll_common.query_return_id(query, (data.type or None,), con)
 
-    # Retrieve or assign InfoClassID, allowing None if not specified
-    info_class = data.get('class') or None
     query = "SELECT InfoClassID FROM InfoClass WHERE value = ?"
-    info_class_id = tombll_common.query_return_id(query, (info_class,), con)
+    info_class_id = tombll_common.query_return_id(query, (data.class_ or None,), con)
 
-    # Insert a new Info record with the retrieved or default IDs
     query = '''
         INSERT INTO Info (title, release, difficulty, duration, type, class, trleID, trcustomsID)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     '''
     arg = (
-        data.get('title'),      # Title of the level
-        data.get('release'),    # Release date
-        info_difficulty_id,     # Retrieved or NULL difficulty ID
-        info_duration_id,       # Retrieved or NULL duration ID
-        info_type_id,           # Retrieved or NULL type ID
-        info_class_id,          # Retrieved or NULL class ID
-        tombll_common.make_empty_null(data.get('trle_id')),        # TRLE ID if available
-        tombll_common.make_empty_null(data.get('trcustoms_id'))    # TRCustoms ID if available
+        data.title,
+        data.release,
+        info_difficulty_id,
+        info_duration_id,
+        info_type_id,
+        info_class_id,
+        tombll_common.make_empty_null(data.trle_id),
+        tombll_common.make_empty_null(data.trcustoms_id),
     )
-
     return tombll_common.query_return_id(query, arg, con)

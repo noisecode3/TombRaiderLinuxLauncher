@@ -2,11 +2,9 @@
 All Read queries.
 
 Only pure queries and sometimes json data here.
-If we can access the json array directly or use all of the data
-equal to the make_trle_tombll_data() from the data_factory to access data, we do it here.
 """
-import tombll_common
 import data_factory
+import tombll_common
 
 
 def database_author_list(level_id, con):
@@ -103,8 +101,12 @@ def database_zip_id_list(level_id, zip_name, zip_url, con):
         JOIN Zip ON ZipList.zipID = Zip.ZipID
         WHERE Level.LevelID = ? AND Zip.url = ? AND Zip.name = ?
     '''
-    return tombll_common.query_return_everything(query,
-            (level_id, zip_url, zip_name), con)
+    return tombll_common.query_return_everything(
+        query,
+        (level_id, zip_url, zip_name),
+        con
+    )
+
 
 def database_level_id(trle_id, con):
     """
@@ -125,7 +127,11 @@ def database_level_id(trle_id, con):
         JOIN Info ON Level.infoID = Info.InfoID
         WHERE Info.trleID = ?
     '''
-    return tombll_common.query_return_id(query, (trle_id, ), con)
+    return tombll_common.query_return_id(
+        query,
+        (trle_id, ),
+        con
+    )
 
 
 def has_multivalued_field(trle_id, con):
@@ -252,11 +258,11 @@ def database_tag_ids(level_id, con):
 
 def trle_page(offset, con, limit=20, sort_latest_first=False):
     """Get a trle page."""
-    page = data_factory.make_trle_page_data()
-    page['offset'] = offset
+    page = data_factory.TrlePage()
+    page.offset = offset
     result = []
 
-    page['records_total'] = tombll_common.query_return_everything('''
+    page.records_total = tombll_common.query_return_everything('''
         SELECT COUNT(*)
         FROM Info
         INNER JOIN Level ON Info.InfoID = Level.infoID
@@ -310,16 +316,16 @@ def trle_page(offset, con, limit=20, sort_latest_first=False):
             ''', (limit, offset), con)
 
     for row in result:
-        level = data_factory.make_trle_level_data()
-        level['trle_id'] = row[0]
-        level['author'] = row[1]
-        level['title'] = row[2]
-        level['difficulty'] = row[3]
-        level['duration'] = row[4]
-        level['class'] = row[5]
-        level['type'] = row[6]
-        level['release'] = row[7]
-        page['levels'].append(level)
+        level = data_factory.TrleLevel()
+        level.trle_id = row[0]
+        level.author = row[1]
+        level.title = row[2]
+        level.difficulty = row[3]
+        level.duration = row[4]
+        level.class_ = row[5]
+        level.type = row[6]
+        level.release = row[7]
+        page.levels.append(level)
 
     return page
 

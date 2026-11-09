@@ -2,9 +2,9 @@
 import logging
 import re
 import sys
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import parse_qs, urldefrag, urlencode, urljoin, urlparse
 
-from bs4 import Tag
+from bs4 import BeautifulSoup, Tag
 
 import data_factory
 import scrape_common
@@ -81,13 +81,13 @@ def get_trle_page(offset=0, sort_created_first=False):
     }
     query_string = urlencode(params)
     soup = scrape_common.get_soup(f"https://www.trle.net/pFind.php?{query_string}")
-    page = data_factory.make_trle_page_data()
-    page['offset'] = offset
+    page = data_factory.TrlePage()
+    page.offset = offset
 
     # Find total records
     strong = soup.select_one('div.find-result-bar p strong')
     if strong:
-        page['records_total'] = int(strong.text.strip().replace(',', ''))
+        page.records_total = int(strong.text.strip().replace(',', ''))
     else:
         print("Total records not found")
         sys.exit(1)
@@ -98,7 +98,7 @@ def get_trle_page(offset=0, sort_created_first=False):
         print("Data table not found")
         sys.exit(1)
 
-    page['levels'] = trle_page_table(table.find_all('tr'))
+    page.levels = trle_page_table(table.find_all('tr'))
 
     return page
 
@@ -112,20 +112,21 @@ def trle_page_table(rows):
         if len(cells) < 14:  # header row (th) or malformed
             continue
 
-        level = data_factory.make_trle_level_data()
-        level['author'] = cells[0].get_text(strip=True)
+        level = data_factory.TrleLevel()
+        level.author = cells[0].get_text(strip=True)
 
         link = cells[5].find('a', href=True)
         if not link:
             continue
-        level['trle_id'] = int(parse_qs(urlparse(link['href']).query)['lid'][0])
-        level['title'] = link.get_text(strip=True)
 
-        level['difficulty'] = cells[6].get_text(strip=True)
-        level['duration'] = cells[7].get_text(strip=True)
-        level['class'] = cells[8].get_text(strip=True)
-        level['type'] = cells[10].get_text(strip=True)
-        level['release'] = scrape_common.convert_to_iso(cells[13].get_text(strip=True))
+        level.trle_id = int(parse_qs(urlparse(link['href']).query)['lid'][0])
+        level.title = link.get_text(strip=True)
+
+        level.difficulty = cells[6].get_text(strip=True)
+        level.duration = cells[7].get_text(strip=True)
+        level.class_ = cells[8].get_text(strip=True)
+        level.type = cells[10].get_text(strip=True)
+        level.release = scrape_common.convert_to_iso(cells[13].get_text(strip=True))
 
         levels.append(level)
 
@@ -254,78 +255,79 @@ def get_trle_cover(level, want_tempfile=False):
 
 def get_trle_walkthrough(level_soup):
     """Find the walkthrough link on the TRLE page."""
-    walkthrough_link = level_soup.find('a', string='Walkthrough')
-    if walkthrough_link:
-        # Constructs the walkthrough URL
-        url = 'https://www.trle.net/sc/' + walkthrough_link['href']
-        print(url)
-    else:
-        logger.info("Walkthrough not found")
+    walkthrough_link = level_soup.select_one('a[href*="Levelwalk.php"]')
+    href = walkthrough_link.get('href') if walkthrough_link else None
+    if not isinstance(href, str):
+        logger.info("Walkthrough link not found")
         return ""
 
-    # Retrieves the walkthrough content by loading the walkthrough URL
+    url, _ = urldefrag(urljoin('https://www.trle.net/sc/', href))
+
     soup = scrape_common.get_soup(url)
+
+    # Normal case on new layout: level has no walkthrough yet
+    if soup.select_one('p.walkthrough-empty'):
+        logger.info("No walkthrough for %s", url)
+        return ""
+
     iframe_tag = soup.find('iframe')
-    if not iframe_tag or not isinstance(iframe_tag, Tag):
+    if not isinstance(iframe_tag, Tag):
+        # Unknown layout: don't kill the whole sync over a missing walkthrough
+        logger.error("Unrecognized walkthrough page layout: %s", url)
+        return ""
+
+    iframe_src = iframe_tag.get('src')
+    if not isinstance(iframe_src, str) or not iframe_src:
+        logger.error("Iframe without src on %s", url)
+        return ""
+
+    url = urljoin('https://www.trle.net', iframe_src)
+
+    if scrape_common.url_basename_postfix(url) == 'jpg':
+        # Images are not handled yet (can't give binary as text to Qt)
+        return ""
+
+    return scrape_common.https.get(url, 'text/html') or ""
+
+
+def get_trle_download_href(soup: BeautifulSoup) -> str:
+    """Return the download link href, e.g. /scadm/trle_dl.php?lid=3788."""
+    link = soup.select_one('a[href*="trle_dl.php?lid="]')
+    href = link.get('href') if link else None
+    if not isinstance(href, str):
+        logger.error("Failed to retrieve trle download link")
         sys.exit(1)
-
-    # Extracts the source URL from the iframe
-    iframe_src = iframe_tag['src']
-    if not iframe_src or not isinstance(iframe_src, str):
-        sys.exit(1)
-
-    # Fetches the walkthrough content from the extracted URL
-    url = "https://www.trle.net" + iframe_src
-
-    # Check the type of "document"
-    typ = scrape_common.url_basename_postfix(url)
-    if typ == 'jpg':
-        # we should handle all images here but right now
-        # we return "" this is a bit more complex
-        # want cant just give binary image as text to
-        # qt, we need to implement out own html "document" thu a filter
-        response = ""
-        # response = https.get(url, 'image/jpeg')
-    else:
-        response = scrape_common.https.get(url, 'text/html')
-
-    if response:
-        return response
-    return None
+    return href
 
 
-def get_trle_level_card(soup, data):
+def get_trle_level_card(soup: BeautifulSoup, data):
     """Call all the other soup extracts for TRLE card."""
-    data['title'] = scrape_common.get_trle_title(soup)
-    data['authors'] = scrape_common.get_trle_authors(soup)
-    data['type'] = scrape_common.get_trle_type(soup)
-    data['class'] = scrape_common.get_trle_class(soup)
-    data['release'] = scrape_common.get_trle_release(soup)
-    data['difficulty'] = scrape_common.get_trle_difficulty(soup)
-    data['duration'] = scrape_common.get_trle_duration(soup)
-    data['screen'] = scrape_common.get_trle_screen(soup)
-    data['large_screens'] = []
-    data['trle_id'] = scrape_common.trle_url_to_int(soup.find('a', string='Download').get('href'))
-    data['zip_files'] = scrape_trle_download.get_zip_file_info(data['trle_id'])
-    data['body'] = ""
-    data['walkthrough'] = ""
+    data.title = scrape_common.get_trle_title(soup)
+    data.authors = scrape_common.get_trle_authors(soup)
+    data.type = scrape_common.get_trle_type(soup)
+    data.class_ = scrape_common.get_trle_class(soup)
+    data.release = scrape_common.get_trle_release(soup)
+    data.difficulty = scrape_common.get_trle_difficulty(soup)
+    data.duration = scrape_common.get_trle_duration(soup)
+    data.screen = scrape_common.get_trle_screen(soup)
+    data.trle_id = scrape_common.trle_url_to_int(get_trle_download_href(soup))
 
 
-def get_trle_level(soup, data):
+def get_trle_level(soup: BeautifulSoup, data):
     """Call all the other soup extracts for TRLE."""
-    data['title'] = scrape_common.get_trle_title(soup)
-    data['authors'] = scrape_common.get_trle_authors(soup)
-    data['type'] = scrape_common.get_trle_type(soup)
-    data['class'] = scrape_common.get_trle_class(soup)
-    data['release'] = scrape_common.get_trle_release(soup)
-    data['difficulty'] = scrape_common.get_trle_difficulty(soup)
-    data['duration'] = scrape_common.get_trle_duration(soup)
-    data['screen'] = scrape_common.get_trle_screen(soup)
-    data['large_screens'] = scrape_common.get_trle_large_screens(soup)
-    data['trle_id'] = scrape_common.trle_url_to_int(soup.find('a', string='Download').get('href'))
-    data['zip_files'] = scrape_trle_download.get_zip_file_info(data['trle_id'])
-    data['body'] = scrape_common.get_trle_body(soup)
-    data['walkthrough'] = get_trle_walkthrough(soup)
+    data.title = scrape_common.get_trle_title(soup)
+    data.authors = scrape_common.get_trle_authors(soup)
+    data.type = scrape_common.get_trle_type(soup)
+    data.class_ = scrape_common.get_trle_class(soup)
+    data.release = scrape_common.get_trle_release(soup)
+    data.difficulty = scrape_common.get_trle_difficulty(soup)
+    data.duration = scrape_common.get_trle_duration(soup)
+    data.screen = scrape_common.get_trle_screen(soup)
+    data.large_screens = scrape_common.get_trle_large_screens(soup)
+    data.trle_id = scrape_common.trle_url_to_int(get_trle_download_href(soup))
+    data.zip_files = scrape_trle_download.get_zip_file_info(data.trle_id)
+    data.body = scrape_common.get_trle_body(soup)
+    data.walkthrough = get_trle_walkthrough(soup)
 
 
 # Consider implementing a separate function for TRLE title matching,

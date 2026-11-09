@@ -1,8 +1,9 @@
 """Terminal menus, prompts for data, tests and setting up the database."""
 import os
-import sqlite3
-
 import shutil
+import sqlite3
+from dataclasses import astuple
+
 import tombll_manage_data
 
 size = shutil.get_terminal_size(fallback=(149, 14))
@@ -17,10 +18,10 @@ def compare_pages(estimate):
     con.close()
 
     database_id = 1
-    if database_page['levels']:
-        database_id = database_page['levels'][0]['trle_id']
+    if database_page.levels:
+        database_id = database_page.levels[0].trle_id
 
-    trle_id = int(tombll_manage_data.get_trle_page(0)['levels'][0]['trle_id'])
+    trle_id = int(tombll_manage_data.get_trle_page(0).levels[0].trle_id)
     total_records = trle_id - database_id + 1
     about_time_sec = total_records * estimate
 
@@ -51,23 +52,6 @@ def update_level_cards():
         tombll_manage_data.add_level_card_range(trle_range[0], trle_range[1])
 
 
-def update_levels():
-    """
-    Update the databse by getting the missing last level records.
-
-    Get a local page from the database and then compare it by a scraped page form trle.net.
-    Then add all the level in the range of id numbers from the last date id on the database
-    to the last date id on trle.net.
-    """
-    '''
-    trle_range = compare_pages(7)
-    print("Do you want to continue?")
-    awn = input("y or n: ")
-    if awn == 'y':
-        tombll_manage_data.add_level_range(trle_range[0], trle_range[1])
-    '''
-
-
 def scrape_trle_index():
     """Browse TRLE data by using normal https requests."""
     offset = 0
@@ -87,7 +71,7 @@ def local_trle_index():
     while True:
         page = tombll_manage_data.get_local_page(offset, con)
         _print_trle_page(page)
-        if len(page['levels']) < 20:
+        if len(page.levels) < 20:
             break
         user_input = input("Press Enter for the next page (or type 'q' to quit: ")
         if user_input.lower() == 'q':
@@ -98,8 +82,8 @@ def local_trle_index():
 
 
 def _print_trle_page(page):
-    print(f"{page['offset'] + len(page['levels'])} of {page['records_total']} records")
-    levels = page['levels']
+    print(f"{page.offset + len(page.levels)} of {page.records_total} records")
+    levels = page.levels
 
     if size.columns < 149:
         print("You're scrren is to small")
@@ -114,15 +98,13 @@ def _print_trle_page(page):
     # Print the headers
     for i, header in enumerate(headers):
         print(header.ljust(column_widths[i]), end="")
-    print("")  # Move to the next line after printing headers
+    print("\n")  # Move to the next line after printing headers
 
     # Print the level data
     for row in levels:
-        cell_data = []  # Collect the cell data to print in one line
-        for idx, k in enumerate(row.keys()):
-            cell = str(row[k])  # Convert each cell value to string
-            width = column_widths[idx]  # Get the correct column width
-            truncated_text = cell[:width-1].ljust(width-1)  # Truncate and pad the text
-            cell_data.append(truncated_text + ' ')
-        print("".join(cell_data))  # Print the row in one line
-    print("")
+        cells = [
+            str(value)[:width - 1].ljust(width - 1) + " "
+            for value, width in zip(astuple(row), column_widths)
+        ]
+        print("".join(cells))
+    print("\n")

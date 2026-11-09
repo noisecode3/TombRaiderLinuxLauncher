@@ -1,19 +1,25 @@
 """Get a request response for https only with curl."""
-import os
-import sys
-import time
-import json
-import socket
-import logging
-import tempfile
 import hashlib
-from urllib.parse import urlparse
+import json
+import logging
+import os
+import socket
+import sys
+import tempfile
+import time
 from io import BytesIO
+from urllib.parse import urlparse
+
 import pycurl
 from tqdm import tqdm
 
-import get_leaf_cert
 import data_factory
+import get_leaf_cert
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
+logging.getLogger("requests").setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class AcquireLock:
@@ -45,8 +51,8 @@ class AcquireLock:
         try:
             # Bind to localhost and a specific port
             self.lock.bind(('127.0.0.1', 55234))
-        except socket.error:
-            logging.error("Another instance is already running")
+        except OSError:
+            logger.error("Another instance is already running")
             sys.exit(1)
 
     def release_lock(self):
@@ -81,7 +87,7 @@ class RequestHandler:
         if any(url.startswith(domain) for domain in allowed_domains):
             return  # URL is valid
 
-        logging.error("Invalid URL domain: %s", url)
+        logger.error("Invalid URL domain: %s", url)
         sys.exit(1)
 
     def head(self, url):
@@ -127,7 +133,7 @@ class RequestHandler:
         }
 
         if content_type not in valid_content_types:
-            logging.error("Invalid content type: %s", content_type)
+            logger.error("Invalid content type: %s", content_type)
             sys.exit(1)
 
     def set_leaf(self, curl):
@@ -154,15 +160,15 @@ class RequestHandler:
 
         if self.leaf_cert:
             self.misconfigured_server = True
-            logging.info("Leaf certificate retrieved and applied.")
+            logger.info("Leaf certificate retrieved and applied.")
         else:
-            logging.error("Failed to retrieve leaf certificate. Exiting.")
+            logger.error("Failed to retrieve leaf certificate. Exiting.")
             sys.exit(1)
 
     def setup_before_get_response(self, url, content_type):
         """Validate known URL and content type."""
         if not url:
-            logging.error("Faild setup_before_get_response, url is None. Exiting.")
+            logger.error("Faild setup_before_get_response, url is None. Exiting.")
             sys.exit(1)
         self.validate_url(url)
         self.validate_data_type(content_type)
@@ -208,7 +214,7 @@ class RequestHandler:
                     temp_cert_path = self.set_leaf(curl)
                     curl.setopt(pycurl.SSL_VERIFYPEER, 1)
                     curl.setopt(pycurl.SSL_VERIFYHOST, 2)
-                    pinned_key = "sha256//2MZQEwUwltI3mozdR9BKE9Ktsi91MNSrIOEu4VipXGI="
+                    pinned_key = "sha256//JaB+fJcTUcWJwVy5DyLuvtWLVkAxlx8fMDRQ+iVrTkU="
                     curl.setopt(pycurl.PINNEDPUBLICKEY, pinned_key)
 
                 headers_list = [
@@ -223,7 +229,7 @@ class RequestHandler:
                 if response_code != 200:
                     retries += 1
                     time.sleep(3)
-                    logging.warning("Retrying... Response code: %s", response_code)
+                    logger.warning("Retrying... Response code: %s", response_code)
                     curl.close()
                     continue
 
@@ -232,10 +238,10 @@ class RequestHandler:
 
             except pycurl.error as curl_error:
                 # if curl_error.args[0] == 60:  # SSL certificate error
-                logging.error("Request failed: %s", curl_error)
+                logger.error("Request failed: %s", curl_error)
                 retries += 1
                 if retries >= max_retries:
-                    logging.error("Max retries reached. Exiting.")
+                    logger.error("Max retries reached. Exiting.")
                     sys.exit(1)
 
             finally:
@@ -247,15 +253,15 @@ class RequestHandler:
     def close_response(self, curl, headers, response_buffer, content_type):
         """Pack response and close curl."""
         if curl is None:
-            logging.error("No curl instance")
+            logger.error("No curl instance")
             sys.exit(1)
 
         if headers is None:
-            logging.error("No headers received")
+            logger.error("No headers received")
             sys.exit(1)
 
         if response_buffer is None:
-            logging.error("No response received")
+            logger.error("No response received")
             sys.exit(1)
 
         # Extract Content-Type from the headers
@@ -264,8 +270,12 @@ class RequestHandler:
             response = self.pack_response_buffer(content_type, response_buffer)
             curl.close()
             return response
-        logging.error("Unexpected content type: %s, expected %s",
-                      response_content_type, content_type)
+
+        logger.error(
+            "Unexpected content type: %s, expected %s",
+            response_content_type,
+            content_type
+        )
         sys.exit(1)
 
     def pack_response_buffer(self, content_type, response_buffer):
@@ -277,7 +287,7 @@ class RequestHandler:
                     return raw_data.decode(encoding)
                 except UnicodeDecodeError:
                     continue
-            logging.error("No known encoding")
+            logger.error("No known encoding")
             sys.exit(1)
         if content_type == 'application/json':
             return json.loads(response_buffer.getvalue().decode('utf-8'))
@@ -285,7 +295,7 @@ class RequestHandler:
             return response_buffer.getvalue()
         if content_type == 'application/pkix-cert':
             return response_buffer.getvalue()
-        logging.error("Unsupported content type: %s", content_type)
+        logger.error("Unsupported content type: %s", content_type)
         return None
 
     def extract_content_type(self, headers):
@@ -293,7 +303,7 @@ class RequestHandler:
         for header in headers.splitlines():
             if header.lower().startswith('content-type:'):
                 return header.split(':', 1)[1].split(';')[0].strip()
-        logging.error("Could not extract content type from header: %s", headers)
+        logger.error("Could not extract content type from header: %s", headers)
         return None
 
 
@@ -375,7 +385,7 @@ class Downloader:
         """
         curl = pycurl.Curl()
         temp_cert_path = None
-        zip_file = data_factory.make_zip_file()  # Initialize the zip_file dictionary
+        zip_file = data_factory.ZipFile()  # Initialize the zip_file dictionary
 
         try:
             # Get file size for the progress bar
@@ -392,9 +402,9 @@ class Downloader:
 
             # Get header info
             total_size = curl.getinfo(pycurl.CONTENT_LENGTH_DOWNLOAD)
-            zip_file['size'] = round(total_size / (1024 * 1024), 2)  # Size in MiB
-            zip_file['url'] = curl.getinfo(pycurl.EFFECTIVE_URL)
-            zip_file['name'] = os.path.basename(urlparse(zip_file['url']).path)
+            zip_file.size = round(total_size / (1024 * 1024), 2)  # Size in MiB
+            zip_file.url = curl.getinfo(pycurl.EFFECTIVE_URL)
+            zip_file.name = os.path.basename(urlparse(zip_file.url).path)
 
             # Main buffer
             curl.setopt(pycurl.NOBODY, False)  # Re-enable body output
@@ -427,7 +437,7 @@ class Downloader:
             md5_hash = hashlib.md5(usedforsecurity=False)
             self.buffer.seek(0)  # Reset buffer pointer
             md5_hash.update(self.buffer.getvalue())
-            zip_file['md5'] = md5_hash.hexdigest()
+            zip_file.md5 = md5_hash.hexdigest()
 
         except pycurl.error as e:
             self.status = 1
@@ -438,13 +448,10 @@ class Downloader:
             if self.progress_bar:
                 self.progress_bar.close()
             curl.close()
-            if temp_cert_path:
-                if os.path.exists(temp_cert_path):
-                    os.remove(temp_cert_path)
+            if temp_cert_path and os.path.exists(temp_cert_path):
+                os.remove(temp_cert_path)
 
         return zip_file  # Always return the zip_file dictionary
-
-
 
 
 ACQUIRE_LOCK = AcquireLock()

@@ -1,8 +1,9 @@
 """Main loop for CLI menu like interfaces."""
-import sys
 import os
-import tombll_view
+import sys
+
 import make_tombll_database
+import tombll_view
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 

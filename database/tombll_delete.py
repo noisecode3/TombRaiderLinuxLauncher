@@ -2,8 +2,6 @@
 All Delete queries.
 
 Only pure queries and sometimes json data here.
-If we can access the json array directly or use all of the data
-equal to the make_trle_tombll_data() from the data_factory to access data, we do it here.
 """
 import tombll_common
 

@@ -1,8 +1,13 @@
 """Common tombll database calls."""
-import sys
-import sqlite3
 import json
 import logging
+import sqlite3
+import sys
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
+logging.getLogger("requests").setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def get_tombll_json(path):
@@ -28,15 +33,15 @@ def get_tombll_json(path):
                 return json.load(json_file)
             except json.JSONDecodeError as json_error:
                 # Log and exit if JSON content is invalid
-                logging.error("Error decoding JSON from file '%s': %s", path, json_error)
+                logger.error("Error decoding JSON from file '%s': %s", path, json_error)
                 sys.exit(1)
     except FileNotFoundError:
         # Log and exit if file is not found
-        logging.error("File not found: '%s'", path)
+        logger.error("File not found: '%s'", path)
         sys.exit(1)
-    except IOError as file_error:
+    except OSError as file_error:
         # Log and exit if any other I/O error occurs
-        logging.error("I/O error occurred while opening file '%s': %s", path, file_error)
+        logger.error("I/O error occurred while opening file '%s': %s", path, file_error)
         sys.exit(1)
 
 
@@ -80,7 +85,7 @@ def query_return_everything(query, params, con):
 
     except sqlite3.DatabaseError as db_error:
         # Log the error, rollback any changes, and exit the program
-        logging.error("Database error occurred during query execution: %s", db_error)
+        logger.error("Database error occurred during query execution: %s", db_error)
         con.rollback()
         sys.exit(1)
 
@@ -127,8 +132,8 @@ def query_return_id(query, params, con):
         return None  # Return None if no valid ID is found
 
     except sqlite3.DatabaseError as db_error:
-        # Log the database error and exit
-        logging.error("Database error occurred: %s", db_error)
+        # Log the database error, rollback and exit
+        logger.error("Database error occurred: %s", db_error)
         con.rollback()
         sys.exit(1)
 
@@ -157,8 +162,7 @@ def query_run(query, params, con):
             cursor.execute(query)
 
     except sqlite3.DatabaseError as db_error:
-        # Log the database error and exit the program
-        logging.error("Database error occurred: %s", db_error)
+        logger.error("Database error occurred: %s", db_error)
         con.rollback()
         sys.exit(1)
 

@@ -1,9 +1,9 @@
 """Record original game files."""
-import re
-import os
-import sys
-import json
 import hashlib
+import json
+import os
+import re
+import sys
 
 
 def _get_game_dir():

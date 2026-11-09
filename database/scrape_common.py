@@ -1,14 +1,15 @@
 """Common scrape functions for trle.net."""
-import os
-import sys
 import hashlib
 import logging
+import os
+import sys
 import tempfile
 import uuid
-from io import BytesIO
 from datetime import datetime
-from urllib.parse import urlparse, parse_qs
-from bs4 import BeautifulSoup
+from io import BytesIO
+from urllib.parse import parse_qs, urljoin, urlparse
+
+from bs4 import BeautifulSoup, Tag
 from PIL import Image
 
 import https
@@ -16,6 +17,7 @@ import https
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 logging.getLogger("requests").setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 ###############################################################################
 # data validators
@@ -56,12 +58,12 @@ def url_domain(url):
     # Parse URL and check if scheme and netloc are present.
     parsed_url = urlparse(url)
     if not all([parsed_url.scheme, parsed_url.netloc]):
-        logging.error("Invalid URL format: Scheme or netloc is missing.")
+        logger.error("Invalid URL format: Scheme or netloc is missing.")
         sys.exit(1)
 
     # Verify the URL uses HTTPS.
     if parsed_url.scheme != "https":
-        logging.error("Invalid URL: Only HTTPS URLs are allowed.")
+        logger.error("Invalid URL: Only HTTPS URLs are allowed.")
         sys.exit(1)
 
     # Confirm the domain is allowed.
@@ -72,7 +74,7 @@ def url_domain(url):
     if parsed_url.netloc.endswith("trlevel.de"):
         return "trlevel.de"
 
-    logging.error("Invalid URL: URL must belong to 'trle.net' or 'trcustoms.org'.")
+    logger.error("Invalid URL: URL must belong to 'trle.net' or 'trcustoms.org'.")
     sys.exit(1)
 
 
@@ -201,86 +203,105 @@ def convert_to_iso(date_str):
     raise ValueError(f"Unsupported date format: {date_str}")
 
 
-def get_trle_zip_file(soup):
-    """Locates the download link for the ZIP file on the TRLE page and return it."""
-    download_link = soup.find('a', string='Download')
-    if download_link:
-        return get_zip(download_link['href'])
-    logging.error("Error fetching download url")
+def get_trle_authors(soup: BeautifulSoup) -> list[str]:
+    """Extract the authors list."""
+    author_names: list[str] = []
+
+    # New layout: one builder card per author
+    for link in soup.select('aside.level-builders a.builder-card-link'):
+        href = link.get('href')
+        if not isinstance(href, str) or not href.startswith('/sc/authorfeatures.php?aid='):
+            continue
+        h3 = link.find('h3')
+        if isinstance(h3, Tag):
+            # First string is the name, the arrow span comes after it
+            name = next(h3.stripped_strings, '')
+            if name:
+                author_names.append(name)
+    if author_names:
+        return author_names
+
+    # Legacy layout: first <td class="medGText"> holds the author links
+    first_td = soup.find('td', class_='medGText')
+    if isinstance(first_td, Tag):
+        for link in first_td.find_all('a'):
+            href = link.get('href')
+            if isinstance(href, str) and href.startswith('/sc/authorfeatures.php?aid='):
+                author_names.append(link.get_text(strip=True))
+        if author_names:
+            return author_names
+
+    logger.error("Failed to retrieve trle authors")
     sys.exit(1)
 
 
-def get_trle_authors(soup):
-    """Extract the authors list."""
-    # Find the first <td> with class "medGText"
-    first_td = soup.find('td', class_='medGText')
+def _get_fact(soup: BeautifulSoup, label: str, legacy_label: str) -> str:
+    """Look up a level fact by label, new layout first, legacy as fallback."""
+    # New layout: <dl class="level-detail-facts"><dt>Label</dt><dd>Value</dd>
+    for dt in soup.select('dl.level-detail-facts dt'):
+        if dt.get_text(strip=True).casefold() == label.casefold():
+            dd = dt.find_next_sibling('dd')
+            if isinstance(dd, Tag):
+                return dd.get_text(strip=True)
 
-    # Find all anchor tags within the first <td>
-    author_links = first_td.find_all('a')
+    # Legacy layout: <td>label:</td><td>value</td>
+    td = soup.find('td', string=legacy_label)
+    if isinstance(td, Tag):
+        value_td = td.find_next('td')
+        if isinstance(value_td, Tag):
+            return value_td.get_text(strip=True)
 
-    # Filter the anchor tags manually based on href attribute
-    author_names = []
-    for link in author_links:
-        href = link.get('href')
-        if href and href.startswith('/sc/authorfeatures.php?aid='):
-            author_names.append(link.text)
-    return author_names
+    return ""
 
 
-def get_trle_type(soup):
+def get_trle_type(soup: BeautifulSoup) -> str:
     """Extract the level type."""
-    return soup.find('td', string='file type:').find_next('td').get_text(strip=True) or ""
+    return _get_fact(soup, 'Engine', 'file type:')
 
 
-def get_trle_class(soup):
+def get_trle_class(soup: BeautifulSoup) -> str:
     """Extract the level class."""
-    return soup.find('td', string='class:').find_next('td').get_text(strip=True) or ""
+    return _get_fact(soup, 'Class', 'class:')
 
 
-def get_trle_release(soup):
+def get_trle_release(soup: BeautifulSoup) -> str:
     """Extract the release date."""
-    raw_date = soup.find('td', string='release date:').find_next('td').get_text(strip=True) or ""
+    raw_date = _get_fact(soup, 'Release date', 'release date:')
     if raw_date:
         return convert_to_iso(raw_date)
     return raw_date
 
 
-def get_trle_difficulty(soup):
+def get_trle_difficulty(soup: BeautifulSoup) -> str:
     """Extract the level difficulty."""
-    difficulty_td = soup.find('td', string='difficulty:')
-    if difficulty_td:
-        next_td = difficulty_td.find_next('td')
-        if next_td:
-            return next_td.get_text(strip=True)
-    return ""
+    return _get_fact(soup, 'Difficulty', 'difficulty:')
 
 
-def get_trle_duration(soup):
+def get_trle_duration(soup: BeautifulSoup) -> str:
     """Extract the level duration."""
-    duration_td = soup.find('td', string='duration:')
-    if duration_td:
-        next_td = duration_td.find_next('td')
-        if next_td:
-            return next_td.get_text(strip=True)
-    return ""
+    return _get_fact(soup, 'Duration', 'duration:')
 
 
-def get_trle_body(soup):
-    """Extract the main level description body."""
-    specific_tags = soup.find_all('td', class_='medGText', align='left', valign='top')
-    return str(specific_tags[1]) if len(specific_tags) >= 2 else ""
+def get_trle_body(soup: BeautifulSoup) -> str:
+    """Extract the main level description body (HTML)."""
+    tag = soup.select_one('section.level-story div')
+    return str(tag) if tag else ""
 
 
-def get_trle_large_screens(soup):
+def get_trle_large_screens(soup: BeautifulSoup):
     """Extract the large screens URLs to the right of page."""
     onmouseover_links = soup.find_all(lambda tag: tag.name == 'a' and 'onmouseover' in tag.attrs)
     return [link['href'] for link in onmouseover_links]
 
 
-def get_trle_screen(soup):
+def get_trle_screen(soup: BeautifulSoup) -> str:
     """Extract the main cover image URL."""
-    image_tag = soup.find('img', class_='border')
-    return 'https://www.trle.net' + image_tag['src']
+    image_tag = soup.select_one('div.level-info-art img')
+    src = image_tag.get('src') if image_tag else None
+    if not isinstance(src, str):
+        logger.error("Failed to retrieve trle cover image")
+        sys.exit(1)
+    return urljoin('https://www.trle.net', src)
 
 
 def cover_resize_or_convert_to_webp(input_img, width=None, height=None):
@@ -304,26 +325,25 @@ def cover_resize_or_convert_to_webp(input_img, width=None, height=None):
     return webp_image.getvalue()
 
 
-def get_trle_title(soup):
-    """Extract title at the to of the page."""
-    title_span = soup.find('span', class_='subHeader')
-    if title_span:
-        title = title_span.get_text(strip=True)
-        br_tag = title_span.find('br')
-        if br_tag:
-            return title_span.contents[0].strip()
-        return title
-    logging.error("Failed to retrieve trle title")
-    sys.exit(1)
+def get_trle_title(soup: BeautifulSoup) -> str:
+    """Extract the level title from a trle.net level info page."""
+    title_tag = soup.select_one('h2#level-detail-title')
+    if title_tag is None:
+        logger.error("Failed to retrieve trle title")
+        sys.exit(1)
+    return title_tag.get_text(strip=True)
 
 
-def get_trle_zip_size(soup):
-    """Extract the release date."""
-    size_str = soup.find('td', string='file size:').find_next('td').get_text(strip=True) or ""
-    return size_str.split(' MB')[0]
+def get_trle_zip_size(soup: BeautifulSoup) -> str:
+    """Extract the zip size in MB as a string, e.g. '1,094'."""
+    size_tag = soup.select_one('span.download-size')
+    if size_tag is None:
+        logger.error("Failed to retrieve trle zip size")
+        sys.exit(1)
+    return size_tag.get_text(strip=True).split(' MB')[0]
 
 
-def trle_search_parser(url):
+def trle_search_parser(url: str):
     """
     Prepare a URL for level title searches on TRLE by encoding special characters.
 
@@ -343,7 +363,7 @@ def trle_search_parser(url):
               .replace("'", r"%5C%27")
 
 
-def url_basename_postfix(url):
+def url_basename_postfix(url: str):
     """
     Extract the file extension from a URL without the leading dot.
 
@@ -357,7 +377,7 @@ def url_basename_postfix(url):
     return os.path.splitext(os.path.basename(urlparse(url).path))[1][1:]
 
 
-def url_basename_prefix(url):
+def url_basename_prefix(url: str):
     """
     Extract the file naem from a URL without the extension.
 
@@ -375,7 +395,7 @@ def url_basename_prefix(url):
 # getter's for https
 ###############################################################################
 
-def get_soup(url):
+def get_soup(url: str):
     """
     Retrieve and parses the HTML content from a URL using BeautifulSoup.
 
@@ -398,7 +418,7 @@ def get_soup(url):
     return BeautifulSoup(html, 'html.parser')
 
 
-def get_image(url):
+def get_image(url: str):
     """
     Fetch an image from a URL, handling both JPEG and PNG formats.
 
@@ -423,7 +443,7 @@ def get_image(url):
     sys.exit(1)
 
 
-def get_jpg(url):
+def get_jpg(url: str):
     """
     Fetch a JPEG image from a URL.
 
@@ -439,7 +459,7 @@ def get_jpg(url):
     return https.get(validate_url(url), 'image/jpeg')
 
 
-def get_png(url):
+def get_png(url: str):
     """
     Fetch a PNG image from a URL.
 
@@ -455,7 +475,7 @@ def get_png(url):
     return https.get(validate_url(url), 'image/png')
 
 
-def get_json(url):
+def get_json(url: str):
     """
     Fetch JSON data from a URL.
 
@@ -471,7 +491,7 @@ def get_json(url):
     return https.get(validate_url(url), 'application/json')
 
 
-def get_zip(url):
+def get_zip(url: str):
     """
     Fetch a ZIP file from a URL and returns it in dictionary format.
 

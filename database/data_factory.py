@@ -1,94 +1,96 @@
-"""Index dictionary data definitions."""
+"""Index data definitions."""
+# pylint: disable=too-many-instance-attributes
+from dataclasses import dataclass, field
 
 
-def make_trle_page_data():
-    """trle.net page, represents the same data as a page on the site."""
-    return {
-        "offset": 0,
-        "records_total": 0,
-        "levels": [],
-    }
-
-
-def make_trle_level_data():
-    """trle.net record data."""
-    return {
-        "trle_id": 0,
-        "author": "",
-        "title": "",
-        "difficulty": "",
-        "duration": "",
-        "class": "",
-        "type": "",
-        "release": "",
-    }
-
-
-def make_trle_tombll_data():
-    """Level data the app uses at the moment."""
-    return {
-        "title": "",
-        "authors": [],
-        "tags": [],
-        "genres": [],
-        "type": "",
-        "class": "",
-        "release": "",
-        "difficulty": "",
-        "duration": "",
-        "screen": "",
-        "large_screens": [],
-        "zip_files": [],
-        "trle_id": 0,
-        "trcustoms_id": 0,
-        "body": "",
-        "walkthrough": ""
-    }
-
-
-def make_trcustoms_page_data():
-    """trcustoms.org page, represents the same data as a page on the site."""
-    return {
-        "current_page": 0,
-        "total_pages": 0,
-        "records_total": 0,
-        "levels": [],
-    }
-
-
-def make_trcustoms_level_data():
-    """trcustoms.org record data."""
-    return {
-        "trcustoms_id": 0,
-        "authors": [],
-        "title": "",
-        "tags": [],
-        "genres": [],
-        "type": "",
-        "release": "",
-        "difficulty": "",
-        "duration": "",
-        "cover": "",
-        "cover_md5sum": "",
-    }
-
-
-def make_zip_file():
+@dataclass
+class ZipFile:
     """trcustoms.org or TRLE zipfile."""
-    return {
-        "name": "",
-        "size": 0.0,
-        "md5": "",
-        "url": "",
-        "release": "",
-        "version": ""
-    }
+
+    name: str = ""
+    size: float = 0.0
+    md5: str = ""
+    url: str = ""
+    release: str = ""
+    version: str = ""
 
 
-def make_picture():
+@dataclass
+class Picture:
     """trcustoms.org or TRLE picture data."""
-    return {
-        "position": 0,
-        "md5sum": "",
-        "md5": b''
-    }
+
+    position: int = 0
+    md5sum: str = ""
+    md5: bytes = b""
+
+
+@dataclass
+class TrleLevel:
+    """trle.net record data."""
+
+    trle_id: int = 0
+    author: str = ""
+    title: str = ""
+    difficulty: str = ""
+    duration: str = ""
+    class_: str = ""  # "class" is a reserved word
+    type: str = ""
+    release: str = ""
+
+
+@dataclass
+class TrlePage:
+    """trle.net page."""
+
+    offset: int = 0
+    records_total: int = 0
+    levels: list[TrleLevel] = field(default_factory=list)
+
+
+@dataclass
+class TrleTombll:
+    """Level data the app uses at the moment."""
+
+    title: str = ""
+    authors: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    genres: list[str] = field(default_factory=list)
+    type: str = ""
+    class_: str = ""
+    release: str = ""
+    difficulty: str = ""
+    duration: str = ""
+    screen: str = ""
+    large_screens: list[Picture] = field(default_factory=list)
+    zip_files: list[ZipFile] = field(default_factory=list)
+    trle_id: int = 0
+    trcustoms_id: int = 0
+    body: str = ""
+    walkthrough: str = ""
+
+
+@dataclass
+class TrcustomsLevel:
+    """trcustoms.org record data."""
+
+    trcustoms_id: int = 0
+    authors: list[str] = field(default_factory=list)
+    title: str = ""
+    tags: list[str] = field(default_factory=list)
+    genres: list[str] = field(default_factory=list)
+    type: str = ""
+    release: str = ""
+    difficulty: str = ""
+    duration: str = ""
+    cover: str = ""
+    cover_md5sum: str = ""
+
+
+@dataclass
+class TrcustomsPage:
+    """trcustoms.org page."""
+
+    current_page: int = 0
+    total_pages: int = 0
+    records_total: int = 0
+    levels: list[TrcustomsLevel] = field(default_factory=list)

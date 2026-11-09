@@ -1,15 +1,14 @@
 """Manage data for the tombll database."""
+import json
+import logging
 import os
-import sys
 import re
 import sqlite3
-import json
+import sys
 import time
-import logging
 
-import scrape_trle
 import data_factory
-
+import scrape_trle
 import tombll_common
 import tombll_create
 import tombll_delete
@@ -19,6 +18,7 @@ import tombll_update
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 logging.getLogger("requests").setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def print_info():
@@ -57,33 +57,33 @@ def list_levels():
 
 def add_level(lid):
     """Add a level by taking the lid number."""
-    data = data_factory.make_trle_tombll_data()
+    data = data_factory.TrleTombll()
 
     soup = scrape_trle.scrape_common.get_soup(trle_level_url(lid))
     scrape_trle.get_trle_level(soup, data)
 
-    if data['title']:
+    if data.title:
         con = database_make_connection()
         database_begin_write(con)
         add_tombll_json_to_database(data, con)
         database_commit_and_close(con)
-        print(f"lid {lid} with title \"{data['title']}\" added successfully.")
+        print(f"lid {lid} with title \"{data.title}\" added successfully.")
     else:
         print(f"lid {lid} was an empty page.")
 
 
 def save_json_level(lid, path):
     """Save a level to a json file on disk by taking the lid number."""
-    data = data_factory.make_trle_tombll_data()
+    data = data_factory.TrleTombll()
 
     soup = scrape_trle.scrape_common.get_soup(trle_level_url(lid))
     scrape_trle.get_trle_level(soup, data)
 
-    if data['title']:
+    if data.title:
         with open(path, mode='w', encoding='utf-8') as json_file:
             json.dump(data, json_file)
         print(
-            f"lid {lid} with title \"{data['title']}\" "
+            f"lid {lid} with title \"{data.title}\" "
             f"saved to {path} successfully."
         )
     else:
@@ -98,22 +98,22 @@ def add_file(path):
     database_begin_write(con)
     add_tombll_json_to_database(data, con)
     database_commit_and_close(con)
-    print(f"File {path} with title \"{data['title']}\" added successfully.")
+    print(f"File {path} with title \"{data.title}\" added successfully.")
 
 
 def add_level_card(lid):
     """Add a level card by taking the lid number."""
-    data = data_factory.make_trle_tombll_data()
+    data = data_factory.TrleTombll()
 
     soup = scrape_trle.scrape_common.get_soup(trle_level_url(lid))
     scrape_trle.get_trle_level_card(soup, data)
 
-    if data['title']:
+    if data.title:
         con = database_make_connection()
         database_begin_write(con)
         add_tombll_json_to_database(data, con)
         database_commit_and_close(con)
-        print(f"lid {lid} card with title \"{data['title']}\" added successfully.")
+        print(f"lid {lid} card with title \"{data.title}\" added successfully.")
     else:
         print(f"lid {lid} was an empty page.")
 
@@ -121,16 +121,16 @@ def add_level_card(lid):
 def add_level_card_range(range_a, range_b):
     """Add a level card by taking a lid range."""
     for i in range(min(int(range_a), int(range_b)), max(int(range_a), int(range_b)) + 1):
-        data = data_factory.make_trle_tombll_data()
+        data = data_factory.TrleTombll()
         soup = scrape_trle.scrape_common.get_soup(trle_level_url(i))
         scrape_trle.get_trle_level_card(soup, data)
 
-        if data['title']:
+        if data.title:
             con = database_make_connection()
             database_begin_write(con)
             add_tombll_json_to_database(data, con)
             database_commit_and_close(con)
-            print(f"lid {i} card with title \"{data['title']}\" added successfully.")
+            print(f"lid {i} card with title \"{data.title}\" added successfully.")
         else:
             print(f"lid {i} was an empty page.")
 
@@ -150,32 +150,32 @@ def remove_level(lid):
 
 def update_level(lid):
     """Update a level by taking the lid number."""
-    data = data_factory.make_trle_tombll_data()
+    data = data_factory.TrleTombll()
 
     soup = scrape_trle.scrape_common.get_soup(trle_level_url(lid))
     scrape_trle.get_trle_level(soup, data)
 
-    if data['title']:
+    if data.title:
         con = database_make_connection()
         level_id = tombll_read.database_level_id(lid, con)
 
         database_begin_write(con)
         update_tombll_json_to_database(data, level_id, con)
         database_commit_and_close(con)
-        print(f"lid {lid} with title \"{data['title']}\" updated successfully.")
+        print(f"lid {lid} with title \"{data.title}\" updated successfully.")
     else:
         print(f"lid {lid} was an empty page.")
 
 
 def add_download(lid, name, size, md5):
     """Add a download file to a level by taking the lid number."""
-    data = data_factory.make_zip_file()
-    data["name"] = name
-    data["size"] = size
-    data["md5"] = md5
-    data["url"] = None
-    data["release"] = None
-    data["version"] = None
+    data = data_factory.ZipFile()
+    data.name = name
+    data.size = size
+    data.md5 = md5
+    data.url = None
+    data.release = None
+    data.version = None
 
     con = database_make_connection()
     database_begin_write(con)
@@ -209,18 +209,17 @@ class TailSync:
         self.trle_page_offset = 0
 
     def match_record(self, a, b):
-        """trle.net record data matching."""
-        keys = [
+        """Compare trle.net record attributes."""
+        keys = (
             'trle_id',
-            #  'author',
             'title',
             'difficulty',
             'duration',
-            'class',
+            'class_',
             'type',
-            'release'
-        ]
-        return all(a.get(k) == b.get(k) for k in keys)
+            'release',
+        )
+        return all(getattr(a, k) == getattr(b, k) for k in keys)
 
     def match_tails(self, match_size=4, max_pages=20):
         """
@@ -244,13 +243,13 @@ class TailSync:
 
         def get_local_page_and_extend(offset):
             con = database_make_connection()
-            page = get_local_page(offset, con)['levels']
+            page = get_local_page(offset, con).levels
             con.close()
             self.local.extend(page)
             return len(page)
 
         def get_trle_page_and_extend(offset):
-            page = get_trle_page(offset)['levels']
+            page = get_trle_page(offset).levels
             self.trle.extend(page)
             return len(page)
 
@@ -258,8 +257,8 @@ class TailSync:
             """Compare a batch of local trle ids to one online trle id."""
             for i in range(match_size*5):
                 try:
-                    local_id = int(self.local[i]['trle_id'])
-                    trle_id = int(self.trle[offset_trle]['trle_id'])
+                    local_id = int(self.local[i].trle_id)
+                    trle_id = int(self.trle[offset_trle].trle_id)
                     if local_id == trle_id:
                         return True
                 except IndexError:
@@ -273,8 +272,8 @@ class TailSync:
                 for j in range(match_size*5):
                     try:
                         overshot_index = offset_trle + match_size*5 - i - 1
-                        trle_id = int(self.trle[overshot_index]['trle_id'])
-                        local_id = int(self.local[match_size*5 - j - 1]['trle_id'])
+                        trle_id = int(self.trle[overshot_index].trle_id)
+                        local_id = int(self.local[match_size*5 - j - 1].trle_id)
                         if local_id == trle_id:
                             print(f"Match found at local[{match_size*5 - j - 1}] and trle[{overshot_index}]")
                             return (match_size*5 - j - 1, overshot_index)
@@ -283,6 +282,7 @@ class TailSync:
                               " and trle[{offset_trle + match_size*5 - i}]")
                         return None
             return None
+
         # Load initial data
         get_local_page_and_extend(self.local_page_offset*20)
 
@@ -318,80 +318,60 @@ class TailSync:
 
     def run(self):
         """
-        Tail-sync in 3 simple stages.
+        Tail-sync local records against trle.net.
 
-        1. Update the last 5 matching records if their attributes differ.
-        2. Add new records from remote page after the match.
-        3. Update or delete unmatched local records after the match.
+        1. Update local records whose attributes differ from remote.
+        2. Remove local records that no longer exist on trle.net.
+        3. Add new remote records, oldest first.
         """
-        con = database_make_connection()
 
         def check_local_trle_id(trle_id):
+            """Return True if the level id already exists in the local db."""
             result = tombll_read.database_level_id(trle_id, con)
-            if isinstance(result, int):
-                return True
-            return False
+            return isinstance(result, int)
 
-        def has_multivalued_field(trle_id):
-            result = tombll_read.has_multivalued_field(trle_id, con)
-            if isinstance(result, int):
-                return result
-            return 0
+        con = database_make_connection()
 
-        def go_to_next_id(index, array):
-            current_id = array[index]['trle_id']
-            i = index
+        try:
+            local_start, remote_start = self.match_tails()
 
-            while i < len(array) and array[i]['trle_id'] == current_id:
-                i -= 1
+            # Windows covering the matched tail, index 0 = newest
+            local_win = self.local[:local_start + 1]
+            remote_win = self.trle[:remote_start + 1]
 
-            return i
+            # trle_id -> remote record (first row per id is enough for comparison)
+            remote_by_id = {}
+            for remote in remote_win:
+                remote_by_id.setdefault(int(remote.trle_id), remote)
 
-        # get a tail of local records matching a point on trle records
-        # from old known records to new, when local_start == 0 we have
-        # only new records left.
-        local_start, remote_start = self.match_tails()
+            # Oldest -> newest, one pass per id (multivalued rows share an id)
+            seen = set()
+            for local in reversed(local_win):
+                lid = int(local.trle_id)
+                if lid in seen:
+                    continue
+                seen.add(lid)
 
-        # update mismatched and remove missing records from trle to local
-        i = local_start
-        j = remote_start
-        while 0 < i:
-            try:
-                local = self.local[i]
-                remote = self.trle[j]
-            except IndexError:
-                print(f"IndexError self.local[{i}] self.trle[{j}]")
-                sys.exit(1)
+                remote = remote_by_id.get(lid)
+                if remote is None:
+                    remove_level(lid)        # deleted on trle.net
+                elif not self.match_record(local, remote):
+                    update_level(lid)        # attributes changed
 
-            if not self.match_record(local, remote):
-                if local['trle_id'] == remote['trle_id']:
-                    # some attributes was chagned we update
-                    # this usally happens when a level is new
-                    update_level(local['trle_id'])
+            # New records, oldest -> newest so local insertion order stays correct
+            local_ids = {int(level.trle_id) for level in local_win}
+            seen = set()
+            for remote in reversed(remote_win):
+                rid = int(remote.trle_id)
+                if rid in local_ids or rid in seen:
+                    continue
+                seen.add(rid)
+                if check_local_trle_id(rid):
+                    update_level(rid)        # exists locally, outside the window
                 else:
-                    # we asume the level was deleted but it might
-                    # apear as a new level later (moved record)
-                    remove_level(local['trle_id'])
-
-            # we can hit a multivalued row usually its just different authors
-            # but could be class also, but its rare. or we go just one record step
-            i = go_to_next_id(i, self.local)
-            j = go_to_next_id(j, self.trle)
-
-        while 0 < j:
-            j -= 1
-            try:
-                remote = self.trle[j]
-            except IndexError:
-                print(f"IndexError self.trle[{j}]")
-                sys.exit(1)
-
-            if check_local_trle_id(remote['trle_id']):
-                update_level(remote['trle_id'])
-            else:
-                add_level_card(remote['trle_id'])
-
-        con.close()
+                    add_level_card(rid)
+        finally:
+            con.close()
 
 
 def sync_cards():
@@ -476,49 +456,46 @@ def add_screen_from_url(screen, level_id, con):
 
     """
     if screen.startswith("https://www.trle.net/screens/"):
-        picture = data_factory.make_picture()
+        picture = data_factory.Picture()
         # Fetch the .webp image data
         relative_path = screen.replace("https://www.trle.net/screens/", "")
-        picture['data'] = scrape_trle.get_trle_cover(relative_path)
-        picture['position'] = parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
-        picture['md5sum'] = scrape_trle.scrape_common.calculate_data_md5(picture['data'])
+        picture.data = scrape_trle.get_trle_cover(relative_path)
+        picture.position = parse_position(scrape_trle.scrape_common.url_basename_prefix(screen))
+        picture.md5sum = scrape_trle.scrape_common.calculate_data_md5(picture.data)
         return tombll_create.database_screen(picture, level_id, con)
 
     print("Cover did not start with https://www.trle.net/screens/ ")
     sys.exit(1)
 
 
-def add_tombll_json_to_database(data, con):
+def add_tombll_json_to_database(data: data_factory.TrleTombll, con):
     """Insert level data and related details into the database.
 
-    This function inserts a level record into the database and subsequently
-    adds associated authors, genres, tags, zip files, screen, and large screens.
+    Adds the level record, then authors, genres, tags, zip files, the cover
+    screen and the large screens.
 
     Args:
-        data (dict): A dictionary containing level data and related details.
+        data (TrleTombll): Level data and related details.
         con (sqlite3.Connection): SQLite database connection.
     """
     # Insert level information and obtain the generated level ID
     level_id = tombll_create.database_level(data, con)
 
-    # Add related information only if corresponding data is present
-    if data.get('authors'):
-        tombll_create.database_authors(data['authors'], level_id, con)
-    if data.get('genres'):
-        tombll_create.database_genres(data['genres'], level_id, con)
-    if data.get('tags'):
-        tombll_create.database_tags(data['tags'], level_id, con)
-    if data.get('zip_files'):
-        tombll_create.database_zip_files(data['zip_files'], level_id, con)
+    # Related rows; the list fields default to empty lists
+    if data.authors:
+        tombll_create.database_authors(data.authors, level_id, con)
+    if data.genres:
+        tombll_create.database_genres(data.genres, level_id, con)
+    if data.tags:
+        tombll_create.database_tags(data.tags, level_id, con)
+    if data.zip_files:
+        tombll_create.database_zip_files(data.zip_files, level_id, con)
 
-    # Single screen image, checked for None in the add_screen_to_database function
-    add_screen_from_url(data.get('screen'), level_id, con)
+    # Cover screen (None is handled inside add_screen_from_url)
+    add_screen_from_url(data.screen, level_id, con)
 
-    # Add large screens if they are provided
-    large_screens = data.get('large_screens')
-    if large_screens:
-        for screen in large_screens:
-            add_screen_from_url(screen, level_id, con)
+    for screen in data.large_screens or ():
+        add_screen_from_url(screen, level_id, con)
 
 
 def update_tombll_authors_to_database(authors, level_id, con):
@@ -536,7 +513,7 @@ def update_tombll_authors_to_database(authors, level_id, con):
         new_set.add(author_id)
 
     if database_authors:
-        current_set = set(a[0] for a in database_authors)
+        current_set = {author_id for author_id, *_ in database_authors}
         to_remove = current_set - new_set
         for author_id in to_remove:
             tombll_delete.database_author(author_id, level_id, con)
@@ -557,7 +534,8 @@ def update_tombll_genres_to_database(genres, level_id, con):
         new_set.add(genre_id)
 
     if database_genres:
-        current_set = set(a[0] for a in database_genres)
+        current_set = {genres_id for genres_id, *_ in database_genres}
+
         to_remove = current_set - new_set
         for genre_id in to_remove:
             tombll_delete.database_genre(genre_id, level_id, con)
@@ -578,7 +556,7 @@ def update_tombll_tags_to_database(tags, level_id, con):
         new_set.add(tag_id)
 
     if database_tags:
-        current_set = set(a[0] for a in database_tags)
+        current_set = {tag_id for tag_id, *_ in database_tags}
         to_remove = current_set - new_set
         for tag_id in to_remove:
             tombll_delete.database_tag(tag_id, level_id, con)
@@ -595,27 +573,27 @@ def update_tombll_zip_files_to_database(zip_files, level_id, con):
     database_zip_files = tombll_read.database_zip_list(level_id, con)
 
     # Build sets for fast comparison
-    current_set = set((z[0], z[3]) for z in database_zip_files)  # (name, url)
-    new_set = set((z['name'], z['url']) for z in zip_files)
+    current_set = {(z[0], z[3]) for z in database_zip_files}  # (name, url)
+    new_set = {(z.name, z.url) for z in zip_files}
 
     # REMOVE
     to_remove = current_set - new_set
     for name, url in to_remove:
         for d in database_zip_files:
             if (d[0], d[3]) == (name, url):
-                list = tombll_read.database_zip_id_list(level_id, name, url, con)
-                for item in list:
+                zip_id_list = tombll_read.database_zip_id_list(level_id, name, url, con)
+                for item in zip_id_list:
                     tombll_delete.database_zip_file(item[0], level_id, con)
                 break
 
     # ADD
     to_add = new_set - current_set
     for name, url in to_add:
-        zip_file = next(z for z in zip_files if (z['name'], z['url']) == (name, url))
+        zip_file = next(z for z in zip_files if (z.name, z.url) == (name, url))
         tombll_create.database_zip_file(zip_file, level_id, con)
 
 
-def update_tombll_json_to_database(data, level_id, con):
+def update_tombll_json_to_database(data: data_factory.TrleTombll, level_id: int, con):
     """Update level data and related attributes into the database.
 
     This function update a level record into the database and subsequently
@@ -629,35 +607,35 @@ def update_tombll_json_to_database(data, level_id, con):
     info_id = tombll_update.database_level(data, level_id, con)
     tombll_update.database_info(data, info_id, con)
 
-    authors = data.get('authors')
+    authors = data.authors
     if isinstance(authors, list):
         update_tombll_authors_to_database(authors, level_id, con)
 
-    genres = data.get('genres')
+    genres = data.genres
     if isinstance(genres, list):
         update_tombll_genres_to_database(genres, level_id, con)
 
-    tags = data.get('tags')
+    tags = data.tags
     if isinstance(tags, list):
         update_tombll_tags_to_database(tags, level_id, con)
 
-    zip_files = data.get('zip_files')
+    zip_files = data.zip_files
     if zip_files:
         update_tombll_zip_files_to_database(zip_files, level_id, con)
 
     # Single screen image, checked for None in the add_screen_to_database function
     new_set = set()
-    new_set.add(add_screen_from_url(data.get('screen'), level_id, con))
+    new_set.add(add_screen_from_url(data.screen, level_id, con))
 
     # Add large screens if they are provided
-    large_screens = data.get('large_screens')
+    large_screens = data.large_screens
     if large_screens:
         for screen in large_screens:
             new_set.add(add_screen_from_url(screen, level_id, con))
 
     database_pictures = tombll_read.database_picture_ids(level_id, con)
     if database_pictures:
-        current_set = set(a[0] for a in database_pictures)
+        current_set = {picture_id for picture_id, *_ in database_pictures}
         to_remove = current_set - new_set
         for picture_id in to_remove:
             tombll_delete.database_picture(picture_id, level_id, con)

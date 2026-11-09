@@ -146,10 +146,11 @@ The Temple of Horus 2 680 x- NO DOWNLOAD
 Re-enter VCI Labs 805 -> trlevel.de x- https://trcustoms.org/levels/790
 The forgotten Valley of Anubis 909 x- NO DOWNLOAD
 """
+import logging
 import re
 import sys
-import logging
-from urllib.parse import urlparse, quote
+from urllib.parse import quote, urlparse
+
 from bs4 import Tag
 
 import data_factory
@@ -158,6 +159,7 @@ import scrape_common
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 logging.getLogger("requests").setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def _get_trle_info(lid):
@@ -171,7 +173,7 @@ def _get_trle_info(lid):
 
 
 def _get_trcustoms_download_info(trcustom_level_dict):
-    zip_file = data_factory.make_zip_file()
+    zip_file = data_factory.ZipFile()
     title = scrape_common.normalize_level_name(trcustom_level_dict.get('name', ''))
     authors = trcustom_level_dict.get('authors', [])
 
@@ -181,17 +183,17 @@ def _get_trcustoms_download_info(trcustom_level_dict):
     authors_str = "-".join(author["username"] for author in authors) if authors else ""
     version_str = f"-V{version}" if version != 1 else ""
 
-    zip_file['name'] = f"{zip_id}-{title}{version_str}-{authors_str}.zip"
-    zip_file['size'] = round(last_file.get('size', 0) / (1024 * 1024), 2)  # Size in MiB
-    zip_file['md5'] = "MISSING"
-    zip_file['url'] = last_file.get('url', '')
-    zip_file['release'] = scrape_common.convert_to_iso(last_file.get('created', ''))
-    zip_file['version'] = version
+    zip_file.name = f"{zip_id}-{title}{version_str}-{authors_str}.zip"
+    zip_file.size = round(last_file.get('size', 0) / (1024 * 1024), 2)  # Size in MiB
+    zip_file.md5 = "MISSING"
+    zip_file.url = last_file.get('url', '')
+    zip_file.release = scrape_common.convert_to_iso(last_file.get('created', ''))
+    zip_file.version = version
     return zip_file
 
 
 def _get_trle_btb_download_info(trle_btb_url, lid):
-    zip_file = data_factory.make_zip_file()
+    zip_file = data_factory.ZipFile()
     parted = trle_btb_url.split("BtB")
     btb_soup = None
     for case in ["web", "Web"]:
@@ -223,14 +225,14 @@ def _get_trle_btb_download_info(trle_btb_url, lid):
     if isinstance(link_tag, Tag):
         download_url = link_tag.get("href", '')
     if isinstance(download_url, str):
-        zip_file['name'] = urlparse(download_url).path.split("/")[-1]
+        zip_file.name = urlparse(download_url).path.split("/")[-1]
     else:
         print("No BtB url from tag")
         sys.exit(1)
 
-    zip_file['size'] = trle_zip_size
-    zip_file['md5'] = "MISSING"
-    zip_file['url'] = download_url
+    zip_file.size = trle_zip_size
+    zip_file.md5 = "MISSING"
+    zip_file.url = download_url
     return zip_file
 
 
@@ -257,16 +259,15 @@ def _get_generic_download(soup):
 
 
 def _get_war_of_the_worlds_download():
-    zip_file = data_factory.make_zip_file()
-    zip_file['name'] = "MD-WarOfTheWorlds.zip"
-    zip_file['size'] = 2246.00
-    zip_file['md5'] = "MISSING"
-    zip_file['url'] = "https://www.trle.net/levels/levels/2021/1221/MD-WarOfTheWorlds.zip"
+    zip_file = data_factory.ZipFile()
+    zip_file.name = "MD-WarOfTheWorlds.zip"
+    zip_file.size = 2246.00
+    zip_file.md5 = "MISSING"
+    zip_file.url = "https://www.trle.net/levels/levels/2021/1221/MD-WarOfTheWorlds.zip"
     return zip_file
 
 
 def _get_trlevel_download_info(trle_info):
-    zip_file = []
     url = "https://www.trlevel.de/filebase/index.php?category-file-list/558-trle-custom-levels/"
     page_prefix = "&sortField=time&sortOrder=DESC&pageNo="
     number = 1
@@ -293,11 +294,13 @@ def _get_trlevel_download_info(trle_info):
                 download_url = download_tag.get('href')
                 head = scrape_common.https.get(f"{download_url}", "head")
                 match = re.search(r'filename\*?=(?:UTF-8\'\')?["\']?([^"\']+)["\']?', head)
-                zip_file = data_factory.make_zip_file()
-                zip_file['name'] = match.group(1) if match else ''
-                zip_file['size'] = trle_info[2]
-                zip_file['md5'] = "MISSING"
-                zip_file['url'] = download_url
+
+                zip_file = data_factory.ZipFile()
+                zip_file.name = match.group(1) if match else ''
+                zip_file.size = trle_info[2]
+                zip_file.md5 = "MISSING"
+                zip_file.url = download_url
+
                 return [zip_file]
 
         if len(card_links) < 20:
@@ -308,11 +311,10 @@ def _get_trlevel_download_info(trle_info):
             print("Reached max page limit, stopping.")
             break  # Prevent infinite loops
 
-    return zip_file
+    return []
 
 
 def _search_trcustoms(trle_info):
-    zip_file = []
     title = quote(trle_info[0])
     release = trle_info[1]
     search_url = f"https://trcustoms.org/api/levels/?search={title}"
@@ -321,13 +323,14 @@ def _search_trcustoms(trle_info):
 
     for level in results:
         # if level and date match exactly
-        if level.get('name', '') == trle_info[0]:
-            if scrape_common.convert_to_iso(level.get('created', '')) == release:
-                # check if it has the files attribute
-                last_file = level.get('last_file', {})
-                if last_file:
-                    zip_file = [_get_trcustoms_download_info(level)]
-    return zip_file
+        if level.get('name', '') == trle_info[0] and \
+                scrape_common.convert_to_iso(level.get('created', '')) == release:
+            # check if it has the files attribute
+            last_file = level.get('last_file', {})
+            if last_file:
+                return [_get_trcustoms_download_info(level)]
+
+    return []
 
 
 def _check_lid(lid):
@@ -335,17 +338,19 @@ def _check_lid(lid):
         if isinstance(lid, str) and lid.isdigit():
             lid = int(lid)
         else:
-            logging.error("Error: lid not a digit")
+            logger.error("Error: lid not a digit")
             sys.exit(1)
 
 
 def _get_download_info(lid, url):
-    zip_file = data_factory.make_zip_file()
     trle_info = _get_trle_info(lid)
-    zip_file['name'] = urlparse(url).path.split("/")[-1]
-    zip_file['size'] = trle_info[2]
-    zip_file['md5'] = "MISSING"
-    zip_file['url'] = url
+
+    zip_file = data_factory.ZipFile()
+    zip_file.name = urlparse(url).path.split("/")[-1]
+    zip_file.size = trle_info[2]
+    zip_file.md5 = "MISSING"
+    zip_file.url = url
+
     return zip_file
 
 
@@ -392,9 +397,9 @@ def get_zip_file_info(lid):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        logging.error("Usage: python3 scrape_trle_downloads.py LID")
-        logging.error("You will find the level id in URL string")
-        logging.error("https://www.trle.net/sc/levelfeatures.php?lid=LID")
+        logger.error("Usage: python3 scrape_trle_downloads.py LID")
+        logger.error("You will find the level id in URL string")
+        logger.error("https://www.trle.net/sc/levelfeatures.php?lid=LID")
         sys.exit(1)
     elif sys.argv[1] == "test1":
         levels = [
